@@ -1,36 +1,44 @@
 'use client'
 import { create } from 'zustand'
 
-import { AnyNodeId, AnyNode } from "../schema/types"
+import { type AnyNodeId, AnyNode } from "../schema/types"
 
 type SceneState = {
     nodes: Record<AnyNodeId, AnyNode>
     rootNodeIds: AnyNodeId[]
 
-    addNode(input: unknown): AnyNodeId
-    updateNode(id: AnyNodeId, patch:Partial<AnyNode>): void
-    removeNode(id: AnyNodeId): void
-    getNode(id: AnyNodeId): AnyNode | undefined
+    addNode: (input: unknown) => AnyNodeId
+    updateNode: (id: AnyNodeId, patch:Partial<AnyNode>) => void
+    removeNode: (id: AnyNodeId) => void
+    getNode: (id: AnyNodeId) => AnyNode | undefined
 }
 
-export const useScene = create<SceneState>()(
-    // nodes 用 Record 不用 Map
+export const useScene = create<SceneState>((set, get) =>({
+    nodes: {},
+    rootNodeIds: [],
 
-    // rootNodeIds 单独存一份顺序。
+    addNode: (input) => {
+        // parse 一次同时完成三件事：填 id，填默认值，挡住非法数据。
+        const node = AnyNode.parse(input)
+        set((s) => ({
+            nodes: { ...s.nodes, [node.id]: node },
+            rootNodeIds: [...s.rootNodeIds, node.id],
+        }))
+        return node.id
+    },
 
-    // addNode 里做一次 AnyNode.parse(input)
+    updateNode: (id, patch) => set((s) => {
+        const prev = s.nodes[id]
+        if (!prev) return s
+        return { nodes: { ...s.nodes, [id]: { ...prev, ...patch } as AnyNode } }
+    }),
 
-    // updateNode 浅合并
+    removeNode: (id) => set((s) => {
+        if (!s.nodes[id]) return s
+        const nodes = { ...s.nodes }
+        delete nodes[id]
+        return { nodes, rootNodeIds: s.rootNodeIds.filter((n) => n !== id) }
+    }),
 
-    // removeNode 只删除自己 从 rootNodeIds 摘掉
-    temporal(
-        (set, get) => ({
-            // 1. Flat dictionary of all nodes
-            nodes: {}
-
-            // 2. Root node IDs
-            rootNodeIds: []
-        })
-    )
-
-)
+    getNode: (id) => get().nodes[id],
+}))

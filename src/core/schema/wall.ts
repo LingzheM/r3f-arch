@@ -8,16 +8,13 @@ export const DEFAULT_WALL_HEIGHT = 2.5
 export const WallNode = BaseNode.extend({ 
     id: objectId('wall'),
     type: nodeType('wall'),
-    thickness: z.number().optional(),
-    height: z.number().optional(),
+    start: z.tuple([z.number(), z.number()]),
+    end: z.tuple([z.number(), z.number()]),
+    thickness: z.number().positive().optional(),
+    height: z.number().positive().optional(),
 })
 
-export function getWallThickness(wall: WallNode): number {
-    return wall.thickness
-}
-
-export function getWallHeight(wall: WallNode): number {
-    return wall.height
-}
+export const getWallThickness = (wall: WallNode) => wall.thickness ?? DEFAULT_WALL_HEIGHT
+export const getWallHeight = (wall: WallNode) => wall.height ?? DEFAULT_WALL_HEIGHT
 
 export type WallNode = z.infer<typeof WallNode>
