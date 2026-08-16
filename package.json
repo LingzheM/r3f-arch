@@ -1,0 +1,56 @@
+{
+  "name": "r3f-arch",
+  "version": "0.0.0",
+  "private": true,
+  "description": "R3F architecture prototype: core schema/store + viewer components",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./core/*": {
+      "types": "./dist/core/*.d.ts",
+      "import": "./dist/core/*.js",
+      "default": "./dist/core/*.js"
+    },
+    "./viewer/*": {
+      "types": "./dist/viewer/*.d.ts",
+      "import": "./dist/viewer/*.js",
+      "default": "./dist/viewer/*.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "check-types": "tsc --build --noEmit",
+    "clean": "tsc --build --clean"
+  },
+  "dependencies": {
+    "nanoid": "^5.1.10",
+    "zod": "^4.1.13",
+    "zundo": "^2.3.0",
+    "zustand": "^5.0.9"
+  },
+  "peerDependencies": {
+    "@react-three/drei": "^10",
+    "@react-three/fiber": "^9",
+    "react": "^18 || ^19",
+    "three": "^0.185"
+  },
+  "devDependencies": {
+    "@react-three/drei": "^10",
+    "@react-three/fiber": "^9",
+    "@types/node": "^22",
+    "@types/react": "^19.2.2",
+    "@types/three": "^0.185.0",
+    "react": "^19.2.0",
+    "three": "^0.185.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "packageManager": "pnpm@10.0.0"
+}
