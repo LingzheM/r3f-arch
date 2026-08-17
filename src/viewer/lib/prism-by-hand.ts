@@ -39,7 +39,7 @@ THREE.BufferGeometry {
     
     for (let i = 1; i < n - 1; i++) indices.push(0, i+1, i)
     
-    geometry.setAttribute('positions', new THREE.Float32BufferAttribute(positions, 3))
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
     geometry.setIndex(indices)
 
     //geometry.computeVertexNormals()
@@ -47,4 +47,61 @@ THREE.BufferGeometry {
     return geometry
 }
 
-//export function buildPrismByHand(footprint: Point2D[], height: number):
+export function buildPrismByHand(footprint: Point2D[], height: number): THREE.BufferGeometry {
+    const geometry = new THREE.BufferGeometry()
+    if (footprint.length < 3) return geometry
+
+    const fp = toClockwise(footprint)
+    const n = fp.length
+    const halfH = height / 2
+
+    const positions: number[] = []
+    const uvs: number[] = []
+    const indices: number[] = []
+
+    let uRun = 0
+    for (let i = 0; i < n; i++) {
+        const a = fp[i]!
+        const b = fp[(i + 1) % n]!
+        const edgeLen = Math.hypot(b.x - a.x, b.y - a.y)
+        const base = positions.length / 3
+
+        positions.push(
+            a.x, -halfH, a.y,
+            b.x, -halfH, b.y,
+            b.x, halfH, b.y,
+            a.x, halfH, a.y,
+        )
+
+        uvs.push(
+            uRun,           0,
+            uRun + edgeLen, 0,
+            uRun + edgeLen, height,
+            uRun,           height,
+        )
+
+        indices.push(base, base + 1, base + 2, base, base + 2, base + 3)
+        uRun += edgeLen
+    }
+
+    const topBase = positions.length / 3
+    for (const p of fp) {
+        positions.push(p.x, halfH, p.y)
+        uvs.push(p.x, p.y)
+    }
+    for (let i = 1; i < n - 1; i++) indices.push(topBase, topBase + i, topBase + i + 1)
+
+    const botBase = positions.length / 3
+    for (const p of fp) {
+        positions.push(p.x, -halfH, p.y)
+        uvs.push(p.x, p.y)
+    }
+    for (let i = 1; i < n - 1; i++) indices.push(botBase, botBase + i + 1, botBase + i)
+    
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
+    geometry.setIndex(indices)
+    geometry.computeVertexNormals()
+
+    return geometry
+}
