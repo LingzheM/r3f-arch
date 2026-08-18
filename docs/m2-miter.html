@@ -1,0 +1,1683 @@
+<title>M2 墙角严丝合缝</title>
+<style>
+:root {
+  --paper:      #EDF1EF;
+  --card:       #F8FAF9;
+  --code-bg:    #E4EBE8;
+  --ink:        #131B19;
+  --ink-2:      #4A5754;
+  --ink-3:      #74827E;
+  --rule:       #C4CFCB;
+  --rule-soft:  #D7E0DC;
+  --accent:     #0B6E5F;
+  --accent-bg:  #DBE9E5;
+  --warn:       #9E4520;
+  --warn-bg:    #F1E2D9;
+  --core:       #0B6E5F;  --core-bg:   #DBE9E5;
+  --viewer:     #2A5A79;  --viewer-bg: #DBE5EC;
+  --app:        #6A5843;  --app-bg:    #ECE5DB;
+
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --body: Georgia, "Iowan Old Style", "Source Serif 4", "Songti SC", "Noto Serif CJK SC", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:     #0D1412;  --card:      #151E1B;  --code-bg:   #0A100F;
+    --ink:       #DBE5E2;  --ink-2:     #96A5A1;  --ink-3:     #6E7C78;
+    --rule:      #2A3733;  --rule-soft: #1E2926;
+    --accent:    #4FC3AA;  --accent-bg: #12312B;
+    --warn:      #E2916A;  --warn-bg:   #32211A;
+    --core:      #4FC3AA;  --core-bg:   #12312B;
+    --viewer:    #79B4DA;  --viewer-bg: #14262F;
+    --app:       #C9AC85;  --app-bg:    #2A2318;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:     #0D1412;  --card:      #151E1B;  --code-bg:   #0A100F;
+  --ink:       #DBE5E2;  --ink-2:     #96A5A1;  --ink-3:     #6E7C78;
+  --rule:      #2A3733;  --rule-soft: #1E2926;
+  --accent:    #4FC3AA;  --accent-bg: #12312B;
+  --warn:      #E2916A;  --warn-bg:   #32211A;
+  --core:      #4FC3AA;  --core-bg:   #12312B;
+  --viewer:    #79B4DA;  --viewer-bg: #14262F;
+  --app:       #C9AC85;  --app-bg:    #2A2318;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.72;
+  margin: 0;
+  padding: 0 24px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 940px; margin: 0 auto; }
+.prose { max-width: 68ch; }
+
+.masthead { padding: 72px 0 0; }
+.eyebrow {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3); margin: 0 0 20px;
+  display: flex; gap: 14px; flex-wrap: wrap; align-items: baseline;
+}
+.eyebrow b { color: var(--accent); font-weight: 600; }
+h1 {
+  font-family: var(--mono); font-size: clamp(34px, 6vw, 52px); line-height: 1.08;
+  letter-spacing: -0.02em; font-weight: 600; margin: 0 0 18px; text-wrap: balance;
+}
+.standfirst { font-size: 19px; color: var(--ink-2); max-width: 60ch; margin: 0 0 8px; }
+
+.dim { position: relative; height: 1px; background: var(--rule); border: 0; margin: 56px 0 40px; }
+.dim::before, .dim::after {
+  content: ""; position: absolute; top: -4px; width: 1px; height: 9px; background: var(--rule);
+}
+.dim::before { left: 0; }
+.dim::after  { right: 0; }
+
+section { margin-top: 8px; }
+h2 {
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.16em;
+  text-transform: uppercase; font-weight: 600; color: var(--accent); margin: 0 0 6px;
+}
+h2 .num { color: var(--ink-3); margin-right: 12px; }
+.h2sub {
+  font-family: var(--mono); font-size: 22px; letter-spacing: -0.01em;
+  font-weight: 600; margin: 0 0 24px; color: var(--ink);
+}
+h3 { font-family: var(--mono); font-size: 16px; font-weight: 600; margin: 34px 0 10px; }
+h4 { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--accent); margin: 24px 0 6px; }
+p { margin: 0 0 16px; }
+ul, ol { margin: 0 0 16px; padding-left: 22px; }
+li { margin-bottom: 7px; }
+strong { font-weight: 700; color: var(--ink); }
+em { font-style: italic; color: var(--ink-2); }
+
+code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 5px; border-radius: 2px; }
+
+.step {
+  display: grid; grid-template-columns: 52px 1fr; gap: 0 20px;
+  padding: 26px 0; border-top: 1px solid var(--rule-soft);
+}
+.step:first-of-type { border-top: 1px solid var(--rule); }
+.step-n {
+  font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink-3);
+  padding-top: 4px; font-variant-numeric: tabular-nums;
+}
+.step-body { min-width: 0; }
+.step-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.step-title { font-family: var(--mono); font-size: 17px; font-weight: 600; margin: 0; }
+.step-body > p { max-width: 64ch; }
+
+.tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 600; padding: 3px 8px; border-radius: 2px; white-space: nowrap;
+}
+.tag.core   { color: var(--core);   background: var(--core-bg); }
+.tag.viewer { color: var(--viewer); background: var(--viewer-bg); }
+.tag.app    { color: var(--app);    background: var(--app-bg); }
+.tag.three  { color: var(--warn);   background: var(--warn-bg); }
+
+pre {
+  background: var(--code-bg); border: 1px solid var(--rule-soft); border-radius: 3px;
+  padding: 16px 18px; overflow-x: auto; margin: 14px 0 18px; line-height: 1.62;
+}
+pre code { background: none; padding: 0; font-size: 13px; white-space: pre; }
+.cm { color: var(--ink-3); }
+.cw { color: var(--warn); }
+
+.trap {
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 6px,
+      color-mix(in srgb, var(--warn) 7%, transparent) 6px 7px),
+    var(--warn-bg);
+  border-left: 3px solid var(--warn);
+  padding: 14px 18px; margin: 18px 0; border-radius: 0 3px 3px 0;
+}
+.trap-label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  font-weight: 600; color: var(--warn); display: block; margin-bottom: 6px;
+}
+.trap p:last-child, .trap ul:last-child { margin-bottom: 0; }
+
+.note {
+  border-left: 3px solid var(--rule); padding: 2px 0 2px 18px; margin: 18px 0;
+  color: var(--ink-2); font-size: 16px;
+}
+.note p:last-child { margin-bottom: 0; }
+
+.tablewrap { overflow-x: auto; margin: 18px 0 24px; }
+table { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: 13px; min-width: 520px; }
+th {
+  text-align: left; font-weight: 600; font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--rule);
+  padding: 0 14px 8px 0;
+}
+td { padding: 9px 14px 9px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; line-height: 1.55; }
+td:last-child, th:last-child { padding-right: 0; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+.check { list-style: none; padding: 0; margin: 0; }
+.check li {
+  display: grid; grid-template-columns: 26px 1fr; gap: 10px; padding: 11px 0;
+  border-bottom: 1px solid var(--rule-soft); margin: 0;
+}
+.check li::before {
+  content: ""; width: 14px; height: 14px; border: 1.5px solid var(--accent);
+  border-radius: 2px; margin-top: 6px;
+}
+
+.defect {
+  display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: baseline;
+  padding: 11px 0; border-bottom: 1px solid var(--rule-soft);
+}
+.defect-to { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+
+.diagram { margin: 20px 0 24px; overflow-x: auto; }
+.diagram svg { display: block; max-width: 100%; height: auto; }
+
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+@media (max-width: 620px) {
+  body { font-size: 16px; padding: 0 18px 80px; }
+  .step { grid-template-columns: 1fr; gap: 0; }
+  .step-n { padding-top: 0; margin-bottom: 4px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">
+    <span>PASCAL EDITOR 复刻计划</span>
+    <span>里程碑 <b>02</b> / 06</span>
+    <span>预计 2–3 周</span>
+  </p>
+  <h1>M2 墙角严丝合缝</h1>
+  <p class="standfirst">
+    画一个矩形房间，四个墙角像真的一样对齐——没有十字穿模，没有缺口，
+    内角和外角各自落在该在的位置。再画一个 T 型隔断，撞上去的墙自动切齐。
+  </p>
+  <p class="standfirst" style="color:var(--ink-3);font-size:17px">
+    M1 的每一堵墙都是孤岛。M2 之后它们互相知道对方的存在——
+    <strong>这是整个项目里第一次出现"节点几何依赖场景全局状态"</strong>，
+    也是后面所有难题（层高传播、门窗开洞、屋顶裁切）的同一个形状。
+  </p>
+</header>
+
+<hr class="dim">
+
+<!-- ═══════════════════════════ 01 -->
+<section>
+  <h2><span class="num">01</span>这一步在解决什么</h2>
+  <p class="h2sub">一个签名的改变，撬动整条数据流</p>
+
+  <div class="prose">
+    <p>M2 的全部难度可以压缩成一行签名的变化：</p>
+<pre><code><span class="cm">// M1</span>
+buildWallGeometry(wall: WallNode): BufferGeometry
+
+<span class="cm">// M2</span>
+buildWallGeometry(wall: WallNode, miter: MiterData): BufferGeometry
+                                  <span class="cw">^^^^^^^^^^^^^^^^^ 这个参数来自「所有墙」</span>
+</code></pre>
+    <p>
+      多出来的那个参数不是一个普通依赖。它意味着<strong>你不能再孤立地渲染一个节点</strong>——
+      必须先有一趟全局计算，再有逐节点的几何生成。这一个改动会连锁出四件事，
+      每一件都是这个项目里反复出现的模式：
+    </p>
+    <ol>
+      <li><strong>两阶段渲染。</strong>先算 miter（一次，全局），再建几何（N 次，逐墙）。
+        原项目的 <code>&lt;GeometrySystem&gt;</code> 就是这个模式的成熟形态。</li>
+      <li><strong>失效范围。</strong>改一堵墙，要重算哪些？答案是"它自己 + 共享交点的邻居"。
+        原项目为此专门有个 <code>getAdjacentWallIds()</code>。M2 先全量重算，
+        M3 才做脏传播——但你现在就要知道这个问题存在。</li>
+      <li><strong>拓扑判据。</strong>"两堵墙接在一起"不是浮点相等，是
+        <em>量化到同一个毫米格</em>。这个判据一旦定下，整个项目都得用它。</li>
+      <li><strong>纯度的回报。</strong>整个斜接算法没有一行 three——它是纯二维几何。
+        所以它住在 <code>core</code>，可以在 Node 里裸测。
+        M1 那条"core 不许 import three"的铁律，第一次真正付了息。</li>
+    </ol>
+
+    <h3>M2 结束时你能做到</h3>
+    <ul>
+      <li>画一个封闭矩形房间，四角严丝合缝，顶视图看不到任何十字叠加或缺口</li>
+      <li>画一个 T 型：一堵墙撞到另一堵墙的中间，撞上来的那堵被切齐</li>
+      <li>改任意一堵墙的厚度，相邻墙角自动跟着重算</li>
+      <li>两堵墙夹角小到 1°，不会射出无限长的尖刺</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════════════════════ 02 -->
+<section>
+  <h2><span class="num">02</span>斜接算法</h2>
+  <p class="h2sub">五步，核心不到 200 行</p>
+
+  <p class="prose">
+    原项目 <code>packages/core/src/systems/wall/wall-mitering.ts</code> 是 536 行，
+    但其中一半是曲线墙、空间网格加速、T 型排序稳定性。剥掉之后，算法本体是这五步。
+    <strong>先把这一节读懂再动手</strong>——它是 M2 唯一需要理解的东西，剩下都是打字。
+  </p>
+
+  <h3>① 找交点</h3>
+  <p class="prose">
+    把每堵墙的两个端点扔进一个哈希桶，key 是<strong>量化后的坐标字符串</strong>。
+    两堵墙的端点落进同一个桶，就是一个交点。然后第二遍扫描找 T 型：
+    某个交点落在另一堵墙的<em>身上</em>（不含端点），那堵墙以
+    <code>passthrough</code> 的身份也加入这个交点。最后丢掉只有一堵墙的桶——那是自由端。
+  </p>
+
+  <h3>② 把每堵墙变成两条边线</h3>
+  <p class="prose">
+    对交点处的每堵墙，取<strong>从交点出发</strong>的方向向量 <code>v</code>，
+    算出左右两条边线（中心线 ± 半厚，沿 <code>v</code> 延伸）。
+    直线用一般式 <code>ax + by + c = 0</code> 存，因为下一步要解线性方程组。
+  </p>
+  <p class="prose">
+    <strong>T 型里那堵"被撞"的直墙要贡献两条腿</strong>（<code>v</code> 和 <code>−v</code>）——
+    对撞上来的墙而言，它是左右两个方向上的邻居。
+  </p>
+
+  <h3>③ 按角度排序，环形配对</h3>
+  <p class="prose">
+    所有腿按出射角 <code>atan2(v.y, v.x)</code> 升序排。然后
+    <code>legs[i]</code> 与 <code>legs[(i+1) % n]</code> 配对——
+    <strong>相邻两条腿之间夹着一个楔形空隙，那就是要被斜接填掉的地方。</strong>
+  </p>
+
+  <h3>④ 求交点</h3>
+  <p class="prose">
+    楔形由前一条腿的<em>左</em>边线和后一条腿的<em>右</em>边线围成。
+    两线求交，得到的就是墙角的尖点。写回时：前者拿 <code>left</code>，后者拿 <code>right</code>。
+    <code>passthrough</code> 的腿不写回——被撞的那堵直墙，几何不该被改。
+  </p>
+
+  <h3>⑤ 取用时左右互换</h3>
+  <p class="prose">
+    <code>getWallMiterBoundaryPoints(wall, miterData)</code> 从交点数据里取四个角。
+    这里藏着 M2 最容易调半天的一处，见下面的算例。
+  </p>
+
+  <h4>精确算例 —— 直接写进测试</h4>
+  <p class="prose">
+    墙 A 从 <code>(0,0)</code> 到 <code>(4,0)</code>，墙 B 从 <code>(4,0)</code> 到
+    <code>(4,4)</code>，厚度都是 0.2。手算一遍，你的实现必须逐位对上：
+  </p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>量</th><th>值</th><th>怎么来的</th></tr></thead>
+    <tbody>
+      <tr><td>A 在交点的方向 v</td><td class="tnum">(−4, 0)</td><td>交点是 A 的 end，所以方向取反：start − end</td></tr>
+      <tr><td>A 的左边线</td><td class="tnum">y = −0.1</td><td>leftNormal(−4,0) = (0,−1)，过 (4,0)+(0,−0.1)</td></tr>
+      <tr><td>A 的右边线</td><td class="tnum">y = +0.1</td><td>过 (4,0)−(0,−0.1)</td></tr>
+      <tr><td>B 在交点的方向 v</td><td class="tnum">(0, 4)</td><td>交点是 B 的 start，方向不取反</td></tr>
+      <tr><td>B 的左边线</td><td class="tnum">x = 3.9</td><td>leftNormal(0,4) = (−1,0)</td></tr>
+      <tr><td>B 的右边线</td><td class="tnum">x = 4.1</td><td></td></tr>
+      <tr><td>出射角</td><td class="tnum">B = π/2，A = π</td><td>排序后是 [B, A]</td></tr>
+      <tr><td>配对 (B,A)</td><td class="tnum">B.left ∩ A.right = (3.9, 0.1)</td><td>B 拿 left，A 拿 right</td></tr>
+      <tr><td>配对 (A,B) 环回</td><td class="tnum">A.left ∩ B.right = (4.1, −0.1)</td><td>A 拿 left，B 拿 right</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">M2 第一深坑 · end 端左右互换</span>
+    <p>取用时必须这样写，注意后两行的交叉：</p>
+<pre style="background:transparent;border:0;padding:0;margin:10px 0"><code>startLeft  ← startJunction.left
+startRight ← startJunction.right
+endLeft    ← endJunction.<span class="cw">right</span>     <span class="cm">// 交叉！</span>
+endRight   ← endJunction.<span class="cw">left</span>      <span class="cm">// 交叉！</span>
+</code></pre>
+    <p>
+      <strong>为什么：</strong>在 end 交点处，这堵墙的出射方向是<em>反的</em>，
+      所以它的"左"也就反了。用上面的算例验证——墙 A 沿 +X，它的 left 侧应该是
+      <code>y &gt; 0</code>。<code>endJunction.right = (3.9, 0.1)</code>，y 是正的 ✓。
+      不交叉的话你会拿到 <code>(4.1, −0.1)</code>，跑到右侧去了。
+    </p>
+    <p>
+      <strong>症状：</strong>矩形房间的四个角，两个对角是尖的，另两个凹进去，
+      而且轮廓自交、挤出后的面撕裂。这个 bug 只在<em>转角</em>出现，直墙全对，
+      所以你会先怀疑一百个别的地方。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════════════════════ 03 -->
+<section>
+  <h2><span class="num">03</span>文件树增量</h2>
+  <p class="h2sub">新增 4 个，改写 3 个</p>
+
+<pre><code>src/
+  core/
+    lib/
+      geometry-2d.ts           <span class="cw">改</span>  <span class="cm">+ Line / 线线求交 / 点在线段上 / quantizeKey</span>
+      geometry-2d.test.ts      <span class="cw">改</span>
+    systems/                   <span class="cm">← 新目录。core 的第一个「系统」</span>
+      wall/
+        wall-mitering.ts       <span class="cm">新  交点检测 + 斜接计算（M2 的心脏）</span>
+        wall-mitering.test.ts  <span class="cm">新  M2 的重头戏，比实现还长</span>
+        wall-footprint.ts      <span class="cm">新  边界点 → 平面轮廓多边形</span>
+        wall-footprint.test.ts <span class="cm">新</span>
+
+  viewer/
+    lib/
+      wall-geometry.ts         <span class="cw">改</span>  <span class="cm">Box → Shape + ExtrudeGeometry</span>
+      prism-by-hand.ts         <span class="cm">新  一次性微练习，写完就删</span>
+    hooks/
+      use-level-miters.ts      <span class="cm">新  订阅所有墙 → useMemo 算 miter</span>
+    components/
+      node-renderer.tsx        <span class="cw">改</span>  <span class="cm">算一次 miter，用 context 往下发</span>
+      wall-renderer.tsx        <span class="cw">改</span>  <span class="cm">从 context 取 miter</span>
+</code></pre>
+
+  <div class="note">
+    <p>
+      <strong><code>core/systems/</code> 这个目录是新概念。</strong>
+      原项目 <code>wiki/architecture/systems.md</code> 的定义是：
+      <em>"Systems own business logic, geometry generation, and constraints."</em>
+      Core systems 是<strong>纯逻辑，无渲染，无 Three 对象</strong>——
+      读节点、算派生值、写回结果。斜接是它的第一个也是最典型的例子。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════════════════════ 04 -->
+<section>
+  <h2><span class="num">04</span>建造顺序</h2>
+  <p class="h2sub">十二步。前七步不碰 Three，全部可测</p>
+
+  <!-- 1 -->
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">手搓一次 BufferGeometry</h3><span class="tag viewer">viewer</span><span class="tag three">three</span></div>
+      <p>
+        <strong>"写完就删"不等于"写一个没人调用的函数"——它要真正跑起来，
+        只是活不过这个里程碑。</strong>三步，大概两小时。
+      </p>
+
+      <h4>① 临时接管渲染</h4>
+<pre><code><span class="cm">// src/viewer/lib/wall-geometry.ts —— 临时改动，第 09 步会推翻</span>
+export function buildWallGeometry(wall: WallNode): THREE.BufferGeometry {
+  const fp = wallFootprint(toPoint(wall.start), toPoint(wall.end), getWallThickness(wall))
+  return buildPrismByHand(fp, getWallHeight(wall))   <span class="cm">// ← 换掉 BoxGeometry</span>
+}
+</code></pre>
+      <p>
+        顺手完成了另一件事：<strong><code>wallFootprint</code> 第一次真正进入渲染路径</strong>。
+        M1 里它只是写好测好挂在一边，从这一步起不是了。
+      </p>
+
+      <h4>② 手搓</h4>
+<pre><code><span class="cm">// src/viewer/lib/prism-by-hand.ts  —— 一次性练习</span>
+export function buildPrismByHand(footprint: Point2D[], height: number): THREE.BufferGeometry
+<span class="cm">// hint: <span class="cw">先按最直觉的方式写：底面 N 个顶点 + 顶面 N 个，共 2N 个。</span></span>
+<span class="cm">//       侧面和顶底面共享它们。跑一下 —— 然后看下面那个陷阱。</span>
+<span class="cm">// hint: 侧面：每条边 (i, i+1) 出两个三角形 → index 数组手写</span>
+<span class="cm">// hint: 顶/底面：扇形三角剖分 (0, i, i+1)。只对凸多边形成立 ——</span>
+<span class="cm">//       墙轮廓是凸的所以够用。这也正是 M4 的开洞不能这么做的原因。</span>
+<span class="cm">// hint: 最后 geometry.computeVertexNormals()。先故意不调，看墙全黑，再调。</span>
+<span class="cm">// hint: uv 不手写就全是 0 —— 贴图会变成「一个像素拉满整面墙」。M2 先不管。</span>
+</code></pre>
+
+      <div class="trap">
+        <span class="trap-label">这个练习的全部价值在这一刻</span>
+        <p>
+          按上面 2N 个顶点的写法跑起来，你会看到<strong>墙的棱角是糊的</strong>——
+          光照像被抹过，方盒子看着像块肥皂。
+        </p>
+        <p>
+          <code>computeVertexNormals()</code> 把<em>共享同一顶点的所有面</em>的法线做平均。
+          墙角那个顶点同时属于两个侧面和一个顶面，三个互相垂直的法线一平均，
+          得到斜向 45° 的法线 —— 硬边就被渲染成了圆角。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>修法只有一个：不共享。每个面拥有自己的顶点。</strong>
+          一堵四边形墙的棱柱因此需要 <strong>24 个顶点</strong>
+          （4 个侧面 × 4 + 上下盖 × 4），不是 8 个。
+          <em>这就是你要拿走的东西。</em>
+        </p>
+      </div>
+
+      <h4>③ 跑通、比对、删除</h4>
+      <p>
+        画一堵墙，确认画面和 M1 的 Box 版一模一样——<strong>没有肉眼比对，
+        你写的顶点数组对不对完全无从判断</strong>。确认后进入第 02 步；
+        等第 09 步换成 <code>ExtrudeGeometry</code> 之后，
+        <code>git rm src/viewer/lib/prism-by-hand.ts</code>。
+      </p>
+
+      <div class="note">
+        <p>那个"24 而不是 8"的认知，有三个直接的下游后果，全在后面等着：</p>
+        <ul>
+          <li><strong>第 09 步</strong> —— <code>ExtrudeGeometry</code> 吐出的顶点数远多于轮廓点数。
+            你会知道那不是浪费，是必须。</li>
+          <li><strong>M4 材质槽位</strong> —— 一堵墙内外面贴不同材质，靠
+            <code>geometry.groups</code> 按顶点区间切分。顶点不独立就切不开。</li>
+          <li><strong>M6 CSG</strong> —— 原项目那句 <code>geometry.toNonIndexed()</code>
+            的注释写着 <em>"so every triangle projects by its own face normal
+            (no shared-vertex seams at edges)"</em>，说的就是这件事。</li>
+        </ul>
+        <p style="margin-bottom:0">
+          <strong>能不能跳过？能。</strong>代价是 M4 调材质分组、M6 调 CSG 时，
+          你面对一堆 <code>Float32Array</code> 和 groups 索引却没有直觉，只能试。
+          我的判断是别跳——它只花两小时，而且是整个六阶段里<strong>唯一一次</strong>
+          被迫直面 <code>position / normal / uv / index</code> 的机会，后面全是库替你生成。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">geometry-2d 扩容</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// src/core/lib/geometry-2d.ts —— 在 M1 的基础上追加</span>
+
+export type Line = { a: number; b: number; c: number }   <span class="cm">// ax + by + c = 0</span>
+
+export function lineFromPointAndDirection(p: Point2D, v: Point2D): Line
+<span class="cm">// hint: a = -v.y, b = v.x, c = -(a*p.x + b*p.y)</span>
+<span class="cm">// hint: 为什么用一般式而不是「点 + 方向」？因为下一步要解 2×2 线性方程组，</span>
+<span class="cm">//       一般式直接就是系数矩阵。点向式还得先转换。</span>
+
+export function intersectLines(l1: Line, l2: Line): Point2D | null
+<span class="cm">// hint: det = l1.a*l2.b - l2.a*l1.b；|det| &lt; 1e-9 → 平行 → 返回 null</span>
+<span class="cm">// hint: 克拉默法则。<span class="cw">注意第二个分量的符号：</span></span>
+<span class="cm">//         x = (l1.b*l2.c - l2.b*l1.c) / det</span>
+<span class="cm">//         y = (l2.a*l1.c - l1.a*l2.c) / det</span>
+<span class="cm">//       自己推一遍。抄错符号的表现是：墙角位置对，但左右镜像。</span>
+
+export function pointOnSegment(p: Point2D, a: Point2D, b: Point2D, tol?: number): boolean
+<span class="cm">// hint: <span class="cw">两个条件都要，缺一不可：</span></span>
+<span class="cm">//   ① 投影参数 t = dot(ab, ap) / |ab|² 落在开区间 (tol, 1-tol)</span>
+<span class="cm">//      —— 开区间：端点相接是「角接」不是「T 接」，走另一条路</span>
+<span class="cm">//   ② 点到直线的垂距 &lt; tol</span>
+<span class="cm">//   只判 ① 会把远处平行的点算成 T 接。</span>
+
+export function quantizeKey(p: Point2D, tol = 1e-3): string
+<span class="cm">// hint: `${Math.round(p.x/tol)},${Math.round(p.y/tol)}`</span>
+<span class="cm">// <span class="cw">⚠ 这是整个 M2 的地基。</span>「两堵墙接在一起」的判据不是浮点相等，</span>
+<span class="cm">//   是量化到同一个毫米格。原项目容差就是 1e-3。</span>
+<span class="cm">// hint: 它有固有的边界效应 —— 0.0004 和 0.0006 相距 0.2mm 却分到不同格。</span>
+<span class="cm">//       这是量化法的已知代价，不要试图修。真正的修法是让工具在落点时</span>
+<span class="cm">//       就吸附到已有端点（M3 的事）。</span>
+</code></pre>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">找交点</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// src/core/systems/wall/wall-mitering.ts</span>
+
+type EndType = 'start' | 'end' | 'passthrough'
+
+interface Junction {
+  meetingPoint: Point2D
+  connected: Array&lt;{ wall: WallNode; endType: EndType }&gt;
+}
+
+function findJunctions(walls: WallNode[]): Map&lt;string, Junction&gt;
+<span class="cm">// hint: 两遍扫描。</span>
+<span class="cm">//   第一遍：每堵墙的 start / end 各往 quantizeKey 对应的桶里塞</span>
+<span class="cm">//           一条 { wall, endType: 'start' | 'end' }</span>
+<span class="cm">//   第二遍：对每个桶的 meetingPoint，扫所有墙。若该点落在某墙<em>身上</em></span>
+<span class="cm">//           （pointOnSegment，开区间所以自动排除端点）→ 塞一条 'passthrough'</span>
+<span class="cm">// hint: 跳过已经在这个交点里的墙（按 id 判重），否则自己会 T 接自己。</span>
+<span class="cm">// hint: 最后过滤：只保留 connected.length &gt;= 2 的桶。单堵墙的端点是自由端，</span>
+<span class="cm">//       用默认的平接就好。</span>
+<span class="cm">// hint: passthrough 要按<em>输入顺序</em>追加，不要按扫描顺序。共线的两堵墙在</span>
+<span class="cm">//       第 05 步排序时角度会打平，稳定排序会保留追加顺序 —— 顺序不定，</span>
+<span class="cm">//       斜接就会随机选错一边的厚度。原项目为此专门留了注释。</span>
+</code></pre>
+      <div class="note">
+        <p>
+          <strong>第二遍是 O(交点数 × 墙数)。</strong>原项目在 1081 堵墙时实测
+          <strong>584 ms</strong>，用 2 米网格分桶降到 <strong>11 ms</strong>。
+          <strong>M2 不要做这个优化</strong>——你只有几十堵墙。但把这句话抄进代码注释里，
+          M3 的性能课会回来找它。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">墙 → 两条边线</h3><span class="tag core">core</span></div>
+<pre><code>interface Leg {
+  wallId: string
+  angle: number            <span class="cm">// 出射角，用来排序</span>
+  edgeLeft: Line
+  edgeRight: Line
+  isPassthrough: boolean
+  halfThickness: number    <span class="cm">// 第 12 步的 miter limit 要用</span>
+}
+
+function legsAtJunction(
+  wall: WallNode, endType: EndType, meetingPoint: Point2D, halfT: number,
+): Leg[]
+<span class="cm">// hint: 返回<strong>数组</strong>，因为 passthrough 墙要贡献两条腿：v 和 -v。</span>
+<span class="cm">//       T 型里被撞的那堵直墙，对撞上来的墙而言是左右两侧的邻居。</span>
+<span class="cm">// <span class="cw">⚠ 方向必须是「从交点出发」：</span></span>
+<span class="cm">//     endType === 'start' → v = end - start</span>
+<span class="cm">//     endType === 'end'   → v = start - end   ← 取反</span>
+<span class="cm">//     endType === 'passthrough' → v 和 -v 两条</span>
+<span class="cm">//   搞反了，第 05 步的整个环形排序就乱了，而且乱得没有规律。</span>
+<span class="cm">// hint: n = leftNormal(v)（M1 写好的）</span>
+<span class="cm">//       edgeLeft  = lineFromPointAndDirection(meetingPoint + n*halfT, v)</span>
+<span class="cm">//       edgeRight = lineFromPointAndDirection(meetingPoint - n*halfT, v)</span>
+<span class="cm">// hint: angle = Math.atan2(v.y, v.x)</span>
+</code></pre>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">排序、配对、求交</h3><span class="tag core">core</span></div>
+<pre><code>function calculateJunctionIntersections(
+  junction: Junction,
+  getThickness: (w: WallNode) =&gt; number,
+): Map&lt;string, { left?: Point2D; right?: Point2D }&gt;
+<span class="cm">// hint: 收集所有腿 → 按 angle 升序排。<strong>角度相同时按 wallId 排</strong>，</span>
+<span class="cm">//       保证同一份场景每次算出同样的结果（否则 Map 迭代顺序会让结果抖动）。</span>
+<span class="cm">// hint: n &lt; 2 直接返回空。</span>
+<span class="cm">// hint: 环形配对：for i in 0..n-1，a = legs[i]，b = legs[(i+1) % n]</span>
+<span class="cm">//       交点 = intersectLines(a.edgeLeft, b.edgeRight)</span>
+<span class="cm">//       ——「a 的左边」和「b 的右边」围出的楔形，就是要填掉的墙角空隙。</span>
+<span class="cm">//       画个图确认这个配对方向，别硬记。</span>
+<span class="cm">// hint: 写回：a 拿 left，b 拿 right。<strong>isPassthrough 的腿不写回</strong> ——</span>
+<span class="cm">//       T 型里被撞的直墙，几何不该被改。</span>
+<span class="cm">// hint: intersectLines 返回 null（平行）时 continue，那两堵墙各自用平接默认值。</span>
+</code></pre>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">对外的两个函数</h3><span class="tag core">core</span></div>
+<pre><code>export interface MiterData {
+  junctionData: Map&lt;string, Map&lt;string, { left?: Point2D; right?: Point2D }&gt;&gt;
+  <span class="cm">//            ↑ junctionKey     ↑ wallId</span>
+}
+
+export function calculateLevelMiters(walls: WallNode[]): MiterData
+<span class="cm">// hint: findJunctions → 逐个 calculateJunctionIntersections → 装进 Map。十来行。</span>
+
+export interface WallMiterBoundaryPoints {
+  startLeft: Point2D; startRight: Point2D
+  endLeft: Point2D;   endRight: Point2D
+}
+
+export function getWallMiterBoundaryPoints(
+  wall: WallNode, miter: MiterData,
+): WallMiterBoundaryPoints
+<span class="cm">// hint: 按 quantizeKey(start) / quantizeKey(end) 查 junctionData，再按 wall.id 查。</span>
+<span class="cm">// hint: 查不到就用默认平接：端点 ± leftNormal * halfT。</span>
+<span class="cm">// <span class="cw">⚠⚠ end 端左右互换 —— 见 §02 那个深坑。</span></span>
+<span class="cm">//     startLeft ← .left    startRight ← .right</span>
+<span class="cm">//     endLeft   ← <span class="cw">.right</span>   endRight   ← <span class="cw">.left</span></span>
+</code></pre>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">轮廓多边形</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// src/core/systems/wall/wall-footprint.ts</span>
+
+export function getWallPlanFootprint(wall: WallNode, miter: MiterData): Point2D[]
+<span class="cm">// hint: 拿到四个边界点后，按这个顺序组装：</span>
+<span class="cm">//         [startRight, endRight, (wallEnd), endLeft, startLeft, (wallStart)]</span>
+<span class="cm">// hint: 括号里的两个<strong>中心线端点，只在该端有 junction 时才插入</strong>。</span>
+<span class="cm">//       所以轮廓可能是 4 / 5 / 6 个点。</span>
+<span class="cm">// hint: 长度退化（&lt; EPSILON）返回 []，调用方要处理空轮廓。</span>
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">M2 第二深坑 · 那两个中心线端点</span>
+        <p>
+          <strong>做个实验再决定信不信：</strong>先<em>不</em>插入它们，画一个
+          30° 的锐角接头，从顶视看轮廓。
+        </p>
+        <p>
+          斜接点在锐角侧会跑得很远、在钝角侧会跨过中心线——四边形因此自交，
+          <code>ExtrudeGeometry</code> 出来的面是撕裂的（有的三角形法线朝内）。
+          插入中心线端点把它切成两个安全的扇形，多边形保持简单。
+          原项目 <code>wall-footprint.ts</code> 那两行 <code>if (junction) polygon.push(...)</code>
+          就是干这个的，没有一句注释解释——因为写的人是被这个 bug 咬过之后才加的。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">测试：M2 的重头戏</h3><span class="tag core">core</span></div>
+      <p>
+        <strong>这一步比实现还长，而且必须在第 09 步之前完成。</strong>
+        理由很实际：斜接错了，你在 3D 里看到的是"墙角有条缝"，
+        但成因可能是 miter 算错、轮廓自交、绕向反了、挤出负号错——四个都在不同文件里。
+        没有测试，你会在这四个之间盲目试错好几天。
+      </p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>用例</th><th>期望</th><th>抓什么 bug</th></tr></thead>
+        <tbody>
+          <tr><td>intersectLines(y=0, x=0)</td><td>(0, 0)</td><td>克拉默法则的符号</td></tr>
+          <tr><td>intersectLines 两条平行线</td><td>null</td><td>det 阈值</td></tr>
+          <tr><td>pointOnSegment 端点本身</td><td>false</td><td>开区间；否则角接被误判成 T 接</td></tr>
+          <tr><td>pointOnSegment 延长线上的点</td><td>false</td><td>只判 t 不判垂距</td></tr>
+          <tr><td>L 型两墙共享端点</td><td>1 个 junction，2 条腿</td><td>桶聚类</td></tr>
+          <tr><td>T 型（端点落在墙中间）</td><td>junction 有 3 条记录</td><td>第二遍扫描</td></tr>
+          <tr><td>§02 的 A/B 算例</td><td>(3.9, 0.1) 与 (4.1, −0.1)</td><td>整条链路，逐位对</td></tr>
+          <tr><td>A 的 endLeft</td><td>(3.9, 0.1)，y &gt; 0</td><td><strong>end 端左右互换</strong></td></tr>
+          <tr><td>闭合矩形 4 堵墙</td><td>每堵 footprint 都是 6 点</td><td>两端都有 junction</td></tr>
+          <tr><td>夹角 90/30/10/5/1/0.1°</td><td>所有边界点坐标 &lt; 墙长 + 1m</td><td>miter limit（第 12 步）</td></tr>
+          <tr><td>同一场景算两次</td><td>结果逐位相同</td><td>排序的确定性</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="note">
+        <p>
+          最后那个角度扫描是原项目的真实测试，直接抄：
+          <code>test.each([90, 30, 10, 5, 1, 0.1, 0.01])</code>，
+          断言所有边界点坐标绝对值 &lt; 4（墙长 3m + 几厘米接头）。
+          <strong>没有 miter limit 时，1° 那一档会算出几十米。</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="step">
+    <div class="step-n">09</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">几何：Box → Shape + Extrude</h3><span class="tag viewer">viewer</span><span class="tag three">three</span></div>
+<pre><code><span class="cm">// src/viewer/lib/wall-geometry.ts —— 重写</span>
+
+export function buildWallGeometry(wall: WallNode, miter: MiterData): THREE.BufferGeometry
+<span class="cm">// hint: 五步。</span>
+<span class="cm">//   ① footprint = getWallPlanFootprint(wall, miter)      ← <strong>世界坐标</strong></span>
+<span class="cm">//   ② 转成局部：先减 wallTransform 的 position，再绕 Y 反向旋转 -rotationY</span>
+<span class="cm">//   ③ const shape = new THREE.Shape()</span>
+<span class="cm">//      shape.moveTo(local.x, <span class="cw">-local.z</span>) / lineTo... / closePath()</span>
+<span class="cm">//   ④ new THREE.ExtrudeGeometry(shape, { depth: height, bevelEnabled: false })</span>
+<span class="cm">//   ⑤ geometry.rotateX(-Math.PI/2) → computeVertexNormals()</span>
+<span class="cm">// hint: 空轮廓（退化墙）要早返回一个空 BufferGeometry，别让 Shape 收到 0 个点。</span>
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">M2 第三深坑 · 那个负号和绕向</span>
+        <p>
+          <strong>负号的来历：</strong><code>Shape</code> 活在 XY 平面，挤出沿 +Z。
+          <code>rotateX(-π/2)</code> 之后，shape 的 y 变成了几何的 <em>−z</em>。
+          所以填 shape 时先取反，转完正好抵消。原项目源码里就写着这句注释：
+          <em>"The negation is needed because after rotateX(-PI/2), shape.y becomes -geometry.z"</em>。
+        </p>
+        <p>
+          <strong>绕向：不用你管。</strong><code>ExtrudeGeometry</code> 内部先调
+          <code>ShapeUtils.isClockWise(vertices)</code>，不是顺时针就
+          <code>vertices.reverse()</code>，把外轮廓归一化之后再挤。
+          所以 <code>getWallPlanFootprint</code> 吐出什么绕向都不影响结果。
+          <em>绕向只在第 01 步手搓顶点时才是真问题</em>——那里没人替你归一化。
+        </p>
+        <p>
+          <strong>也不要在 <code>rotateX</code> 之后调
+          <code>computeVertexNormals()</code>。</strong>
+          <code>ExtrudeGeometry</code> 构造时已经算好法线，而
+          <code>BufferGeometry.rotateX()</code> 会用法线矩阵把 <code>normal</code> 属性
+          一起转过去。多调一次不会错，但会让你误以为它是必需的——
+          等 M4 你手动改过顶点之后再调，那时才是真需要。
+        </p>
+      </div>
+      <div class="trap">
+        <span class="trap-label">M2 改一处约定 · 墙底在局部原点</span>
+        <p>
+          <code>ExtrudeGeometry</code> 沿 +Z 从 <code>0</code> 挤到 <code>depth</code>，
+          <code>rotateX(-π/2)</code> 之后局部 Y 就是 <code>[0, height]</code>。
+          与其加一次 <code>translate(0, -h/2, 0)</code> 把它掰回居中，不如接受这个基准：
+        </p>
+<pre style="background:transparent;border:0;padding:0;margin:10px 0"><code><span class="cm">// wallTransform 改一个字</span>
+position: [c.x, <span class="cw">0</span>, c.y]      <span class="cm">// 原来是 getWallHeight(wall) / 2</span>
+</code></pre>
+        <p style="margin-bottom:0">
+          <strong>"墙底在局部原点"才是 M5 层高标高的正确基准</strong>——
+          一堵墙放到二层，只需要把 <code>position.y</code> 设成层标高，不用再补半个高度。
+          第 01 步那个 <code>halfH</code> 也跟着改成 <code>0 / height</code>。
+        </p>
+      </div>
+      <div class="note">
+        <p>
+          <strong>为什么要转局部坐标，而不是直接用世界坐标建几何、让 mesh 不做变换？</strong>
+          因为 M3 的拖拽要靠 mutate <code>Object3D.position</code> 来避免重建几何。
+          几何一旦是世界坐标的，拖一下就得重算轮廓——那条性能路径就断了。
+          <strong>保留 mesh transform，是专门给 M3 留的门。</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="step">
+    <div class="step-n">10</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">miter 怎么送到每堵墙手上</h3><span class="tag viewer">viewer</span></div>
+<pre><code><span class="cm">// src/viewer/hooks/use-level-miters.ts</span>
+export function useLevelMiters(): MiterData
+<span class="cm">// hint: useScene(s =&gt; s.nodes) + useMemo，筛出 type === 'wall' 的，</span>
+<span class="cm">//       调 calculateLevelMiters。</span>
+<span class="cm">// hint: <strong>只在 SceneRenderer 里调一次</strong>，用 React context 往下发。</span>
+<span class="cm">//       每个 WallRenderer 各调一次 = N 次全量重算。</span>
+
+<span class="cm">// src/viewer/components/node-renderer.tsx</span>
+export const MiterContext = createContext&lt;MiterData | null&gt;(null)
+<span class="cm">// hint: SceneRenderer 里 &lt;MiterContext.Provider value={miter}&gt; 包住 map。</span>
+<span class="cm">// hint: WallRenderer 用 useContext 取，并把它加进 buildWallGeometry 的 useMemo 依赖。</span>
+</code></pre>
+      <div class="note">
+        <p>
+          <strong>这个 hook 订阅了整个 <code>nodes</code>，任何节点变动都会触发全量重算 +
+          全部墙重建几何。</strong>这是<em>对的</em>——斜接确实依赖全部墙。
+          但它也正是 M2 最大的故意缺陷（见 §06）。
+        </p>
+        <p>
+          原项目的解法是 <code>getAdjacentWallIds(allWalls, dirtyWallIds)</code>：
+          改一堵墙 → 找出共享交点的邻居 → 只重建这几堵。配合
+          <code>level-miter-cache.ts</code> 缓存整层结果。<strong>M3 再做。</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="step">
+    <div class="step-n">11</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">接线并肉眼验收</h3><span class="tag viewer">viewer</span></div>
+      <p>
+        <code>WallRenderer</code> 从 context 取 miter，传进 <code>buildWallGeometry</code>，
+        <code>useMemo</code> 依赖加上 miter。然后画一个矩形房间。
+      </p>
+      <p>
+        <strong>此刻大概率还是错的。</strong>按这个顺序排查——每一条都能单独证伪：
+      </p>
+      <ol>
+        <li>顶视看轮廓：四角尖点位置对不对？→ 错在 miter（但你第 08 步的测试应该已经拦住了）</li>
+        <li>轮廓对但墙"透明"/只从一侧可见 → 绕向反了，第 09 步</li>
+        <li>轮廓对但墙躺倒/穿地 → <code>rotateX</code> 或那个负号，第 09 步</li>
+        <li>墙位置整体偏移 → 世界→局部的转换，第 09 步 ②</li>
+        <li>只有转角处撕裂，直墙全对 → 中心线端点没插，第 07 步</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div class="step">
+    <div class="step-n">12</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">miter limit</h3><span class="tag core">core</span></div>
+      <p>
+        <strong>先制造故障：</strong>画两堵夹角约 2° 的墙。你会看到一根射向天边的尖刺。
+      </p>
+      <p>
+        原因是斜接点到交点的距离 ∝ <code>halfThickness / sin θ</code>，
+        θ → 0 时跑向无穷。<code>det</code> 只能挡住<em>严格</em>平行。
+      </p>
+<pre><code>const MITER_LIMIT = 10
+<span class="cm">// hint: 在第 05 步求出交点 p 之后加一道闸：</span>
+<span class="cm">//   maxMiter = MITER_LIMIT * max(a.halfThickness, b.halfThickness)</span>
+<span class="cm">//   若 |p - meetingPoint|² &gt; maxMiter²  或  p 不是有限数 → continue（回退平接）</span>
+<span class="cm">// hint: 为什么是 10？0.1m 厚的墙能一直斜接到约 11° —— 覆盖所有现实转角，</span>
+<span class="cm">//       同时把病态的近共线情况框住。原项目的注释里算的就是这笔账。</span>
+</code></pre>
+      <p>加完，第 08 步那个角度扫描测试应该全绿。</p>
+    </div>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════════════════════ 05 -->
+<section>
+  <h2><span class="num">05</span>验收</h2>
+  <p class="h2sub">测试全绿 + 六条肉眼检查</p>
+
+  <ul class="check">
+    <li><span>矩形房间四堵墙，顶视图：<strong>四角严丝合缝</strong>，没有十字叠加，没有缺口。</span></li>
+    <li><span>同一个房间，透视图绕一圈：没有任何一面墙从某个角度看是透明的（绕向）。</span></li>
+    <li><span>T 型隔断：一堵墙撞到另一堵的中间，撞上来的被切齐，<strong>被撞的那堵不变形</strong>。</span></li>
+    <li><span>改任意一堵墙的 <code>thickness</code>，相邻墙角立刻跟着重算。</span></li>
+    <li><span>两堵夹角 2° 的墙：没有尖刺，回退成平接。</span></li>
+    <li><span>非直角房间（比如五边形）：每个角都对，包括钝角。</span></li>
+  </ul>
+
+  <h3>提交回来的方式</h3>
+  <p class="prose">
+    贴三个文件：<code>core/lib/geometry-2d.ts</code>、
+    <code>core/systems/wall/wall-mitering.ts</code>、
+    <code>viewer/lib/wall-geometry.ts</code>，加上
+    <code>wall-mitering.test.ts</code> 的运行结果，再加一张五边形房间的顶视截图。
+  </p>
+  <p class="prose">
+    我按三条 review：<strong>斜接算法的方向约定是否自洽</strong>（出射方向 / 左右 / 交叉取用
+    这三处必须同时对，错任意一个都能让直角房间看起来是对的）、
+    <strong>core 里有没有混进 Three</strong>、
+    <strong>世界坐标和局部坐标的边界是否清晰</strong>。
+  </p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════════════════════ 06 -->
+<section>
+  <h2><span class="num">06</span>故意保留的缺陷</h2>
+  <p class="h2sub">M2 结束时这些必须还在</p>
+
+  <div class="defect"><span>改一堵墙 → 全场景 miter 重算 + 所有墙重建几何</span><span class="defect-to">→ M3</span></div>
+  <div class="defect"><span>没有脏标记，没有 <code>getAdjacentWallIds</code> 邻接传播</span><span class="defect-to">→ M3</span></div>
+  <div class="defect"><span>交点检测是 O(交点×墙)，没有空间网格</span><span class="defect-to">→ M3</span></div>
+  <div class="defect"><span>画墙时端点不吸附到已有端点，靠手抖对齐（毫米格外就接不上）</span><span class="defect-to">→ M3</span></div>
+  <div class="defect"><span>墙不能移动，改厚度只能在代码里改</span><span class="defect-to">→ M3</span></div>
+  <div class="defect"><span>不支持弧形墙（原项目的 <code>curveOffset</code> + <code>wall-curve.ts</code>）</span><span class="defect-to">→ 选修</span></div>
+  <div class="defect"><span>墙的内外表面没有区分，无法分别上材质</span><span class="defect-to">→ M4</span></div>
+  <div class="defect"><span>UV 是 ExtrudeGeometry 默认的，每堵墙各自从 0 开始，贴图接不上</span><span class="defect-to">→ M4</span></div>
+
+  <div class="note" style="margin-top:28px">
+    <p>
+      最后一条值得多看一眼。原项目专门写了
+      <code>applyWorldPlanarWallUVs()</code>——把 UV 按<strong>世界坐标</strong>重投影
+      （1 UV 单位 = 1 米），这样相邻墙的贴图能连续、能和上方屋顶的山墙对齐。
+      注释里明说这是为了替换 <em>"THREE's ExtrudeGeometry UVs, which restart at each
+      wall's own start/end"</em>。
+    </p>
+    <p style="margin-bottom:0">
+      现在别做。等你 M4 给墙贴了砖纹、看到每堵墙接缝处砖块错位的那一刻再做——
+      那时你会一次就理解为什么它要按世界坐标投影，而不是按墙的局部长度。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════════════════════ 07 -->
+<section>
+  <h2><span class="num">07</span>全部变更代码</h2>
+  <p class="h2sub">新增 6 个文件，改写 5 个</p>
+
+  <div class="trap">
+    <span class="trap-label">先看这两条，它们贯穿全部文件</span>
+    <p>
+      <strong>① 局部 Y 约定变了。</strong>墙的几何局部 Y 从 <code>0</code> 到
+      <code>height</code>（不再是 <code>±h/2</code>），<code>wallTransform</code> 的
+      <code>position.y</code> 改成 <code>0</code>。见第 09 步的约定框。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>② <code>buildWallGeometry</code> 多了一个参数。</strong>
+      签名变成 <code>(wall, miter)</code>——这是 M2 的结构性事件，
+      所有调用点都要跟着改。
+    </p>
+  </div>
+
+  <h3>1 · core/schema/wall.ts <span class="tag core">改</span></h3>
+<pre><code><span class="cm">// 追加两个转换器。放这里而不是放几何库里 —— 「把存储的 tuple 变成 Point2D」</span>
+<span class="cm">// 是 schema 的职责，几何库不该知道 WallNode 长什么样。</span>
+import type { Point2D } from '../lib/geometry-2d'
+
+export const wallStart = (w: WallNode): Point2D =&gt; ({ x: w.start[0], y: w.start[1] })
+export const wallEnd   = (w: WallNode): Point2D =&gt; ({ x: w.end[0],   y: w.end[1] })
+</code></pre>
+
+  <h3>2 · core/lib/geometry-2d.ts <span class="tag core">改</span></h3>
+<pre><code><span class="cm">// ── 在 M1 的内容之后追加 ─────────────────────────────</span>
+
+<span class="cm">/** 直线的一般式 ax + by + c = 0。</span>
+<span class="cm"> *  为什么不用「点 + 方向」？因为求交要解 2×2 线性方程组，</span>
+<span class="cm"> *  一般式的系数直接就是系数矩阵。 */</span>
+export type Line = { a: number; b: number; c: number }
+
+export function lineFromPointAndDirection(p: Point2D, v: Point2D): Line {
+  const a = -v.y
+  const b = v.x
+  return { a, b, c: -(a * p.x + b * p.y) }
+}
+
+<span class="cm">/** 两直线求交。平行返回 null。 */</span>
+export function intersectLines(l1: Line, l2: Line): Point2D | null {
+  const det = l1.a * l2.b - l2.a * l1.b
+  if (Math.abs(det) &lt; EPSILON) return null
+  <span class="cm">// 克拉默法则。<span class="cw">y 的分子是 (a2·c1 − a1·c2)，符号很容易抄反 ——</span></span>
+  <span class="cm">// 抄反的表现是：墙角位置对，但左右镜像。</span>
+  return {
+    x: (l1.b * l2.c - l2.b * l1.c) / det,
+    y: (l2.a * l1.c - l1.a * l2.c) / det,
+  }
+}
+
+<span class="cm">/** 点是否落在线段「身上」（不含两端）。T 型接头的判据。 */</span>
+export function pointOnSegment(p: Point2D, a: Point2D, b: Point2D, tol = 1e-3): boolean {
+  const ab = sub(b, a)
+  const L2 = ab.x * ab.x + ab.y * ab.y
+  if (L2 &lt; EPSILON) return false
+  const L = Math.sqrt(L2)
+  const ap = sub(p, a)
+
+  <span class="cm">// ① 投影参数落在开区间内。<span class="cw">容差要除以长度换算到 t 空间</span> ——</span>
+  <span class="cm">//    tol 的单位是米，t 是无量纲比例。原项目直接拿 tol 当 t 的容差用，</span>
+  <span class="cm">//    在 4 米长的墙上等于 4 毫米，能用但不严谨。</span>
+  const t = (ab.x * ap.x + ab.y * ap.y) / L2
+  const tTol = tol / L
+  if (t &lt;= tTol || t &gt;= 1 - tTol) return false
+
+  <span class="cm">// ② 到直线的垂距。<span class="cw">只判 ① 会把远处平行的点误判成 T 接。</span></span>
+  return Math.abs(ab.x * ap.y - ab.y * ap.x) / L &lt; tol
+}
+
+<span class="cm">/** 量化坐标 → 字符串键。<span class="cw">整个 M2 的地基：</span></span>
+<span class="cm"> *  「两堵墙接在一起」的判据不是浮点相等，是量化到同一个毫米格。 */</span>
+export function quantizeKey(p: Point2D, tol = 1e-3): string {
+  return `${Math.round(p.x / tol)},${Math.round(p.y / tol)}`
+}
+</code></pre>
+
+  <h3>3 · core/systems/wall/wall-mitering.ts <span class="tag core">新</span></h3>
+<pre><code>import {
+  add, EPSILON, intersectLines, leftNormal, len, lineFromPointAndDirection,
+  pointOnSegment, quantizeKey, scale, sub, type Line, type Point2D,
+} from '../../lib/geometry-2d'
+import { getWallThickness, wallEnd, wallStart, type WallNode } from '../../schema/wall'
+
+const JUNCTION_TOLERANCE = 1e-3
+
+<span class="cm">// 斜接点到交点的距离 ∝ halfThickness / sin θ，θ→0 时跑向无穷 ——</span>
+<span class="cm">// 表现为一根射向天边的尖刺。10 倍半厚意味着 0.1m 的墙能一直斜接到约 11°，</span>
+<span class="cm">// 覆盖所有现实转角，同时把病态的近共线情况框住。</span>
+const MITER_LIMIT = 10
+
+type EndType = 'start' | 'end' | 'passthrough'
+
+interface Junction {
+  meetingPoint: Point2D
+  connected: Array&lt;{ wall: WallNode; endType: EndType }&gt;
+}
+
+<span class="cm">/** 一条「从交点出发」的腿。passthrough 墙会贡献两条（正反方向）。 */</span>
+interface Leg {
+  wallId: string
+  angle: number          <span class="cm">// 出射角，排序用</span>
+  edgeLeft: Line
+  edgeRight: Line
+  isPassthrough: boolean
+  halfThickness: number
+}
+
+export interface MiterCorner { left?: Point2D; right?: Point2D }
+export interface MiterData { junctionData: Map&lt;string, Map&lt;string, MiterCorner&gt;&gt; }
+
+export const EMPTY_MITER_DATA: MiterData = { junctionData: new Map() }
+
+<span class="cm">// ── ① 找交点 ────────────────────────────────────────</span>
+
+function findJunctions(walls: WallNode[]): Map&lt;string, Junction&gt; {
+  const buckets = new Map&lt;string, Junction&gt;()
+
+  const push = (p: Point2D, wall: WallNode, endType: EndType) =&gt; {
+    const key = quantizeKey(p, JUNCTION_TOLERANCE)
+    let j = buckets.get(key)
+    if (!j) { j = { meetingPoint: p, connected: [] }; buckets.set(key, j) }
+    j.connected.push({ wall, endType })
+  }
+
+  <span class="cm">// 第一遍：每堵墙的两个端点各入桶</span>
+  for (const wall of walls) {
+    push(wallStart(wall), wall, 'start')
+    push(wallEnd(wall), wall, 'end')
+  }
+
+  <span class="cm">// 第二遍：T 型 —— 交点落在某堵墙「身上」</span>
+  <span class="cm">// <span class="cw">按 walls 的输入顺序遍历</span>，追加顺序才是确定的。共线的两堵墙在下面</span>
+  <span class="cm">// 排序时角度会打平，稳定排序保留追加顺序 —— 顺序不定就会随机选错厚度。</span>
+  <span class="cm">// 复杂度 O(交点数 × 墙数)。原项目 1081 堵墙时实测 584ms，2 米网格分桶降到 11ms。</span>
+  <span class="cm">// M2 不做这个优化 —— 你只有几十堵墙。M3 的性能课会回来找这行注释。</span>
+  for (const junction of buckets.values()) {
+    for (const wall of walls) {
+      if (junction.connected.some((c) =&gt; c.wall.id === wall.id)) continue
+      if (pointOnSegment(junction.meetingPoint, wallStart(wall), wallEnd(wall), JUNCTION_TOLERANCE)) {
+        junction.connected.push({ wall, endType: 'passthrough' })
+      }
+    }
+  }
+
+  <span class="cm">// 只有一堵墙的桶是自由端，用默认平接即可</span>
+  const result = new Map&lt;string, Junction&gt;()
+  for (const [key, j] of buckets) if (j.connected.length &gt;= 2) result.set(key, j)
+  return result
+}
+
+<span class="cm">// ── ② 墙 → 两条边线 ──────────────────────────────────</span>
+
+function legsAtJunction(
+  wall: WallNode, endType: EndType, meetingPoint: Point2D, halfT: number,
+): Leg[] {
+  const forward = sub(wallEnd(wall), wallStart(wall))
+
+  <span class="cm">// <span class="cw">方向必须是「从交点出发」：</span></span>
+  <span class="cm">//   start       → end - start</span>
+  <span class="cm">//   end         → start - end   （取反！搞反了整个环形排序就乱了）</span>
+  <span class="cm">//   passthrough → 两条腿，因为被撞的直墙对撞上来的墙而言是左右两侧的邻居</span>
+  const dirs =
+    endType === 'passthrough' ? [forward, scale(forward, -1)]
+    : endType === 'start'     ? [forward]
+    :                           [scale(forward, -1)]
+
+  const legs: Leg[] = []
+  for (const v of dirs) {
+    if (len(v) &lt; EPSILON) continue
+    const n = scale(leftNormal(v), halfT)
+    legs.push({
+      wallId: wall.id,
+      angle: Math.atan2(v.y, v.x),
+      edgeLeft:  lineFromPointAndDirection(add(meetingPoint, n), v),
+      edgeRight: lineFromPointAndDirection(sub(meetingPoint, n), v),
+      isPassthrough: endType === 'passthrough',
+      halfThickness: halfT,
+    })
+  }
+  return legs
+}
+
+<span class="cm">// ── ③④ 排序、环形配对、求交 ──────────────────────────</span>
+
+function calculateJunctionIntersections(junction: Junction): Map&lt;string, MiterCorner&gt; {
+  const legs: Leg[] = []
+  for (const { wall, endType } of junction.connected) {
+    legs.push(...legsAtJunction(wall, endType, junction.meetingPoint, getWallThickness(wall) / 2))
+  }
+
+  <span class="cm">// 角度相同时按 wallId 排 —— 保证同一份场景每次算出逐位相同的结果。</span>
+  <span class="cm">// 否则 Map 迭代顺序会让墙角在两次渲染之间抖动。</span>
+  legs.sort((p, q) =&gt;
+    p.angle !== q.angle ? p.angle - q.angle
+    : p.wallId &lt; q.wallId ? -1 : p.wallId &gt; q.wallId ? 1 : 0)
+
+  const out = new Map&lt;string, MiterCorner&gt;()
+  const n = legs.length
+  if (n &lt; 2) return out
+
+  const cornerOf = (id: string): MiterCorner =&gt; {
+    let c = out.get(id)
+    if (!c) { c = {}; out.set(id, c) }
+    return c
+  }
+
+  for (let i = 0; i &lt; n; i++) {
+    const a = legs[i]!
+    const b = legs[(i + 1) % n]!
+
+    <span class="cm">// 相邻两条腿之间夹着一个楔形空隙，由 a 的左边和 b 的右边围成。</span>
+    <span class="cm">// 画个图确认这个配对方向，别硬记。</span>
+    const p = intersectLines(a.edgeLeft, b.edgeRight)
+    if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) continue
+
+    <span class="cm">// miter limit：det 只挡得住<em>严格</em>平行。夹角很小的两堵墙 det 小而非零，</span>
+    <span class="cm">// 交点会落到很远的地方。超出就回退平接。</span>
+    const maxMiter = MITER_LIMIT * Math.max(a.halfThickness, b.halfThickness)
+    const dx = p.x - junction.meetingPoint.x
+    const dy = p.y - junction.meetingPoint.y
+    if (dx * dx + dy * dy &gt; maxMiter * maxMiter) continue
+
+    <span class="cm">// passthrough 的腿不写回 —— T 型里被撞的直墙，几何不该被改。</span>
+    if (!a.isPassthrough) cornerOf(a.wallId).left = p
+    if (!b.isPassthrough) cornerOf(b.wallId).right = p
+  }
+
+  return out
+}
+
+<span class="cm">// ── ⑤ 对外 ──────────────────────────────────────────</span>
+
+export function calculateLevelMiters(walls: WallNode[]): MiterData {
+  const junctionData = new Map&lt;string, Map&lt;string, MiterCorner&gt;&gt;()
+  for (const [key, junction] of findJunctions(walls)) {
+    junctionData.set(key, calculateJunctionIntersections(junction))
+  }
+  return { junctionData }
+}
+
+export interface WallMiterBoundaryPoints {
+  startLeft: Point2D;  startRight: Point2D
+  endLeft: Point2D;    endRight: Point2D
+}
+
+export function getWallMiterBoundaryPoints(
+  wall: WallNode, miter: MiterData,
+): WallMiterBoundaryPoints | null {
+  const start = wallStart(wall)
+  const end = wallEnd(wall)
+  const v = sub(end, start)
+  if (len(v) &lt; EPSILON) return null
+
+  const n = scale(leftNormal(v), getWallThickness(wall) / 2)
+  const cornerAt = (p: Point2D) =&gt;
+    miter.junctionData.get(quantizeKey(p, JUNCTION_TOLERANCE))?.get(wall.id)
+
+  const s = cornerAt(start)
+  const e = cornerAt(end)
+
+  return {
+    startLeft:  s?.left  ?? add(start, n),
+    startRight: s?.right ?? sub(start, n),
+    <span class="cm">// <span class="cw">⚠⚠ end 端左右互换。</span>在 end 交点处这堵墙的出射方向是反的，</span>
+    <span class="cm">//    所以它的「左」也反了。见 §02 的算例。</span>
+    endLeft:    e?.right ?? add(end, n),
+    endRight:   e?.left  ?? sub(end, n),
+  }
+}
+
+<span class="cm">/** 某一端是否参与了斜接 —— 轮廓要不要插中心线端点，靠它判断。 */</span>
+export function hasJunctionAt(wall: WallNode, p: Point2D, miter: MiterData): boolean {
+  return miter.junctionData.get(quantizeKey(p, JUNCTION_TOLERANCE))?.has(wall.id) ?? false
+}
+</code></pre>
+
+  <h3>4 · core/systems/wall/wall-footprint.ts <span class="tag core">新</span></h3>
+<pre><code>import type { Point2D } from '../../lib/geometry-2d'
+import { wallEnd, wallStart, type WallNode } from '../../schema/wall'
+import { getWallMiterBoundaryPoints, hasJunctionAt, type MiterData } from './wall-mitering'
+
+<span class="cm">/** 墙的平面轮廓。4 / 5 / 6 个点 —— 每个参与斜接的端各多一个中心线端点。 */</span>
+export function getWallPlanFootprint(wall: WallNode, miter: MiterData): Point2D[] {
+  const bp = getWallMiterBoundaryPoints(wall, miter)
+  if (!bp) return []                       <span class="cm">// 退化墙</span>
+
+  const start = wallStart(wall)
+  const end = wallEnd(wall)
+
+  const polygon: Point2D[] = [bp.startRight, bp.endRight]
+
+  <span class="cm">// <span class="cw">这两个 push 是 M2 第二深坑。</span>做个实验：注释掉它们，画一个 30° 锐角接头。</span>
+  <span class="cm">// 斜接点在钝角侧会跨过中心线，四边形自交，挤出的面撕裂（部分三角形法线朝内）。</span>
+  <span class="cm">// 插入中心线端点把它切成两个安全的扇形，多边形保持简单。</span>
+  <span class="cm">// 原项目那两行同样没有注释 —— 因为写的人是被咬过之后才加的。</span>
+  if (hasJunctionAt(wall, end, miter)) polygon.push(end)
+
+  polygon.push(bp.endLeft, bp.startLeft)
+
+  if (hasJunctionAt(wall, start, miter)) polygon.push(start)
+
+  return polygon
+}
+</code></pre>
+
+  <h3>5 · viewer/lib/prism-by-hand.ts <span class="tag viewer">新（用完即删）</span></h3>
+<pre><code>import * as THREE from 'three'
+import type { Point2D } from '../../core/lib/geometry-2d'
+
+<span class="cm">/** 鞋带公式：轮廓在 (x, z) 上的有符号面积。&gt;0 逆时针，&lt;0 顺时针。 */</span>
+function signedArea(fp: Point2D[]): number {
+  let s = 0
+  for (let i = 0; i &lt; fp.length; i++) {
+    const a = fp[i]!, b = fp[(i + 1) % fp.length]!
+    s += a.x * b.y - b.x * a.y
+  }
+  return s / 2
+}
+
+<span class="cm">/** 本文件约定：轮廓归一化成 (x,z) 顺时针。在这个约定下侧面按</span>
+<span class="cm"> *  (底i, 底j, 顶j) 绕出来法线朝外，顶面按原序绕出来朝 +Y。 */</span>
+const toClockwise = (fp: Point2D[]) =&gt; (signedArea(fp) &gt; 0 ? [...fp].reverse() : fp)
+
+<span class="cm">// ── ❶ 先写这个：2N 个顶点，侧面和顶底面共享。跑起来看糊棱角。 ──</span>
+export function buildPrismNaive(footprint: Point2D[], height: number): THREE.BufferGeometry {
+  const geometry = new THREE.BufferGeometry()
+  if (footprint.length &lt; 3) return geometry
+
+  const fp = toClockwise(footprint)
+  const n = fp.length
+
+  const positions: number[] = []
+  for (const p of fp) positions.push(p.x, 0,      p.y)   <span class="cm">// 0 .. n-1    底环</span>
+  for (const p of fp) positions.push(p.x, height, p.y)   <span class="cm">// n .. 2n-1   顶环</span>
+  <span class="cm">//                                       ↑ 局部 Y 从 0 到 height（M2 新约定）</span>
+
+  const indices: number[] = []
+  for (let i = 0; i &lt; n; i++) {
+    const j = (i + 1) % n
+    indices.push(i, j, n + j,  i, n + j, n + i)          <span class="cm">// 侧面两个三角形</span>
+  }
+  <span class="cm">// 扇形三角剖分，只对凸多边形成立 —— 这也是 M4 带洞轮廓不能这么剖的原因</span>
+  for (let i = 1; i &lt; n - 1; i++) indices.push(n, n + i, n + i + 1)   <span class="cm">// 顶</span>
+  for (let i = 1; i &lt; n - 1; i++) indices.push(0, i + 1, i)           <span class="cm">// 底（绕向相反）</span>
+
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geometry.setIndex(indices)
+  geometry.computeVertexNormals()   <span class="cm">// 先注释掉跑一次 —— 墙全黑</span>
+  return geometry
+}
+
+<span class="cm">// ── ❷ 修法：每个面独立顶点。4 边形墙 = 4×4 + 4 + 4 = 24 个顶点。 ──</span>
+export function buildPrismByHand(footprint: Point2D[], height: number): THREE.BufferGeometry {
+  const geometry = new THREE.BufferGeometry()
+  if (footprint.length &lt; 3) return geometry
+
+  const fp = toClockwise(footprint)
+  const n = fp.length
+  const positions: number[] = []
+  const uvs: number[] = []
+  const indices: number[] = []
+
+  let uRun = 0                                   <span class="cm">// 沿墙累计弧长 → U 坐标</span>
+  for (let i = 0; i &lt; n; i++) {
+    const a = fp[i]!, b = fp[(i + 1) % n]!
+    const edgeLen = Math.hypot(b.x - a.x, b.y - a.y)
+    const base = positions.length / 3
+
+    positions.push(
+      a.x, 0,      a.y,    <span class="cm">// base+0 左下</span>
+      b.x, 0,      b.y,    <span class="cm">// base+1 右下</span>
+      b.x, height, b.y,    <span class="cm">// base+2 右上</span>
+      a.x, height, a.y,    <span class="cm">// base+3 左上</span>
+    )
+    <span class="cm">// 1 uv 单位 = 1 米。U 沿墙长累计，贴图跨过转角能接上。</span>
+    <span class="cm">// 先注释掉这四行跑一次 —— uv 全 0，贴图变成「一个像素拉满整面墙」。</span>
+    uvs.push(uRun, 0,  uRun + edgeLen, 0,  uRun + edgeLen, height,  uRun, height)
+
+    indices.push(base, base + 1, base + 2,  base, base + 2, base + 3)
+    uRun += edgeLen
+  }
+
+  <span class="cm">// 顶面。面内共享顶点是安全的 —— 同一平面法线本来就相同，平均等于不变。</span>
+  <span class="cm">// 「共享」的危险只发生在跨越折角时。</span>
+  const topBase = positions.length / 3
+  for (const p of fp) { positions.push(p.x, height, p.y); uvs.push(p.x, p.y) }
+  for (let i = 1; i &lt; n - 1; i++) indices.push(topBase, topBase + i, topBase + i + 1)
+
+  const botBase = positions.length / 3
+  for (const p of fp) { positions.push(p.x, 0, p.y); uvs.push(p.x, p.y) }
+  for (let i = 1; i &lt; n - 1; i++) indices.push(botBase, botBase + i + 1, botBase + i)
+
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geometry.setAttribute('uv',       new THREE.Float32BufferAttribute(uvs, 2))
+  geometry.setIndex(indices)
+  geometry.computeVertexNormals()
+  return geometry
+}
+</code></pre>
+
+  <h3>6 · viewer/lib/wall-geometry.ts <span class="tag viewer">改写</span></h3>
+<pre><code>import * as THREE from 'three'
+import { midpoint, type Point2D } from '../../core/lib/geometry-2d'
+import { getWallHeight, wallEnd, wallStart, type WallNode } from '../../core/schema/wall'
+import { getWallPlanFootprint } from '../../core/systems/wall/wall-footprint'
+import type { MiterData } from '../../core/systems/wall/wall-mitering'
+
+<span class="cm">/** 世界 XZ 点 → mesh 局部 XZ 点。</span>
+<span class="cm"> *  mesh 的 local→world 是「先绕 Y 转 rotationY，再平移 position」，逆变换即：</span>
+<span class="cm"> *    绕 Y 转 θ： (lx,lz) → ( lx·cosθ + lz·sinθ, −lx·sinθ + lz·cosθ )</span>
+<span class="cm"> *    逆：        (dx,dz) → ( dx·cosθ − dz·sinθ,  dx·sinθ + dz·cosθ ) */</span>
+export function worldToLocalXZ(
+  p: Point2D, position: [number, number, number], rotationY: number,
+): Point2D {
+  const cos = Math.cos(rotationY)
+  const sin = Math.sin(rotationY)
+  const dx = p.x - position[0]
+  const dz = p.y - position[2]          <span class="cm">// p.y 是世界 Z</span>
+  return { x: dx * cos - dz * sin, y: dx * sin + dz * cos }
+}
+
+export function wallTransform(wall: WallNode): {
+  position: [number, number, number]
+  rotationY: number
+} {
+  const start = wallStart(wall)
+  const end = wallEnd(wall)
+  const c = midpoint(start, end)
+
+  <span class="cm">// 推导见 M1：Box/挤出体的长边沿局部 +X，绕 Y 正转把 +X 转向 −Z，</span>
+  <span class="cm">// 所以 θ = atan2(−dz, dx)。少个负号 = 斜墙镜像，直墙全对。</span>
+  const rotationY = Math.atan2(-(end.y - start.y), end.x - start.x)
+
+  <span class="cm">// <span class="cw">M2 改：y 从 height/2 改成 0</span> —— 挤出体天然占 [0, height]，</span>
+  <span class="cm">// 而「墙底在局部原点」才是 M5 层高标高的正确基准。</span>
+  return { position: [c.x, 0, c.y], rotationY }
+}
+
+export function buildWallGeometry(wall: WallNode, miter: MiterData): THREE.BufferGeometry {
+  <span class="cm">// ① 世界坐标的斜接轮廓</span>
+  const worldFp = getWallPlanFootprint(wall, miter)
+  if (worldFp.length &lt; 3) return new THREE.BufferGeometry()
+
+  <span class="cm">// ② 转局部。<span class="cw">为什么不直接用世界坐标建几何、让 mesh 不做变换？</span></span>
+  <span class="cm">//    因为 M3 的拖拽要靠 mutate Object3D.position 来避免重建几何。</span>
+  <span class="cm">//    几何一旦是世界坐标的，拖一下就得重算轮廓 —— 那条性能路径就断了。</span>
+  const { position, rotationY } = wallTransform(wall)
+  const local = worldFp.map((p) =&gt; worldToLocalXZ(p, position, rotationY))
+
+  <span class="cm">// ③ Shape 活在 XY 平面。<span class="cw">那个负号：</span>rotateX(−π/2) 会把 (x,y,z) 映成 (x,z,−y)，</span>
+  <span class="cm">//    即 shape 的 y 变成几何的 −z。所以填的时候先取反，转完正好抵消。</span>
+  <span class="cm">//    绕向不用管 —— ExtrudeGeometry 内部会 isClockWise() + reverse() 归一化。</span>
+  const shape = new THREE.Shape()
+  shape.moveTo(local[0]!.x, -local[0]!.y)
+  for (let i = 1; i &lt; local.length; i++) shape.lineTo(local[i]!.x, -local[i]!.y)
+  shape.closePath()
+
+  <span class="cm">// ④ 沿 +Z 挤出 height</span>
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: getWallHeight(wall),
+    bevelEnabled: false,
+  })
+
+  <span class="cm">// ⑤ 把挤出方向掰成竖直。rotateX 会用法线矩阵把 normal 一起转过去，</span>
+  <span class="cm">//    所以<strong>不需要</strong>再调 computeVertexNormals()。</span>
+  geometry.rotateX(-Math.PI / 2)
+  return geometry
+}
+</code></pre>
+
+  <h3>7 · viewer/hooks/use-level-miters.ts <span class="tag viewer">新</span></h3>
+<pre><code>import { useMemo } from 'react'
+import type { WallNode } from '../../core/schema/wall'
+import { useScene } from '../../core/store/use-scene'
+import { calculateLevelMiters, type MiterData } from '../../core/systems/wall/wall-mitering'
+
+<span class="cm">/** <span class="cw">这个 hook 订阅整个 nodes，任何节点变动都会触发全量重算。</span></span>
+<span class="cm"> *  这是<em>对的</em> —— 斜接确实依赖全部墙。但它也是 M2 最大的故意缺陷：</span>
+<span class="cm"> *  改一堵墙 → 全场景 miter 重算 + 所有墙重建几何。</span>
+<span class="cm"> *</span>
+<span class="cm"> *  M3 的解法：getAdjacentWallIds(allWalls, dirtyIds) 找出共享交点的邻居，</span>
+<span class="cm"> *  配合脏标记只重建这几堵，并把整层结果缓存起来。 */</span>
+export function useLevelMiters(): MiterData {
+  const nodes = useScene((s) =&gt; s.nodes)
+  return useMemo(() =&gt; {
+    const walls = Object.values(nodes).filter((n): n is WallNode =&gt; n.type === 'wall')
+    return calculateLevelMiters(walls)
+  }, [nodes])
+}
+</code></pre>
+
+  <h3>8 · viewer/components/node-renderer.tsx <span class="tag viewer">改</span></h3>
+<pre><code>import { createContext } from 'react'
+import type { AnyNodeId } from '../../core/schema/types'
+import { useScene } from '../../core/store/use-scene'
+import { EMPTY_MITER_DATA, type MiterData } from '../../core/systems/wall/wall-mitering'
+import { useLevelMiters } from '../hooks/use-level-miters'
+import { WallRenderer } from './wall-renderer'
+
+<span class="cm">// 用 context 而不是逐层 props：M4 会有门窗嵌在墙下面，props 要传三层。</span>
+export const MiterContext = createContext&lt;MiterData&gt;(EMPTY_MITER_DATA)
+
+export function SceneRenderer() {
+  const rootNodeIds = useScene((s) =&gt; s.rootNodeIds)
+  <span class="cm">// <span class="cw">只在这里算一次。</span>每个 WallRenderer 各调一次 = N 次全量重算。</span>
+  const miter = useLevelMiters()
+
+  return (
+    &lt;MiterContext.Provider value={miter}&gt;
+      &lt;group name="scene-renderer"&gt;
+        {rootNodeIds.map((id) =&gt; &lt;NodeRenderer key={id} nodeId={id} /&gt;)}
+      &lt;/group&gt;
+    &lt;/MiterContext.Provider&gt;
+  )
+}
+
+export function NodeRenderer({ nodeId }: { nodeId: AnyNodeId }) {
+  const node = useScene((s) =&gt; s.nodes[nodeId])
+  if (!node) return null
+  switch (node.type) {
+    case 'wall': return &lt;WallRenderer node={node} /&gt;
+    default:     return null
+  }
+}
+</code></pre>
+
+  <h3>9 · viewer/components/wall-renderer.tsx <span class="tag viewer">改</span></h3>
+<pre><code>import { useContext, useEffect, useMemo, useRef } from 'react'
+import type * as THREE from 'three'
+import { useRegistry } from '../../core/registry/scene-registry'
+import type { WallNode } from '../../core/schema/wall'
+import { buildWallGeometry, wallTransform } from '../lib/wall-geometry'
+import { MiterContext } from './node-renderer'
+
+export function WallRenderer({ node }: { node: WallNode }) {
+  const ref = useRef&lt;THREE.Mesh&gt;(null)
+  useRegistry(node.id, 'wall', ref)
+
+  const miter = useContext(MiterContext)
+
+  <span class="cm">// miter 加进依赖 —— 邻居变了这堵墙也要重建。</span>
+  <span class="cm">// <span class="cw">副作用：miter 每次都是新对象，所以这个 memo 实际上从不命中。</span></span>
+  <span class="cm">// 这就是 §06 那条「改一堵墙 → 所有墙重建几何」的缺陷。M3 修。</span>
+  const geometry = useMemo(
+    () =&gt; buildWallGeometry(node, miter),
+    [node.start[0], node.start[1], node.end[0], node.end[1],
+     node.thickness, node.height, miter],
+  )
+
+  useEffect(() =&gt; () =&gt; geometry.dispose(), [geometry])
+
+  const { position, rotationY } = useMemo(
+    () =&gt; wallTransform(node),
+    [node.start[0], node.start[1], node.end[0], node.end[1]],
+  )
+
+  return (
+    &lt;mesh
+      ref={ref}
+      geometry={geometry}
+      position={position}
+      rotation-y={rotationY}
+      visible={node.visible !== false}
+      castShadow
+      receiveShadow
+      onClick={(e) =&gt; { e.stopPropagation(); console.log('[pick]', node.id) }}
+    &gt;
+      &lt;meshStandardMaterial color="#e8e8e8" roughness={0.9} metalness={0} /&gt;
+    &lt;/mesh&gt;
+  )
+}
+</code></pre>
+
+  <h3>10 · core/lib/geometry-2d.test.ts <span class="tag core">改</span></h3>
+<pre><code><span class="cm">// ── 在 M1 的用例之后追加 ─────────────────────────────</span>
+import { intersectLines, lineFromPointAndDirection, pointOnSegment, quantizeKey } from './geometry-2d'
+
+describe('intersectLines', () =&gt; {
+  const horizontal = (y: number) =&gt; lineFromPointAndDirection({ x: 0, y }, { x: 1, y: 0 })
+  const vertical   = (x: number) =&gt; lineFromPointAndDirection({ x, y: 0 }, { x: 0, y: 1 })
+
+  it('垂直相交', () =&gt; near(intersectLines(horizontal(0), vertical(0))!, { x: 0, y: 0 }))
+
+  it('§02 算例的两个墙角', () =&gt; {
+    near(intersectLines(vertical(3.9), horizontal(0.1))!,  { x: 3.9, y:  0.1 })
+    near(intersectLines(horizontal(-0.1), vertical(4.1))!, { x: 4.1, y: -0.1 })
+  })
+
+  it('平行返回 null', () =&gt; {
+    expect(intersectLines(horizontal(0), horizontal(1))).toBeNull()
+  })
+})
+
+describe('pointOnSegment', () =&gt; {
+  const a = { x: 0, y: 0 }, b = { x: 4, y: 0 }
+  it('中间的点算 T 接',       () =&gt; expect(pointOnSegment({ x: 2, y: 0 }, a, b)).toBe(true))
+  it('端点不算（开区间）',     () =&gt; expect(pointOnSegment(a, a, b)).toBe(false))
+  it('延长线上的点不算',       () =&gt; expect(pointOnSegment({ x: 5, y: 0 }, a, b)).toBe(false))
+  it('平行偏移的点不算',       () =&gt; expect(pointOnSegment({ x: 2, y: 1 }, a, b)).toBe(false))
+  it('1mm 内的偏移仍然算',     () =&gt; expect(pointOnSegment({ x: 2, y: 0.0005 }, a, b)).toBe(true))
+})
+
+describe('quantizeKey', () =&gt; {
+  it('半毫米内的两点同键', () =&gt; {
+    expect(quantizeKey({ x: 1, y: 2 })).toBe(quantizeKey({ x: 1.0004, y: 2 }))
+  })
+  it('跨格的两点不同键', () =&gt; {
+    expect(quantizeKey({ x: 1.0004, y: 0 })).not.toBe(quantizeKey({ x: 1.0006, y: 0 }))
+  })
+})
+</code></pre>
+
+  <h3>11 · core/systems/wall/wall-mitering.test.ts <span class="tag core">新</span></h3>
+<pre><code>import { describe, expect, it } from 'vitest'
+import type { Point2D } from '../../lib/geometry-2d'
+import { WallNode } from '../../schema/wall'
+import { calculateLevelMiters, getWallMiterBoundaryPoints } from './wall-mitering'
+import { getWallPlanFootprint } from './wall-footprint'
+
+<span class="cm">// 走 schema.parse：顺手验证 schema 本身，而且 id 可以指定，断言才好写。</span>
+const wall = (id: string, start: [number, number], end: [number, number], thickness = 0.2) =&gt;
+  WallNode.parse({ id: `wall_${id}`, type: 'wall', start, end, thickness, height: 2.5 })
+
+const near = (a: Point2D, b: Point2D) =&gt; {
+  expect(a.x).toBeCloseTo(b.x, 9)
+  expect(a.y).toBeCloseTo(b.y, 9)
+}
+
+describe('直角 L 型 —— §02 的算例', () =&gt; {
+  const A = wall('a', [0, 0], [4, 0])
+  const B = wall('b', [4, 0], [4, 4])
+  const miter = calculateLevelMiters([A, B])
+
+  it('A 的 end 端左右互换后落在正确一侧', () =&gt; {
+    const bp = getWallMiterBoundaryPoints(A, miter)!
+    <span class="cm">// A 沿 +X，leftNormal = (0,1)，所以 left 侧是 y &gt; 0</span>
+    near(bp.endLeft,  { x: 3.9, y:  0.1 })
+    near(bp.endRight, { x: 4.1, y: -0.1 })
+    <span class="cm">// 自由端保持平接</span>
+    near(bp.startLeft,  { x: 0, y:  0.1 })
+    near(bp.startRight, { x: 0, y: -0.1 })
+  })
+
+  it('B 的 start 端不互换', () =&gt; {
+    const bp = getWallMiterBoundaryPoints(B, miter)!
+    near(bp.startLeft,  { x: 3.9, y:  0.1 })
+    near(bp.startRight, { x: 4.1, y: -0.1 })
+  })
+
+  it('A 的轮廓是 5 点（一端斜接）', () =&gt; {
+    expect(getWallPlanFootprint(A, miter)).toHaveLength(5)
+  })
+})
+
+describe('闭合矩形', () =&gt; {
+  const walls = [
+    wall('n', [0, 0], [4, 0]),
+    wall('e', [4, 0], [4, 3]),
+    wall('s', [4, 3], [0, 3]),
+    wall('w', [0, 3], [0, 0]),
+  ]
+  const miter = calculateLevelMiters(walls)
+
+  it('每堵墙两端都斜接 → 轮廓 6 点', () =&gt; {
+    for (const w of walls) expect(getWallPlanFootprint(w, miter)).toHaveLength(6)
+  })
+
+  it('外角在包围盒外，内角在包围盒内', () =&gt; {
+    const bp = getWallMiterBoundaryPoints(walls[0]!, miter)!
+    near(bp.startRight, { x: -0.1, y: -0.1 })   <span class="cm">// 外角</span>
+    near(bp.startLeft,  { x:  0.1, y:  0.1 })   <span class="cm">// 内角</span>
+  })
+})
+
+describe('T 型', () =&gt; {
+  <span class="cm">// 直墙 main 横跨，stub 从中间垂直撞上来</span>
+  const main = wall('main', [0, 0], [6, 0])
+  const stub = wall('stub', [3, 0], [3, 3])
+  const miter = calculateLevelMiters([main, stub])
+
+  it('撞上来的墙被切齐', () =&gt; {
+    const bp = getWallMiterBoundaryPoints(stub, miter)!
+    <span class="cm">// stub 沿 +Y(世界Z)，两个下角应该贴到 main 的表面 y = ±0.1</span>
+    expect(bp.startLeft.y).toBeCloseTo(0.1, 9)
+    expect(bp.startRight.y).toBeCloseTo(0.1, 9)
+  })
+
+  it('被撞的直墙几何不变（passthrough 不写回）', () =&gt; {
+    const bp = getWallMiterBoundaryPoints(main, miter)!
+    near(bp.startLeft,  { x: 0, y:  0.1 })
+    near(bp.endLeft,    { x: 6, y:  0.1 })
+    expect(getWallPlanFootprint(main, miter)).toHaveLength(4)
+  })
+})
+
+describe('miter limit', () =&gt; {
+  <span class="cm">// 原项目的真实测试。没有 MITER_LIMIT 时 1° 那一档会算出几十米。</span>
+  it.each([90, 30, 10, 5, 1, 0.1, 0.01])('%s° 夹角下边界保持有界', (deg) =&gt; {
+    const rad = (deg * Math.PI) / 180
+    const walls = [
+      wall('a', [0, 0], [3, 0]),
+      wall('b', [0, 0], [3 * Math.cos(rad), 3 * Math.sin(rad)]),
+    ]
+    const miter = calculateLevelMiters(walls)
+    for (const w of walls) {
+      const bp = getWallMiterBoundaryPoints(w, miter)!
+      for (const p of [bp.startLeft, bp.startRight, bp.endLeft, bp.endRight]) {
+        expect(Number.isFinite(p.x)).toBe(true)
+        expect(Math.max(Math.abs(p.x), Math.abs(p.y))).toBeLessThan(4)
+      }
+    }
+  })
+})
+
+describe('确定性', () =&gt; {
+  it('同一场景算两次结果逐位相同', () =&gt; {
+    const walls = [wall('a', [0, 0], [4, 0]), wall('b', [4, 0], [4, 4])]
+    const one = getWallMiterBoundaryPoints(walls[0]!, calculateLevelMiters(walls))
+    const two = getWallMiterBoundaryPoints(walls[0]!, calculateLevelMiters([...walls].reverse()))
+    expect(one).toEqual(two)
+  })
+})
+</code></pre>
+
+  <div class="note">
+    <p>
+      <strong>T 型那个断言值得多看一眼。</strong><code>stub</code> 从
+      <code>(3,0)</code> 向 <code>+Z</code> 长出去，它的两个下角
+      <em>都</em>应该落在 <code>y = 0.1</code>——也就是 <code>main</code> 的上表面。
+      因为 <code>main</code> 贡献了两条腿（正反方向），<code>stub</code> 夹在中间，
+      左右两侧各自和其中一条腿求交，结果都是 <code>main</code> 的同一条边线。
+    </p>
+    <p style="margin-bottom:0">
+      如果你的实现让 <code>stub</code> 只有一侧被切齐、另一侧还是
+      <code>y = 0</code>，那就是 <code>legsAtJunction</code> 里
+      passthrough 只返回了一条腿。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<footer style="color:var(--ink-3);font-family:var(--mono);font-size:12px;letter-spacing:0.04em">
+  <p style="margin:0">
+    对照源码：<code>core/systems/wall/wall-mitering.ts</code>（536 行）·
+    <code>wall-footprint.ts</code>（79 行）·
+    <code>wall-mitering.test.ts</code> ·
+    <code>viewer/systems/wall/wall-system.tsx</code>（1281 行，看 buildWallGeometry 那段即可）
+  </p>
+  <p style="margin:8px 0 0">上一站 · M1 能画一堵墙　　下一站 · M3 能选中、能拖动、能撤销</p>
+</footer>
+
+</div>

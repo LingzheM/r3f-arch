@@ -1,0 +1,2109 @@
+<title>M1 能画一堵墙</title>
+<style>
+:root {
+  --paper:      #EDF1EF;
+  --card:       #F8FAF9;
+  --code-bg:    #E4EBE8;
+  --ink:        #131B19;
+  --ink-2:      #4A5754;
+  --ink-3:      #74827E;
+  --rule:       #C4CFCB;
+  --rule-soft:  #D7E0DC;
+  --accent:     #0B6E5F;
+  --accent-bg:  #DBE9E5;
+  --warn:       #9E4520;
+  --warn-bg:    #F1E2D9;
+  --core:       #0B6E5F;  --core-bg:   #DBE9E5;
+  --viewer:     #2A5A79;  --viewer-bg: #DBE5EC;
+  --app:        #6A5843;  --app-bg:    #ECE5DB;
+
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --body: Georgia, "Iowan Old Style", "Source Serif 4", "Songti SC", "Noto Serif CJK SC", serif;
+  --cjk-sans: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:     #0D1412;
+    --card:      #151E1B;
+    --code-bg:   #0A100F;
+    --ink:       #DBE5E2;
+    --ink-2:     #96A5A1;
+    --ink-3:     #6E7C78;
+    --rule:      #2A3733;
+    --rule-soft: #1E2926;
+    --accent:    #4FC3AA;
+    --accent-bg: #12312B;
+    --warn:      #E2916A;
+    --warn-bg:   #32211A;
+    --core:      #4FC3AA;  --core-bg:   #12312B;
+    --viewer:    #79B4DA;  --viewer-bg: #14262F;
+    --app:       #C9AC85;  --app-bg:    #2A2318;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:     #0D1412;
+  --card:      #151E1B;
+  --code-bg:   #0A100F;
+  --ink:       #DBE5E2;
+  --ink-2:     #96A5A1;
+  --ink-3:     #6E7C78;
+  --rule:      #2A3733;
+  --rule-soft: #1E2926;
+  --accent:    #4FC3AA;
+  --accent-bg: #12312B;
+  --warn:      #E2916A;
+  --warn-bg:   #32211A;
+  --core:      #4FC3AA;  --core-bg:   #12312B;
+  --viewer:    #79B4DA;  --viewer-bg: #14262F;
+  --app:       #C9AC85;  --app-bg:    #2A2318;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.72;
+  margin: 0;
+  padding: 0 24px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 940px; margin: 0 auto; }
+.prose { max-width: 68ch; }
+
+/* ── masthead ─────────────────────────────── */
+.masthead { padding: 72px 0 0; }
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 20px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+.eyebrow b { color: var(--accent); font-weight: 600; }
+h1 {
+  font-family: var(--mono);
+  font-size: clamp(34px, 6vw, 52px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+.standfirst {
+  font-size: 19px;
+  color: var(--ink-2);
+  max-width: 60ch;
+  margin: 0 0 8px;
+}
+
+/* ── dimension-line divider ───────────────── */
+.dim {
+  position: relative;
+  height: 1px;
+  background: var(--rule);
+  border: 0;
+  margin: 56px 0 40px;
+}
+.dim::before, .dim::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  width: 1px;
+  height: 9px;
+  background: var(--rule);
+}
+.dim::before { left: 0; }
+.dim::after  { right: 0; }
+
+/* ── sections ─────────────────────────────── */
+section { margin-top: 8px; }
+h2 {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 0 0 6px;
+}
+h2 .num { color: var(--ink-3); margin-right: 12px; }
+.h2sub {
+  font-family: var(--mono);
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  margin: 0 0 24px;
+  color: var(--ink);
+}
+h3 {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 34px 0 10px;
+  letter-spacing: -0.005em;
+}
+h4 {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 24px 0 6px;
+  letter-spacing: 0;
+}
+p { margin: 0 0 16px; }
+ul, ol { margin: 0 0 16px; padding-left: 22px; }
+li { margin-bottom: 7px; }
+strong { font-weight: 700; color: var(--ink); }
+em { font-style: italic; color: var(--ink-2); }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+/* ── step blocks ──────────────────────────── */
+.step {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 0 20px;
+  padding: 26px 0;
+  border-top: 1px solid var(--rule-soft);
+}
+.step:first-of-type { border-top: 1px solid var(--rule); }
+.step-n {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-3);
+  padding-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.step-body { min-width: 0; }
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.step-title {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+.step-body > p { max-width: 64ch; }
+
+.tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.tag.core   { color: var(--core);   background: var(--core-bg); }
+.tag.viewer { color: var(--viewer); background: var(--viewer-bg); }
+.tag.app    { color: var(--app);    background: var(--app-bg); }
+.tag.three  { color: var(--warn);   background: var(--warn-bg); }
+
+/* ── code ─────────────────────────────────── */
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--rule-soft);
+  border-radius: 3px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  margin: 14px 0 18px;
+  line-height: 1.62;
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  white-space: pre;
+}
+.hl { color: var(--accent); }
+.cm { color: var(--ink-3); font-style: normal; }
+.cw { color: var(--warn); }
+
+/* ── callouts ─────────────────────────────── */
+.trap {
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 6px,
+      color-mix(in srgb, var(--warn) 7%, transparent) 6px 7px
+    ),
+    var(--warn-bg);
+  border-left: 3px solid var(--warn);
+  padding: 14px 18px;
+  margin: 18px 0;
+  border-radius: 0 3px 3px 0;
+}
+.trap-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--warn);
+  display: block;
+  margin-bottom: 6px;
+}
+.trap p:last-child, .trap ul:last-child { margin-bottom: 0; }
+
+.note {
+  border-left: 3px solid var(--rule);
+  padding: 2px 0 2px 18px;
+  margin: 18px 0;
+  color: var(--ink-2);
+  font-size: 16px;
+}
+.note p:last-child { margin-bottom: 0; }
+
+/* ── tables ───────────────────────────────── */
+.tablewrap { overflow-x: auto; margin: 18px 0 24px; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 13px;
+  min-width: 520px;
+}
+th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border-bottom: 1px solid var(--rule);
+  padding: 0 14px 8px 0;
+}
+td {
+  padding: 9px 14px 9px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  vertical-align: top;
+  line-height: 1.55;
+}
+td:last-child, th:last-child { padding-right: 0; }
+.tnum { font-variant-numeric: tabular-nums; text-align: right; }
+
+/* ── checklist ────────────────────────────── */
+.check { list-style: none; padding: 0; margin: 0; }
+.check li {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  margin: 0;
+}
+.check li::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--accent);
+  border-radius: 2px;
+  margin-top: 6px;
+}
+
+/* ── defects ──────────────────────────────── */
+.defect {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: baseline;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.defect-to {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* ── file tree ────────────────────────────── */
+.tree { font-size: 12.5px; }
+.tree .d { color: var(--ink-3); }
+
+a { color: var(--accent); }
+a:focus-visible, li:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+@media (max-width: 620px) {
+  body { font-size: 16px; padding: 0 18px 80px; }
+  .step { grid-template-columns: 1fr; gap: 0; }
+  .step-n { padding-top: 0; margin-bottom: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">
+    <span>PASCAL EDITOR 复刻计划</span>
+    <span>里程碑 <b>01</b> / 06</span>
+    <span>预计 2–3 周</span>
+  </p>
+  <h1>M1 能画一堵墙</h1>
+  <p class="standfirst">
+    在 3D 视口里点两下地面，一堵 2.5 米高、0.1 米厚的墙立起来。按 Tab 切正交顶视，
+    它变成一个矩形。点击它，控制台打出它的 node id。
+  </p>
+  <p class="standfirst" style="color:var(--ink-3);font-size:17px">
+    这就是全部。看起来一天能写完——你会用两到三周，因为这堵墙要同时把三层边界、
+    schema 真相源、场景注册表和坐标系约定一次性钉死。后面五个里程碑全部长在它上面。
+  </p>
+</header>
+
+<hr class="dim">
+
+<!-- ══════════════════════════════════════ -->
+<section>
+  <h2><span class="num">01</span>这一步在解决什么</h2>
+  <p class="h2sub">四个决定，钉死之后不许再改</p>
+
+  <div class="prose">
+    <p>
+      M1 的产出物看起来是一堵墙，实际产出物是四条<strong>此后不再讨论</strong>的约定。
+      每一条在原项目里都能找到对应，而每一条如果 M1 没定死，你会在 M2 到 M4 之间的某个下午
+      推翻重写。
+    </p>
+
+    <h3>① 三层边界与单向依赖</h3>
+    <p>
+      <code>core</code> 不许 <code>import three</code>。一行都不许。这不是洁癖——它是你
+      M2 那批几何测试能在 Node 里裸跑、不用 headless WebGL 的唯一原因，也是决策 10
+      （纯函数写测试）的兑现条件。<code>viewer</code> 不许知道"工具""选中""模式"这些词。
+      <code>app</code> 可以 import 前两者，反向永远不行。
+    </p>
+    <p>
+      M1 就三个目录、十几个文件，边界看起来是形式主义。原项目 390k 行时它是全部意义所在——
+      <code>packages/viewer</code> 能单独发 npm 包，正是因为这条线三年没破。
+    </p>
+
+    <h3>② schema 是唯一真相源</h3>
+    <p>
+      墙的一切状态只存在于一个 Zod 对象里：两个二维端点、可选厚度、可选高度。
+      不存长度（可算），不存角度（可算），不存 Three 对象的引用（那是 registry 的事），
+      不存"是否选中"（那是 app 层的事）。每当你想往 <code>WallNode</code> 上加字段时，
+      先问一遍：这个值能不能从已有字段算出来？
+    </p>
+
+    <h3>③ 中心线 + 平面点约定</h3>
+    <p>
+      墙由中心线定义——原项目的 <code>WallNode</code> 只存 <code>start: [x, z]</code> 和
+      <code>end: [x, z]</code>，厚度沿左法线双向外扩。平面坐标类型叫 <code>Point2D</code>，
+      字段是 <code>{ x, y }</code>，而这个 <code>y</code> 是<strong>世界 Z</strong>。
+      这个命名很坑，但它是原项目的约定，你抄了才能随时对照源码。
+    </p>
+
+    <h3>④ registry 是命令式路径的地基</h3>
+    <p>
+      <code>sceneRegistry</code> 是一个全局可变的 <code>Map&lt;nodeId, Object3D&gt;</code>，
+      改它不会触发任何重渲染。M1 你只用它做一件小事：验证点击命中的 mesh 能反查回 node id。
+      看起来多此一举——直接在 <code>&lt;mesh onClick&gt;</code> 上拿 <code>node.id</code>
+      不就行了？对，M1 确实就行。但 M3 的拖拽和 M4 的 GeometrySystem 会绕开 React 直接
+      mutate 这些 Object3D，那时没有 registry 就只能遍历场景图。地基现在打，成本最低。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ══════════════════════════════════════ -->
+<section>
+  <h2><span class="num">02</span>文件树</h2>
+  <p class="h2sub">17 个文件，约 900 行</p>
+
+  <p class="prose">
+    目录名故意和原项目的 <code>packages/</code> 对齐，方便你左右开窗对照。M1 用单包
+    单目录即可，不要一上来就搞 monorepo——边界靠 <code>tsconfig</code> 的 paths
+    加一条 lint 规则约束就够。
+  </p>
+
+<pre class="tree"><code>src/
+  core/                        <span class="cm">← 禁止出现 "three" 这个词</span>
+    schema/
+      base.ts                  <span class="cm">BaseNode / generateId / objectId / nodeType</span>
+      wall.ts                  <span class="cm">WallNode + 默认值 + getter</span>
+      types.ts                 <span class="cm">AnyNode 判别联合 / AnyNodeId</span>
+    store/
+      use-scene.ts             <span class="cm">zustand：nodes / rootNodeIds / CRUD</span>
+    lib/
+      geometry-2d.ts           <span class="cm">Point2D 与向量运算（第一批测试的对象）</span>
+      geometry-2d.test.ts
+    registry/
+      scene-registry.ts        <span class="cm">全局 Map + useRegistry + 反查</span>
+
+  viewer/                      <span class="cm">← 禁止出现 "tool" "select" "mode"</span>
+    components/
+      viewer.tsx               <span class="cm">&lt;Canvas&gt; + 灯光 + 地面</span>
+      camera-rig.tsx           <span class="cm">正交 / 透视切换</span>
+      ground.tsx               <span class="cm">视觉地平面。哑的，不参与拾取</span>
+                               <span class="cm">吸附网格是 app 层的事 → M3</span>
+      node-renderer.tsx        <span class="cm">按 type 分发</span>
+      wall-renderer.tsx        <span class="cm">WallNode → &lt;mesh&gt;</span>
+    lib/
+      wall-geometry.ts         <span class="cm">WallNode → BufferGeometry + 变换</span>
+      pointer-plane.ts         <span class="cm">屏幕射线 ∩ 地平面</span>
+
+  app/                         <span class="cm">← 可以 import 上面两层</span>
+    app.tsx
+    store/
+      use-editor.ts            <span class="cm">activeTool / viewMode / selectedId</span>
+    tools/
+      wall-tool.tsx            <span class="cm">点两下画墙（M3 会被 spine 取代）</span>
+</code></pre>
+
+  <div class="note">
+    <p>
+      <strong>关于那 6 个 Three 微练习。</strong>你选了"现学现卖"，我把它们重新分配到了真正
+      需要它们的位置，而不是堆在开头：M1 吃 <em>Object3D 变换与旋转方向</em>、
+      <em>Raycaster 与平面求交</em>、<em>dispose 与显存</em>；M2 吃 <em>手搓 BufferGeometry</em>；
+      M4 吃 <em>Shape+holes</em> 与 <em>材质 groups</em>。下面每个步骤里带
+      <span class="tag three">three</span> 标记的就是。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ══════════════════════════════════════ -->
+<section>
+  <h2><span class="num">03</span>原项目骨架摘录</h2>
+  <p class="h2sub">622 行里，M1 真正需要的 34 行</p>
+
+  <p class="prose">
+    原项目的 <code>packages/viewer/src/components/viewer/index.tsx</code> 是 622 行的
+    <code>forwardRef&lt;ViewerHandle, ViewerProps&gt;</code>。下面是把 WebGPU 初始化、
+    后期处理、性能采样、隔离模式全部剥掉之后剩下的东西——你的 M1 直接从这里起步。
+  </p>
+
+  <h3>viewer.tsx</h3>
+<pre><code><span class="cm">// src/viewer/components/viewer.tsx</span>
+import { Canvas } from '@react-three/fiber'
+import type { ReactNode } from 'react'
+import { CameraRig }    from './camera-rig'
+import { Ground }       from './ground'
+import { SceneRenderer } from './node-renderer'
+
+export function Viewer({ mode, children }: { mode: '3d' | 'plan'; children?: ReactNode }) {
+  return (
+    &lt;Canvas dpr={[1, 1.5]} shadows style={{ background: '#fafafa' }}&gt;
+      &lt;CameraRig mode={mode} /&gt;
+
+      &lt;ambientLight intensity={0.6} /&gt;
+      &lt;directionalLight position={[10, 10, 5]} intensity={1.2} castShadow /&gt;
+
+      &lt;Ground /&gt;
+      &lt;SceneRenderer /&gt;
+
+      {children}          <span class="cm">{/* ← 宿主注入点，见下方陷阱 4 */}</span>
+    &lt;/Canvas&gt;
+  )
+}
+</code></pre>
+
+  <h3>node-renderer.tsx</h3>
+  <p class="prose">
+    上半段对应原项目的 <code>components/renderers/scene-renderer.tsx</code>——
+    <strong>全文 16 行，你几乎一字不改地抄</strong>。下半段对应
+    <code>node-renderer.tsx</code>，原文 56 行（registry + <code>lazy</code> +
+    <code>Suspense</code> + 插件开关），M1 版砍到 8 行。
+  </p>
+<pre><code>export const SceneRenderer = () =&gt; {
+  const rootNodeIds = useScene((state) =&gt; state.rootNodeIds)
+  return (
+    &lt;group name="scene-renderer"&gt;
+      {rootNodeIds.map((nodeId) =&gt; &lt;NodeRenderer key={nodeId} nodeId={nodeId} /&gt;)}
+    &lt;/group&gt;
+  )
+}
+
+export const NodeRenderer = ({ nodeId }: { nodeId: AnyNodeId }) =&gt; {
+  const node = useScene((state) =&gt; state.nodes[nodeId])
+  if (!node) return null
+  switch (node.type) {
+    case 'wall': return &lt;WallRenderer node={node} /&gt;
+    default:     return null
+  }
+}
+</code></pre>
+
+  <div class="note">
+    <p>
+      <strong>这两段是第 09 步那条 hint 的实证。</strong>注意 <code>NodeRenderer</code>
+      收的是 <code>nodeId</code> 而不是 <code>node</code>——由它自己订阅单个节点。
+      这就是"改一堵墙只重渲染那一堵"的实现方式，也是为什么父组件只能订阅
+      <code>rootNodeIds</code>（一个 id 数组，引用稳定）。原项目在只有 16 行的文件里
+      就把这件事做对了。
+    </p>
+  </div>
+
+  <h3>剥掉了什么</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>原项目有</th><th class="tnum">行数</th><th>M1 为什么不要</th></tr></thead>
+    <tbody>
+      <tr><td>gl={async WebGPU factory}</td><td class="tnum">~60</td><td>WebGPU 初始化竞态处理。默认 WebGL 就够，整个 gl prop 省掉</td></tr>
+      <tr><td>frameloop="never" + FrameLimiter</td><td class="tnum">—</td><td>按需渲染省电。见陷阱 1</td></tr>
+      <tr><td>&lt;GeometrySystem&gt; &lt;RegisteredSystems&gt;</td><td class="tnum">—</td><td>三复选框模型的运行时 → M4</td></tr>
+      <tr><td>&lt;PostProcessing&gt; &lt;SelectionManager&gt;</td><td class="tnum">—</td><td>描边高亮、双层选择 → M3</td></tr>
+      <tr><td>&lt;SceneBvh&gt; / useBvh</td><td class="tnum">—</td><td>拾取加速。几十堵墙用不上</td></tr>
+      <tr><td>&lt;Lights /&gt;</td><td class="tnum">317</td><td>主题化光照 + useFrame 里 lerp 过渡。M1 两盏灯写死</td></tr>
+      <tr><td>isolate / ViewerHandle</td><td class="tnum">~40</td><td>隔离显示模式</td></tr>
+      <tr><td>SceneReadyTracker</td><td class="tnum">—</td><td>宿主 loading 态协议</td></tr>
+      <tr><td>renderContext / defaultRender</td><td class="tnum">~40</td><td>渲染偏好持久化到 localStorage</td></tr>
+      <tr><td>ErrorBoundary / GPU fallback</td><td class="tnum">—</td><td>生产兜底</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>抄这个文件的四个陷阱</h3>
+
+  <div class="trap">
+    <span class="trap-label">陷阱 1 · 画面完全静止且不报错</span>
+    <p>
+      <strong>千万别抄 <code>frameloop="never"</code>。</strong>原项目配
+      <code>&lt;FrameLimiter fps={50}/&gt;</code> 主动调 <code>invalidate()</code> 控制帧率。
+      只抄前半句的话，第一帧渲染完就再也不更新，而且<strong>没有任何报错</strong>。
+      这是 R3F 新手最难自查的卡点。M1 用默认值，别写这个 prop。
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">陷阱 2 · 两个相机</span>
+    <p>
+      原项目的 <code>&lt;Canvas camera={{ position: [50,50,50], fov: 50 }}&gt;</code>
+      和 <code>&lt;ViewerCamera&gt;</code> 同时存在——前者建了一个相机，后者用
+      <code>makeDefault</code> 又换掉了它。这是历史遗留的冗余，真正生效的是后者。
+      你只留 <code>&lt;CameraRig&gt;</code>，别写 <code>camera</code> prop。
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">陷阱 3 · shadows 的对象形式</span>
+    <p>
+      <code>shadows={{ type, enabled }}</code> 是给 WebGPU 擦屁股的。源码注释写得很清楚：
+      切 <code>castShadow</code> 会 dispose 阴影贴图，但 three r184 的 WebGPU node cache
+      还引用着它，下一帧就是 <code>GPUValidationError</code>，所以改成在 renderer 级别开关。
+      你用 WebGL + 布尔 <code>shadows</code>，没这个问题。
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">陷阱 4 · OrbitControls 不在 viewer 里</span>
+    <p>
+      这是分层，不是遗漏。相机控制器在
+      <code>packages/editor/src/components/editor/custom-camera-controls.tsx</code>，
+      属于 editor 层。<code>AGENTS.md</code> 那句 <em>"Editor features are injected into
+      &lt;Viewer&gt; via props and children"</em> 讲的就是它。所以你的
+      <code>app.tsx</code> 该这么写：
+    </p>
+<pre style="background:transparent;border:0;padding:0;margin:12px 0 10px"><code><span class="cm">// src/app/app.tsx</span>
+&lt;Viewer mode={viewMode}&gt;
+  &lt;OrbitControls makeDefault enableRotate={viewMode === '3d'} /&gt;
+  &lt;WallTool /&gt;
+&lt;/Viewer&gt;
+</code></pre>
+    <p>
+      M1 阶段这看着像脱裤子放屁——控制器明明只有一种用法。但这是第 04 步那道边界考试的
+      第二题：<strong>viewer 提供画布和渲染，app 决定怎么操作它。</strong>
+      等你想把 viewer 单独发包，或者做一个只读展示模式（不要 OrbitControls，要自动旋转），
+      这条线就是全部意义。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ══════════════════════════════════════ -->
+<section>
+  <h2><span class="num">04</span>建造顺序</h2>
+  <p class="h2sub">十三步，严格按序——每一步都只依赖它前面的</p>
+
+  <!-- 1 -->
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">脚手架与边界闸门</h3></div>
+      <p>
+        Vite + React + TS，装 <code>three</code>、<code>@react-three/fiber</code>、
+        <code>@react-three/drei</code>、<code>zustand</code>、<code>zod</code>、
+        <code>vitest</code>。<code>zundo</code> 和 <code>mitt</code> M1 用不上，别装。
+      </p>
+      <p>
+        关键动作是<strong>先立闸门再写代码</strong>：加一条 lint 规则禁止
+        <code>src/core/**</code> 出现 <code>three</code> 的 import，禁止
+        <code>src/viewer/**</code> import <code>src/app/**</code>。
+        <code>eslint-plugin-import</code> 的 <code>no-restricted-paths</code>，
+        或 <code>eslint-plugin-boundaries</code>，二十行配置。
+      </p>
+      <div class="trap">
+        <span class="trap-label">为什么先立闸门</span>
+        <p>
+          这条线破在哪一天，几乎总是"我就在 core 里 import 一个 Vector3 算个距离，
+          很快就重构掉"的那一天。有闸门时你会写三行手算；没闸门时你会在两个月后发现
+          core 的测试跑不起来了。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">BaseNode</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// src/core/schema/base.ts</span>
+
+export const generateId = &lt;T extends string&gt;(prefix: T): `${T}_${string}`
+<span class="cm">// hint: nanoid 的 customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 16)</span>
+<span class="cm">// hint: 产出形如 wall_k3f9x2q8m1v0zb7c。前缀不是装饰——console 里一眼看出类型，</span>
+<span class="cm">//       M5 加载旧场景时也靠它做粗判。</span>
+
+export const objectId = &lt;T extends string&gt;(prefix: T)
+<span class="cm">// hint: 返回一个 zod schema，不是字符串。</span>
+<span class="cm">//       z.templateLiteral([`${prefix}_`, z.string()]).default(() =&gt; generateId(prefix))</span>
+<span class="cm">// hint: default 传的是**函数**，所以每次 parse 都生成新 id。</span>
+<span class="cm">//       这是后面 createNode({ start, end }) 不用手传 id 的全部原因。</span>
+
+export const nodeType = &lt;T extends string&gt;(type: T)
+<span class="cm">// hint: z.literal(type).default(type)。一行。</span>
+<span class="cm">//       它存在的唯一理由是让 AnyNode 判别联合能被 TS 收窄。</span>
+
+export const BaseNode
+<span class="cm">// hint: 只要六个字段：object('node') / id / type / name? / parentId / visible</span>
+<span class="cm">// hint: parentId 是 nullable、default null。M1 全程没人读它——留着，</span>
+<span class="cm">//       M5 的级联删除和 M4 的门窗挂墙都要用。</span>
+<span class="cm">// hint: id 这里声明成 z.string() 而不是 objectId('node')。原项目在这行留了注释：</span>
+<span class="cm">//       用 objectId 的话，BaseNode.extend 出来的 WallNode 会因为 id 类型更窄</span>
+<span class="cm">//       而让 TS 报"不可赋值"。子类型自己覆盖 id。</span>
+<span class="cm">// hint: 不要加 metadata / camera / collections。那是原项目三年长出来的。</span>
+</code></pre>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">WallNode 与判别联合</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// src/core/schema/wall.ts</span>
+
+export const DEFAULT_WALL_THICKNESS = 0.1   <span class="cm">// 米，原项目同值</span>
+export const DEFAULT_WALL_HEIGHT    = 2.5
+
+export const WallNode = BaseNode.extend({ ... })
+<span class="cm">// hint: id: objectId('wall')，type: nodeType('wall')</span>
+<span class="cm">// hint: start / end 都是 z.tuple([z.number(), z.number()])</span>
+<span class="cm">//       —— 世界 XZ 平面上的点，不是 XY。用 tuple 不用 object，</span>
+<span class="cm">//       因为它序列化后是 [3, 4] 而不是 {"x":3,"y":4}，M5 存盘时省一半体积。</span>
+<span class="cm">// hint: thickness / height 都 optional，**不要给 .default()**。</span>
+<span class="cm"><span class="cw">//       ⚠ 这条反直觉，是原项目的刻意选择：</span></span>
+<span class="cm">//       "未设置"和"设置成 0.1"在后面的层级继承里不是一回事。M5 墙高迁移到</span>
+<span class="cm">//       Level 时，只有 undefined 的墙才跟随层高，显式设过的保持自己的值。</span>
+
+export function getWallThickness(wall: WallNode): number
+export function getWallHeight(wall: WallNode): number
+<span class="cm">// hint: 各一行 ?? 兜底。看着多余——但从现在起，代码库里任何地方</span>
+<span class="cm">//       直接读 wall.thickness 都算 bug。所有读取走这两个函数。</span>
+</code></pre>
+<pre><code><span class="cm">// src/core/schema/types.ts</span>
+
+export const AnyNode = z.discriminatedUnion('type', [WallNode])
+export type  AnyNode = z.infer&lt;typeof AnyNode&gt;
+export type  AnyNodeId = AnyNode['id']
+<span class="cm">// hint: 现在只有一个成员，写起来很傻。M4 加到三个、原项目加到四十个时，</span>
+<span class="cm">//       discriminatedUnion 与 z.union 的差别是：前者报错告诉你</span>
+<span class="cm">//       "type 为 'wall' 的分支里 start 缺失"，后者把四十个分支的错误全列一遍。</span>
+</code></pre>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">场景 store</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// src/core/store/use-scene.ts</span>
+
+type SceneState = {
+  nodes:       Record&lt;AnyNodeId, AnyNode&gt;
+  rootNodeIds: AnyNodeId[]
+
+  addNode(input: unknown): AnyNodeId
+  updateNode(id: AnyNodeId, patch: Partial&lt;AnyNode&gt;): void
+  removeNode(id: AnyNodeId): void
+  getNode(id: AnyNodeId): AnyNode | undefined
+}
+
+export const useScene = create&lt;SceneState&gt;()(...)
+<span class="cm">// hint: nodes 用 Record 不用 Map。理由有三：O(1) 查、结构共享便宜、</span>
+<span class="cm">//       M5 能直接 JSON.stringify。原项目也是 Record。</span>
+<span class="cm">// hint: rootNodeIds 单独存一份顺序。Record 的键顺序在规范上不可依赖，</span>
+<span class="cm">//       而"墙的创建顺序"在 M2 算墙角、M5 存盘时都要稳定。</span>
+<span class="cm">// hint: addNode 里做一次 AnyNode.parse(input)。慢——但它同时完成了三件事：</span>
+<span class="cm">//       填 id、填默认值、挡住非法数据。M5 加载旧存档时这行就是迁移入口。</span>
+<span class="cm">// hint: updateNode 浅合并即可。深合并的需求要到 M4 的嵌套配置才出现，别提前做。</span>
+<span class="cm">// hint: removeNode 现在只删自己 + 从 rootNodeIds 摘掉。M5 才处理级联。</span>
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">边界考试 · 第一题</span>
+        <p>
+          你会很想在这个 store 里加一个 <code>selectedId</code>。别加。"谁被选中"是编辑器状态，
+          属于 <code>app</code> 层——它不进存档、不进撤销历史、换一个宿主应用就换一套语义。
+          原项目把它放在 <code>packages/editor</code> 的 <code>useEditor</code> 里，
+          而 <code>viewer</code> 通过 props 接收。这是 M1 唯一一次考你分层，答错了 M3 会疼。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">平面几何与第一批测试</h3><span class="tag core">core</span></div>
+      <p>这是整个 M1 里最该慢慢写的一个文件。它没有一行 Three，全部可测，而 M2 的墙角斜接会长在它上面。</p>
+<pre><code><span class="cm">// src/core/lib/geometry-2d.ts</span>
+
+export type Point2D = { x: number; y: number }
+<span class="cm"><span class="cw">// ⚠ y 是世界 Z。原项目的约定，抄它是为了能对照源码。</span></span>
+<span class="cm">//   在文件顶部写死这句注释，你三周后会需要它。</span>
+
+export function sub(a: Point2D, b: Point2D): Point2D
+export function len(v: Point2D): number
+export function normalize(v: Point2D): Point2D
+<span class="cm">// hint: 零向量必须有明确行为——返回 {x:0,y:0} 或抛，不能放 NaN 出去。</span>
+<span class="cm">//       NaN 传到 Three 的矩阵里，画面会整个消失且控制台一声不吭。</span>
+
+export function leftNormal(v: Point2D): Point2D
+<span class="cm">// hint: (-v.y, v.x)。原项目 wall-footprint.ts:44 的 nUnit 就是这个。</span>
+<span class="cm">// hint: "左"指沿 start→end 方向看的左手边。这个方向一旦定下，</span>
+<span class="cm">//       M4 门窗的 interior / exterior 语义就跟着它。现在别改，以后也别改。</span>
+
+export function wallFootprint(
+  start: Point2D, end: Point2D, thickness: number
+): Point2D[]
+<span class="cm">// hint: 返回恰好 4 个点，顺序固定为</span>
+<span class="cm">//         startLeft → endLeft → endRight → startRight</span>
+<span class="cm">//       中心线端点各沿 ±(半厚 × 左法线单位向量) 偏移。</span>
+<span class="cm">// hint: 长度 &lt; 1e-9 时返回 []。原项目就是这个阈值，退化墙必须有出口，</span>
+<span class="cm">//       否则 normalize 除零。</span>
+<span class="cm">// hint: 顺序和命名现在就要定死 —— M2 的斜接会把这 4 个点里的某几个</span>
+<span class="cm">//       替换成相邻墙的交点，那时函数签名会变成</span>
+<span class="cm">//       wallFootprint(wall, miterData)，但四个角的名字不变。</span>
+</code></pre>
+      <p><strong>测试用例</strong>（直接写进 <code>geometry-2d.test.ts</code>）：</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>输入</th><th>期望</th><th>它在防什么</th></tr></thead>
+        <tbody>
+          <tr><td>leftNormal({1,0})</td><td>{0, 1}</td><td>基准方向，写反了整面墙镜像</td></tr>
+          <tr><td>leftNormal({0,1})</td><td>{-1, 0}</td><td>旋转手性，只有斜墙能暴露</td></tr>
+          <tr><td>wallFootprint({0,0},{4,0}, 0.2)</td><td>[{0,.1},{4,.1},{4,-.1},{0,-.1}]</td><td>顺序 + 半厚</td></tr>
+          <tr><td>wallFootprint({0,0},{0,0}, 0.2)</td><td>[]</td><td>退化墙不炸</td></tr>
+          <tr><td>wallFootprint({0,0},{3,4}, 1)</td><td>四点到中心线距离均 = 0.5</td><td>斜墙厚度不被拉伸</td></tr>
+          <tr><td>normalize({0,0})</td><td>无 NaN</td><td>整个画面消失那一类 bug</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">画布、相机、地面</h3><span class="tag viewer">viewer</span><span class="tag three">three</span></div>
+      <p>
+        <code>viewer.tsx</code> 的全文已经在 §03 给出，照抄即可——它只是 JSX 组装，
+        没有逻辑。这一步真正要写的是 <code>camera-rig.tsx</code> 和 <code>ground.tsx</code>。
+      </p>
+
+      <h4>camera-rig.tsx</h4>
+<pre><code><span class="cm">// 原项目对应 viewer-camera.tsx，全文 12 行。前两条原样抄，第三条是你独有的。</span>
+export function CameraRig({ mode }: { mode: '3d' | 'plan' }) {
+  return mode === '3d' ? (
+    &lt;PerspectiveCamera  makeDefault fov={50} near={0.1}   far={1000} position={[10, 10, 10]} /&gt;
+  ) : (
+    &lt;OrthographicCamera makeDefault zoom={40} near={-1000} far={1000} position={[0, 40, 0]} /&gt;
+  )
+}
+</code></pre>
+      <ul>
+        <li><strong><code>makeDefault</code> 两个都要。</strong>它把 drei 建的相机写进 R3F 的
+          <code>state.camera</code>。少了它，画面切了但射线还用旧相机——表现是"点哪都错位"，
+          而且完全不报错。</li>
+        <li><strong>正交的 <code>near={-1000}</code>，负数。</strong>正交投影没有透视收缩，
+          近裁面允许在相机后方，这样相机放哪都不裁物体。透视相机写负 <code>near</code> 会直接崩。</li>
+        <li><strong><code>up</code> 必须显式设成 <code>[0, 0, -1]</code>。</strong>见下方陷阱。
+          drei 的相机组件不接受 <code>up</code> prop，你得拿 ref 在 <code>useLayoutEffect</code>
+          里写 <code>cam.up.set(0, 0, -1)</code>。<strong>顺序有讲究</strong>——OrbitControls
+          挂载时会读 <code>camera.up</code>，所以必须在它之前设好。</li>
+      </ul>
+
+      <div class="trap">
+        <span class="trap-label">three 微练习 · Object3D 与万向锁</span>
+        <p>
+          相机在正上方看向原点时，默认 <code>up = (0,1,0)</code> 与视线共线，
+          <code>lookAt</code> 退化——画面会随机翻转或直接黑掉。
+        </p>
+        <p>
+          <strong>动手一次：</strong>先<em>不</em>设 up，把相机 y 从 40 降到 0 再升回来，
+          看画面在过零点时怎么跳。理解了再修。
+        </p>
+        <p>
+          <strong>原项目里找不到这个坑的对照。</strong>它的正交相机在
+          <code>[10,10,10]</code>——那是轴测图，不是顶视平面图（它的真·平面图是那套独立
+          SVG 场景）。你选了"正交顶视当 2D"，相机就落在退化点上。
+          <em>改了一个前提，原项目就不再是你的答案</em>——这是抄一个项目时最危险的地方。
+        </p>
+      </div>
+
+      <h4>ground.tsx</h4>
+      <p>
+        先纠正一处：<strong>原项目的 viewer 里根本没有 ground 或 grid。</strong>
+        它在 <code>packages/editor/src/components/editor/grid.tsx</code>——
+        <strong>322 行，editor 层</strong>，TSL 手写着色器的无限网格，带光标局部揭示。
+        调用处是这样：
+      </p>
+<pre style="margin-top:10px"><code>function SnapAwareGrid() {
+  const gridSnapStep = <span class="cm">/* 从 useEditor 读 */</span>
+  return &lt;Grid cellSize={gridSnapStep} cellColor="#aaa" sectionColor="#ccc" /&gt;
+}
+</code></pre>
+      <p>
+        <code>cellSize</code> 绑的是<strong>吸附步长</strong>——网格不是装饰，
+        它是"你现在会吸附到多大的格子"的可视化。纯编辑器功能，所以它在 editor 层。
+        正确的切分是两件东西：
+      </p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>东西</th><th>归属</th><th>是什么</th></tr></thead>
+        <tbody>
+          <tr><td>视觉地平面</td><td>viewer</td><td>大平面 + 淡网格，纯参照物，让空场景不是虚空。任何 viewer（哪怕只读展示模式）都该有</td></tr>
+          <tr><td>吸附网格</td><td>app</td><td>格子大小 = 吸附步长，随工具状态变化。原项目那 322 行</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>
+        <strong>M1 只需要前者。</strong>纯组装，没有你要推导的东西，全码奉上：
+      </p>
+<pre><code><span class="cm">// src/viewer/components/ground.tsx</span>
+
+<span class="cm">// 必须是模块级常量。写成内联箭头函数每次渲染都是新引用，</span>
+<span class="cm">// R3F 会每帧重新挂一次 raycast。</span>
+const NEVER_RAYCAST = () =&gt; null
+
+export function Ground({
+  size            = 100,
+  divisions       = 200,        <span class="cm">// 100/200 = 0.5m 一格，同原项目 cellSize 默认值</span>
+  gridColor       = '#d8dcda',
+  centerLineColor = '#b4bcb9',
+}: {
+  size?: number
+  divisions?: number
+  gridColor?: string
+  centerLineColor?: string
+}) {
+  return (
+    &lt;group name="ground"&gt;
+      <span class="cm">{/* 网格线。抬高 1mm，否则和下面的地面共面 → z-fighting */}</span>
+      &lt;gridHelper
+        args={[size, divisions, centerLineColor, gridColor]}
+        position={[0, 0.001, 0]}
+        raycast={NEVER_RAYCAST}
+      /&gt;
+
+      <span class="cm">{/* 地面。接收阴影，让 3D 视角下墙有立体感 */}</span>
+      &lt;mesh rotation-x={-Math.PI / 2} receiveShadow raycast={NEVER_RAYCAST}&gt;
+        &lt;planeGeometry args={[size, size]} /&gt;
+        &lt;meshStandardMaterial color="#f0f2f1" roughness={1} metalness={0} /&gt;
+      &lt;/mesh&gt;
+    &lt;/group&gt;
+  )
+}
+</code></pre>
+      <ul>
+        <li><strong><code>gridHelper</code> 的 args 顺序是
+          <code>(size, divisions, colorCenterLine, colorGrid)</code>。</strong>
+          第三个参数是<em>中心两条轴线</em>的颜色，不是"大格子"。three 的
+          <code>GridHelper</code> 没有 drei <code>&lt;Grid&gt;</code> 那种 cell/section
+          双层概念——原项目那 322 行是自己写 TSL 着色器实现的。别按 drei 的心智模型传参。</li>
+        <li><strong>这里全部用声明式，不需要 <code>useMemo</code> + 手动 dispose。</strong>
+          <code>&lt;gridHelper args={...}&gt;</code> 是 R3F 创建的，卸载时它自己收拾。
+          和第 09 步的 <code>WallRenderer</code> 正好相反——两个样本放在一起看，
+          比背规则清楚。</li>
+        <li><strong>那个 1mm。</strong>网格线与地面共面 → 深度缓冲精度不够 →
+          画面上出现随相机移动而游走的闪烁条纹（z-fighting）。抬 1mm，肉眼不可见。
+          这是 3D 里最常见的视觉 bug，你以后在踢脚线、贴地地毯上还会再遇到。</li>
+      </ul>
+      <div class="trap">
+        <span class="trap-label">这里会 debug 掉你一小时</span>
+        <p>
+          <strong>地面和网格都必须不参与拾取</strong>——给它们
+          <code>raycast={() =&gt; null}</code>。否则你的墙工具会先命中地面 mesh，
+          而不是走第 10 步 <code>pointer-plane.ts</code> 的数学解。
+        </p>
+        <p>
+          症状是：射线数学明明算对了，测试也过，就是点不准，而且误差随相机角度变化。
+          因为你实际拿到的是 mesh 的表面交点，它和数学平面差一个地面网格的厚度／偏移。
+        </p>
+      </div>
+      <div class="note">
+        <p>
+          M3 加吸附时，<strong>新建一个 app 层的 <code>snap-grid.tsx</code></strong>，
+          通过 <code>&lt;Viewer&gt;{'{children}'}&lt;/Viewer&gt;</code> 注入，
+          viewer 里的 <code>Ground</code> 保持哑。那时你就完整复现了原项目的切分。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">场景注册表</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// src/core/registry/scene-registry.ts</span>
+<span class="cm">// 注意它在 core，但存的是 THREE.Object3D —— 靠 `import type * as THREE`</span>
+<span class="cm">// 保持零运行时依赖。原项目就是这么绕过自己那条铁律的。</span>
+
+export const sceneRegistry: {
+  nodes:  Map&lt;AnyNodeId, THREE.Object3D&gt;
+  byType: Record&lt;string, Set&lt;AnyNodeId&gt;&gt;
+}
+
+export function useRegistry(
+  id: AnyNodeId, type: string, ref: RefObject&lt;THREE.Object3D&gt;
+): void
+<span class="cm">// hint: useLayoutEffect，**不是** useEffect。注册必须在首次绘制前完成，</span>
+<span class="cm">//       否则同一帧里跑的 system 查不到对象。原项目源码里专门写了这一句。</span>
+<span class="cm">// hint: 注册时顺手 ref.current.userData.nodeId = id（只在这一处写）。</span>
+<span class="cm">// hint: 清理里 nodes.delete(id) 和 byType[type].delete(id) 两个都要。</span>
+<span class="cm">// hint: byType 用 (byType[type] ??= new Set()) 懒建即可。原项目用 Proxy，</span>
+<span class="cm">//       那是为了让插件贡献的任意 kind 都能参与 —— 你 M1 没有插件。</span>
+
+export function nodeIdFromObject(obj: THREE.Object3D): AnyNodeId | null
+<span class="cm">// hint: 从命中的 mesh 沿 obj.parent 往上走，找第一个带 userData.nodeId 的。</span>
+<span class="cm">// hint: 为什么不给每个 mesh 都挂 nodeId？因为 M4 一堵墙会有 N 个子 mesh</span>
+<span class="cm">//       （墙体 / 洞口边 / 踢脚线）。向上走一次，比维护 N 份冗余便宜。</span>
+</code></pre>
+      <div class="note">
+        <p>
+          <strong>它是全局可变单例，不是 React state，这是故意的。</strong>
+          改它不触发任何重渲染。M1 你感受不到区别；M3 拖一堵墙时，
+          "每帧 mutate Object3D 但一次都不 setState"正是那条性能不变量的实现方式。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">墙的几何与变换</h3><span class="tag viewer">viewer</span><span class="tag three">three</span></div>
+<pre><code><span class="cm">// src/viewer/lib/wall-geometry.ts</span>
+
+export function buildWallGeometry(wall: WallNode): THREE.BufferGeometry
+<span class="cm">// hint: M1 就用 new THREE.BoxGeometry(length, height, thickness)。</span>
+<span class="cm">//       手搓顶点留到 M2 —— 那时你需要任意四边形轮廓，Box 才真的不够用。</span>
+<span class="cm">// hint: length 从 start/end 算，别存进 schema。</span>
+
+export function wallTransform(wall: WallNode): {
+  position: [number, number, number]
+  rotationY: number
+}
+<span class="cm">// hint: position = start 与 end 的中点，y = getWallHeight(wall) / 2</span>
+<span class="cm">//       （BoxGeometry 原点在体心，墙底要贴地）</span>
+<span class="cm"><span class="cw">// hint: rotationY = Math.atan2(-(end.y - start.y), end.x - start.x)</span></span>
+<span class="cm"><span class="cw">//       注意那个负号。</span> 世界 Z 指向屏幕外，Point2D.y 增大 = Z 增大，</span>
+<span class="cm">//       而绕 Y 轴正向旋转是从 +X 转向 -Z。差一个负号的表现是：</span>
+<span class="cm">//       轴对齐的墙全对，斜墙沿中心线镜像。测试用例里那条 {0,0}→{3,4} 就是抓它的。</span>
+<span class="cm"><span class="cw">// ⚠ 别背这个公式。</span> 在纸上画出 XZ 平面、标出 +X 和 +Z、画一个 30° 的墙，</span>
+<span class="cm">//   自己推一遍。M2 的法线方向、M4 的门窗朝向都要用同一套推导。</span>
+</code></pre>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="step">
+    <div class="step-n">09</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">渲染器与分发</h3><span class="tag viewer">viewer</span><span class="tag three">three</span></div>
+      <p>三个组件，一条链，每个只有一个职责和<strong>一次订阅</strong>：</p>
+<pre><code>SceneRenderer      订阅 rootNodeIds（id 数组，引用稳定）  → 只在增删墙时重渲染
+  └ NodeRenderer   订阅 nodes[nodeId]（单个节点）         → 只在这堵墙变时重渲染
+      └ WallRenderer   不订阅任何东西，纯 props            → 把 WallNode 变成一个 mesh
+</code></pre>
+      <p>
+        <code>NodeRenderer</code> 是<strong>分发器</strong>——拿到节点，看
+        <code>node.type</code>，决定挂载哪个具体渲染器。M1 只有一个 case，看起来它什么都没干；
+        M4 会变成三个 case，原项目里则进化成查注册表 + <code>React.lazy</code> 的 56 行。
+      </p>
+      <p>
+        <code>WallRenderer</code> 是<strong>具体渲染器</strong>——只认识
+        <code>WallNode</code>，不知道 store 存在，不知道别的类型存在。
+        这是它能被 props 完全决定、因而好测好换的原因。
+      </p>
+<pre><code><span class="cm">// src/viewer/components/node-renderer.tsx</span>
+export function NodeRenderer(): JSX.Element
+<span class="cm">// hint: useScene(s =&gt; s.rootNodeIds) 拿顺序，然后逐个渲染一个订阅单节点的子组件。</span>
+<span class="cm"><span class="cw">// ⚠ 不要写 useScene(s =&gt; Object.values(s.nodes))。</span></span>
+<span class="cm">//   那个选择器每次返回新数组，zustand 默认用 Object.is 比较 → 每次 store 变动</span>
+<span class="cm">//   都整树重渲染。M1 只有几堵墙，你看不出来；M3 有一百多个节点时它是灾难。</span>
+<span class="cm">//   现在就写对，并且记住原因。</span>
+<span class="cm">// hint: switch (node.type) 分发，只有一个 case。故意的 —— 决策 9，</span>
+<span class="cm">//       第三个节点类型出现时才抽 registry。</span>
+
+<span class="cm">// src/viewer/components/wall-renderer.tsx —— 纯组装，全码</span>
+
+export function WallRenderer({ node }: { node: WallNode }) {
+  const ref = useRef&lt;THREE.Mesh&gt;(null!)
+  useRegistry(node.id, 'wall', ref)
+
+  <span class="cm">// <span class="cw">⚠ 依赖写具体字段，不是 [node]。</span></span>
+  <span class="cm">//   updateNode 浅合并每次都换 node 引用，写 [node] 等于没有 memo。</span>
+  const geometry = useMemo(
+    () =&gt; buildWallGeometry(node),
+    [node.start[0], node.start[1], node.end[0], node.end[1], node.thickness, node.height],
+  )
+
+  <span class="cm">// 清理函数在 geometry 变化时先跑一次 —— 释放的是**旧的**那个。</span>
+  useEffect(() =&gt; () =&gt; geometry.dispose(), [geometry])
+
+  const { position, rotationY } = useMemo(
+    () =&gt; wallTransform(node),
+    [node.start[0], node.start[1], node.end[0], node.end[1], node.height],
+  )
+
+  return (
+    &lt;mesh
+      ref={ref}
+      geometry={geometry}
+      position={position}
+      rotation-y={rotationY}
+      visible={node.visible !== false}
+      castShadow
+      receiveShadow
+    &gt;
+      &lt;meshStandardMaterial color="#e8e8e8" roughness={0.9} metalness={0} /&gt;
+    &lt;/mesh&gt;
+  )
+}
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">geometry 要手动 dispose，材质不用</span>
+        <p>这条规则决定你后面所有的内存管理，现在就记死：</p>
+        <ul style="margin-bottom:0">
+          <li><code>geometry</code> 是你 <code>new</code> 出来当 <strong>prop</strong>
+            传进去的 → R3F 没创建它，不负责销毁 → <strong>你自己 dispose</strong></li>
+          <li><code>&lt;meshStandardMaterial&gt;</code> 是<strong>声明式子元素</strong>
+            → R3F 创建的，卸载时它自己 dispose → 你别管</li>
+        </ul>
+      </div>
+      <div class="trap">
+        <span class="trap-label">three 微练习 · dispose 与显存</span>
+        <p>
+          JS 的 GC 管不到显卡。<code>BufferGeometry</code> 和 <code>Material</code>
+          在 GPU 上的缓冲区只有 <code>.dispose()</code> 能释放。
+        </p>
+        <p>
+          <strong>动手一次：</strong>先<em>故意不写</em> dispose，画 20 堵墙再全删，
+          在 DevTools 里看 <code>renderer.info.memory.geometries</code>——数字只涨不跌。
+          然后补上 dispose 再看一遍。M3 拖拽时几何每帧重建，
+          这个数字会以每秒 60 的速度涨，几秒钟吃掉几百 MB。
+        </p>
+      </div>
+
+      <div class="note">
+        <p>
+          <strong><code>wall-renderer.tsx</code> 有保质期，现在就该知道。</strong>
+          原项目里没有这个文件——墙走的是通用的 <code>ParametricNodeRenderer</code>
+          （98 行，全项目所有参数化节点共用一个）。它的文档注释说得很直白：
+        </p>
+        <p style="font-style:italic;color:var(--ink-3);border-left:2px solid var(--rule);padding-left:14px">
+          Mounts an empty <code>&lt;group&gt;</code>. Registers it with
+          <code>sceneRegistry</code> so <code>&lt;GeometrySystem&gt;</code> can find it and
+          inject children built by <code>def.geometry(node, ctx)</code>.
+        </p>
+        <p>
+          也就是说，三复选框模型走到终点，<strong>per-kind 的 renderer 会消失</strong>——
+          渲染器退化成一个空 group，几何由 <code>&lt;GeometrySystem&gt;</code> 每帧读脏标记、
+          调 <code>def.geometry()</code> 塞进去。你的 <code>WallRenderer</code> 在 M4
+          会被这个通用件吃掉，<code>buildWallGeometry</code> 则从 viewer 组件里被拆出来，
+          变成注册表里的 <code>def.geometry</code>。
+        </p>
+        <p style="margin-bottom:0">
+          现在<strong>别</strong>提前做。但写这个文件时心里有数：
+          你真正在写的是 <code>buildWallGeometry</code>，<code>WallRenderer</code>
+          只是它 M1 阶段的临时外壳。<strong>所以几何逻辑一行都别写进组件里。</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="step">
+    <div class="step-n">10</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">屏幕点 → 地面点</h3><span class="tag viewer">viewer</span><span class="tag three">three</span></div>
+<pre><code><span class="cm">// src/viewer/lib/pointer-plane.ts</span>
+
+export function screenToGround(
+  pointer: THREE.Vector2,      <span class="cm">// NDC，[-1,1]，不是像素</span>
+  camera: THREE.Camera,
+  planeY?: number,
+): Point2D | null
+<span class="cm">// hint: 三种写法，你会想用第一种，但只有第三种是对的：</span>
+<span class="cm">//   ① 给地面挂一个大 &lt;mesh&gt;，让 R3F 的 onPointerMove 帮你算</span>
+<span class="cm">//      → 地面被墙挡住的地方就没有事件了</span>
+<span class="cm">//   ② raycaster.intersectObject(groundMesh)  → 同上，且地面有限大</span>
+<span class="cm">//   ③ raycaster.setFromCamera(pointer, camera)</span>
+<span class="cm">//      raycaster.ray.intersectPlane(</span>
+<span class="cm">//        new THREE.Plane(new THREE.Vector3(0, 1, 0), -(planeY ?? 0)), target)</span>
+<span class="cm">//      → 纯数学，无实体，永不被遮挡，正交/透视都成立。唯一正确解。</span>
+<span class="cm">// hint: Plane 的第二个参数是**有符号距离常数**，不是高度。y = h 的平面</span>
+<span class="cm">//       对应 constant = -h。写成 +h 时墙会画在镜像高度上。</span>
+<span class="cm">// hint: intersectPlane 写入你传的 target 并返回它或 null。</span>
+<span class="cm">//       别复用模块级 Vector3 —— M3 会有重入的调用。</span>
+<span class="cm">// hint: R3F 的 useThree().pointer 已经是 NDC，直接用。</span>
+<span class="cm">//       自己从 clientX 换算的话记得减 canvas 的 boundingRect 再归一化，Y 要翻转。</span>
+</code></pre>
+      <div class="note">
+        <p>
+          <strong>为什么这个函数值得单独一个文件。</strong>M1 只有画墙用它。
+          M3 拖拽、M4 门窗定位、M5 量测，全都要"把光标变成平面上的一个点"，
+          而且必须是同一套数学——否则 2D 和 3D 下画出来的墙会差半个像素，
+          在墙角斜接时放大成可见的缝。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="step">
+    <div class="step-n">11</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">编辑器状态</h3><span class="tag app">app</span></div>
+<pre><code><span class="cm">// src/app/store/use-editor.ts</span>
+
+type EditorState = {
+  activeTool: 'select' | 'wall'
+  viewMode:   '3d' | 'plan'
+  selectedId: AnyNodeId | null
+  <span class="cm">// + setters</span>
+}
+export const useEditor = create&lt;EditorState&gt;()
+<span class="cm">// hint: 这个 store 在 app 层。viewer 永远不许 import 它 —— 第 01 步的 lint</span>
+<span class="cm">//       闸门会替你把关。viewer 需要知道"谁被选中"时，由 app 通过 props 传进去。</span>
+<span class="cm">// hint: 它不进撤销历史、不进存档。这是它和 useScene 的根本区别，</span>
+<span class="cm">//       也是为什么它们必须是两个 store 而不是一个的两个切片。</span>
+</code></pre>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div class="step">
+    <div class="step-n">12</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">画墙工具</h3><span class="tag app">app</span></div>
+<pre><code><span class="cm">// src/app/tools/wall-tool.tsx</span>
+
+export function WallTool(): null
+<span class="cm">// hint: M1 用最朴素的两态：useState&lt;Point2D | null&gt;(null)</span>
+<span class="cm">//       第一次点存起点，第二次点 addNode 建墙 + 清空。</span>
+<span class="cm">// hint: 监听不要挂在 &lt;group onPointerDown&gt; 上 —— R3F 的事件依赖射线命中物体，</span>
+<span class="cm">//       而你要"点空地也算"。用 useThree() 拿 gl.domElement 直接 addEventListener。</span>
+<span class="cm">// hint: 橡皮筋预览线 M1 可做可不做。要做就用 drei 的 &lt;Line&gt;，</span>
+<span class="cm">//       但**绝不要**把预览墙 addNode 进 store —— 那是 M3 live-overrides 的活，</span>
+<span class="cm">//       提前做会污染撤销历史。</span>
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">这段代码有保质期</span>
+        <p>
+          那个 <code>useState&lt;Point2D | null&gt;</code> 就是 <code>interaction-scope.md</code>
+          开头列举的"7 个独立布尔标志"的第一个。它现在完全够用，别提前抽象。
+        </p>
+        <p>
+          <strong>M3 重构的触发条件是"第二个工具出现"，不是"代码变丑"。</strong>
+          当你加选择工具、发现"画墙画到一半时点击是否应该选中物体"这个问题
+          没有单一答案时——那一刻就是 spine 该出现的时刻。把这句话记在
+          <code>wall-tool.tsx</code> 顶部的注释里。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">13</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">拾取自检</h3><span class="tag app">app</span><span class="tag viewer">viewer</span></div>
+      <p>
+        M1 的选中最省事的做法：<code>WallRenderer</code> 的 mesh 上挂
+        <code>onClick</code>，<code>e.stopPropagation()</code> 之后调 app 层传进来的回调。
+        <strong>stopPropagation 必须有</strong>，否则射线穿过的每一堵墙都会触发。
+      </p>
+      <p>
+        但同一次点击里加一行临时校验：<code>nodeIdFromObject(e.object)</code>
+        应当严格等于 <code>node.id</code>。这行代码没有产品价值，
+        它只是确认第 07 步的 registry 真的能用——M3 之后你就没机会这么便宜地验证它了。
+      </p>
+    </div>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ══════════════════════════════════════ -->
+<section>
+  <h2><span class="num">05</span>验收</h2>
+  <p class="h2sub">七条手动 + 六条测试，全绿才开 M2</p>
+
+  <ul class="check">
+    <li><span>视口里有地面网格；滚轮缩放、右键平移、左键拖拽旋转都正常。</span></li>
+    <li><span>切到墙工具，在地面点两下——一堵墙立起来，<strong>底面贴地</strong>（不是一半埋在地下）。</span></li>
+    <li><span><strong>斜着画一堵不平行于坐标轴的墙</strong>，从顶视看，它的方向和你点的两个位置一致，没有镜像。这条抓 <code>atan2</code> 的负号。</span></li>
+    <li><span>按 Tab 切正交顶视：墙变成一个矩形，视角不能旋转；再按 Tab 回到透视，相机位置合理。</span></li>
+    <li><span>顶视下画的墙，和透视下画的墙，端点坐标一致（在 console 里比对 <code>node.start</code>）。</span></li>
+    <li><span>点击墙，console 打出 node id，且 <code>nodeIdFromObject(e.object) === node.id</code>。</span></li>
+    <li><span>画 20 堵墙再全删，<code>renderer.info.memory.geometries</code> 回到基线，不持续增长。</span></li>
+  </ul>
+
+  <h3>提交回来的方式</h3>
+  <p class="prose">
+    贴这四个文件的全文给我：<code>core/schema/wall.ts</code>、
+    <code>core/store/use-scene.ts</code>、<code>core/lib/geometry-2d.ts</code>、
+    <code>viewer/lib/wall-geometry.ts</code>，外加两张截图（一张顶视、一张有斜墙的透视）。
+  </p>
+  <p class="prose">
+    我按三条 review：<strong>三层边界有没有破</strong>、<strong>schema 里有没有存可推导的值</strong>、
+    <strong>坐标系推导对不对</strong>。这三条过了才开 M2，不过就打回重写——
+    因为 M2 的墙角斜接会把这三处的任何错误放大成肉眼可见的裂缝。
+  </p>
+</section>
+
+<hr class="dim">
+
+<!-- ══════════════════════════════════════ -->
+<section>
+  <h2><span class="num">06</span>故意保留的缺陷</h2>
+  <p class="h2sub">M1 结束时这些必须还在，看到别修</p>
+
+  <p class="prose">
+    每一条都是下一个里程碑的入口。提前修的代价不是浪费时间，
+    而是<strong>你会在没有痛感的情况下写出自己不理解的抽象</strong>——那正是
+    "看懂了但复述不出来"的根源，也是这次学习最想避免的失败模式。
+  </p>
+
+  <div class="defect"><span>两堵墙相交处互相穿模，没有斜接，顶视下能看到十字叠加</span><span class="defect-to">→ M2</span></div>
+  <div class="defect"><span>墙是个方盒子，改厚度时两侧同时长，没有内外皮概念</span><span class="defect-to">→ M2</span></div>
+  <div class="defect"><span>改一堵墙会重渲染所有墙的 React 组件</span><span class="defect-to">→ M3</span></div>
+  <div class="defect"><span>墙画完不能移动、不能删、没有撤销</span><span class="defect-to">→ M3</span></div>
+  <div class="defect"><span>画墙工具的状态是一个裸 useState，第二个工具进来就会打架</span><span class="defect-to">→ M3</span></div>
+  <div class="defect"><span>墙上开不了洞，没有门窗</span><span class="defect-to">→ M4</span></div>
+  <div class="defect"><span>只有一个节点类型，<code>switch</code> 里只有一个 case</span><span class="defect-to">→ M4</span></div>
+  <div class="defect"><span>刷新即丢，没有存档，没有 schema 迁移</span><span class="defect-to">→ M5</span></div>
+  <div class="defect"><span>墙高存在墙自己身上，没有楼层概念</span><span class="defect-to">→ M5</span></div>
+
+  <div class="note" style="margin-top:28px">
+    <p>
+      唯一的例外是<strong>第 05 步那批测试</strong>。测试不算缺陷补丁——
+      它是你判断"坐标系推导对不对"的唯一手段，而这个判断在 M1 就必须成立。
+      没有它，M2 出现裂缝时你分不清是斜接算错了，还是 M1 的左法线方向本来就反了。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ══════════════════════════════════════ -->
+<section>
+  <h2><span class="num">07</span>全部源码</h2>
+  <p class="h2sub">19 个文件，可直接落盘</p>
+
+  <div class="trap">
+    <span class="trap-label">怎么用这一节</span>
+    <p>
+      本文档原本的契约是"方法内部只 hint"，理由是你要掌握实现的<em>原因</em>。
+      全码会把 M1 从两三周压到两三天——但你拿到的是能跑的代码，不是能复述的理解。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>建议：先按前面的 hint 自己写，卡住超过 20 分钟再翻这里对答案。</strong>
+      其中 <code>wallTransform</code> 的 <code>atan2</code> 和
+      <code>screenToGround</code> 的平面常数，值得先在纸上推一遍——
+      M2 的法线方向、M4 的门窗朝向都要用同一套推导。
+    </p>
+  </div>
+
+  <h3>0 · 依赖与边界闸门</h3>
+<pre><code>npm i three @react-three/fiber @react-three/drei zustand zod nanoid
+npm i -D vitest @types/three
+<span class="cm"># zundo / mitt 是 M3 / M5 的事，现在别装</span>
+</code></pre>
+
+<pre><code><span class="cm">// eslint.config.js（flat config）</span>
+import tseslint from 'typescript-eslint'
+
+<span class="cm">/** 三层都要用的 TS 解析设置 */</span>
+const ts = {
+  plugins: { '@typescript-eslint': tseslint.plugin },
+  languageOptions: {
+    parser: tseslint.parser,
+    parserOptions: { ecmaFeatures: { jsx: true } },
+  },
+}
+
+export default [
+  {
+    files: ['src/core/**/*.{ts,tsx}'],
+    ...ts,
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        paths: [{
+          name: 'three',
+          message: 'core 不许依赖 three。几何计算写成纯函数。',
+          <span class="cm">// <span class="cw">allowTypeImports 是每一条 path / pattern 内部的选项，不是顶层选项。</span></span>
+          <span class="cm">// 写在顶层会被静默忽略 —— scene-registry.ts 的</span>
+          <span class="cm">// `import type * as THREE` 照样报错，而且你查不到原因。</span>
+          <span class="cm">// 类型导入编译后整行抹掉，不构成运行时依赖，所以放行。</span>
+          <span class="cm">// 这是原项目绕过自己那条铁律的同一招。</span>
+          allowTypeImports: true,
+        }],
+        patterns: [
+          { group: ['three/*', '@react-three/*'], message: 'core 不许依赖渲染层。',
+            allowTypeImports: true },
+          { group: ['**/viewer/**', '**/app/**'],  message: 'core 不许反向依赖上层。' },
+        ],
+      }],
+    },
+  },
+  {
+    files: ['src/viewer/**/*.{ts,tsx}'],
+    ...ts,
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [{ group: ['**/app/**'], message: 'viewer 不许知道 editor/app 的存在。' }],
+      }],
+    },
+  },
+]
+</code></pre>
+  <p>
+    配完立刻验证：在 <code>src/core/</code> 随便一个文件里写一行
+    <code>import * as THREE from 'three'</code>，确认它报错。<strong>那一声报错是这整个项目的地基。</strong>
+  </p>
+
+  <h3>1 · core / schema</h3>
+<pre><code><span class="cm">// src/core/schema/base.ts</span>
+import { customAlphabet } from 'nanoid'
+import { z } from 'zod'
+
+const customId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 16)
+
+export const generateId = &lt;T extends string&gt;(prefix: T): `${T}_${string}` =&gt;
+  `${prefix}_${customId()}` as `${T}_${string}`
+
+export const objectId = &lt;T extends string&gt;(prefix: T) =&gt; {
+  const schema = z.templateLiteral([`${prefix}_`, z.string()])
+  <span class="cm">// default 传的是**函数** → 每次 parse 生成新 id。</span>
+  <span class="cm">// 这是 addNode({ type:'wall', start, end }) 不用手传 id 的全部原因。</span>
+  return schema.default(() =&gt; generateId(prefix) as z.infer&lt;typeof schema&gt;)
+}
+
+export const nodeType = &lt;T extends string&gt;(type: T) =&gt; z.literal(type).default(type)
+
+export const BaseNode = z.object({
+  object:   z.literal('node').default('node'),
+  <span class="cm">// id 声明成 z.string() 而不是 objectId('node')：用后者的话，</span>
+  <span class="cm">// BaseNode.extend 出来的 WallNode 会因 id 类型更窄而让 TS 报"不可赋值"。</span>
+  <span class="cm">// 子类型自己覆盖 id。原项目在这行留了同样的注释。</span>
+  id:       z.string(),
+  type:     nodeType('node'),
+  name:     z.string().optional(),
+  <span class="cm">// M1 全程没人读 parentId。留着 —— M4 门窗挂墙、M5 级联删除都要用。</span>
+  parentId: z.string().nullable().default(null),
+  visible:  z.boolean().default(true),
+})
+
+export type BaseNode = z.infer&lt;typeof BaseNode&gt;
+</code></pre>
+
+<pre><code><span class="cm">// src/core/schema/wall.ts</span>
+import { z } from 'zod'
+import { BaseNode, nodeType, objectId } from './base'
+
+export const DEFAULT_WALL_THICKNESS = 0.1   <span class="cm">// 米，同原项目</span>
+export const DEFAULT_WALL_HEIGHT    = 2.5
+
+export const WallNode = BaseNode.extend({
+  id:   objectId('wall'),
+  type: nodeType('wall'),
+  <span class="cm">// 世界 XZ 平面上的两个点。tuple 不用 object —— 序列化后是 [3,4]</span>
+  <span class="cm">// 而不是 {"x":3,"y":4}，M5 存盘省一半体积。</span>
+  start: z.tuple([z.number(), z.number()]),
+  end:   z.tuple([z.number(), z.number()]),
+  <span class="cm">// <span class="cw">⚠ optional 且不给 .default()。</span>"未设置"和"设置成 0.1"在层级继承里</span>
+  <span class="cm">//   不是一回事：M5 墙高迁移到 Level 时，只有 undefined 的墙才跟随层高。</span>
+  thickness: z.number().positive().optional(),
+  height:    z.number().positive().optional(),
+})
+
+export type WallNode = z.infer&lt;typeof WallNode&gt;
+
+<span class="cm">// 从现在起，代码库里任何地方直接读 wall.thickness 都算 bug。</span>
+export const getWallThickness = (wall: WallNode) =&gt; wall.thickness ?? DEFAULT_WALL_THICKNESS
+export const getWallHeight    = (wall: WallNode) =&gt; wall.height    ?? DEFAULT_WALL_HEIGHT
+</code></pre>
+
+<pre><code><span class="cm">// src/core/schema/types.ts</span>
+import { z } from 'zod'
+import { WallNode } from './wall'
+
+<span class="cm">// 只有一个成员，写起来很傻。M4 加到三个、原项目加到四十个时，</span>
+<span class="cm">// discriminatedUnion 报错会告诉你"type 为 'wall' 的分支里 start 缺失"，</span>
+<span class="cm">// z.union 则把所有分支的错误全列一遍。</span>
+export const AnyNode = z.discriminatedUnion('type', [WallNode])
+
+export type AnyNode   = z.infer&lt;typeof AnyNode&gt;
+export type AnyNodeId = AnyNode['id']
+</code></pre>
+
+  <h3>2 · core / lib — 平面几何</h3>
+<pre><code><span class="cm">// src/core/lib/geometry-2d.ts</span>
+<span class="cm">// <span class="cw">⚠ Point2D.y 是世界 Z。</span>原项目的约定，抄它是为了能对照源码。</span>
+
+export type Point2D = { x: number; y: number }
+
+export const EPSILON = 1e-9
+
+export const sub   = (a: Point2D, b: Point2D): Point2D =&gt; ({ x: a.x - b.x, y: a.y - b.y })
+export const add   = (a: Point2D, b: Point2D): Point2D =&gt; ({ x: a.x + b.x, y: a.y + b.y })
+export const scale = (v: Point2D, k: number):  Point2D =&gt; ({ x: v.x * k,  y: v.y * k })
+export const len   = (v: Point2D): number =&gt; Math.hypot(v.x, v.y)
+
+export const midpoint = (a: Point2D, b: Point2D): Point2D =&gt;
+  ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
+
+export function normalize(v: Point2D): Point2D {
+  const l = len(v)
+  <span class="cm">// 绝不放 NaN 出去 —— NaN 进了 three 的矩阵，画面整个消失且控制台一声不吭。</span>
+  if (l &lt; EPSILON) return { x: 0, y: 0 }
+  return { x: v.x / l, y: v.y / l }
+}
+
+<span class="cm">/** 沿 start→end 方向看的左手边法线（单位向量）。</span>
+<span class="cm"> *  这个方向定死了 M4 门窗的 interior / exterior 语义。现在别改，以后也别改。 */</span>
+export function leftNormal(v: Point2D): Point2D {
+  return normalize({ x: -v.y, y: v.x })
+}
+
+<span class="cm">/** 墙的平面轮廓，恰好 4 点，顺序固定：</span>
+<span class="cm"> *    startLeft → endLeft → endRight → startRight</span>
+<span class="cm"> *  M2 的斜接会把其中某几个替换成相邻墙的交点，但四个角的名字不变。 */</span>
+export function wallFootprint(start: Point2D, end: Point2D, thickness: number): Point2D[] {
+  const v = sub(end, start)
+  if (len(v) &lt; EPSILON) return []          <span class="cm">// 退化墙必须有出口</span>
+  const n = scale(leftNormal(v), thickness / 2)
+  return [add(start, n), add(end, n), sub(end, n), sub(start, n)]
+}
+</code></pre>
+
+<pre><code><span class="cm">// src/core/lib/geometry-2d.test.ts</span>
+import { describe, expect, it } from 'vitest'
+import { leftNormal, normalize, sub, wallFootprint, type Point2D } from './geometry-2d'
+
+<span class="cm">// 用 toBeCloseTo 而不是 toEqual：v.y === 0 时 `-v.y` 是 -0，</span>
+<span class="cm">// 而 toEqual 对 -0 / +0 的处理会咬你一口。</span>
+const near = (a: Point2D, b: Point2D) =&gt; {
+  expect(a.x).toBeCloseTo(b.x, 10)
+  expect(a.y).toBeCloseTo(b.y, 10)
+}
+
+describe('leftNormal', () =&gt; {
+  it('+X 的左法线是 +Y', () =&gt; near(leftNormal({ x: 1, y: 0 }), { x: 0,  y: 1 }))
+  it('+Y 的左法线是 -X', () =&gt; near(leftNormal({ x: 0, y: 1 }), { x: -1, y: 0 }))
+})
+
+describe('normalize', () =&gt; {
+  it('零向量不返回 NaN', () =&gt; {
+    const r = normalize({ x: 0, y: 0 })
+    expect(Number.isNaN(r.x)).toBe(false)
+    expect(Number.isNaN(r.y)).toBe(false)
+  })
+})
+
+describe('wallFootprint', () =&gt; {
+  it('轴对齐墙：顺序与半厚', () =&gt; {
+    const f = wallFootprint({ x: 0, y: 0 }, { x: 4, y: 0 }, 0.2)
+    expect(f).toHaveLength(4)
+    near(f[0], { x: 0, y:  0.1 })   <span class="cm">// startLeft</span>
+    near(f[1], { x: 4, y:  0.1 })   <span class="cm">// endLeft</span>
+    near(f[2], { x: 4, y: -0.1 })   <span class="cm">// endRight</span>
+    near(f[3], { x: 0, y: -0.1 })   <span class="cm">// startRight</span>
+  })
+
+  it('退化墙返回空', () =&gt; {
+    expect(wallFootprint({ x: 0, y: 0 }, { x: 0, y: 0 }, 0.2)).toEqual([])
+  })
+
+  it('斜墙的厚度不被拉伸', () =&gt; {
+    const start = { x: 0, y: 0 }
+    const end   = { x: 3, y: 4 }          <span class="cm">// 长度 5</span>
+    const dir   = normalize(sub(end, start))
+    for (const p of wallFootprint(start, end, 1)) {
+      const d = sub(p, start)
+      <span class="cm">// 点到中心线的垂距 = |cross(dir, p - start)|</span>
+      expect(Math.abs(dir.x * d.y - dir.y * d.x)).toBeCloseTo(0.5, 10)
+    }
+  })
+})
+</code></pre>
+
+  <h3>3 · core / registry</h3>
+<pre><code><span class="cm">// src/core/registry/scene-registry.ts</span>
+import { useLayoutEffect, type RefObject } from 'react'
+<span class="cm">// <span class="cw">import type</span> —— 编译后整行消失，core 保持零运行时依赖。</span>
+import type * as THREE from 'three'
+import type { AnyNodeId } from '../schema/types'
+
+<span class="cm">// 全局可变单例，不是 React state。改它不触发任何重渲染 —— 这是故意的，</span>
+<span class="cm">// 也正是 M3 命令式路径（每帧 mutate 但一次都不 setState）的地基。</span>
+export const sceneRegistry = {
+  nodes:  new Map&lt;AnyNodeId, THREE.Object3D&gt;(),
+  byType: {} as Record&lt;string, Set&lt;AnyNodeId&gt;&gt;,
+}
+
+export function useRegistry(
+  id: AnyNodeId,
+  type: string,
+  ref: RefObject&lt;THREE.Object3D | null&gt;,
+) {
+  <span class="cm">// <span class="cw">useLayoutEffect，不是 useEffect。</span>注册必须在首次绘制前完成，</span>
+  <span class="cm">// 否则同一帧里跑的 system 查不到对象。原项目源码里专门写了这一句。</span>
+  useLayoutEffect(() =&gt; {
+    const obj = ref.current
+    if (!obj) return
+
+    obj.userData.nodeId = id          <span class="cm">// 只在这一处写</span>
+    sceneRegistry.nodes.set(id, obj)
+    ;(sceneRegistry.byType[type] ??= new Set()).add(id)
+
+    return () =&gt; {
+      sceneRegistry.nodes.delete(id)
+      sceneRegistry.byType[type]?.delete(id)
+      delete obj.userData.nodeId
+    }
+  }, [id, type, ref])
+}
+
+<span class="cm">/** 从命中的 mesh 沿 parent 往上走，找第一个带 nodeId 的对象。</span>
+<span class="cm"> *  为什么不给每个 mesh 都挂 nodeId？M4 一堵墙会有 N 个子 mesh</span>
+<span class="cm"> *  （墙体 / 洞口边 / 踢脚线）。向上走一次比维护 N 份冗余便宜。 */</span>
+export function nodeIdFromObject(obj: THREE.Object3D | null): AnyNodeId | null {
+  let cur: THREE.Object3D | null = obj
+  while (cur) {
+    const id = cur.userData?.nodeId
+    if (typeof id === 'string') return id as AnyNodeId
+    cur = cur.parent
+  }
+  return null
+}
+</code></pre>
+
+  <h3>4 · core / store</h3>
+<pre><code><span class="cm">// src/core/store/use-scene.ts</span>
+import { create } from 'zustand'
+import { AnyNode, type AnyNodeId } from '../schema/types'
+
+type SceneState = {
+  <span class="cm">// Record 不用 Map：O(1) 查、结构共享便宜、M5 能直接 JSON.stringify。</span>
+  nodes: Record&lt;AnyNodeId, AnyNode&gt;
+  <span class="cm">// 单独存一份顺序 —— Record 的键顺序在规范上不可依赖，</span>
+  <span class="cm">// 而"墙的创建顺序"在 M2 算墙角、M5 存盘时都要稳定。</span>
+  rootNodeIds: AnyNodeId[]
+
+  addNode:    (input: unknown) =&gt; AnyNodeId
+  updateNode: (id: AnyNodeId, patch: Partial&lt;AnyNode&gt;) =&gt; void
+  removeNode: (id: AnyNodeId) =&gt; void
+  getNode:    (id: AnyNodeId) =&gt; AnyNode | undefined
+}
+
+<span class="cm">// <span class="cw">这里不许出现 selectedId。</span>"谁被选中"是编辑器状态 → app 层的 useEditor。</span>
+<span class="cm">// 它不进存档、不进撤销历史，换个宿主就换套语义。这是 M1 唯一一次考你分层。</span>
+export const useScene = create&lt;SceneState&gt;((set, get) =&gt; ({
+  nodes: {},
+  rootNodeIds: [],
+
+  addNode: (input) =&gt; {
+    <span class="cm">// parse 一次同时完成三件事：填 id、填默认值、挡住非法数据。</span>
+    <span class="cm">// 慢 —— 但 M5 加载旧存档时，这行就是迁移入口。</span>
+    const node = AnyNode.parse(input)
+    set((s) =&gt; ({
+      nodes:       { ...s.nodes, [node.id]: node },
+      rootNodeIds: [...s.rootNodeIds, node.id],
+    }))
+    return node.id
+  },
+
+  <span class="cm">// 浅合并即可。深合并的需求要到 M4 的嵌套配置才出现，别提前做。</span>
+  updateNode: (id, patch) =&gt; set((s) =&gt; {
+    const prev = s.nodes[id]
+    if (!prev) return s
+    return { nodes: { ...s.nodes, [id]: { ...prev, ...patch } as AnyNode } }
+  }),
+
+  <span class="cm">// 现在只删自己。M5 才处理 children 级联。</span>
+  removeNode: (id) =&gt; set((s) =&gt; {
+    if (!s.nodes[id]) return s
+    const nodes = { ...s.nodes }
+    delete nodes[id]
+    return { nodes, rootNodeIds: s.rootNodeIds.filter((n) =&gt; n !== id) }
+  }),
+
+  getNode: (id) =&gt; get().nodes[id],
+}))
+</code></pre>
+
+  <h3>5 · viewer / lib</h3>
+<pre><code><span class="cm">// src/viewer/lib/wall-geometry.ts</span>
+import * as THREE from 'three'
+import { len, midpoint, sub, type Point2D } from '../../core/lib/geometry-2d'
+import { getWallHeight, getWallThickness, type WallNode } from '../../core/schema/wall'
+
+const toPoint = (t: readonly [number, number]): Point2D =&gt; ({ x: t[0], y: t[1] })
+
+export function buildWallGeometry(wall: WallNode): THREE.BufferGeometry {
+  const length = len(sub(toPoint(wall.end), toPoint(wall.start)))
+  <span class="cm">// M1 就用 Box。手搓顶点留到 M2 —— 那时你需要任意四边形轮廓，Box 才真的不够用。</span>
+  return new THREE.BoxGeometry(length, getWallHeight(wall), getWallThickness(wall))
+}
+
+export function wallTransform(wall: WallNode): {
+  position: [number, number, number]
+  rotationY: number
+} {
+  const start = toPoint(wall.start)
+  const end   = toPoint(wall.end)
+  const c     = midpoint(start, end)
+
+  <span class="cm">// <span class="cw">坐标系推导 —— 在纸上画一遍，别背：</span></span>
+  <span class="cm">//   Point2D.y ≡ 世界 Z。BoxGeometry 的长边沿局部 +X。</span>
+  <span class="cm">//   绕 Y 轴正向旋转 θ，把 +X 转到 (cos θ, 0, −sin θ)。</span>
+  <span class="cm">//   要它对齐方向向量 (dx, dz)/|v| ⟹ θ = atan2(−dz, dx)</span>
+  <span class="cm">//   自检：墙沿 +Z 时 dx=0, dz&gt;0 ⟹ θ = −π/2 ⟹ +X 转成 (0,0,1) ✓</span>
+  <span class="cm">//   <span class="cw">少一个负号的表现：轴对齐的墙全对，斜墙沿中心线镜像。</span></span>
+  const rotationY = Math.atan2(-(end.y - start.y), end.x - start.x)
+
+  <span class="cm">// Box 原点在体心，墙底要贴地 → y = 高度的一半</span>
+  return { position: [c.x, getWallHeight(wall) / 2, c.y], rotationY }
+}
+</code></pre>
+
+<pre><code><span class="cm">// src/viewer/lib/pointer-plane.ts</span>
+import * as THREE from 'three'
+import type { Point2D } from '../../core/lib/geometry-2d'
+
+const raycaster = new THREE.Raycaster()
+const plane     = new THREE.Plane()
+const UP        = new THREE.Vector3(0, 1, 0)
+<span class="cm">// 复用模块级 scratch 是安全的 —— 我们立刻读出 x/z 并返回一个新对象，</span>
+<span class="cm">// 从不把 scratch 本身交给调用方。这正是可以复用的判据。</span>
+const scratch   = new THREE.Vector3()
+
+<span class="cm">/** 屏幕 NDC 点 → 地平面上的世界点。</span>
+<span class="cm"> *  纯数学，不依赖任何实体 mesh，所以永不被遮挡，正交 / 透视都成立。 */</span>
+export function screenToGround(
+  pointer: THREE.Vector2,   <span class="cm">// NDC，[-1,1]。R3F 的 useThree().pointer 已经是这个</span>
+  camera: THREE.Camera,
+  planeY = 0,
+): Point2D | null {
+  raycaster.setFromCamera(pointer, camera)
+  <span class="cm">// <span class="cw">⚠ Plane 第二个参数是「有符号距离常数」，不是高度。</span></span>
+  <span class="cm">//   y = h 的平面 ⟹ constant = −h。写成 +h 时墙会画在镜像高度上。</span>
+  plane.set(UP, -planeY)
+  const hit = raycaster.ray.intersectPlane(plane, scratch)
+  if (!hit) return null                <span class="cm">// 射线与平面平行（相机水平看）</span>
+  return { x: hit.x, y: hit.z }        <span class="cm">// ← 世界 Z 落进 Point2D.y</span>
+}
+</code></pre>
+
+  <h3>6 · viewer / components</h3>
+<pre><code><span class="cm">// src/viewer/components/viewer.tsx</span>
+import { Canvas } from '@react-three/fiber'
+import type { ReactNode } from 'react'
+import { CameraRig }     from './camera-rig'
+import { Ground }        from './ground'
+import { SceneRenderer } from './node-renderer'
+
+export function Viewer({ mode, children }: { mode: '3d' | 'plan'; children?: ReactNode }) {
+  return (
+    <span class="cm">{/* <span class="cw">别写 frameloop="never"</span> —— 那需要配 invalidate() 主动驱动，</span>
+        <span class="cm">只抄前半句的话画面完全静止且不报错。 */}</span>
+    &lt;Canvas dpr={[1, 1.5]} shadows style={{ background: '#fafafa' }}&gt;
+      &lt;CameraRig mode={mode} /&gt;
+
+      <span class="cm">{/* 别碰 Environment / HDRI：漂亮的光照会让错误的法线看起来是对的。 */}</span>
+      &lt;ambientLight intensity={0.6} /&gt;
+      &lt;directionalLight position={[10, 10, 5]} intensity={1.2} castShadow /&gt;
+
+      &lt;Ground /&gt;
+      &lt;SceneRenderer /&gt;
+
+      {children}          <span class="cm">{/* 宿主注入点：OrbitControls / 工具都从这进来 */}</span>
+    &lt;/Canvas&gt;
+  )
+}
+</code></pre>
+
+<pre><code><span class="cm">// src/viewer/components/camera-rig.tsx</span>
+import { OrthographicCamera, PerspectiveCamera } from '@react-three/drei'
+import { useLayoutEffect, useRef } from 'react'
+import type * as THREE from 'three'
+
+export function CameraRig({ mode }: { mode: '3d' | 'plan' }) {
+  const planRef = useRef&lt;THREE.OrthographicCamera&gt;(null)
+
+  <span class="cm">// 相机在正上方看向原点时，默认 up=(0,1,0) 与视线共线 → lookAt 退化 → 画面随机翻转。</span>
+  <span class="cm">// <span class="cw">必须在 OrbitControls 读取 camera.up 之前设好</span>，所以是 useLayoutEffect。</span>
+  useLayoutEffect(() =&gt; {
+    const cam = planRef.current
+    if (mode !== 'plan' || !cam) return
+    cam.up.set(0, 0, -1)
+    cam.lookAt(0, 0, 0)
+    cam.updateProjectionMatrix()
+  }, [mode])
+
+  return mode === '3d' ? (
+    <span class="cm">{/* makeDefault 是关键字 —— 少了它 raycaster 还用旧相机，点哪都错位且不报错 */}</span>
+    &lt;PerspectiveCamera makeDefault fov={50} near={0.1} far={1000} position={[10, 10, 10]} /&gt;
+  ) : (
+    <span class="cm">{/* 正交的 near 是负数：正交无透视收缩，近裁面允许在相机后方。</span>
+        <span class="cm">透视相机写负 near 会直接崩。 */}</span>
+    &lt;OrthographicCamera
+      ref={planRef} makeDefault zoom={40} near={-1000} far={1000} position={[0, 40, 0]}
+    /&gt;
+  )
+}
+</code></pre>
+
+<pre><code><span class="cm">// src/viewer/components/ground.tsx</span>
+
+<span class="cm">// 模块级常量。写成内联箭头函数每次渲染都是新引用，R3F 会每帧重新挂一次。</span>
+const NEVER_RAYCAST = () =&gt; null
+
+export function Ground({
+  size            = 100,
+  divisions       = 200,        <span class="cm">// 100/200 = 0.5m 一格，同原项目 cellSize 默认值</span>
+  gridColor       = '#d8dcda',
+  centerLineColor = '#b4bcb9',
+}: {
+  size?: number; divisions?: number; gridColor?: string; centerLineColor?: string
+}) {
+  return (
+    &lt;group name="ground"&gt;
+      <span class="cm">{/* args 顺序是 (size, divisions, colorCenterLine, colorGrid)。</span>
+          <span class="cm">第三个是「中心两条轴线」，不是「大格子」—— 别按 drei &lt;Grid&gt; 的心智模型传参。</span>
+          <span class="cm">position 抬 1mm：与下面的地面共面会 z-fighting。 */}</span>
+      &lt;gridHelper
+        args={[size, divisions, centerLineColor, gridColor]}
+        position={[0, 0.001, 0]}
+        raycast={NEVER_RAYCAST}
+      /&gt;
+
+      <span class="cm">{/* <span class="cw">两个都必须 raycast={NEVER_RAYCAST}</span> —— 否则墙工具会先命中地面 mesh，</span>
+          <span class="cm">而不是走 pointer-plane 的数学解。症状：射线算对了却点不准。 */}</span>
+      &lt;mesh rotation-x={-Math.PI / 2} receiveShadow raycast={NEVER_RAYCAST}&gt;
+        &lt;planeGeometry args={[size, size]} /&gt;
+        &lt;meshStandardMaterial color="#f0f2f1" roughness={1} metalness={0} /&gt;
+      &lt;/mesh&gt;
+    &lt;/group&gt;
+  )
+}
+</code></pre>
+
+<pre><code><span class="cm">// src/viewer/components/node-renderer.tsx</span>
+import type { AnyNodeId } from '../../core/schema/types'
+import { useScene } from '../../core/store/use-scene'
+import { WallRenderer } from './wall-renderer'
+
+export function SceneRenderer() {
+  <span class="cm">// 订阅 id 数组，引用稳定 → 只在增删节点时重渲染。</span>
+  <span class="cm">// <span class="cw">别写 useScene(s =&gt; Object.values(s.nodes))</span> —— 每次返回新数组，</span>
+  <span class="cm">// zustand 默认 Object.is 比较，结果是任何 store 变动都整树重渲染。</span>
+  const rootNodeIds = useScene((s) =&gt; s.rootNodeIds)
+  return (
+    &lt;group name="scene-renderer"&gt;
+      {rootNodeIds.map((id) =&gt; &lt;NodeRenderer key={id} nodeId={id} /&gt;)}
+    &lt;/group&gt;
+  )
+}
+
+export function NodeRenderer({ nodeId }: { nodeId: AnyNodeId }) {
+  <span class="cm">// 订阅单个节点 → 改这堵墙不会重渲染别的墙。</span>
+  const node = useScene((s) =&gt; s.nodes[nodeId])
+  if (!node) return null
+  <span class="cm">// 只有一个 case。故意的 —— 第三个节点类型出现时才抽 registry。</span>
+  switch (node.type) {
+    case 'wall': return &lt;WallRenderer node={node} /&gt;
+    default:     return null
+  }
+}
+</code></pre>
+
+<pre><code><span class="cm">// src/viewer/components/wall-renderer.tsx</span>
+import { useEffect, useMemo, useRef } from 'react'
+import type * as THREE from 'three'
+import { useRegistry } from '../../core/registry/scene-registry'
+import type { WallNode } from '../../core/schema/wall'
+import { buildWallGeometry, wallTransform } from '../lib/wall-geometry'
+
+export function WallRenderer({ node }: { node: WallNode }) {
+  const ref = useRef&lt;THREE.Mesh&gt;(null)
+  useRegistry(node.id, 'wall', ref)
+
+  <span class="cm">// <span class="cw">⚠ 依赖写具体字段，不是 [node]。</span></span>
+  <span class="cm">//   updateNode 浅合并每次都换 node 引用，写 [node] 等于没有 memo。</span>
+  const geometry = useMemo(
+    () =&gt; buildWallGeometry(node),
+    [node.start[0], node.start[1], node.end[0], node.end[1], node.thickness, node.height],
+  )
+
+  <span class="cm">// 清理函数在 geometry 变化时先跑一次 —— 释放的是**旧的**那个。</span>
+  <span class="cm">// geometry 是你 new 出来当 prop 传的 ⟹ R3F 不负责销毁 ⟹ 你自己 dispose。</span>
+  <span class="cm">// &lt;meshStandardMaterial&gt; 是声明式子元素 ⟹ R3F 创建的 ⟹ 它自己收拾，你别管。</span>
+  useEffect(() =&gt; () =&gt; geometry.dispose(), [geometry])
+
+  const { position, rotationY } = useMemo(
+    () =&gt; wallTransform(node),
+    [node.start[0], node.start[1], node.end[0], node.end[1], node.height],
+  )
+
+  return (
+    &lt;mesh
+      ref={ref}
+      geometry={geometry}
+      position={position}
+      rotation-y={rotationY}
+      visible={node.visible !== false}
+      castShadow
+      receiveShadow
+      onClick={(e) =&gt; {
+        e.stopPropagation()   <span class="cm">// 必须有，否则射线穿过的每堵墙都会触发</span>
+        console.log('[pick]', node.id)
+      }}
+    &gt;
+      &lt;meshStandardMaterial color="#e8e8e8" roughness={0.9} metalness={0} /&gt;
+    &lt;/mesh&gt;
+  )
+}
+</code></pre>
+
+  <h3>7 · app</h3>
+<pre><code><span class="cm">// src/app/store/use-editor.ts</span>
+import { create } from 'zustand'
+import type { AnyNodeId } from '../../core/schema/types'
+
+export type Tool     = 'select' | 'wall'
+export type ViewMode = '3d' | 'plan'
+
+type EditorState = {
+  activeTool: Tool
+  viewMode:   ViewMode
+  selectedId: AnyNodeId | null
+  setActiveTool:  (t: Tool) =&gt; void
+  toggleViewMode: () =&gt; void
+  select:         (id: AnyNodeId | null) =&gt; void
+}
+
+<span class="cm">// 这个 store 在 app 层。viewer 永远不许 import 它 —— eslint 闸门会把关。</span>
+<span class="cm">// 它不进撤销历史、不进存档。这是它和 useScene 的根本区别，</span>
+<span class="cm">// 也是为什么它们必须是两个 store 而不是一个的两个切片。</span>
+export const useEditor = create&lt;EditorState&gt;((set) =&gt; ({
+  activeTool: 'wall',
+  viewMode:   '3d',
+  selectedId: null,
+  setActiveTool:  (activeTool) =&gt; set({ activeTool }),
+  toggleViewMode: () =&gt; set((s) =&gt; ({ viewMode: s.viewMode === '3d' ? 'plan' : '3d' })),
+  select:         (selectedId) =&gt; set({ selectedId }),
+}))
+</code></pre>
+
+<pre><code><span class="cm">// src/app/tools/wall-tool.tsx</span>
+import { useThree } from '@react-three/fiber'
+import { useEffect, useRef } from 'react'
+import * as THREE from 'three'
+import type { Point2D } from '../../core/lib/geometry-2d'
+import { useScene } from '../../core/store/use-scene'
+import { screenToGround } from '../../viewer/lib/pointer-plane'
+import { useEditor } from '../store/use-editor'
+
+const ndc = new THREE.Vector2()
+
+<span class="cm">/** M1 版画墙工具：点两下。Esc 取消。</span>
+<span class="cm"> *</span>
+<span class="cm"> *  <span class="cw">⚠ 这段有保质期。</span>下面那个 pendingRef 就是 interaction-scope.md 里列举的</span>
+<span class="cm"> *  「7 个独立布尔标志」的第一个。M3 重构成 spine 的触发条件是</span>
+<span class="cm"> *  <span class="cw">"第二个工具出现"，不是"代码变丑"</span> —— 当你加选择工具、发现</span>
+<span class="cm"> *  "画墙画到一半时点击该不该选中物体"没有单一答案时，那一刻就是。 */</span>
+export function WallTool() {
+  const activeTool = useEditor((s) =&gt; s.activeTool)
+  const { gl, camera } = useThree()
+  const pendingRef = useRef&lt;Point2D | null&gt;(null)
+
+  useEffect(() =&gt; {
+    if (activeTool !== 'wall') { pendingRef.current = null; return }
+    const el = gl.domElement
+
+    <span class="cm">// 监听挂在 canvas DOM 上，不是 R3F 的 &lt;group onPointerDown&gt;：</span>
+    <span class="cm">// R3F 事件依赖射线命中物体，而我们要「点空地也算」。</span>
+    const onPointerDown = (e: PointerEvent) =&gt; {
+      if (e.button !== 0) return
+      <span class="cm">// 自己算 NDC：原生事件先于 R3F 的 state.pointer 更新，读它可能是上一帧的。</span>
+      const r = el.getBoundingClientRect()
+      ndc.set(
+        ((e.clientX - r.left) / r.width)  * 2 - 1,
+        -((e.clientY - r.top) / r.height) * 2 + 1,
+      )
+      const p = screenToGround(ndc, camera)
+      if (!p) return
+
+      const start = pendingRef.current
+      if (!start) { pendingRef.current = p; return }
+      pendingRef.current = null
+      <span class="cm">// 预览墙**绝不**先 addNode 进 store —— 那是 M3 live-overrides 的活，</span>
+      <span class="cm">// 提前做会污染撤销历史。</span>
+      useScene.getState().addNode({
+        type:  'wall',
+        start: [start.x, start.y],
+        end:   [p.x, p.y],
+      })
+    }
+
+    const onKeyDown = (e: KeyboardEvent) =&gt; {
+      if (e.key === 'Escape') pendingRef.current = null
+    }
+
+    el.addEventListener('pointerdown', onPointerDown)
+    window.addEventListener('keydown', onKeyDown)
+    return () =&gt; {
+      el.removeEventListener('pointerdown', onPointerDown)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [activeTool, gl, camera])
+
+  return null
+}
+</code></pre>
+
+<pre><code><span class="cm">// src/app/app.tsx</span>
+import { OrbitControls } from '@react-three/drei'
+import { useEffect } from 'react'
+import { Viewer } from '../viewer/components/viewer'
+import { useEditor } from './store/use-editor'
+import { WallTool } from './tools/wall-tool'
+
+export function App() {
+  const viewMode   = useEditor((s) =&gt; s.viewMode)
+  const activeTool = useEditor((s) =&gt; s.activeTool)
+
+  useEffect(() =&gt; {
+    const onKey = (e: KeyboardEvent) =&gt; {
+      if (e.key === 'Tab') { e.preventDefault(); useEditor.getState().toggleViewMode() }
+      if (e.key.toLowerCase() === 'w') useEditor.getState().setActiveTool('wall')
+      if (e.key.toLowerCase() === 'v') useEditor.getState().setActiveTool('select')
+    }
+    window.addEventListener('keydown', onKey)
+    return () =&gt; window.removeEventListener('keydown', onKey)
+  }, [])
+
+  return (
+    &lt;div style={{ position: 'fixed', inset: 0 }}&gt;
+      &lt;Viewer mode={viewMode}&gt;
+        <span class="cm">{/* 相机控制器由 app 注入 —— viewer 不该知道你想怎么操作它。</span>
+            <span class="cm">M1 局限：画墙时禁掉左键旋转，否则拖拽会和落点打架。</span>
+            <span class="cm">M3 的 spine 会用「scope 决定指针归谁」正经解决这个问题。 */}</span>
+        &lt;OrbitControls
+          makeDefault
+          enableRotate={viewMode === '3d' &amp;&amp; activeTool !== 'wall'}
+        /&gt;
+        &lt;WallTool /&gt;
+      &lt;/Viewer&gt;
+
+      &lt;div style={{
+        position: 'absolute', left: 12, bottom: 12, padding: '6px 10px',
+        font: '12px ui-monospace, monospace', background: 'rgba(255,255,255,.85)',
+        borderRadius: 3, pointerEvents: 'none',
+      }}&gt;
+        {activeTool} · {viewMode} &amp;nbsp;|&amp;nbsp; W 墙 · V 选 · Tab 切视图 · Esc 取消
+      &lt;/div&gt;
+    &lt;/div&gt;
+  )
+}
+</code></pre>
+
+<pre><code><span class="cm">// src/main.tsx</span>
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { App } from './app/app'
+
+<span class="cm">// StrictMode 会把 effect 挂载两次 → useRegistry 注册/注销各跑两轮。</span>
+<span class="cm">// 如果你的清理函数写对了，registry 里最终只有一份。这是个免费的自检。</span>
+createRoot(document.getElementById('root')!).render(
+  &lt;StrictMode&gt;&lt;App /&gt;&lt;/StrictMode&gt;,
+)
+</code></pre>
+
+  <div class="note">
+    <p>
+      <strong>跑起来之后立刻做一件事：</strong>斜着画一堵墙（不平行于坐标轴），
+      切顶视看它方向对不对。这是 §05 验收清单里第 3 条，也是唯一一条
+      单元测试覆盖不到、只能靠眼睛的检查——因为它验的是
+      <code>wallTransform</code> 里那个负号，而那是 viewer 层、依赖 three。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<footer style="color:var(--ink-3);font-family:var(--mono);font-size:12px;letter-spacing:0.04em">
+  <p style="margin:0">
+    对照源码 · core：<code>schema/base.ts</code> · <code>schema/nodes/wall.ts</code> ·
+    <code>systems/wall/wall-footprint.ts</code> ·
+    <code>hooks/scene-registry/scene-registry.ts</code>
+  </p>
+  <p style="margin:6px 0 0">
+    对照源码 · viewer：<code>components/viewer/index.tsx</code> ·
+    <code>components/viewer/viewer-camera.tsx</code> ·
+    <code>components/renderers/scene-renderer.tsx</code> ·
+    <code>components/renderers/node-renderer.tsx</code>
+  </p>
+  <p style="margin:8px 0 0">下一站 · M2 墙有厚度、有墙角</p>
+</footer>
+
+</div>

@@ -1,0 +1,384 @@
+<title>r3f-arch 路线图</title>
+<style>
+:root {
+  --paper:#EDF1EF; --card:#F8FAF9; --code-bg:#E4EBE8;
+  --ink:#131B19; --ink-2:#4A5754; --ink-3:#74827E;
+  --rule:#C4CFCB; --rule-soft:#D7E0DC;
+  --accent:#0B6E5F; --accent-bg:#DBE9E5;
+  --warn:#9E4520; --warn-bg:#F1E2D9;
+  --done:#0B6E5F; --done-bg:#DBE9E5;
+  --now:#9E4520;  --now-bg:#F1E2D9;
+  --mech:#2A5A79; --mech-bg:#DBE5EC;
+  --patt:#6A5843; --patt-bg:#ECE5DB;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --body: Georgia, "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+    --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+    --rule:#2A3733; --rule-soft:#1E2926;
+    --accent:#4FC3AA; --accent-bg:#12312B;
+    --warn:#E2916A; --warn-bg:#32211A;
+    --done:#4FC3AA; --done-bg:#12312B;
+    --now:#E2916A;  --now-bg:#32211A;
+    --mech:#79B4DA; --mech-bg:#14262F;
+    --patt:#C9AC85; --patt-bg:#2A2318;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+  --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+  --rule:#2A3733; --rule-soft:#1E2926;
+  --accent:#4FC3AA; --accent-bg:#12312B;
+  --warn:#E2916A; --warn-bg:#32211A;
+  --done:#4FC3AA; --done-bg:#12312B;
+  --now:#E2916A;  --now-bg:#32211A;
+  --mech:#79B4DA; --mech-bg:#14262F;
+  --patt:#C9AC85; --patt-bg:#2A2318;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--body);
+  font-size:17px; line-height:1.72; margin:0; padding:0 24px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 940px; margin: 0 auto; }
+.prose { max-width: 68ch; }
+.masthead { padding: 72px 0 0; }
+.eyebrow {
+  font-family: var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color: var(--ink-3); margin:0 0 20px; display:flex; gap:14px; flex-wrap:wrap;
+}
+.eyebrow b { color: var(--accent); font-weight:600; }
+h1 {
+  font-family: var(--mono); font-size: clamp(34px,6vw,52px); line-height:1.08;
+  letter-spacing:-.02em; font-weight:600; margin:0 0 18px; text-wrap:balance;
+}
+.standfirst { font-size:19px; color: var(--ink-2); max-width:60ch; margin:0 0 8px; }
+.dim { position:relative; height:1px; background:var(--rule); border:0; margin:56px 0 40px; }
+.dim::before,.dim::after { content:""; position:absolute; top:-4px; width:1px; height:9px; background:var(--rule); }
+.dim::before{left:0} .dim::after{right:0}
+h2 {
+  font-family: var(--mono); font-size:13px; letter-spacing:.16em; text-transform:uppercase;
+  font-weight:600; color:var(--accent); margin:0 0 6px;
+}
+h2 .num { color: var(--ink-3); margin-right:12px; }
+.h2sub { font-family:var(--mono); font-size:22px; font-weight:600; margin:0 0 24px; letter-spacing:-.01em; }
+h3 { font-family: var(--mono); font-size:16px; font-weight:600; margin:34px 0 10px; }
+p { margin:0 0 16px; }
+ul,ol { margin:0 0 16px; padding-left:22px; }
+li { margin-bottom:7px; }
+strong { font-weight:700; color:var(--ink); }
+em { font-style:italic; color:var(--ink-2); }
+code { font-family:var(--mono); font-size:.86em; background:var(--code-bg); padding:1px 5px; border-radius:2px; }
+pre {
+  background:var(--code-bg); border:1px solid var(--rule-soft); border-radius:3px;
+  padding:16px 18px; overflow-x:auto; margin:14px 0 18px; line-height:1.62;
+}
+pre code { background:none; padding:0; font-size:13px; white-space:pre; }
+.cm { color: var(--ink-3); }
+.tablewrap { overflow-x:auto; margin:18px 0 24px; }
+table { border-collapse:collapse; width:100%; font-family:var(--mono); font-size:13px; min-width:640px; }
+th {
+  text-align:left; font-weight:600; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule); padding:0 14px 8px 0;
+}
+td { padding:10px 14px 10px 0; border-bottom:1px solid var(--rule-soft); vertical-align:top; line-height:1.55; }
+td:last-child, th:last-child { padding-right:0; }
+.tnum { font-variant-numeric: tabular-nums; white-space:nowrap; }
+.pill {
+  font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  font-weight:600; padding:2px 7px; border-radius:2px; white-space:nowrap; display:inline-block;
+}
+.pill.mech { color:var(--mech); background:var(--mech-bg); }
+.pill.patt { color:var(--patt); background:var(--patt-bg); }
+.pill.mix  { color:var(--accent); background:var(--accent-bg); }
+.pill.done { color:var(--done); background:var(--done-bg); }
+.pill.now  { color:var(--now);  background:var(--now-bg); }
+.trap {
+  background: repeating-linear-gradient(-45deg, transparent 0 6px,
+    color-mix(in srgb, var(--warn) 7%, transparent) 6px 7px), var(--warn-bg);
+  border-left:3px solid var(--warn); padding:14px 18px; margin:18px 0; border-radius:0 3px 3px 0;
+}
+.trap-label {
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  font-weight:600; color:var(--warn); display:block; margin-bottom:6px;
+}
+.trap p:last-child { margin-bottom:0; }
+.note { border-left:3px solid var(--rule); padding:2px 0 2px 18px; margin:18px 0; color:var(--ink-2); font-size:16px; }
+.note p:last-child { margin-bottom:0; }
+.convo {
+  display:grid; grid-template-columns:88px 1fr; gap:0 20px;
+  padding:20px 0; border-top:1px solid var(--rule-soft);
+}
+.convo:first-of-type { border-top:1px solid var(--rule); }
+.convo-n { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--ink-3); padding-top:3px; }
+.convo-body > p { max-width:64ch; margin-bottom:8px; }
+.convo-title { font-family:var(--mono); font-size:16px; font-weight:600; margin:0 0 8px; }
+a { color: var(--accent); }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media (max-width:620px) {
+  body { font-size:16px; padding:0 18px 80px; }
+  .convo { grid-template-columns:1fr; }
+  .convo-n { padding-top:0; margin-bottom:4px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">
+    <span>r3f-arch</span><span>复刻 <b>pascalorg/editor</b></span><span>14 个里程碑 / 5 个对话</span>
+  </p>
+  <h1>路线图</h1>
+  <p class="standfirst">
+    做一个自己能用、能给别人看的住宅编辑器：8 种节点、多楼层、材质上色、完整编辑 UI。
+    约原项目功能的 25–30%，估 6–9 个月业余时间。
+  </p>
+  <p class="standfirst" style="color:var(--ink-3);font-size:17px">
+    权威版本是仓库里的 <code>docs/ROADMAP.md</code>；本页与它冲突时以 Markdown 为准。
+  </p>
+</header>
+
+<hr class="dim">
+
+<section>
+  <h2><span class="num">01</span>目标为什么改了</h2>
+  <p class="h2sub">「90% 功能覆盖」不是难，是不存在</p>
+
+  <div class="prose">
+    <p>你最初说的目标是「功能和 UI 达到原项目 90%」。我重新量了规模：</p>
+  </div>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>项</th><th class="tnum">量</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td>节点类型</td><td class="tnum">46 种</td><td>含风管三通、冷媒管、屋顶涡轮通风器、电梯井、点云扫描</td></tr>
+      <tr><td>专属面板 / 工具</td><td class="tnum">24 / 32</td><td>每种类型一套</td></tr>
+      <tr><td>packages/nodes</td><td class="tnum">160k 行</td><td>730 文件</td></tr>
+      <tr><td>editor UI</td><td class="tnum">90k 行</td><td>272 文件，含 2D 平面图 UI 13.6k 行</td></tr>
+      <tr><td>全项目</td><td class="tnum">390k 行</td><td>≈ 2 人年全职</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="prose">
+    <p>
+      按每小时 100 行<em>可用</em>代码算（对几何/交互代码已经算快），390k 行 ≈ 3900 小时。
+      我生成代码能压缩打字时间，<strong>压缩不了三维几何的调试时间</strong>——
+      M2 那三个深坑就是样本，每一个都是"看起来对但只在特定角度错"。
+    </p>
+    <p>
+      所以目标改成<strong>完整产品</strong>：不追覆盖率，追一个闭环。
+      画多层住宅、开门窗、盖屋顶、上颜色、能存能读，有侧栏有属性面板。
+      功能上是原项目的 25–30%，但它是<em>完整的</em>。
+    </p>
+  </div>
+
+  <h3>在边界内</h3>
+  <p class="prose">
+    <code>wall</code> · <code>door</code> · <code>window</code> · <code>slab</code> ·
+    <code>ceiling</code> · <code>roof</code> · <code>stair</code> · <code>column</code>
+    ＋ <code>site / building / level</code> 容器
+    ＋ 多楼层 ＋ 材质上色（颜色预设）＋ 完整编辑 UI
+  </p>
+  <h3>在边界外</h3>
+  <p class="prose" style="color:var(--ink-3)">
+    家具 GLB 目录 · HVAC 管道全家 · 电梯 · 栅栏 · 地形雕刻 · 点云扫描 ·
+    测量标注 · 结构网格 · 集合 · 命令面板 · 移动端 · 第一人称漫游
+  </p>
+</section>
+
+<hr class="dim">
+
+<section>
+  <h2><span class="num">02</span>14 个里程碑</h2>
+  <p class="h2sub">5 个是新机制，9 个是同一模式的重复</p>
+
+  <p class="prose">
+    <span class="pill mech">机制</span> 只给设计 + 方法签名 + hint，你手写，我 review。
+    <span class="pill patt">模式</span> 直接给全码，你读懂并跑通。
+    <span class="pill mix">混合</span> 核心给 hint，样板给全码。
+  </p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>M</th><th>名称</th><th>类型</th><th>核心内容</th><th>对照源码</th></tr></thead>
+    <tbody>
+      <tr><td class="tnum">1 <span class="pill done">done</span></td><td>能画一堵墙</td><td><span class="pill mech">机制</span></td>
+        <td>三层边界 / schema / registry / 射线拾取</td><td>schema/base.ts · viewer/index.tsx</td></tr>
+      <tr><td class="tnum">2 <span class="pill now">now</span></td><td>墙角严丝合缝</td><td><span class="pill mech">机制</span></td>
+        <td>交点检测 / 斜接 / 轮廓 / Shape+Extrude</td><td>wall-mitering.ts (536)</td></tr>
+      <tr><td class="tnum">3</td><td>选中与交互状态机</td><td><span class="pill mech">机制</span></td>
+        <td>InteractionScope 判别联合 · <code>selectionEnabled</code> 铁律 · 两层选择</td>
+        <td><strong>interaction-scope.md</strong> · selection-manager.tsx</td></tr>
+      <tr><td class="tnum">4</td><td>拖动、撤销、脏传播</td><td><span class="pill mech">机制</span></td>
+        <td>live overrides · zundo + pause 租约 · 命令式路径 · 邻接失效</td>
+        <td>use-live-transforms.ts · history-control.ts · level-miter-cache.ts</td></tr>
+      <tr><td class="tnum">5</td><td>节点注册表</td><td><span class="pill mech">机制</span></td>
+        <td>三复选框 <code>geometry/renderer/system</code> · GeometrySystem 脏循环</td>
+        <td><strong>node-definitions.md</strong> · core/registry/</td></tr>
+      <tr><td class="tnum">6</td><td>楼板、天花、柱</td><td><span class="pill patt">模式</span></td>
+        <td>三种新类型全走注册表 · 多边形绘制工具</td><td>nodes/{slab,ceiling,column}/</td></tr>
+      <tr><td class="tnum">7</td><td>门窗与开洞</td><td><span class="pill mech">机制</span></td>
+        <td>宿主关系 · 沿墙参数定位 · Shape+holes · 级联删除</td>
+        <td>spatial-queries.md · opening-cutout-geometry.ts</td></tr>
+      <tr><td class="tnum">8</td><td>多楼层</td><td><span class="pill mech">机制</span></td>
+        <td>Level 树 · 墙顶绑层平面 · 楼层切换 · 首次真实 schema 迁移</td>
+        <td><strong>vertical-model.md</strong> · systems/level/</td></tr>
+      <tr><td class="tnum">9</td><td>存档、导入导出、迁移</td><td><span class="pill mix">混合</span></td>
+        <td>localStorage · JSON · 版本号 + 迁移链</td><td>use-scene-*-migration.test.ts ×8</td></tr>
+      <tr><td class="tnum">10</td><td>屋顶</td><td><span class="pill patt">模式</span></td>
+        <td>山形/四坡生成 · 墙裁切 · CSG 首次登场</td><td>roof-system.tsx (2716)</td></tr>
+      <tr><td class="tnum">11</td><td>楼梯</td><td><span class="pill patt">模式</span></td>
+        <td>踏步生成 · <strong>楼板开洞</strong>（首个跨类型几何依赖）</td><td>nodes/stair/ · StairOpeningSystem</td></tr>
+      <tr><td class="tnum">12</td><td>UI 外壳</td><td><span class="pill patt">模式</span></td>
+        <td>Tailwind+Radix 接入 · 侧栏 · Build 面板 · 视口叠加</td>
+        <td>ui/primitives/ ×19 · build-tab.tsx (556)</td></tr>
+      <tr><td class="tnum">13</td><td>属性面板与大纲</td><td><span class="pill patt">模式</span></td>
+        <td>按 schema 生成表单 · 每类型面板 · 多选 · 大纲树</td>
+        <td>parametric-inspector.tsx · nodes/*/panel.tsx ×24</td></tr>
+      <tr><td class="tnum">14</td><td>材质与上色</td><td><span class="pill mix">混合</span></td>
+        <td>surface roles · 材质槽位 · 刷面上色 · UV 世界投影</td>
+        <td><strong>materials-and-themes.md</strong> · wall/paint.ts</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <p>
+      <strong>M10 屋顶是唯一一个我建议你大段参照原码改写、而不是从零推的。</strong>
+      屋面生成的边界情况极多（老虎窗、天窗、不等坡、山墙收边），
+      从零推不会让你学到新机制，只会让你重新发现 2716 行里已经发现过的事。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<section>
+  <h2><span class="num">03</span>对话怎么切</h2>
+  <p class="h2sub">5 个，按"共享哪一批源码"分组</p>
+
+  <div class="convo">
+    <div class="convo-n">对话 1<br><span class="pill done">进行中</span></div>
+    <div class="convo-body">
+      <h3 class="convo-title">M1–M2 · 几何基础</h3>
+      <p>三层边界、schema、registry、斜接、挤出。<strong>M1 已验收，M2 进行中。</strong></p>
+    </div>
+  </div>
+
+  <div class="convo">
+    <div class="convo-n">对话 2</div>
+    <div class="convo-body">
+      <h3 class="convo-title">M3–M5 · 交互与框架</h3>
+      <p>
+        三个都是机制型，共享 <code>wiki/architecture/</code> 的
+        <code>interaction-scope</code> / <code>systems</code> / <code>node-definitions</code> 三页。
+        这是全项目认知密度最高的一段，也是最值得手写的一段。
+      </p>
+    </div>
+  </div>
+
+  <div class="convo">
+    <div class="convo-n">对话 3</div>
+    <div class="convo-body">
+      <h3 class="convo-title">M6–M8 · 结构扩展</h3>
+      <p>
+        楼板天花柱、门窗开洞、多楼层。共享注册表与宿主关系两个新概念，
+        并在 M8 完成第一次真实的 schema 迁移。
+      </p>
+    </div>
+  </div>
+
+  <div class="convo">
+    <div class="convo-n">对话 4</div>
+    <div class="convo-body">
+      <h3 class="convo-title">M9–M11 · 持久化与复杂几何</h3>
+      <p>存档迁移、屋顶、楼梯。两块最重的几何，配一块最需要纪律的持久化。</p>
+    </div>
+  </div>
+
+  <div class="convo">
+    <div class="convo-n">对话 5</div>
+    <div class="convo-body">
+      <h3 class="convo-title">M12–M14 · UI 与材质</h3>
+      <p>
+        Tailwind + Radix 全新技术栈，与前面完全不共享上下文——
+        这也是为什么它单独一个对话。
+      </p>
+    </div>
+  </div>
+
+  <p class="prose" style="margin-top:24px">
+    <strong>切换信号</strong>：当前对话开始出现上下文摘要，或一组 M 全部验收通过。
+    不必严格按 3 个 M 一组——2 个也行，感觉吃力就早切。
+  </p>
+
+  <h3>新对话开场，把这段原样贴给我</h3>
+<pre><code>项目 C:\Users\User\workspace\meguri\r3f-arch，对照仓库 ..\editor。
+先读 docs/STATE.md、docs/DECISIONS.md、docs/ROADMAP.md，
+再扫一遍 src/ 的真实代码和测试结果，
+报告实际代码与计划的偏差，然后出 M&lt;N&gt; 的方案。
+</code></pre>
+
+  <p class="prose">我在开场必须做的四件事，缺任何一件都会漂移：</p>
+  <ol class="prose">
+    <li>读 <code>STATE.md</code> / <code>DECISIONS.md</code> / <code>ROADMAP.md</code></li>
+    <li><strong>读 <code>src/</code> 的真实代码</strong>——不是读我上次写的计划</li>
+    <li>跑 <code>pnpm verify</code> 和测试，确认基线是绿的</li>
+    <li><strong>先报告偏差，再出计划</strong></li>
+  </ol>
+</section>
+
+<hr class="dim">
+
+<section>
+  <h2><span class="num">04</span>质量能保证到什么程度</h2>
+  <p class="h2sub">「完美衔接」做不到，但漂移可以被抓住</p>
+
+  <div class="trap">
+    <span class="trap-label">这三件事一定会发生，问题只是被不被发现</span>
+    <p>
+      <strong>① 接口漂移。</strong>后一个 M 的计划假设前一个 M 留了某个钩子，实际写法不同。
+      <em>已经发生过一次</em>——我给的 eslint 配置把 <code>allowTypeImports</code> 放在了顶层，
+      正确位置是每条 <code>paths</code> 条目内部。你自己改对了；<strong>如果你没告诉我，
+      我后面所有计划都会建立在一份和你代码不一致的想象上。</strong>
+    </p>
+    <p>
+      <strong>② 决策失忆。</strong>跨对话必然发生。我不记得当初为什么选 A 不选 B，
+      新计划和旧决策打架。对策是 <code>DECISIONS.md</code> ——13 条，每条都带"为什么"。
+    </p>
+    <p>
+      <strong>③ 累积腐坏。</strong>最致命。前 5 个 M 的临时方案在 M9 集中爆发。
+      对策是每个 M 的"故意保留的缺陷"清单<strong>标注到期 M</strong>，
+      汇总在 <code>STATE.md</code> 里跟踪——现在有 8 条未偿。
+    </p>
+  </div>
+
+  <p class="prose">
+    <strong>唯一可靠的锚是第 2 步：每个 M 开始前读你的真实代码。</strong>
+    计划文档会过期，决策记录会遗漏，只有代码不会撒谎。
+    这也是为什么你的项目和对照仓库在同一个 workspace 下很重要——
+    <code>../editor</code> 我随时能读，不需要你贴源码给我。
+  </p>
+
+  <h3>你这边要做的三件事</h3>
+  <ol class="prose">
+    <li><strong>每个 M 验收后更新 <code>STATE.md</code></strong>（或者让我更新）。这是唯一需要你维护的东西。</li>
+    <li><strong>改了我给的代码就说一声。</strong>不用解释为什么，说"我把 X 改成 Y 了"就够——我会更新文档并检查下游影响。</li>
+    <li><strong>每个 M 结束打个 git tag</strong>（<code>m3-done</code> 之类）。M10 出跨模块 bug 时，能二分定位到是哪个 M 引入的。</li>
+  </ol>
+</section>
+
+<hr class="dim">
+
+<footer style="color:var(--ink-3);font-family:var(--mono);font-size:12px;letter-spacing:.04em">
+  <p style="margin:0">
+    权威文档 · <code>docs/ROADMAP.md</code> · <code>docs/STATE.md</code> · <code>docs/DECISIONS.md</code>
+  </p>
+  <p style="margin:8px 0 0">当前 · M2 墙角严丝合缝　　下一站 · M3 选中与交互状态机</p>
+</footer>
+
+</div>
