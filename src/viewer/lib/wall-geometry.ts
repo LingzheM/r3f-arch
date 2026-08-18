@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import { len, midpoint, sub, wallFootprint, type Point2D } from '../../core/lib/geometry-2d'
-import { getWallHeight, getWallThickness, type WallNode } from '../../core/schema/wall'
+import { midpoint, type Point2D } from '../../core/lib/geometry-2d'
+import { getWallHeight, type WallNode } from '../../core/schema/wall'
 import type { MiterData } from '../../core/systems/wall/wall-mitering'
 import { getWallPlanFootprint } from '../../core/systems/wall/wall-footprint'
 

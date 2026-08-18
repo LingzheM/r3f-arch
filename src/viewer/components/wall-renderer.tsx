@@ -14,7 +14,10 @@ export function WallRenderer({node}: { node: WallNode }) {
 
     const geometry = useMemo(
         () => buildWallGeometry(node, miter),
-        [node.start[0], node.start[1], node.end[0], node.end[1], node.thickness, node.height],
+        // miter 必须在依赖里：邻居变了这堵墙的墙角也要重算。
+        // 代价是 miter 每次都是新对象 → 这个 memo 实际从不命中。
+        // 这就是 M2 §06 那条「改一堵墙 → 所有墙重建几何」的缺陷，M4 用脏传播修。
+        [node.start[0], node.start[1], node.end[0], node.end[1], node.thickness, node.height, miter],
     )
 
     useEffect(() => () => geometry.dispose(), [geometry])

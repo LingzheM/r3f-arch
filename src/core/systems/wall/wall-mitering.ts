@@ -71,6 +71,8 @@ function legsAtJunction(
     const legs: Leg[] = []
     for (const v of dirs) {
         if (len(v) < EPSILON) continue
+        // 半厚沿左法线的偏移向量 —— 左右两条边线各用它一次
+        const n = scale(leftNormal(v), halfT)
         legs.push({
             wallId: wall.id,
             angle: Math.atan2(v.y, v.x),
