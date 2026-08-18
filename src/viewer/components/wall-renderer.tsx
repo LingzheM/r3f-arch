@@ -1,16 +1,19 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useContext, useEffect, useMemo, useRef } from "react";
 import type { WallNode } from "../../core/schema/wall";
 import type * as THREE from 'three'
 import { useRegistry } from "../../core/registry/scene-registry";
 import { buildWallGeometry, wallTransform } from "../lib/wall-geometry";
+import { MiterContext } from "./node-renderer";
 
 
 export function WallRenderer({node}: { node: WallNode }) {
     const ref = useRef<THREE.Mesh>(null)
     useRegistry(node.id, 'wall', ref)
 
+    const miter = useContext(MiterContext)
+
     const geometry = useMemo(
-        () => buildWallGeometry(node),
+        () => buildWallGeometry(node, miter),
         [node.start[0], node.start[1], node.end[0], node.end[1], node.thickness, node.height],
     )
 

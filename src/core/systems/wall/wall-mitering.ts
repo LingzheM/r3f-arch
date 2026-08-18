@@ -1,5 +1,4 @@
-import { EPSILON } from "three/tsl"
-import { add, leftNormal, len, lineFromPointAndDirection, pointOnSegment, quantizeKey, scale, sub, type Line, type Point2D } from "../../lib/geometry-2d"
+import { add, EPSILON, intersectLines, leftNormal, len, lineFromPointAndDirection, pointOnSegment, quantizeKey, scale, sub, type Line, type Point2D } from "../../lib/geometry-2d"
 import { getWallThickness, wallEnd, wallStart, type WallNode } from "../../schema/wall"
 
 const JUNCTION_TOLERANCE = 1e-3
@@ -23,7 +22,6 @@ interface Leg {
 }
 
 export interface MiterCorner { left?: Point2D; right?: Point2D }
-// junctionkey, wallId
 export interface MiterData { junctionData: Map<string, Map<string, MiterCorner>> }
 
 export const EMPTY_MITER_DATA: MiterData = { junctionData: new Map() }
@@ -83,6 +81,54 @@ function legsAtJunction(
         })
     }
     return legs
+}
+
+export function calculateJunctionIntersections(junction: Junction): Map<string, MiterCorner> {
+    const legs: Leg[] = []
+    for (const { wall, endType } of junction.connected) {
+        legs.push(...legsAtJunction(wall, endType, junction.meetingPoint, getWallThickness(wall) / 2))
+    }
+
+    legs.sort((p, q) =>
+        p.angle !== q.angle ? p.angle - q.angle
+        : p.wallId < q.wallId ? -1 : p.wallId > q.wallId ? 1 : 0
+    )
+
+    const out = new Map<string, MiterCorner>()
+    const n = legs.length
+    if (n < 2) return out
+
+    const cornerOf = (id: string): MiterCorner => {
+        let c = out.get(id)
+        if (!c) { c = {}; out.set(id, c) }
+        return c
+    }
+
+    for (let i = 0; i < n; i++) {
+        const a = legs[i]!
+        const b = legs[(i + 1) % n]!
+
+        const p = intersectLines(a.edgeLeft, b.edgeRight)
+        if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) continue
+
+        const maxMiter = MITER_LIMIT * Math.max(a.halfThickness, b.halfThickness)
+        const dx = p.x - junction.meetingPoint.x
+        const dy = p.y - junction.meetingPoint.y
+        if (dx * dx + dy * dy > maxMiter * maxMiter) continue
+        
+        if (!a.isPassthrough) cornerOf(a.wallId).left = p
+        if (!b.isPassthrough) cornerOf(b.wallId).right = p
+    }
+
+    return out
+}
+
+export function calculateLevelMiters(walls: WallNode[]): MiterData {
+  const junctionData = new Map<string, Map<string, MiterCorner>>()
+  for (const [key, junction] of findJunctions(walls)) {
+    junctionData.set(key, calculateJunctionIntersections(junction))
+  }
+  return { junctionData }
 }
 
 export interface WallMiterBoundaryPoints {
