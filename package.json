@@ -28,10 +28,12 @@
     "build:watch": "tsc --build --watch",
     "check-types": "tsc --build --noEmit",
     "lint": "eslint src",
-    "verify": "pnpm check-types && pnpm lint",
-    "clean": "tsc --build --clean"
+    "verify": "pnpm check-types && pnpm lint && pnpm test",
+    "clean": "tsc --build --clean",
+    "test": "vitest run"
   },
   "dependencies": {
+    "mitt": "^3.0.1",
     "nanoid": "^5.1.10",
     "zod": "^4.1.13",
     "zundo": "^2.3.0",
@@ -57,7 +59,8 @@
     "three": "^0.185.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.67.0",
-    "vite": "^8.2.1"
+    "vite": "^8.2.1",
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=20.9.0"
