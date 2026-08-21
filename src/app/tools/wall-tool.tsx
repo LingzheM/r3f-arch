@@ -1,65 +1,107 @@
-// src/app/tools/wall-tool.tsx
-import { useThree } from '@react-three/fiber'
-import { useEffect, useRef } from 'react'
+import { useThree } from "@react-three/fiber";
+import { useEditor } from "../store/use-editor";
+import { useEffect, useState } from "react";
+import type { Point2D } from "../../core/lib/geometry-2d";
+import { getScope, useInteractionScope } from "../store/use-interaction-scope";
+import { screenToGround } from "../../viewer/lib/pointer-plane";
 import * as THREE from 'three'
-import type { Point2D } from '../../core/lib/geometry-2d'
-import { useScene } from '../../core/store/use-scene'
-import { screenToGround } from '../../viewer/lib/pointer-plane'
-import { useEditor } from '../store/use-editor'
+import { isClickGesture } from "../../viewer/lib/pointer-gesture";
+import { draftPoints, lastDraftPoint } from "../lib/interaction/scope";
+import { useScene } from "../../core/store/use-scene";
+import { Line } from "@react-three/drei";
 
 const ndc = new THREE.Vector2()
 
-/** M1 版画墙工具：点两下。Esc 取消。
- *
- *  ⚠ 这段有保质期。下面那个 pendingRef 就是 interaction-scope.md 里列举的
- *  「7 个独立布尔标志」的第一个。M3 重构成 spine 的触发条件是
- *  "第二个工具出现"，不是"代码变丑" —— 当你加选择工具、发现
- *  "画墙画到一半时点击该不该选中物体"没有单一答案时，那一刻就是。 */
 export function WallTool() {
   const activeTool = useEditor((s) => s.activeTool)
   const { gl, camera } = useThree()
-  const pendingRef = useRef<Point2D | null>(null)
+
+  // 跟随光标的橡皮筋端点。
+  const [cursor, setCursor] = useState<Point2D | null>(null)
 
   useEffect(() => {
-    if (activeTool !== 'wall') { pendingRef.current = null; return }
+    if (activeTool !== 'wall') return
+    useInteractionScope.getState().begin({ kind: 'drafting', tool: 'wall', points: [] })
+    return () => {
+      useInteractionScope.getState().endIf((s) => s.kind === 'drafting')
+      setCursor(null)
+    }
+  }, [activeTool])
+
+  useEffect(() => {
+    if (activeTool !== 'wall') return
     const el = gl.domElement
 
-    // 监听挂在 canvas DOM 上，不是 R3F 的 <group onPointerDown>：
-    // R3F 事件依赖射线命中物体，而我们要「点空地也算」。
-    const onPointerDown = (e: PointerEvent) => {
-      if (e.button !== 0) return
-      // 自己算 NDC：原生事件先于 R3F 的 state.pointer 更新，读它可能是上一帧的。
+    const toGround = (e: PointerEvent): Point2D | null => {
       const r = el.getBoundingClientRect()
       ndc.set(
-        ((e.clientX - r.left) / r.width)  * 2 - 1,
+        ((e.clientX - r.left) / r.width) * 2 - 1,
         -((e.clientY - r.top) / r.height) * 2 + 1,
       )
-      const p = screenToGround(ndc, camera)
+      return screenToGround(ndc, camera)
+    }
+
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.button !== 0) return
+      if (!isClickGesture(e)) return
+
+      const p = toGround(e)
       if (!p) return
 
-      const start = pendingRef.current
-      if (!start) { pendingRef.current = p; return }
-      pendingRef.current = null
-      // 预览墙**绝不**先 addNode 进 store —— 那是 M3 live-overrides 的活，
-      // 提前做会污染撤销历史。
-      useScene.getState().addNode({
-        type:  'wall',
-        start: [start.x, start.y],
-        end:   [p.x, p.y],
-      })
+      const scope = getScope()
+      if (scope.kind !== 'drafting') return
+
+      const last = lastDraftPoint(scope)
+      if (last) {
+        useScene.getState().addNode({
+          type: 'wall',
+          start: [last.x, last.y],
+          end: [p.x, p.y],
+        })
+      }
+      useInteractionScope.getState().update({ points: [p] })
     }
+
+    const onPointerMove = (e: PointerEvent) => setCursor(toGround(e))
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') pendingRef.current = null
+      if (e.key === 'Escape') {
+        useInteractionScope.getState().update({ points: [] })
+        setCursor(null)
+      }
     }
 
-    el.addEventListener('pointerdown', onPointerDown)
+    el.addEventListener('pointerup', onPointerUp)
+    el.addEventListener('pointermove', onPointerMove)
     window.addEventListener('keydown', onKeyDown)
+
     return () => {
-      el.removeEventListener('pointerdown', onPointerDown)
+      el.removeEventListener('pointerup', onPointerUp)
+      el.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('keydown', onKeyDown)
     }
   }, [activeTool, gl, camera])
 
-  return null
+  return <WallDraftPreview cursor={cursor} />
+}
+
+function WallDraftPreview({ cursor }: { cursor: Point2D | null }) {
+  const scope = useInteractionScope((s) => s.scope)
+  const pts = draftPoints(scope)
+  const last = pts.length > 0 ? pts[pts.length - 1]! : null
+
+  if (!last || !cursor) return null
+
+  return (
+    <Line
+      points={[
+        [last.x, 0.01, last.y],
+        [cursor.x, 0.01, cursor.y],
+      ]}
+      color="#0b6e5f"
+      lineWidth={2}
+      dashed
+      dashScale={20}
+    />
+  )
 }

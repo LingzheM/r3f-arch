@@ -20,5 +20,5 @@ export interface GridEvent {
 export type NodeEventKey = `${AnyNodeType}:${NodeEventSuffix}`
 
 export type EventMap =
-    & { [k in NodeEventKey]: NodeEvent }
-    & { 'grid: click': GridEvent }
+    & { [K in NodeEventKey]: NodeEvent }
+    & { 'grid:click': GridEvent }
