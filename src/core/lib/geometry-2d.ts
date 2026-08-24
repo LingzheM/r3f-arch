@@ -50,7 +50,7 @@ export function intersectLines(l1: Line, l2: Line): Point2D | null {
 
 export function pointOnSegment(p: Point2D, a: Point2D, b: Point2D, tol=1e-3): boolean {
     const ab = sub(b, a)
-    const L2 = ab.x + ab.y * ab.y
+    const L2 = ab.x * ab.x + ab.y * ab.y
     if (L2 < EPSILON) return false
     const L = Math.sqrt(L2)
     const ap = sub(p, a)

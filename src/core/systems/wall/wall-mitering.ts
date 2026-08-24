@@ -1,7 +1,7 @@
 import { add, EPSILON, intersectLines, leftNormal, len, lineFromPointAndDirection, pointOnSegment, quantizeKey, scale, sub, type Line, type Point2D } from "../../lib/geometry-2d"
 import { getWallThickness, wallEnd, wallStart, type WallNode } from "../../schema/wall"
 
-const JUNCTION_TOLERANCE = 1e-3
+export const JUNCTION_TOLERANCE = 1e-3
 
 const MITER_LIMIT = 10
 

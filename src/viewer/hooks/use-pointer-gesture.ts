@@ -11,5 +11,7 @@ export function usePointerGesture(): void {
         const onDown = (e: PointerEvent) => beginGesture(e)
 
         el.addEventListener('pointerdown', onDown, { capture: true })
+        return () => el.removeEventListener('pointerdown', onDown, { capture: true })
+
     }, [gl])
 }
