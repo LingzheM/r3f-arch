@@ -4,13 +4,15 @@ import type * as THREE from 'three'
 import { useRegistry } from "../../core/registry/scene-registry";
 import { buildWallGeometry, wallTransform } from "../lib/wall-geometry";
 import { MiterContext, SelectionContext } from "./scene-context";
-import { events } from "@react-three/fiber";
-
+import { useNodeEvents } from "../hooks/use-node-events";
+import { useEffectiveNode } from "../hooks/use-effective-node";
 
 const WALL_COLOR = '#e8e8e8'
 const WALL_SELECTED_COLOR = '#7dd3c0'
 
-export function WallRenderer({node}: { node: WallNode }) {
+export function WallRenderer({node: documentNode}: { node: WallNode }) {
+    const node = useEffectiveNode(documentNode)
+
     const ref = useRef<THREE.Mesh>(null)
     useRegistry(node.id, 'wall', ref)
 
@@ -18,6 +20,8 @@ export function WallRenderer({node}: { node: WallNode }) {
 
     const selectId = useContext(SelectionContext)
     const isSelected = selectId === node.id
+
+    const events = useNodeEvents(node, 'wall')
 
     const geometry = useMemo(
         () => buildWallGeometry(node, miter),
