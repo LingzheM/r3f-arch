@@ -1,30 +1,31 @@
-import { useThree } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useEditor } from "../store/use-editor";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, type ComponentRef } from "react";
 import type { Point2D } from "../../core/lib/geometry-2d";
 import { getScope, useInteractionScope } from "../store/use-interaction-scope";
-import { screenToGround } from "../../viewer/lib/pointer-plane";
-import * as THREE from 'three'
 import { isClickGesture } from "../../viewer/lib/pointer-gesture";
-import { draftPoints, lastDraftPoint } from "../lib/interaction/scope";
+import { lastDraftPoint } from "../lib/interaction/scope";
 import { useScene } from "../../core/store/use-scene";
 import { Line } from "@react-three/drei";
+import { eventToGround } from "../../viewer/lib/pointer-plane";
+import { snapPoint } from "../../core/schema/snap-2d";
+import { documentWalls } from "../lib/interaction/wall-linking";
 
-const ndc = new THREE.Vector2()
+const PREVIEW_Y = 0.01
 
 export function WallTool() {
   const activeTool = useEditor((s) => s.activeTool)
   const { gl, camera } = useThree()
 
   // 跟随光标的橡皮筋端点。
-  const [cursor, setCursor] = useState<Point2D | null>(null)
+  const cursorRef = useRef<Point2D | null>(null)
 
   useEffect(() => {
     if (activeTool !== 'wall') return
     useInteractionScope.getState().begin({ kind: 'drafting', tool: 'wall', points: [] })
     return () => {
       useInteractionScope.getState().endIf((s) => s.kind === 'drafting')
-      setCursor(null)
+      cursorRef.current = null
     }
   }, [activeTool])
 
@@ -32,42 +33,37 @@ export function WallTool() {
     if (activeTool !== 'wall') return
     const el = gl.domElement
 
-    const toGround = (e: PointerEvent): Point2D | null => {
-      const r = el.getBoundingClientRect()
-      ndc.set(
-        ((e.clientX - r.left) / r.width) * 2 - 1,
-        -((e.clientY - r.top) / r.height) * 2 + 1,
-      )
-      return screenToGround(ndc, camera)
-    }
-
     const onPointerUp = (e: PointerEvent) => {
       if (e.button !== 0) return
       if (!isClickGesture(e)) return
 
-      const p = toGround(e)
-      if (!p) return
+      const raw = eventToGround(e, el, camera)
+      if (!raw) return
 
       const scope = getScope()
       if (scope.kind !== 'drafting') return
+
+      const point = snapPoint(raw, documentWalls())
 
       const last = lastDraftPoint(scope)
       if (last) {
         useScene.getState().addNode({
           type: 'wall',
           start: [last.x, last.y],
-          end: [p.x, p.y],
+          end: [point.x, point.y],
         })
       }
-      useInteractionScope.getState().update({ points: [p] })
+      useInteractionScope.getState().update('drafting', { points: [point] })
     }
 
-    const onPointerMove = (e: PointerEvent) => setCursor(toGround(e))
+    const onPointerMove = (e: PointerEvent) => {
+      cursorRef.current = eventToGround(e, el, camera)
+    }
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        useInteractionScope.getState().update({ points: [] })
-        setCursor(null)
+        useInteractionScope.getState().update('drafting', { points: [] })
+        cursorRef.current = null
       }
     }
 
@@ -82,21 +78,36 @@ export function WallTool() {
     }
   }, [activeTool, gl, camera])
 
-  return <WallDraftPreview cursor={cursor} />
+  if (activeTool !== 'wall') return null
+  return <WallDraftPreview cursorRef={cursorRef} />
 }
 
-function WallDraftPreview({ cursor }: { cursor: Point2D | null }) {
-  const scope = useInteractionScope((s) => s.scope)
-  const pts = draftPoints(scope)
-  const last = pts.length > 0 ? pts[pts.length - 1]! : null
+function WallDraftPreview({ cursorRef }: { cursorRef: React.RefObject<Point2D | null> }) {
+  const lineRef = useRef<ComponentRef<typeof Line>>(null)
 
-  if (!last || !cursor) return null
+  useFrame(() => {
+    const line = lineRef.current
+    if (!line) return 
+  
+    const last = lastDraftPoint(getScope())
+    const cursor = cursorRef.current
+
+    if (!last || !cursor) {
+      line.visible = false
+      return
+    }
+
+    line.visible = true
+    line.geometry.setPositions([last.x, PREVIEW_Y, last.y, cursor.x, PREVIEW_Y, cursor.y])
+    line.computeLineDistances()
+  })
 
   return (
     <Line
+      ref={lineRef}
       points={[
-        [last.x, 0.01, last.y],
-        [cursor.x, 0.01, cursor.y],
+        [0, PREVIEW_Y, 0],
+        [0, PREVIEW_Y, 0],
       ]}
       color="#0b6e5f"
       lineWidth={2}
