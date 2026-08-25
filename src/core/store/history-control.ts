@@ -64,3 +64,37 @@ export function resetSceneHistoryPause(store: PausableStore): void {
     pauseLeases.clear()
     if (hadLeases) store.temporal.getState().resume()
 }
+
+type HistoryStore<TPast> = {
+    temporal: {
+        getState(): { pastStates: TPast[] }
+        setState(partial: { pastStates: TPast[] }): void
+    }
+}
+
+function retainedPastStateCount<TPast>(before: readonly TPast[], after: readonly TPast[]): number {
+
+}
+
+export function runAsSingleSceneHistoryStep<TPast, TResult>(
+    store: HistoryStore<TPast>,
+    run: () => TResult,
+): TResult {
+
+    const before = {...store.temporal.getState().pastStates}
+
+    const result = run()
+
+    const after =store.temporal.getState().pastStates
+    const retained = retainedPastStateCount(before, after)
+    const added = after.length - retained
+
+    if (added > 1) {
+        const firstAdded = after[retained]
+        if (firstAdded !== undefined) {
+            store.temporal.setState({ pastStates: [...after.slice(0, retained), firstAdded] })
+        }
+    }
+    
+    return result
+}
