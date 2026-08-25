@@ -1,10 +1,12 @@
 import { create } from "zustand"
-import { IDLE_SCOPE, selectionEnabled, type ActiveInteractionScope, type InteractionScope } from "../lib/interaction/scope"
+import { IDLE_SCOPE, selectionEnabled, type ActiveInteractionScope, type InteractionScope, type scopeOfKind } from "../lib/interaction/scope"
+
+type ActiveKind = ActiveInteractionScope['kind']
 
 type InteractionScopeState = {
     scope: InteractionScope
     begin: (scope: ActiveInteractionScope) => void
-    update: (patch: Partial<ActiveInteractionScope>) => void
+    update: <K extends ActiveKind>(kind: K, patch: Partial<scopeOfKind<K>>) => void
     end: () => void
     endIf: (match: (s: ActiveInteractionScope) => boolean) => void 
 }
@@ -14,11 +16,9 @@ export const useInteractionScope = create<InteractionScopeState>((set, get) => (
 
     begin: (scope) => set({ scope }),
 
-    update: (patch) => 
+    update: (kind, patch) => 
         set((state) => {
             if (state.scope.kind === 'idle') return state
-        
-            if ('kind' in patch && patch.kind !== state.scope.kind) return state
             return { scope: { ...state.scope, ...patch } as InteractionScope }
         }),
     

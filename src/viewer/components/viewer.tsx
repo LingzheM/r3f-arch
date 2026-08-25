@@ -1,22 +1,42 @@
-import { Canvas } from "@react-three/fiber";
 import type { ReactNode } from "react";
+import type { AnyNodeId } from "../../core/schema/types";
+import { Canvas } from "@react-three/fiber";
 import { CameraRig } from "./camera-rig";
-import { SceneRenderer } from "./node-renderer";
+import { usePointerGesture } from "../hooks/use-pointer-gesture";
+import { useGridEvents } from "../hooks/use-grid-events";
 import { Ground } from "./ground";
+import { SelectionContext } from "./scene-context";
+import { SceneRenderer } from "./node-renderer";
 
-
-export function Viewer({ mode, children }: { mode: '3d' | 'plan'; children?: ReactNode }) {
-    return(
-        <Canvas dpr={[1, 1.5]} shadows style={{ background: '#fafafa' }}>
+export function Viewer({
+    mode,
+    selectId = null,
+    children,
+}: {
+    mode: '3d' | 'plan',
+    selectId?: AnyNodeId | null,
+    children?: ReactNode
+}) {
+    return (
+        <Canvas>
             <CameraRig mode={mode} />
+            <ViewInput />
 
-            <ambientLight intensity={0.6} />
-            <directionalLight position={[10, 10, 5]} intensity={1.2} castShadow />
+            <ambientLight />
+            <directionalLight />
 
             <Ground />
-            <SceneRenderer />
 
+            <SelectionContext.Provider value={selectId}>
+                <SceneRenderer />
+            </SelectionContext.Provider>
             {children}
         </Canvas>
     )
+}
+
+function ViewInput(): null {
+    usePointerGesture()
+    useGridEvents()
+    return null
 }
