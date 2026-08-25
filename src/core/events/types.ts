@@ -10,6 +10,7 @@ export interface NodeEvent<N extends AnyNode = AnyNode> {
     point: [number, number, number]
     object: THREE.Object3D
     stopPropagation: () => void
+    nativeEvent: PointerEvent
 }
 
 export interface GridEvent {

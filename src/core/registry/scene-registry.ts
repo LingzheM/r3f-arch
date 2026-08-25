@@ -18,7 +18,7 @@ export function useRegistry(
 
         obj.userData.nodeId = id
         sceneRegistry.nodes.set(id, obj)
-        ;(sceneRegistry.byType[type] ?? = new Set()).add(id)
+        ;(sceneRegistry.byType[type] ??= new Set()).add(id)
 
         return () => {
             sceneRegistry.nodes.delete(id)

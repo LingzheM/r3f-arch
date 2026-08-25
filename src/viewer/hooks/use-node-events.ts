@@ -15,6 +15,7 @@ export function useNodeEvents<K extends AnyNodeType>(node: NodeByKind<K>, type: 
             point: [e.point.x, e.point.y, e.point.z],
             object: e.object,
             stopPropagation: () => e.stopPropagation(),
+            nativeEvent: e.nativeEvent,
         }
 
         emitter.emit(`${type}:${suffix}` as NodeEventKey, payload as NodeEvent)

@@ -6,6 +6,9 @@ import { useEffect } from "react";
 import { MOUSE } from "three";
 import { useViewer } from "../viewer/store/use-viewer";
 import { SelectionManager } from "./components/selection-manager";
+import { useHistoryShortcuts } from "./hooks/use-history-shortcuts";
+import { MoveTool } from "./tools/move-tool";
+import { EndpointHandles } from "./tools/endpoint-handles";
 
 const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN}
 
@@ -13,6 +16,10 @@ export function App() {
     const viewMode = useEditor((s) => s.viewMode)
     const activeTool = useEditor((s) => s.activeTool)
     const selectId = useEditor((s) => s.selectId)
+
+    const inputDragging = useViewer((s) => s.inputDragging)
+
+    useHistoryShortcuts()
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
@@ -42,6 +49,8 @@ export function App() {
                 />
                 <SelectionManager />
                 <WallTool />
+                <MoveTool />
+                <EndpointHandles />
             </Viewer>
 
             <div style={{
@@ -50,7 +59,8 @@ export function App() {
                 borderRadius:3, pointerEvents: 'none',
             }}>
                 {activeTool} · {viewMode} · sel={selectId ?? '—'}
-                &nbsp;|&nbsp; W 墙 · V 选 · Tab 视图 · Esc 断链
+                &nbsp;|&nbsp; W 墙 · V 选 · Tab 视图 · Esc 断链/取消
+                &nbsp;|&nbsp; 拖墙移动 · 拖端点球 · Del 删 · Ctrl+Z 撤销
             </div>
         </div>
     )
