@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { AnyNodeId } from "../../core/schema/types";
 import { Canvas } from "@react-three/fiber";
 import { CameraRig } from "./camera-rig";
@@ -7,6 +7,8 @@ import { useGridEvents } from "../hooks/use-grid-events";
 import { Ground } from "./ground";
 import { SelectionContext } from "./scene-context";
 import { SceneRenderer } from "./node-renderer";
+import { registerAllNodes } from "../nodes/register";
+import { GeometrySystem } from "../systems/geometry-system";
 
 export function Viewer({
     mode,
@@ -17,6 +19,12 @@ export function Viewer({
     selectId?: AnyNodeId | null,
     children?: ReactNode
 }) {
+
+    useState(() => {
+        registerAllNodes()
+        return null
+    })
+
     return (
         <Canvas>
             <CameraRig mode={mode} />
@@ -29,6 +37,7 @@ export function Viewer({
 
             <SelectionContext.Provider value={selectId}>
                 <SceneRenderer />
+                <GeometrySystem />
             </SelectionContext.Provider>
             {children}
         </Canvas>
