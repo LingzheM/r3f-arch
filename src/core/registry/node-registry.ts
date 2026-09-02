@@ -24,3 +24,7 @@ export const nodeRegistry = {
         return definitions.size
     },
 }
+
+export function resetNodeRegistry(): void {
+    definitions.clear()
+}

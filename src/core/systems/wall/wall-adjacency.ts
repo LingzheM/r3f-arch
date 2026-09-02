@@ -10,7 +10,7 @@ export function getAdjacentWallIds(
     const adjacent = new Set<AnyNodeId>
     if (dirtyWallIds.size === 0) return adjacent
 
-    const byId = new Map(walls.map((w) => [w.id, w] as const))
+    const byId = new Map<AnyNodeId, WallNode>(walls.map((w) => [w.id, w] as const))
 
     for (const dirtyId of dirtyWallIds) {
         const dirty = byId.get(dirtyId)
@@ -32,7 +32,7 @@ export function getAdjacentWallIds(
             const startKey = quantizeKey(start, JUNCTION_TOLERANCE)
             const endKey = quantizeKey(end, JUNCTION_TOLERANCE)
             if (
-                startKey === dirtyEndKey ||
+                startKey === dirtyStartKey ||
                 startKey === dirtyEndKey ||
                 endKey === dirtyStartKey ||
                 endKey === dirtyEndKey

@@ -16,11 +16,11 @@ export type NodeAppearance = { selected: boolean }
 export type NodeDefinition<N extends AnyNode = AnyNode, L = unknown> = {
     kind: N['type']
 
-    geometry: (node: N, ctx: GeometryContext<L>, appearance: NodeAppearance) => THREE.Object3D
+    geometry?: (node: N, ctx: GeometryContext<L>, appearance: NodeAppearance) => THREE.Object3D
 
     computeLevelData?: (siblings: readonly N[]) => L
 
-    renderer?: ComponentType<{node: N}>
+    renderer?: ComponentType<{ node: N }>
 
     system?: ComponentType
 }

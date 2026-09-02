@@ -1,4 +1,4 @@
-import { use, useEffect } from "react";
+import { useEffect } from "react";
 import { getScope } from "../store/use-interaction-scope";
 import { useScene } from "../../core/store/use-scene";
 import { useEditor } from "../store/use-editor";
@@ -8,7 +8,7 @@ export function useHistoryShortcuts(): void {
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (isTypingTarget(e.target)) return
-            
+
             if (getScope().kind !== 'idle') return
 
             const mod = e.ctrlKey || e.metaKey
@@ -17,14 +17,14 @@ export function useHistoryShortcuts(): void {
             if (mod && key === 'z' && !e.shiftKey) {
                 e.preventDefault()
                 useScene.temporal.getState().undo()
-                
+                afterHistoryJump()
                 return
             }
 
             if (mod && ((key === 'z' && e.shiftKey) || key === 'y')) {
                 e.preventDefault()
                 useScene.temporal.getState().redo()
-
+                afterHistoryJump()
                 return
             }
 
@@ -42,7 +42,7 @@ export function useHistoryShortcuts(): void {
 
         window.addEventListener('keydown', onKeyDown)
         return () => window.removeEventListener('keydown', onKeyDown)
-    })
+    }, [])
 }
 
 function afterHistoryJump(): void {

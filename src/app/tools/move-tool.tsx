@@ -3,7 +3,6 @@ import { midpoint, type Point2D } from "../../core/lib/geometry-2d"
 import { wallEnd, wallStart, type WallNode } from "../../core/schema/wall"
 import { useEditor } from "../store/use-editor"
 import { useEffect, useRef } from "react"
-import * as THREE from 'three'
 import { startDragSession, type DragSession } from "../lib/interaction/drag-session"
 import { documentWalls, linkedWallOverrides, type OverrideEntry } from "../lib/interaction/wall-linking"
 import { runAsSingleSceneHistoryStep } from "../../core/store/history-control"
@@ -40,10 +39,10 @@ export function MoveTool(): null {
         const commit = () => {
             const entries = entriesRef.current
             runAsSingleSceneHistoryStep(useScene, () => {
-                const { updateNode }  = useScene.getState()
+                const { updateNode } = useScene.getState()
                 for (const [id, patch] of entries) updateNode(id, patch)
             })
-        teardown()
+            teardown()
         }
 
         const cancel = () => {
@@ -84,7 +83,7 @@ export function MoveTool(): null {
             const self: OverrideEntry = [
                 candidate.wall.id,
                 { start: [nextStart.x, nextStart.y], end: [nextEnd.x, nextEnd.y] }
-                
+
             ]
 
             const linked = linkedWallOverrides(
@@ -157,6 +156,7 @@ export function MoveTool(): null {
             window.removeEventListener('pointerup', onCandidateUp)
 
             sessionRef.current?.end('cancel')
+            candidateRef.current = null
             useViewer.getState().setInputDragging(false)
         }
     }, [activeTool, gl, camera])

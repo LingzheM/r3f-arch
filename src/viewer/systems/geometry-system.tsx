@@ -35,6 +35,7 @@ export function GeometrySystem(): null {
                 .filter((n) => n.type === node.type)
                 .map((n) => getEffectiveNode(n))
             effectiveBykind.set(node.type, siblings)
+            levelDataBykind.set(node.type, def.computeLevelData(siblings))
         }
 
         for (const id of dirtyIds) {
@@ -75,7 +76,7 @@ export function GeometrySystem(): null {
                 child.userData.__fromGeometry = true
                 group.add(child)
             }
-
+            clearDirty(id)
         }
     })
 
@@ -87,7 +88,7 @@ function disposeGeometryChildren(group: THREE.Group): void {
         if (child.userData.__fromGeometry !== true) continue
         group.remove(child)
         disposeSubtree(child)
-        
+
     }
 }
 

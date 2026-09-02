@@ -10,7 +10,7 @@ import { useHistoryShortcuts } from "./hooks/use-history-shortcuts";
 import { MoveTool } from "./tools/move-tool";
 import { EndpointHandles } from "./tools/endpoint-handles";
 
-const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN}
+const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
 
 export function App() {
     const viewMode = useEditor((s) => s.viewMode)
@@ -41,11 +41,12 @@ export function App() {
         <div style={{ position: 'fixed', inset: 0 }}>
             <Viewer mode={viewMode} selectId={selectId}>
                 <OrbitControls
-                makeDefault
-                enableRotate={!isPlan}
-                mouseButtons={isPlan ? PLAN_MOUSE_BUTTONS : undefined}
-                onStart={() => useViewer.getState().setCameraDragging(true)}
-                onEnd={() => useViewer.getState().setCameraDragging(false)}
+                    makeDefault
+                    enabled={!inputDragging}
+                    enableRotate={!isPlan}
+                    mouseButtons={isPlan ? PLAN_MOUSE_BUTTONS : undefined}
+                    onStart={() => useViewer.getState().setCameraDragging(true)}
+                    onEnd={() => useViewer.getState().setCameraDragging(false)}
                 />
                 <SelectionManager />
                 <WallTool />
@@ -55,8 +56,8 @@ export function App() {
 
             <div style={{
                 position: 'absolute', left: 12, bottom: 12, padding: '6px 10px',
-                font:'12px ui-monospace, monospace', background: 'rgba(255,255,255,.85)',
-                borderRadius:3, pointerEvents: 'none',
+                font: '12px ui-monospace, monospace', background: 'rgba(255,255,255,.85)',
+                borderRadius: 3, pointerEvents: 'none',
             }}>
                 {activeTool} · {viewMode} · sel={selectId ?? '—'}
                 &nbsp;|&nbsp; W 墙 · V 选 · Tab 视图 · Esc 断链/取消

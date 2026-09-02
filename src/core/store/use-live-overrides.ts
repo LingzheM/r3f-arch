@@ -18,7 +18,7 @@ export const useLiveOverrides = create<LiveOverrideState>((set, get) => ({
     set: (id, values) =>
         set((state) => {
             const next = new Map(state.overrides)
-            next.set(id, { ...next.get(id), ...values })
+            next.set(id, mergeOverride(next.get(id), values))
             return { overrides: next }
         }),
 
@@ -26,7 +26,7 @@ export const useLiveOverrides = create<LiveOverrideState>((set, get) => ({
         set((state) => {
             if (entries.length === 0) return state
             const next = new Map(state.overrides)
-            for (const [id, values] of entries) next.set(id, { ...next.get(id), ...values })
+            for (const [id, values] of entries) next.set(id, mergeOverride(next.get(id), values))
             return { overrides: next }
         }),
 
@@ -48,4 +48,9 @@ export function getEffectiveNode<T extends AnyNode>(node: T): T {
     const override = useLiveOverrides.getState().overrides.get(node.id)
     if (!override) return node
     return { ...node, ...override } as T
+}
+
+
+function mergeOverride(prev: NodeOverride | undefined, next: NodeOverride): NodeOverride {
+    return { ...prev, ...next } as NodeOverride
 }

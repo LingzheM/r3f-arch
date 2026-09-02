@@ -73,7 +73,17 @@ type HistoryStore<TPast> = {
 }
 
 function retainedPastStateCount<TPast>(before: readonly TPast[], after: readonly TPast[]): number {
+    for (let start = 0; start < before.length; start += 1) {
+        const retained = before.length - start
+        if (retained > after.length) continue
 
+        let matches = true
+        for (let index = 0; index < retained; index += 1) {
+            if (before[start + index] !== after[index]) { matches = false; break }
+        }
+        if (matches) return retained
+    }
+    return 0
 }
 
 export function runAsSingleSceneHistoryStep<TPast, TResult>(
@@ -81,11 +91,11 @@ export function runAsSingleSceneHistoryStep<TPast, TResult>(
     run: () => TResult,
 ): TResult {
 
-    const before = {...store.temporal.getState().pastStates}
+    const before = [...store.temporal.getState().pastStates]
 
     const result = run()
 
-    const after =store.temporal.getState().pastStates
+    const after = store.temporal.getState().pastStates
     const retained = retainedPastStateCount(before, after)
     const added = after.length - retained
 
@@ -95,6 +105,6 @@ export function runAsSingleSceneHistoryStep<TPast, TResult>(
             store.temporal.setState({ pastStates: [...after.slice(0, retained), firstAdded] })
         }
     }
-    
+
     return result
 }

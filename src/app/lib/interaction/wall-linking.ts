@@ -34,7 +34,7 @@ export function linkedWallOverrides(
         const nextEnd = targetByKey.get(quantizeKey(wallEnd(wall), JUNCTION_TOLERANCE))
         if (!nextStart && !nextEnd) continue
 
-        const patch: NodeOverride = {}
+        const patch: Partial<WallNode> = {}
         if (nextStart) patch.start = [nextStart.x, nextStart.y]
         if (nextEnd) patch.end = [nextEnd.x, nextEnd.y]
         entries.push([wall.id, patch])

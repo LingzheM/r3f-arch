@@ -87,8 +87,8 @@ function WallDraftPreview({ cursorRef }: { cursorRef: React.RefObject<Point2D | 
 
   useFrame(() => {
     const line = lineRef.current
-    if (!line) return 
-  
+    if (!line) return
+
     const last = lastDraftPoint(getScope())
     const cursor = cursorRef.current
 
@@ -109,6 +109,7 @@ function WallDraftPreview({ cursorRef }: { cursorRef: React.RefObject<Point2D | 
         [0, PREVIEW_Y, 0],
         [0, PREVIEW_Y, 0],
       ]}
+      visible={false}
       color="#0b6e5f"
       lineWidth={2}
       dashed

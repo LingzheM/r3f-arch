@@ -1,10 +1,9 @@
-import { events } from "@react-three/fiber"
 import { acquireSceneHistoryPause } from "../../../core/store/history-control"
 import { useScene } from "../../../core/store/use-scene"
 import { useViewer } from "../../../viewer/store/use-viewer"
 
 export type DragSession = {
-    end: (mode: 'commit' | 'cancel') => void 
+    end: (mode: 'commit' | 'cancel') => void
 }
 
 type DragSessionHandlers = {
