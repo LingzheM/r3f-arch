@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import type { GridEvent, NodeEvent } from "../../core/events/types";
+import type { GridEvent, NodeEvent, NodeEventKey } from "../../core/events/types";
 import { isSelectionEnabled } from "../store/use-interaction-scope";
 import { useEditor } from "../store/use-editor";
 import { emitter } from "../../core/events/bus";
+import { nodeRegistry } from "../../core/registry/node-registry";
 
 export function SelectionManager(): null {
     useEffect(() => {
@@ -17,10 +18,16 @@ export function SelectionManager(): null {
             useEditor.getState().select(null)
         }
 
-        emitter.on('wall:click', onNodeClick)
+        const clickKeys = [...nodeRegistry.entries()].map(
+            ([kind]) => `${kind}:click` as NodeEventKey,
+        )
+
+        for (const key of clickKeys) emitter.on(key, onNodeClick)
         emitter.on('grid:click', onGridClick)
+
+
         return () => {
-            emitter.off('wall:click', onNodeClick)
+            for (const key of clickKeys) emitter.off(key, onNodeClick)
             emitter.off('grid:click', onGridClick)
         }
     }, [])

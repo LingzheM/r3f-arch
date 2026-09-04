@@ -10,6 +10,7 @@ import { useHistoryShortcuts } from "./hooks/use-history-shortcuts";
 import { MoveTool } from "./tools/move-tool";
 import { EndpointHandles } from "./tools/endpoint-handles";
 import { PolygonTool } from "./tools/polygon-tool";
+import { ColumnTool } from "./tools/column-tool";
 
 const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
 
@@ -32,6 +33,7 @@ export function App() {
             if (e.key.toLowerCase() === 'v') useEditor.getState().setActiveTool('select')
             if (e.key.toLowerCase() === 'f') useEditor.getState().setActiveTool('slab')
             if (e.key.toLowerCase() === 'g') useEditor.getState().setActiveTool('ceiling')
+            if (e.key.toLowerCase() === 'c') useEditor.getState().setActiveTool('column')
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
@@ -55,6 +57,7 @@ export function App() {
                 <WallTool />
                 <PolygonTool tool="slab" />
                 <PolygonTool tool="ceiling" />
+                <ColumnTool />
                 <MoveTool />
                 <EndpointHandles />
             </Viewer>
