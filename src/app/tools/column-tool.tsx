@@ -48,7 +48,8 @@ export function ColumnTool() {
     }
 
     const onPointerMove = (e: PointerEvent) => {
-      cursorRef.current = eventToGround(e, el, camera)
+      const raw = eventToGround(e, el, camera)
+      cursorRef.current = raw ? snapToGrid(raw) : null
     }
 
     el.addEventListener('pointerup', onPointerUp)
@@ -86,7 +87,7 @@ function ColumnGhost({ cursorRef }: { cursorRef: RefObject<Point2D | null> }) {
     <group ref={groupRef} visible={false}>
       <mesh position={[0, DEFAULT_COLUMN_HEIGHT / 2, 0]} raycast={NEVER_RAYCAST}>
         <cylinderGeometry
-          args={[DEFAULT_COLUMN_RADIUS, DEFAULT_COLUMN_RADIUS, DEFAULT_COLUMN_RADIUS, 24]}
+          args={[DEFAULT_COLUMN_RADIUS, DEFAULT_COLUMN_RADIUS, DEFAULT_COLUMN_HEIGHT, 24]}
         />
         <meshStandardMaterial
           color="#0b6e5f"
