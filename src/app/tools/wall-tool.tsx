@@ -109,7 +109,6 @@ function WallDraftPreview({ cursorRef }: { cursorRef: React.RefObject<Point2D | 
         [0, PREVIEW_Y, 0],
         [0, PREVIEW_Y, 0],
       ]}
-      visible={false}
       color="#0b6e5f"
       lineWidth={2}
       dashed
