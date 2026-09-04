@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { AnyNodeId } from "../../core/schema/types";
 
-export type Tool = 'select' | 'wall'
+export type Tool = 'select' | 'wall' | 'slab' | 'ceiling'
 export type ViewMode = '3d' | 'plan'
 
 type EditorState = {

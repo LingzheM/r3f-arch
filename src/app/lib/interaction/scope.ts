@@ -2,10 +2,13 @@ import type { Point2D } from "../../../core/lib/geometry-2d";
 import type { AnyNodeId } from "../../../core/schema/types";
 
 export type WallHandle = 'start' | 'end'
+export type PolygonToolKind = 'slab' | 'ceiling'
+export type DraftToolKind = 'wall' | PolygonToolKind
 
-export type InteractionScope = 
+export type InteractionScope =
     | { kind: 'idle' }
-    | { kind: 'drafting'; tool: 'wall'; points: Point2D[] }
+    | { kind: 'drafting'; tool: DraftToolKind; points: Point2D[] }
+    | { kind: 'placing'; tool: 'column' }
     | { kind: 'moving'; nodeId: AnyNodeId; origin: Point2D }
     | { kind: 'handle-drag'; nodeId: AnyNodeId; handle: WallHandle }
 
@@ -19,7 +22,7 @@ export const IDLE_SCOPE: InteractionScope = { kind: 'idle' }
 const NO_POINTS: readonly Point2D[] = Object.freeze([])
 
 export function isIdle(s: InteractionScope): s is { kind: 'idle' } {
-    return s.kind === 'idle'   
+    return s.kind === 'idle'
 }
 
 export function isActive(s: InteractionScope): s is ActiveInteractionScope {

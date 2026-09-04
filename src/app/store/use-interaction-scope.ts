@@ -18,7 +18,7 @@ export const useInteractionScope = create<InteractionScopeState>((set, get) => (
 
     update: (kind, patch) =>
         set((state) => {
-            if (state.scope.kind === kind) return state
+            if (state.scope.kind !== kind) return state
             return { scope: { ...state.scope, ...patch } as InteractionScope }
         }),
 

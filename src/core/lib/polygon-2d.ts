@@ -12,6 +12,6 @@ export function signedArea(polygon: readonly Point2D[]): number {
   return sum / 2
 }
 
-export function polygon(polygon: readonly Point2D[]): number {
+export function polygonArea(polygon: readonly Point2D[]): number {
   return Math.abs(signedArea(polygon))
 }

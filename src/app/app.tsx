@@ -9,6 +9,7 @@ import { SelectionManager } from "./components/selection-manager";
 import { useHistoryShortcuts } from "./hooks/use-history-shortcuts";
 import { MoveTool } from "./tools/move-tool";
 import { EndpointHandles } from "./tools/endpoint-handles";
+import { PolygonTool } from "./tools/polygon-tool";
 
 const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
 
@@ -29,6 +30,8 @@ export function App() {
             }
             if (e.key.toLowerCase() === 'w') useEditor.getState().setActiveTool('wall')
             if (e.key.toLowerCase() === 'v') useEditor.getState().setActiveTool('select')
+            if (e.key.toLowerCase() === 'f') useEditor.getState().setActiveTool('slab')
+            if (e.key.toLowerCase() === 'g') useEditor.getState().setActiveTool('ceiling')
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
@@ -50,6 +53,8 @@ export function App() {
                 />
                 <SelectionManager />
                 <WallTool />
+                <PolygonTool tool="slab" />
+                <PolygonTool tool="ceiling" />
                 <MoveTool />
                 <EndpointHandles />
             </Viewer>
@@ -60,7 +65,8 @@ export function App() {
                 borderRadius: 3, pointerEvents: 'none',
             }}>
                 {activeTool} · {viewMode} · sel={selectId ?? '—'}
-                &nbsp;|&nbsp; W 墙 · V 选 · Tab 视图 · Esc 断链/取消
+                &nbsp;|&nbsp; W 墙 · F 楼板 · G 天花 · C 柱（Shift=方） · V 选 · Tab 视图
+                &nbsp;|&nbsp; 多边形：点回起点 或 Enter 闭合 · Esc 取消
                 &nbsp;|&nbsp; 拖墙移动 · 拖端点球 · Del 删 · Ctrl+Z 撤销
             </div>
         </div>
