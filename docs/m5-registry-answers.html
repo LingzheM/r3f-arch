@@ -1,0 +1,1808 @@
+<title>M5 参考答案</title>
+<style>
+:root {
+  --paper:#EDF1EF; --card:#F8FAF9; --code-bg:#E4EBE8;
+  --ink:#131B19; --ink-2:#4A5754; --ink-3:#74827E;
+  --rule:#C4CFCB; --rule-soft:#D7E0DC;
+  --accent:#0B6E5F; --accent-bg:#DBE9E5;
+  --warn:#9E4520; --warn-bg:#F1E2D9;
+  --core:#0B6E5F;  --core-bg:#DBE9E5;
+  --viewer:#2A5A79; --viewer-bg:#DBE5EC;
+  --app:#6A5843;   --app-bg:#ECE5DB;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --body: Georgia, "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+    --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+    --rule:#2A3733; --rule-soft:#1E2926;
+    --accent:#4FC3AA; --accent-bg:#12312B;
+    --warn:#E2916A; --warn-bg:#32211A;
+    --core:#4FC3AA;  --core-bg:#12312B;
+    --viewer:#79B4DA; --viewer-bg:#14262F;
+    --app:#C9AC85;   --app-bg:#2A2318;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+  --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+  --rule:#2A3733; --rule-soft:#1E2926;
+  --accent:#4FC3AA; --accent-bg:#12312B;
+  --warn:#E2916A; --warn-bg:#32211A;
+  --core:#4FC3AA;  --core-bg:#12312B;
+  --viewer:#79B4DA; --viewer-bg:#14262F;
+  --app:#C9AC85;   --app-bg:#2A2318;
+}
+* { box-sizing:border-box; }
+body {
+  background:var(--paper); color:var(--ink); font-family:var(--body);
+  font-size:17px; line-height:1.72; margin:0; padding:0 24px 120px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:940px; margin:0 auto; }
+.prose { max-width:68ch; }
+.masthead { padding:72px 0 0; }
+.eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 20px; display:flex; gap:14px; flex-wrap:wrap;
+}
+.eyebrow b { color:var(--accent); font-weight:600; }
+h1 {
+  font-family:var(--mono); font-size:clamp(32px,5.5vw,50px); line-height:1.08;
+  letter-spacing:-.02em; font-weight:600; margin:0 0 18px; text-wrap:balance;
+}
+.standfirst { font-size:19px; color:var(--ink-2); max-width:60ch; margin:0 0 8px; }
+.dim { position:relative; height:1px; background:var(--rule); border:0; margin:56px 0 40px; }
+.dim::before,.dim::after { content:""; position:absolute; top:-4px; width:1px; height:9px; background:var(--rule); }
+.dim::before{left:0} .dim::after{right:0}
+h2 {
+  font-family:var(--mono); font-size:13px; letter-spacing:.16em; text-transform:uppercase;
+  font-weight:600; color:var(--accent); margin:0 0 6px;
+}
+h2 .num { color:var(--ink-3); margin-right:12px; }
+.h2sub { font-family:var(--mono); font-size:22px; font-weight:600; margin:0 0 24px; letter-spacing:-.01em; }
+h3 { font-family:var(--mono); font-size:16px; font-weight:600; margin:34px 0 10px; }
+h4 { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--accent); margin:24px 0 6px; }
+p { margin:0 0 16px; }
+ul,ol { margin:0 0 16px; padding-left:22px; }
+li { margin-bottom:7px; }
+strong { font-weight:700; color:var(--ink); }
+em { font-style:italic; color:var(--ink-2); }
+code { font-family:var(--mono); font-size:.86em; background:var(--code-bg); padding:1px 5px; border-radius:2px; }
+pre {
+  background:var(--code-bg); border:1px solid var(--rule-soft); border-radius:3px;
+  padding:16px 18px; overflow-x:auto; margin:14px 0 18px; line-height:1.62;
+}
+pre code { background:none; padding:0; font-size:13px; white-space:pre; }
+.cm { color:var(--ink-3); }
+.cw { color:var(--warn); }
+.step {
+  display:grid; grid-template-columns:52px 1fr; gap:0 20px;
+  padding:26px 0; border-top:1px solid var(--rule-soft);
+}
+.step:first-of-type { border-top:1px solid var(--rule); }
+.step-n { font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink-3); padding-top:4px; font-variant-numeric:tabular-nums; }
+.step-body { min-width:0; }
+.step-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.step-title { font-family:var(--mono); font-size:17px; font-weight:600; margin:0; }
+.step-body > p { max-width:64ch; }
+.tag {
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  font-weight:600; padding:3px 8px; border-radius:2px; white-space:nowrap;
+}
+.tag.core{color:var(--core);background:var(--core-bg)}
+.tag.viewer{color:var(--viewer);background:var(--viewer-bg)}
+.tag.app{color:var(--app);background:var(--app-bg)}
+.tag.debt{color:var(--warn);background:var(--warn-bg)}
+.trap {
+  background: repeating-linear-gradient(-45deg, transparent 0 6px,
+    color-mix(in srgb, var(--warn) 7%, transparent) 6px 7px), var(--warn-bg);
+  border-left:3px solid var(--warn); padding:14px 18px; margin:18px 0; border-radius:0 3px 3px 0;
+}
+.trap-label {
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  font-weight:600; color:var(--warn); display:block; margin-bottom:6px;
+}
+.trap p:last-child,.trap ul:last-child { margin-bottom:0; }
+.note { border-left:3px solid var(--rule); padding:2px 0 2px 18px; margin:18px 0; color:var(--ink-2); font-size:16px; }
+.note p:last-child { margin-bottom:0; }
+.tablewrap { overflow-x:auto; margin:18px 0 24px; }
+table { border-collapse:collapse; width:100%; font-family:var(--mono); font-size:13px; min-width:560px; }
+th {
+  text-align:left; font-weight:600; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule); padding:0 14px 8px 0;
+}
+td { padding:9px 14px 9px 0; border-bottom:1px solid var(--rule-soft); vertical-align:top; line-height:1.55; }
+td:last-child,th:last-child { padding-right:0; }
+.check { list-style:none; padding:0; margin:0; }
+.check li {
+  display:grid; grid-template-columns:26px 1fr; gap:10px; padding:11px 0;
+  border-bottom:1px solid var(--rule-soft); margin:0;
+}
+.check li::before { content:""; width:14px; height:14px; border:1.5px solid var(--accent); border-radius:2px; margin-top:6px; }
+.defect { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--rule-soft); }
+.defect-to { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--accent); white-space:nowrap; }
+a { color:var(--accent); }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media (max-width:620px) {
+  body { font-size:16px; padding:0 18px 80px; }
+  .step { grid-template-columns:1fr; }
+  .step-n { padding-top:0; margin-bottom:4px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">
+    <span>r3f-arch</span><span>里程碑 <b>05</b> / 14</span>
+    <span style="color:var(--warn)"><b>参考答案 · 封存件</b></span>
+    <span>2026-08-26</span>
+  </p>
+  <h1>M5 参考答案</h1>
+
+  <div class="trap" style="margin-top:24px">
+    <span class="trap-label">先别读这个</span>
+    <p>
+      <strong>这份文件是 <code>m5-registry.html</code> 里留给你的那五节的一个答案，
+      外加 §07 全码。</strong>
+    </p>
+    <p>
+      写之前读它，你会得到「读懂了」；写完之后读它，你会得到「我和它哪里不一样、为什么」。
+      后者才是 §00 那七步想换来的东西。<strong>先把你自己的 §01 / §02 / §04 / §05 / §06 写出来。</strong>
+    </p>
+    <p style="margin-bottom:0">
+      卡住的地方标 <code>[卡住]</code> 就好 —— 带着具体的卡点来对照，
+      比通读一遍有用得多。
+    </p>
+  </div>
+
+  <p class="standfirst" style="margin-top:28px">
+    <strong>关于这份答案的来历：</strong>写 <code>m5-registry.html</code> 时我并没有把方案和代码做完 ——
+    §00 是原材料工作（读规格书、量行数、抽不变量、诊断你的代码），
+    §03 里我对三处分叉有倾向但没落实。这份文件是<em>之后</em>把活干完的产物：
+    做了决定、写了代码、在你 <code>src/</code> 的完整拷贝上跑绿了。
+  </p>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>验证结果：</strong><code>tsc --build --force --noEmit</code> ✅ ·
+      <code>eslint src</code> ✅ · <code>vitest run</code> ✅
+      <strong>14 文件 / 153 用例</strong>（M5 新增 18 例）·
+      <code>vite build</code> 692 modules，0 error。
+      前提是先应用 <code>m4-drag.html</code> §08 的收尾清单 —— 这份答案建在 M4 全绿之上。
+    </p>
+  </div>
+</header>
+
+<hr class="dim">
+
+<!-- ═══════════ 01 -->
+<section>
+  <h2><span class="num">01</span>这一步解决什么问题</h2>
+  <p class="h2sub">一处代码线性增长，加每个类型付一次固定成本</p>
+
+  <div class="prose">
+    <p>
+      你现在的代码里有 <strong>18 处</strong>提到 <code>'wall'</code>，散在 11 个文件。
+      但它们不是一回事，混在一起看会得出错误结论。分成三类：
+    </p>
+  </div>
+
+  <h3>A · 分发点 —— 一处代码，随类型数线性增长</h3>
+<pre><code><span class="cm">// viewer/components/node-renderer.tsx:25</span>
+switch (node.type) {
+    case 'wall':
+        return &lt;WallRenderer node={node} /&gt;
+    default: return null
+}
+</code></pre>
+  <div class="prose">
+    <p>
+      加 slab 就多一个 case，加 column 再多一个。M6 一口气加三种，这里变成四个 case。
+      <strong>这是最容易看见的那种痛，但它其实是两类里比较轻的一类</strong>——
+      一个 switch 长到 48 个 case 也只是难看，不会错。
+    </p>
+  </div>
+
+  <h3>B · 样板 —— 每个类型各付一次固定成本</h3>
+  <div class="prose">
+    <p>
+      <code>wall-renderer.tsx</code> 55 行。把它逐行分类：
+    </p>
+  </div>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>行</th><th>做什么</th><th>换成 slab 要改吗</th></tr></thead>
+    <tbody>
+      <tr><td>16–17</td><td><code>useRef</code> + <code>useRegistry(id, 'wall', ref)</code></td><td>只改字符串</td></tr>
+      <tr><td>14</td><td><code>useEffectiveNode(documentNode)</code></td><td>不改</td></tr>
+      <tr><td>24</td><td><code>useNodeEvents(node, 'wall')</code></td><td>只改字符串</td></tr>
+      <tr><td>21–22</td><td>读 <code>SelectionContext</code>，算 <code>isSelected</code></td><td>不改</td></tr>
+      <tr><td>26–29</td><td><code>useMemo</code> 建几何 + 依赖数组</td><td><strong>依赖数组要按字段重列</strong></td></tr>
+      <tr><td>31</td><td><code>useEffect</code> dispose</td><td>不改</td></tr>
+      <tr><td>33–36</td><td><code>useMemo</code> 算 transform</td><td>不改（但 slab 没有 transform）</td></tr>
+      <tr><td>44–58</td><td><code>&lt;mesh&gt;</code> + 材质</td><td>不改</td></tr>
+      <tr><td colspan="3" style="padding-top:12px"><strong>真正 wall-specific 的：<code>buildWallGeometry(node, miter)</code> 一行 + 两个颜色常量。</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="prose">
+    <p>
+      <strong>55 行里 52 行是样板。</strong>M6 加三种类型 = 复制粘贴三遍这 52 行，
+      而且每一遍都有机会把 <code>useMemo</code> 的依赖数组抄错 ——
+      抄错的表现是「改了参数几何不更新」，而它不产生任何红字。
+    </p>
+  </div>
+
+  <h3>C · 真·类型特有 —— 不该消灭</h3>
+  <div class="prose">
+    <p>
+      <code>wall-linking.ts:14</code> 筛墙算邻接、<code>wall-tool.tsx</code> 画墙、
+      <code>use-editor.ts</code> 的 <code>Tool</code> 联合 —— 这些本来就该按类型分。
+      <strong>注册表不该碰它们</strong>，碰了就是过度抽象。
+    </p>
+  </div>
+
+  <div class="note">
+    <p>
+      <strong>A 和 B 分开，是这一节唯一要说清楚的事。</strong>
+      它们靠不同的东西解决：A 靠<em>查表</em>（一个 Map 取代 switch），
+      B 靠<em>通用渲染器</em>（一份代码取代 N 份复制）。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>规格书把这两件事分给了两个组件</strong>：
+      <code>&lt;NodeRenderer&gt;</code> 治 A，<code>&lt;ParametricNodeRenderer&gt;</code> 治 B。
+      读源码时如果觉得「为什么要两个渲染器组件」，答案在这里。
+    </p>
+  </div>
+
+  <h3>为什么是现在，而不是 M6 之后 —— 正面回答 D10</h3>
+  <div class="prose">
+    <p>
+      D10 写的是「M1–M4 硬编码 <code>switch</code>，<strong>M5 加第三种类型时</strong>才抽注册表。
+      rule of three」。而 M5 结束时只有 wall 一种。<strong>按字面意思，现在做早了两个类型。</strong>
+    </p>
+    <p>三条理由，按份量排：</p>
+    <ol>
+      <li>
+        <strong>rule of three 数的是「第三次<em>重复</em>」，不是「第三个类型」。</strong>
+        M6 的验收原文是「加第三种类型的工作量 ≈ 加第二种，<em>这一条本身就是对 M5 的检验</em>」——
+        如果 M5 之后再抽，M6 就没有可检验的东西了，你只能事后说「好像是快了点」。
+        <strong>先建再验证，和先重复三遍再抽，得到的是同一份代码，但只有前者能验收。</strong>
+      </li>
+      <li>
+        <strong>M4 已经把地基建好了，而且它现在零消费者。</strong>
+        <code>useScene.dirtyNodes</code> 是 M4 建的，<code>GeometrySystem</code> 是它的第一个用户；
+        <code>sceneRegistry.byType</code> 有写入无读者。
+        地基放着不用会腐坏——M4 §08 B 组第 09 条（<code>updateNode</code> 没接脏标记）
+        就是它腐坏的第一个证据：<em>没人消费，所以没人发现它是错的。</em>
+      </li>
+      <li>
+        <strong>M6 的三种类型不是「三次重复」，是「一次×3」。</strong>
+        slab / ceiling / column 会在同一个时间段写完。
+        如果 M5 不做，M6 就是「复制粘贴三遍 52 行样板，然后立刻回头抽掉」——
+        那不是 rule of three，那是明知故犯。
+      </li>
+    </ol>
+    <p style="margin-bottom:0">
+      <strong>D10 不需要推翻，需要补一句限定：</strong>
+      <em>「rule of three 数的是重复次数。当 N 个用户会在同一个里程碑内一起出现时，
+      提前抽象不算违反——因为『三次重复』根本不会分三次发生。」</em>
+      这一句值得追加成 <code>DECISIONS.md</code> 的一条新决策（不改 D10，引用它）。
+    </p>
+  </div>
+
+  <h3>这笔账</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th></th><th>M4 现状</th><th>M5 之后</th></tr></thead>
+    <tbody>
+      <tr><td>加一种参数化类型要写的文件</td><td>1 个 renderer.tsx（55 行）+ 1 个 case</td>
+        <td>1 个 <code>definition.ts</code>（<strong>9 行</strong>）+ 1 个纯 builder</td></tr>
+      <tr><td>要改的框架文件</td><td>1（<code>node-renderer.tsx</code>）</td><td><strong>0</strong></td></tr>
+      <tr><td>几何能不能单测</td><td>不能（锁在 <code>useMemo</code> 里）</td><td><strong>能</strong>（纯函数）</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="prose" style="margin-bottom:0">
+    <strong>M6 加三种类型就回本</strong>：省下 3×52 = 156 行样板，
+    代价是 M5 的 115 行框架（见 §07 末尾的实测账）。
+  </p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 02 -->
+<section>
+  <h2><span class="num">02</span>机制说明</h2>
+  <p class="h2sub">三个字段、两个组件、三处分叉的决定</p>
+
+  <h3>三复选框：没有判别标签，「声明即参与」</h3>
+  <div class="prose">
+    <p>规格书原话是 <em>"There is no discriminator tag — presence is participation"</em>。</p>
+  </div>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th><code>geometry</code></th><th><code>renderer</code></th><th>谁挂载</th><th>谁填几何</th><th>例</th></tr></thead>
+    <tbody>
+      <tr><td>✓</td><td>—</td><td><code>ParametricNodeRenderer</code></td><td><code>GeometrySystem</code></td>
+        <td><strong>wall（M5）</strong>、slab / column（M6）</td></tr>
+      <tr><td>—</td><td>✓</td><td>你的组件</td><td>你的组件</td><td>GLB 家具、<code>&lt;Html&gt;</code> 标注（本项目不做）</td></tr>
+      <tr><td>✓</td><td>✓</td><td>你的组件</td><td><code>GeometrySystem</code></td><td>自定义挂载 + 参数化几何</td></tr>
+      <tr><td>—</td><td>—</td><td>无</td><td>无</td><td>纯结构节点（M8 的 site / building / level）</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="prose">
+    <p>
+      <strong>为什么不用一个 <code>kind: 'parametric' | 'custom'</code> 的标签？</strong>
+      因为第三行和第四行都存在。标签只能表达互斥，而这三个字段是<em>正交</em>的。
+      用标签的话，第三行要发明一个 <code>'custom-parametric'</code>，
+      第四行要发明一个 <code>'none'</code>——
+      <strong>而每发明一个标签值，所有消费点都要多一个分支。</strong>
+      这正好是注册表要消灭的那种东西，在注册表内部复现一遍就荒唐了。
+    </p>
+  </div>
+
+  <h3>两个组件的分工</h3>
+<pre><code><span class="cm">NodeRenderer（39 行）—— 治「分发点」</span>
+  查表 → def.renderer ? 用它 : def.geometry ? 通用渲染器 : 不渲染
+  <span class="cm">加多少类型都不改这个文件</span>
+
+<span class="cm">ParametricNodeRenderer（44 行）—— 治「样板」</span>
+  空 group + useRegistry + useNodeEvents + 标脏
+  <span class="cm">每个参数化类型共用这一份</span>
+
+<span class="cm">GeometrySystem（134 行）—— 每帧的重建循环</span>
+  脏集 → computeLevelData（每类一次）→ def.geometry（每节点一次）
+       → dispose 旧子节点 → 挂新子节点 → clearDirty
+</code></pre>
+
+  <h3>三处分叉的决定</h3>
+
+  <div class="step">
+    <div class="step-n">?1</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">定义放哪层</h3><span class="tag viewer">选了候选甲</span></div>
+      <p>
+        <code>NodeDefinition</code> <strong>类型</strong>放 <code>core/registry/</code>，
+        用 <code>import type * as THREE from 'three'</code>——
+        编译后整行消失，是 D4 已记录在案的例外，
+        <code>eslint.config.js</code> 的 <code>allowTypeImports: true</code> 已放行。
+        对照仓库 <code>core/src/registry/types.ts:2</code> 一字不差地这么写。
+      </p>
+      <p>
+        <strong>定义<em>实例</em></strong>（<code>wallDefinition</code>）和 builder 放
+        <code>viewer/nodes/wall/</code>——它们要 <code>new THREE.ExtrudeGeometry()</code>，是运行时依赖。
+      </p>
+      <p><strong>为什么不加第四层：</strong></p>
+      <ul>
+        <li>D4 的「三层」是写进 DECISIONS 的，推翻它要付一条新决策 + 一条 eslint 规则 + 一次目录搬迁，
+          而买到的只是「schema 和 definition 在同一个目录里」。</li>
+        <li>对照仓库需要 <code>packages/nodes</code> 是因为它有 <strong>48 种类型</strong>，
+          每种十几个文件（tool / panel / paint / floorplan / preview …）。我们有 8 种，每种 2 个文件。</li>
+        <li><strong>这个决定是可逆的。</strong>真到 M12/M13 觉得挤，把
+          <code>viewer/nodes/</code> 整个 <code>git mv</code> 成 <code>src/nodes/</code> 加一条 lint 规则就行。
+          现在做则要为一个还没发生的问题付代价。</li>
+      </ul>
+      <p style="margin-bottom:0">
+        <strong>放弃的那条会怎样：</strong>选丙（core 存定义、viewer 注入几何）的话，
+        <code>wallDefinition</code> 变成分两次拼起来的对象，
+        「什么时候拼完」成了隐式依赖 —— 而 M9 读档时机、测试初始化都会踩它。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">?2</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title"><code>AnyNode</code> 继续手写 <code>discriminatedUnion</code></h3><span class="tag core">不变</span></div>
+      <p>
+        诱惑是让它从 <code>nodeRegistry</code> 推出来。<strong>不行，而且理由是根本性的：</strong>
+        注册表是<em>运行时的值</em>，<code>AnyNode</code> 是<em>编译期的类型</em>。
+      </p>
+<pre><code><span class="cm">// 这一行之所以能收窄成 WallNode：</span>
+if (node.type === 'wall') node.start   <span class="cm">// ✓ 静态联合</span>
+
+<span class="cm">// 如果 AnyNode 从 Map 推导，编译器不知道 Map 里有什么，</span>
+<span class="cm">// 收窄就没了 —— 而收窄是这个项目里最常用的一件事。</span>
+</code></pre>
+      <p style="margin-bottom:0">
+        <strong>对照仓库自己也放弃了这条路。</strong>它的
+        <code>nodeRegistry.schemas()</code> 返回类型是 <code>ZodObject&lt;any&gt;[]</code>——
+        <em>any</em>。那个 <code>any</code> 就是它放弃的痕迹。
+        代价是加类型要改 <code>core/schema/types.ts</code> 一行，
+        <strong>而那一行改不改编译器会告诉你</strong>——属于「遗漏」里最良性的一种。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">?3</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">斜接走 <code>def.computeLevelData</code></h3><span class="tag viewer">删掉两个文件</span></div>
+      <p>
+        <code>ctx.siblings</code> 让每堵墙自己算一遍整层交点图 —— O(N²)，
+        拖一堵墙时每个邻居各算一次完整的斜接。<strong>不选。</strong>
+      </p>
+      <p>
+        <code>computeLevelData</code> 每帧每类跑一次，产物落进 <code>ctx.levelData</code>。
+        <strong>它和你 M4 写的 <code>level-miter-cache.ts</code> 一比一对应</strong>，
+        规格书原文：<em>"wall: <code>calculateLevelMiters(walls)</code> — every wall's mesh
+        reads its junctions from the level-wide miter graph."</em>
+      </p>
+      <div class="trap">
+        <span class="trap-label">这个选择顺手删掉了 M4 的缓存</span>
+        <p>
+          <code>level-miter-cache.ts</code>（33 行代码 + 14 个测试）在 M5 里<strong>整个消失</strong>。
+          不是因为它写得不好，是因为它解决的问题被换了个位置解决：
+        </p>
+        <ul>
+          <li>M4 的缓存挡的是「React 因为别的原因重渲染 → <code>useMemo</code> 重跑 → 全场重算」。</li>
+          <li>M5 的 <code>GeometrySystem</code> 第一行就是 <code>if (dirtyNodes.size === 0) return</code>——
+            <strong>空闲帧根本不进循环</strong>，没有可缓存的东西。</li>
+        </ul>
+        <p style="margin-bottom:0">
+          拖拽时呢？每帧都有脏节点，<code>computeLevelData</code> 每帧跑一次全量斜接。
+          而 M4 的缓存在拖拽时<em>也</em>每帧未命中（输入真的在变）。<strong>成本完全一样。</strong>
+        </p>
+      </div>
+      <p style="margin-bottom:0">
+        连带删掉的还有 <code>MiterContext</code> 和 <code>use-level-miters.ts</code>——
+        斜接不再需要一条穿过 React 树的通道。
+      </p>
+    </div>
+  </div>
+
+  <h3>一处对规格书的**故意偏离**：墙的 transform 由 builder 算</h3>
+  <div class="trap">
+    <span class="trap-label">Rule ② 说「渲染器拥有 transform」，我们做不到</span>
+    <p>
+      规格书的 <code>ParametricNodeRenderer</code> 写的是
+      <code>&lt;group position={node.position}&gt;</code>——它假设每种类型都有 <code>position</code> 字段。
+      <strong>我们的 <code>WallNode</code> 没有</strong>：它由 <code>start</code> / <code>end</code>
+      两个点定义（D3），中心和朝向是<em>导出量</em>。
+    </p>
+    <p>
+      通用渲染器不知道怎么从 start/end 推 transform，也<strong>不该</strong>知道——那是墙的领域知识。
+      解法是让 builder 返回一个「信封」：
+    </p>
+<pre style="background:transparent;border:0;padding:0;margin:10px 0"><code>root（信封，会被丢掉）
+ └─ body（带 position + rotation.y）
+     └─ mesh（顶点是局部坐标）
+</code></pre>
+    <p style="margin-bottom:0">
+      <code>GeometrySystem</code> 取的是 <code>root.children</code>，
+      所以 <code>body</code> 连同它的 transform 一起被挂到注册的 group 上。
+      <strong>Rule ② 的实质（不许把世界坐标烘进顶点）仍然成立</strong>——
+      顶点是局部的，世界位置在 <code>body.position</code> 上。
+      M6 的 slab / column 有 <code>position</code> 字段，可以走规格书的原路；
+      两条路并存不冲突。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 04 -->
+<section>
+  <h2><span class="num">04</span>建造顺序</h2>
+  <p class="h2sub">九步。方法签名 + hint，不含实现体</p>
+
+  <div class="step">
+    <div class="step-n">00</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">先把 M4 收干净</h3><span class="tag debt">欠账</span></div>
+      <p>
+        <code>m4-drag.html</code> §08 的 14 处 + 4 个测试文件，全部做完，
+        <code>pnpm verify</code> 全绿。
+      </p>
+      <p style="margin-bottom:0">
+        <strong>尤其是 B 组第 09 条</strong>（<code>updateNode</code>/<code>removeNode</code>
+        没接脏标记）。<code>GeometrySystem</code> 唯一的输入就是脏集 ——
+        脏集是错的，你第一天就会看到「拖了墙但几何不更新」，
+        然后去查 <code>GeometrySystem</code>，因为它才是新写的那个。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">跑 §00 ⑧ 那个原型</h3><span class="tag viewer">viewer</span></div>
+      <p>二十行，回答一个问题：<strong>新挂载的节点，<code>useFrame</code> 第一次跑时 group 进 registry 了吗？</strong></p>
+<pre><code><span class="cm">// 临时塞进 viewer.tsx，验完删掉</span>
+function Probe() {
+  const ref = useRef&lt;THREE.Group&gt;(null)
+  useLayoutEffect(() =&gt; console.log('[layout] ref =', !!ref.current), [])
+  useFrame(() =&gt; console.log('[frame] ref =', !!ref.current))
+  return &lt;group ref={ref} /&gt;
+}
+</code></pre>
+      <p style="margin-bottom:0">
+        <strong>不管结果是哪种，第 06 步的写法都不变</strong>——
+        因为正确写法是「取不到 group 就<em>不清脏</em>，下一帧再来」。
+        跑原型的价值是让你<em>知道</em>为什么要那么写，而不是照抄一行防御代码。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title"><code>core/registry/node-definition.ts</code></h3><span class="tag core">core</span></div>
+<pre><code>export type GeometryContext&lt;L = unknown&gt; = {
+  resolve: (id: AnyNodeId) =&gt; AnyNode | undefined
+  siblings: readonly AnyNode[]
+  levelData: L | undefined
+}
+
+export type NodeAppearance = { selected: boolean }
+
+export type NodeDefinition&lt;N extends AnyNode = AnyNode, L = unknown&gt; = {
+  kind: N['type']
+  geometry?: (node: N, ctx: GeometryContext&lt;L&gt;, appearance: NodeAppearance) =&gt; Object3D
+  computeLevelData?: (siblings: readonly N[]) =&gt; L
+  renderer?: ComponentType&lt;{ node: N }&gt;
+  system?: ComponentType
+}
+
+export type AnyNodeDefinition = NodeDefinition&lt;AnyNode, unknown&gt;
+export function asAnyDefinition&lt;N extends AnyNode, L&gt;(def: NodeDefinition&lt;N, L&gt;): AnyNodeDefinition
+</code></pre>
+      <p><strong>hint：</strong></p>
+      <ul>
+        <li><code>import type * as THREE from 'three'</code> —— <strong>必须是 type-only</strong>。
+          写成值导入的话 eslint 会红，而且 core 就真的依赖 three 了。</li>
+        <li>两层泛型（节点类型 + levelData 类型）让 <code>wallDefinition</code> 里的
+          <code>ctx.levelData</code> 直接是 <code>MiterData</code>，不用在 builder 里 cast。</li>
+        <li><code>asAnyDefinition</code> 是<strong>整个注册表唯一一处 cast</strong>。
+          把它单独命名而不是在 <code>registerNode</code> 里内联，
+          是为了让「这里丢了类型信息」这件事在代码里有个名字。</li>
+        <li><code>NodeAppearance</code> 单独一个参数位，<strong>不塞进 ctx</strong>——
+          ctx 是「场景读取」，appearance 是「呈现意图」。M14 往里加
+          <code>shading</code> / <code>colorPreset</code> 时你会庆幸分开了。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title"><code>core/registry/node-registry.ts</code></h3><span class="tag core">core</span></div>
+<pre><code>export function registerNode&lt;N extends AnyNode, L&gt;(def: NodeDefinition&lt;N, L&gt;): void
+export const nodeRegistry: {
+  get(kind: AnyNodeType): AnyNodeDefinition | undefined
+  has(kind: AnyNodeType): boolean
+  entries(): IterableIterator&lt;[AnyNodeType, AnyNodeDefinition]&gt;
+  readonly size: number
+}
+export function resetNodeRegistry(): void   <span class="cm">// 只给测试</span>
+</code></pre>
+      <p><strong>hint：</strong></p>
+      <ul>
+        <li><strong>重复 kind 直接抛，不许静默覆盖。</strong>
+          覆盖会让「改了定义没生效」变成查半天的问题：你以为在改 A，跑的是后注册的 B。</li>
+        <li><code>resetNodeRegistry</code> 现在就写。注册表活得比任何一次 mount 都久，
+          第二个测试文件调 <code>registerAllNodes()</code> 就会撞上「已经注册过了」。
+          对照仓库把它叫 <code>_reset()</code> 并特意不从 barrel 导出，同一个理由。</li>
+        <li>不要抄对照仓库的 HMR 分支（dev 时警告、prod 时抛）。
+          那是为插件市场准备的，我们没有插件。</li>
+      </ul>
+      <p style="margin-bottom:0"><strong>这一步就该写测试</strong>（6 条，见 §07）——
+        纯 Map 操作，写起来两分钟，而它锁住的「重复注册要抛」是个很容易被后来的自己改掉的决定。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title"><code>viewer/nodes/wall/geometry.ts</code></h3><span class="tag viewer">viewer</span></div>
+      <p><code>viewer/lib/wall-geometry.ts</code> 搬过来，签名换成注册表的形状：</p>
+<pre><code><span class="cm">// 原来</span>
+buildWallGeometry(wall: WallNode, miter: MiterData): THREE.BufferGeometry
+
+<span class="cm">// 现在</span>
+buildWallGeometry(node: WallNode, ctx: GeometryContext&lt;MiterData&gt;,
+                  appearance: NodeAppearance): THREE.Object3D
+computeWallLevelMiters(walls: readonly WallNode[]): MiterData
+</code></pre>
+      <p><strong>三处变化，每一处都有理由：</strong></p>
+      <ul>
+        <li><strong>返回 <code>Object3D</code> 不是 <code>BufferGeometry</code></strong>——
+          builder 现在要连材质一起负责（<code>appearance.selected</code> 决定颜色）。</li>
+        <li><strong>信封结构</strong>（<code>root &gt; body &gt; mesh</code>）——见 §02 末尾那条偏离。
+          位置挂在 <code>body</code> 上；挂在 <code>root</code> 上等于没挂，
+          因为 <code>GeometrySystem</code> 只取 <code>root.children</code>。</li>
+        <li><strong><code>ctx.levelData ?? calculateLevelMiters([node])</code></strong>——
+          没有 levelData 时退化成「只有自己」，这样 builder 在单测里能脱离系统跑。</li>
+      </ul>
+      <p style="margin-bottom:0">
+        <code>wallTransform</code> / <code>worldToLocalXZ</code> 一起搬，
+        <code>viewer/lib/wall-geometry.ts</code> 删掉。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">定义 + 注册入口</h3><span class="tag viewer">viewer</span></div>
+<pre><code><span class="cm">// viewer/nodes/wall/definition.ts —— 9 行有效代码</span>
+export const wallDefinition: NodeDefinition&lt;WallNode, MiterData&gt;
+
+<span class="cm">// viewer/nodes/register.ts</span>
+export function registerAllNodes(): void        <span class="cm">// 幂等</span>
+export function resetRegisteredNodes(): void    <span class="cm">// 测试用</span>
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">幂等不是为了省事</span>
+        <p style="margin-bottom:0">
+          React 严格模式会把 <code>useState</code> 的初始化函数<strong>跑两次</strong>，
+          第二次会撞上 <code>registerNode</code> 的「已经注册过了」。
+          所以 <code>registerAllNodes</code> 用模块级 <code>let registered</code> 守卫 ——
+          但 <code>registerNode</code> 本身<strong>仍然抛</strong>，
+          因为「两个文件声明了同一个 kind」是真 bug，必须炸出来。
+          <em>把「重入保护」和「冲突检测」放在两个不同的层次上。</em>
+        </p>
+      </div>
+      <p style="margin-bottom:0">
+        <strong>为什么不用 import 副作用</strong>（在 <code>definition.ts</code> 末尾直接
+        <code>registerNode(...)</code>）：那依赖「有人 import 了这个文件」，
+        而 tree-shaking 会积极地帮倒忙。症状是<strong>生产构建里节点画不出来，开发时一切正常</strong>。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title"><code>viewer/systems/geometry-system.tsx</code></h3><span class="tag viewer">viewer</span></div>
+<pre><code>export function GeometrySystem(): null
+</code></pre>
+      <p><strong>每帧两个阶段：</strong></p>
+<pre><code><span class="cm">阶段一 —— 按类型批处理</span>
+  脏节点里出现过的每一种 kind，若声明了 computeLevelData：
+    取该类的**全部** effective 节点 → 跑一次 → 存进 Map
+
+<span class="cm">阶段二 —— 逐个重建</span>
+  for (id of 脏集快照):
+    节点没了      → clearDirty，跳过
+    没有 geometry → clearDirty，跳过
+    group 没挂上  → **不 clearDirty**，跳过（下一帧再来）
+    建 ctx → def.geometry(effectiveNode, ctx, { selected })
+    dispose 带 __fromGeometry 的旧子节点
+    挂新子节点（逐个打上 __fromGeometry）
+    clearDirty
+</code></pre>
+      <p><strong>hint：</strong></p>
+      <ul>
+        <li>
+          <code>const dirtyNodes = useScene((s) =&gt; s.dirtyNodes)</code> ——
+          这个订阅<strong>永远不会触发</strong>（Set 引用不变），我们要的就是那个稳定引用，
+          每帧自己读 <code>.size</code>。<em>这是 M4「脏集故意不走 set()」那个决定的兑现。</em>
+        </li>
+        <li>
+          <strong>先把脏集拷成数组再遍历</strong>——循环里会 <code>clearDirty</code>，
+          边遍历边改同一个 Set 是未定义行为。
+        </li>
+        <li>
+          <strong>取不到 group 时不许 clearDirty。</strong>这是第 01 步原型要回答的那个问题的答案：
+          清了的话这个节点永远不会被建出来，症状是「读档后场景空白，直到你动一下鼠标」。
+        </li>
+        <li>
+          节点要过 <code>getEffectiveNode()</code>（文档 ⊕ 覆盖），
+          <code>computeLevelData</code> 的 siblings <strong>也要</strong>——
+          否则拖拽时主墙用的是新位置、斜接图用的是旧位置。
+        </li>
+        <li>
+          <code>selectId</code> 从 <code>SelectionContext</code> 读，
+          <strong>存进 ref</strong> 再在 <code>useFrame</code> 里用 ——
+          直接闭包捕获会让每次选中变化都重建整个 <code>useFrame</code> 回调。
+        </li>
+      </ul>
+      <div class="trap">
+        <span class="trap-label"><code>__fromGeometry</code> 现在做，三行；M7 补做，重读整条 dispose 路径</span>
+        <p style="margin-bottom:0">
+          一个注册的 group 会同时挂两种子节点：builder 造的网格、
+          和 React 渲染的宿主子节点（M7 的门窗）。不打标记就分不清，
+          重建时会把 React 挂的那些一起 dispose 掉 ——
+          <strong>症状是把门拖到墙上，门消失且再也不回来</strong>。
+          M5 还没有宿主，但代价是三行。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title"><code>ParametricNodeRenderer</code> + 改写 <code>NodeRenderer</code></h3><span class="tag viewer">viewer</span></div>
+<pre><code>export function ParametricNodeRenderer({ node }: { node: AnyNode }): JSX.Element
+</code></pre>
+      <p><strong>标脏的依赖数组是这一步全部的难点</strong>，三个来源缺一不可：</p>
+      <ul>
+        <li><code>node</code> —— 文档变了（<code>updateNode</code> 已经会标脏，这里是兜底 + 首帧）。</li>
+        <li><code>override</code> —— <strong>拖拽期主 store 一动不动</strong>。
+          M4 里几何靠 <code>useMemo</code> 依赖数组重建；现在几何归系统管，
+          而系统只看脏集。少这一项，拖动时墙不跟手。</li>
+        <li><code>isSelected</code> —— 选中高亮现在由 builder 挑颜色。
+          M4 里它是 material 的一个 prop，React 自己会更新；
+          现在 React 已经不碰材质了。少这一项，选中不变色。</li>
+      </ul>
+      <p style="margin-bottom:0">
+        <code>NodeRenderer</code> 的 <code>switch</code> 换成两条 <code>if</code>。
+        <strong><code>SceneRenderer</code> 里的 <code>MiterContext.Provider</code> 一起删掉。</strong>
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">挂进 <code>Viewer</code>，然后删掉旧的</h3><span class="tag viewer">viewer</span></div>
+      <p><strong>注册必须发生在第一次渲染<em>之前</em></strong>——<code>NodeRenderer</code> 渲染期间就要查表：</p>
+<pre><code>useState(() =&gt; { registerAllNodes(); return null })   <span class="cm">// ✓ 渲染前，只跑一次</span>
+useEffect(() =&gt; { registerAllNodes() }, [])           <span class="cm">// ✗ 晚了，第一帧什么都不画</span>
+</code></pre>
+      <p><code>&lt;GeometrySystem /&gt;</code> 挂在 <code>&lt;SceneRenderer /&gt;</code> <strong>之后</strong>——
+        它消费 <code>sceneRegistry</code> 里的 group，那是渲染器挂载时才填进去的。</p>
+      <p style="margin-bottom:0">
+        <strong>确认画面正常之后</strong>再删这四个：
+        <code>wall-renderer.tsx</code>、<code>use-level-miters.ts</code>、
+        <code>lib/wall-geometry.ts</code>、<code>lib/level-miter-cache.ts</code>（连它的测试）。
+        <em>删除排在最后，因为在它们还在的时候你随时可以退回去对比。</em>
+      </p>
+    </div>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 05 -->
+<section>
+  <h2><span class="num">05</span>验收</h2>
+  <p class="h2sub">第一条是 M5 的全部意义，其余是不许倒退</p>
+
+  <ul class="check">
+    <li><span><strong>数一数：加第二种类型要改几处。</strong>
+      改造前是 <strong>18 处 / 11 个文件</strong>（§01 量的）。
+      改造后：<code>core/schema/&lt;kind&gt;.ts</code> + <code>core/schema/types.ts</code> 加进联合
+      + <code>viewer/nodes/&lt;kind&gt;/{geometry,definition}.ts</code> + <code>register.ts</code> 一行
+      = <strong>5 处，且框架文件 0 处</strong>。</span></li>
+    <li><span><strong><code>wall-renderer.tsx</code> 不存在了。</strong>
+      这是 M5 成立与否最硬的单一证据 —— 注册表的价值是<em>消除</em>代码，不是加一层。</span></li>
+    <li><span><code>node-renderer.tsx</code> 里没有 <code>switch</code> 也没有 <code>case</code>。</span></li>
+    <li><span><strong>画面和 M4 完全一样</strong>：画墙、拖墙、拖端点、选中变色、
+      墙角严丝合缝、Ctrl+Z。<em>M5 是纯重构，任何肉眼可见的变化都是 bug。</em></span></li>
+    <li><span><strong>拖拽时墙跟手</strong>（第 07 步依赖数组里的 <code>override</code>）。</span></li>
+    <li><span><strong>点墙变色</strong>（依赖数组里的 <code>isSelected</code>）。</span></li>
+    <li><span><strong>刷新页面，墙立刻出现</strong>，不需要动鼠标（第 06 步「取不到 group 不清脏」）。</span></li>
+    <li><span><code>pnpm verify</code> 全绿。<strong>用例数应该<em>净增</em></strong>——
+      虽然删了 <code>level-miter-cache.test.ts</code> 的 14 条。</span></li>
+    <li><span><strong><code>buildWallGeometry</code> 有单测。</strong>
+      D11 说渲染层不测，而不变量 ① 刚把几何生成从渲染层里挖了出来 ——
+      three 在 Node 里能构造几何，只是不能渲染，
+      <code>geometry.attributes.position.count</code> 是可以断言的。</span></li>
+    <li><span>拖拽中<strong>没有 GPU 内存泄漏</strong>：拖 30 秒后
+      <code>renderer.info.memory.geometries</code> 不应该单调上涨（dispose 生效）。</span></li>
+  </ul>
+
+  <h3>提交回来的方式</h3>
+  <p class="prose">
+    贴四个文件：<code>node-definition.ts</code>、<code>geometry-system.tsx</code>、
+    <code>parametric-node-renderer.tsx</code>、<code>wall/definition.ts</code>，
+    加 <code>pnpm test</code> 输出，加一张「加第二种类型要改几处」的清单。
+  </p>
+  <p class="prose">
+    我按四条 review：<strong>builder 里有没有 import useScene</strong>、
+    <strong>取不到 group 时有没有 clearDirty</strong>、
+    <strong><code>__fromGeometry</code> 在不在</strong>、
+    <strong>标脏的依赖数组是不是三项都有</strong>。
+  </p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 06 -->
+<section>
+  <h2><span class="num">06</span>故意保留的缺陷</h2>
+  <p class="h2sub">M5 结束时这些必须还在</p>
+
+  <h3>来源一 · §00 ③ 标了「不要」的</h3>
+  <div class="defect"><span><code>geometryKey</code> 跳过重建（脏了但输入没变时省掉一次 dispose+rebuild）</span><span class="defect-to">→ M7</span></div>
+  <div class="defect"><span><code>surfaceRole</code> 主题着色</span><span class="defect-to">→ M14</span></div>
+  <div class="defect"><span>appearance 变化时全量重标脏（换 shading / 色板）</span><span class="defect-to">→ M14</span></div>
+  <div class="defect"><span>场景材质库 <code>scene:&lt;id&gt;</code> 引用</span><span class="defect-to">→ M14</span></div>
+  <div class="defect"><span><code>RegisteredSystems</code>（<code>def.system</code> 的挂载器）—— 字段留着，挂载器没写</span><span class="defect-to">→ M7</span></div>
+
+  <h3>来源二 · 规格书里读懂了但不做的</h3>
+  <div class="defect"><span><code>capabilities</code>（paint / roofAccessory / floorPlaced …）</span><span class="defect-to">→ M14 / M10</span></div>
+  <div class="defect"><span><code>relations.hosts</code> + <code>children</code> 反向索引</span><span class="defect-to">→ M7</span></div>
+  <div class="defect"><span><code>parametrics</code>（按 schema 生成属性面板）</span><span class="defect-to">→ M13</span></div>
+  <div class="defect"><span><code>toolHints</code> / <code>keyboardActions</code> / <code>def.tool</code></span><span class="defect-to">→ M12</span></div>
+  <div class="defect"><span><code>dirtyTracking: false</code>（结构类型不进脏集）</span><span class="defect-to">→ M8</span></div>
+  <div class="defect"><span><code>schemaVersion</code> + 迁移链</span><span class="defect-to">→ M9</span></div>
+
+  <h3>来源三 · <strong>M5 自己新引入的债</strong></h3>
+  <div class="defect"><span><code>AnyNodeDefinition</code> 擦掉了泛型 —— <code>nodeRegistry.get()</code> 拿到的
+    <code>geometry</code> 签名是 <code>(AnyNode, …)</code>，
+    <strong>系统调它时没有类型保证</strong>，靠 <code>kind</code> 和 <code>node.type</code> 一致这个约定</span><span class="defect-to">→ 待定</span></div>
+  <div class="defect"><span>注册是<strong>显式的</strong>（<code>registerAllNodes()</code>）——
+    每个碰注册表的测试都要记得调，忘了就是「注册表是空的」而不是编译错误</span><span class="defect-to">→ 待定</span></div>
+  <div class="defect"><span><code>computeLevelData</code> 是<strong>按 kind 分组，不按 level 分组</strong>——
+    名字里的 "level" 现在是谎话。M8 有了真楼层要改成 <code>(kind, levelId)</code> 双键</span><span class="defect-to">→ <strong>M8</strong></span></div>
+  <div class="defect"><span>墙的 transform 由 builder 算（§02 末尾那条偏离）——
+    和 M6 的 slab / column 会走两条不同的路</span><span class="defect-to">→ M6 复核</span></div>
+  <div class="defect"><span>选中变色靠<strong>重建整个几何</strong>。一堵墙无所谓，
+    M13 多选 50 堵墙时会一次性重建 50 个 ExtrudeGeometry</span><span class="defect-to">→ <strong>M13</strong></span></div>
+
+  <div class="note" style="margin-top:28px">
+    <p style="margin-bottom:0">
+      <strong>来源三最容易漏。</strong>只列「继承下来的」说明还没意识到注册表本身也有代价 ——
+      而上面那五条里，第三条（<code>computeLevelData</code> 名不副实）和第五条
+      （选中即重建）都是<em>因为做了 M5 才产生的</em>，M4 时它们不存在。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 07 -->
+<section>
+  <h2><span class="num">07</span>全部代码</h2>
+  <p class="h2sub">新增 8 个，改写 4 个，删 4 个 · 已验证</p>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      在一份你 <code>src/</code> 的完整拷贝上（先应用 <code>m4-drag.html</code> §08）：
+      <code>tsc --build --force --noEmit</code> ✅ · <code>eslint src</code> ✅ ·
+      <code>vitest run</code> ✅ <strong>14 文件 / 153 用例</strong> ·
+      <code>vite build</code> 692 modules，0 error。
+      <strong>没在真实浏览器里跑过</strong> —— §05 那十条肉眼验收还是要走。
+    </p>
+  </div>
+
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/registry/node-definition.ts</h3><span class="tag core">core</span><span class="tag core">新</span></div>
+      <p>25 行有效代码。三个可选字段就是全部的「三复选框」。</p><p>第 7 行那句 <code>import type * as THREE from 'three'</code> 是本文件唯一的机巧 —— type-only 导入编译后整行消失，D4 的例外，eslint 已放行。</p>
+<pre><code>// core 不许在**运行时**依赖 three（D4）。但 `Object3D` 只是个返回类型，
+// `import type` 编译后整行消失 —— 和 scene-registry.ts 用的是同一招，
+// eslint.config.js 里的 `allowTypeImports: true` 已经放行。
+//
+// 对照仓库 core/src/registry/types.ts:2 一字不差地这么写：
+//   import type { AnimationClip, BufferGeometry, Object3D, Ray } from 'three'
+import type * as THREE from 'three'
+import type { AnyNode, AnyNodeId, AnyNodeType } from '../schema/types'
+import type { ComponentType } from 'react'
+
+/**
+ * 几何构建器读场景的唯一入口。
+ *
+ * 它存在的理由只有一个：**让 builder 保持纯函数**。
+ * builder 里不许 `import { useScene }` —— 那样它就再也不能在 vitest 里裸跑，
+ * 而「几何生成可以裸测」是三复选框模型最大的一笔红利。
+ */
+export type GeometryContext&lt;L = unknown&gt; = {
+  /** 按 id 取任意节点（M7 门窗要拿宿主墙的厚度）。 */
+  resolve: (id: AnyNodeId) =&gt; AnyNode | undefined
+  /** 同类型的全部节点，含自己。墙的斜接靠它。 */
+  siblings: readonly AnyNode[]
+  /** `def.computeLevelData` 的产物。没声明那个钩子时是 undefined。 */
+  levelData: L | undefined
+}
+
+/**
+ * 和几何无关、但会改变外观的东西。
+ *
+ * 对照仓库把它们放在 ctx **之后**的独立参数位上
+ * （`geometry(node, ctx, shading, textures, colorPreset, sceneTheme)`），
+ * 而不是塞进 ctx —— ctx 是「场景读取」，这些是「呈现意图」，两回事。
+ * M5 只有一个字段，M14 会往里加。
+ */
+export type NodeAppearance = {
+  selected: boolean
+}
+
+/**
+ * 一种节点类型的全部声明。
+ *
+ * 三个可选字段**互相独立，没有判别标签** —— 规格书原话是
+ * *"presence is participation"*。四种组合都合法：
+ *
+ * | geometry | renderer | 谁来挂载 | 谁来填几何 | 例 |
+ * |---|---|---|---|---|
+ * | ✓ | — | ParametricNodeRenderer | GeometrySystem | wall（M5）、slab / column（M6） |
+ * | — | ✓ | 你的组件 | 你的组件 | GLB 家具、要 `&lt;Html&gt;` 的标注（本项目不做） |
+ * | ✓ | ✓ | 你的组件 | GeometrySystem | 自定义挂载 + 参数化几何 |
+ * | — | — | 无 | 无 | 纯结构节点（M8 的 site / building / level） |
+ */
+export type NodeDefinition&lt;N extends AnyNode = AnyNode, L = unknown&gt; = {
+  kind: N['type']
+
+  /** 纯几何构建器。返回对象的**子节点**会被挂到注册的 group 上。 */
+  geometry?: (node: N, ctx: GeometryContext&lt;L&gt;, appearance: NodeAppearance) =&gt; THREE.Object3D
+
+  /**
+   * 每帧每类跑一次的批处理，在这一类的所有 `geometry()` **之前**。
+   * 产物落进 `ctx.levelData`。
+   *
+   * 墙的斜接是它的动机：每堵墙都需要「整层的交点图」，
+   * 逐墙算是 O(N²)。M4 的 `level-miter-cache.ts` 就是这个钩子的手工版本。
+   */
+  computeLevelData?: (siblings: readonly N[]) =&gt; L
+
+  /** 自定义 React 渲染器。设了它就自己拥有挂载。M5 无人使用。 */
+  renderer?: ComponentType&lt;{ node: N }&gt;
+
+  /** 每帧的命令式工作（动画、跨类型脏级联）。M5 无人使用。 */
+  system?: ComponentType
+}
+
+/** 注册表里存的是擦掉泛型的版本 —— 取出来时不知道具体是哪一类。 */
+export type AnyNodeDefinition = NodeDefinition&lt;AnyNode, unknown&gt;
+
+/** 把带泛型的定义收窄成可入表的形状。注册点唯一的一处 cast。 */
+export function asAnyDefinition&lt;N extends AnyNode, L&gt;(
+  def: NodeDefinition&lt;N, L&gt;,
+): AnyNodeDefinition {
+  return def as unknown as AnyNodeDefinition
+}
+
+export type { AnyNodeType }</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/registry/node-registry.ts</h3><span class="tag core">core</span><span class="tag core">新</span></div>
+      <p>27 行。对照仓库同名文件 328 行，差的全是 HMR 重复注册、插件 id、按插件启用/禁用这些迁移期脚手架。</p>
+<pre><code>import type { AnyNodeType } from '../schema/types'
+import { asAnyDefinition, type AnyNodeDefinition, type NodeDefinition } from './node-definition'
+import type { AnyNode } from '../schema/types'
+
+/**
+ * 类型 → 定义。模块级单例。
+ *
+ * 对照仓库的 `registry.ts` 是 328 行，多出来的是 HMR 重复注册、插件 id、
+ * 按插件启用/禁用、`getSelectableKinds()` 之类的迁移期脚手架。
+ * 我们要的就是一个 Map 加三个方法。
+ */
+const definitions = new Map&lt;AnyNodeType, AnyNodeDefinition&gt;()
+
+export function registerNode&lt;N extends AnyNode, L&gt;(def: NodeDefinition&lt;N, L&gt;): void {
+  if (definitions.has(def.kind)) {
+    // 重复注册永远是 bug：要么 registerAllNodes() 被调了两次，
+    // 要么两个文件声明了同一个 kind。静默覆盖会让「改了定义没生效」
+    // 变成一个查半天的问题。
+    throw new Error(`[registry] 节点类型 "${def.kind}" 已经注册过了`)
+  }
+  definitions.set(def.kind, asAnyDefinition(def))
+}
+
+export const nodeRegistry = {
+  get(kind: AnyNodeType): AnyNodeDefinition | undefined {
+    return definitions.get(kind)
+  },
+  has(kind: AnyNodeType): boolean {
+    return definitions.has(kind)
+  },
+  entries(): IterableIterator&lt;[AnyNodeType, AnyNodeDefinition]&gt; {
+    return definitions.entries()
+  },
+  get size(): number {
+    return definitions.size
+  },
+}
+
+/**
+ * 只给测试用。
+ *
+ * 注册表活得比任何一次 mount 都久，测试之间不清会互相污染 ——
+ * 第二个测试文件调 `registerAllNodes()` 就会撞上「已经注册过了」。
+ * 对照仓库把它叫 `_reset()` 并特意不从包的 barrel 导出，同一个理由。
+ */
+export function resetNodeRegistry(): void {
+  definitions.clear()
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/registry/node-registry.test.ts</h3><span class="tag core">core</span><span class="tag core">新 · 6 例</span></div>
+      <p>纯 Map 操作，两分钟写完。锁住的是「重复注册要抛」——一个很容易被后来的自己顺手改成静默覆盖的决定。</p>
+<pre><code>import { beforeEach, describe, expect, it } from 'vitest'
+import type { WallNode } from '../schema/wall'
+import type { NodeDefinition } from './node-definition'
+import { nodeRegistry, registerNode, resetNodeRegistry } from './node-registry'
+
+const stub: NodeDefinition&lt;WallNode&gt; = { kind: 'wall' }
+
+beforeEach(resetNodeRegistry)
+
+describe('注册表', () =&gt; {
+  it('注册之后取得回来', () =&gt; {
+    registerNode(stub)
+    expect(nodeRegistry.has('wall')).toBe(true)
+    expect(nodeRegistry.get('wall')?.kind).toBe('wall')
+    expect(nodeRegistry.size).toBe(1)
+  })
+
+  it('没注册的类型返回 undefined，不抛', () =&gt; {
+    expect(nodeRegistry.get('wall')).toBeUndefined()
+    expect(nodeRegistry.has('wall')).toBe(false)
+  })
+
+  it('重复注册同一个 kind 直接抛', () =&gt; {
+    registerNode(stub)
+    // 静默覆盖会让「改了定义没生效」变成查半天的问题：
+    // 你以为在改 A，运行的是后注册的 B。
+    expect(() =&gt; registerNode(stub)).toThrow(/已经注册过/)
+  })
+
+  it('resetNodeRegistry 清空 —— 测试之间不许互相污染', () =&gt; {
+    registerNode(stub)
+    resetNodeRegistry()
+    expect(nodeRegistry.size).toBe(0)
+    expect(() =&gt; registerNode(stub)).not.toThrow()
+  })
+
+  it('三个字段都可选 —— 纯结构类型（M8 的 level）什么都不声明', () =&gt; {
+    registerNode(stub)
+    const def = nodeRegistry.get('wall')
+    expect(def?.geometry).toBeUndefined()
+    expect(def?.renderer).toBeUndefined()
+    expect(def?.computeLevelData).toBeUndefined()
+  })
+
+  it('entries 能遍历', () =&gt; {
+    registerNode(stub)
+    expect([...nodeRegistry.entries()].map(([kind]) =&gt; kind)).toEqual(['wall'])
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/nodes/wall/geometry.ts</h3><span class="tag viewer">viewer</span><span class="tag debt">改</span></div>
+      <p>从 <code>viewer/lib/wall-geometry.ts</code> 搬来，签名换成注册表的形状。</p><p><strong>注意 <code>buildWallGeometry</code> 的返回结构</strong>：<code>root</code> 只是个信封，<code>GeometrySystem</code> 取的是 <code>root.children</code>。所以位置和朝向必须挂在 <code>body</code> 上 —— 挂在 <code>root</code> 上会连信封一起被丢掉。这条注释我写在函数头上了，因为它是这个文件里唯一会让人踩坑的地方。</p>
+<pre><code>import * as THREE from 'three'
+import { midpoint, type Point2D } from '../../../core/lib/geometry-2d'
+import type { GeometryContext, NodeAppearance } from '../../../core/registry/node-definition'
+import { getWallHeight, type WallNode } from '../../../core/schema/wall'
+import { getWallPlanFootprint } from '../../../core/systems/wall/wall-footprint'
+import { calculateLevelMiters, type MiterData } from '../../../core/systems/wall/wall-mitering'
+
+const WALL_COLOR = '#e8e8e8'
+const WALL_SELECTED_COLOR = '#7dd3c0'
+
+const toPoint = (t: readonly [number, number]): Point2D =&gt; ({ x: t[0], y: t[1] })
+
+export function worldToLocalXZ(
+  p: Point2D,
+  position: [number, number, number],
+  rotationY: number,
+): Point2D {
+  const cos = Math.cos(rotationY)
+  const sin = Math.sin(rotationY)
+  const dx = p.x - position[0]
+  const dz = p.y - position[2]
+  return { x: dx * cos - dz * sin, y: dx * sin + dz * cos }
+}
+
+export function wallTransform(wall: WallNode): {
+  position: [number, number, number]
+  rotationY: number
+} {
+  const start = toPoint(wall.start)
+  const end = toPoint(wall.end)
+  const c = midpoint(start, end)
+  const rotationY = Math.atan2(-(end.y - start.y), end.x - start.x)
+  return { position: [c.x, 0, c.y], rotationY }
+}
+
+/** `def.computeLevelData` —— 整层跑一次，产物落进 `ctx.levelData`。 */
+export function computeWallLevelMiters(walls: readonly WallNode[]): MiterData {
+  return calculateLevelMiters([...walls])
+}
+
+/**
+ * `def.geometry` —— 纯函数。不 import useScene，不碰 store。
+ *
+ * ⚠ 返回值的结构值得看清楚：**外层 root 只是个信封**。
+ * GeometrySystem 取的是 `root.children`，把它们挂到注册的 group 上。
+ * 所以墙的位置/朝向必须挂在 `body` 上（root 的子节点），
+ * 挂在 root 上会被连信封一起丢掉。
+ *
+ * 为什么墙的 transform 由 builder 算，而不是像规格书 Rule ② 说的
+ * 「渲染器拥有 transform」：**我们的 WallNode 根本没有 position 字段**。
+ * 它由 start / end 两个点定义（D3），中心和朝向是导出量。
+ * 通用渲染器不知道怎么从 start/end 推 transform，也不该知道 ——
+ * 那是墙这一类的领域知识。Rule ② 的实质（不许把世界坐标烘进顶点）
+ * 仍然成立：顶点是局部的，世界位置在 body.position 上。
+ */
+export function buildWallGeometry(
+  node: WallNode,
+  ctx: GeometryContext&lt;MiterData&gt;,
+  appearance: NodeAppearance,
+): THREE.Object3D {
+  const root = new THREE.Group()
+
+  const miter = ctx.levelData ?? calculateLevelMiters([node])
+  const worldFootprint = getWallPlanFootprint(node, miter)
+  if (worldFootprint.length &lt; 3) return root
+
+  const { position, rotationY } = wallTransform(node)
+  const local = worldFootprint.map((p) =&gt; worldToLocalXZ(p, position, rotationY))
+
+  const shape = new THREE.Shape()
+  shape.moveTo(local[0]!.x, -local[0]!.y)
+  for (let i = 1; i &lt; local.length; i += 1) shape.lineTo(local[i]!.x, -local[i]!.y)
+  shape.closePath()
+
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: getWallHeight(node),
+    bevelEnabled: false,
+  })
+  geometry.rotateX(-Math.PI / 2)
+
+  const material = new THREE.MeshStandardMaterial({
+    color: appearance.selected ? WALL_SELECTED_COLOR : WALL_COLOR,
+    roughness: 0.9,
+    metalness: 0,
+  })
+
+  const mesh = new THREE.Mesh(geometry, material)
+  mesh.name = 'wall-body'
+  mesh.castShadow = true
+  mesh.receiveShadow = true
+
+  const body = new THREE.Group()
+  body.position.set(position[0], position[1], position[2])
+  body.rotation.y = rotationY
+  body.add(mesh)
+
+  root.add(body)
+  return root
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/nodes/wall/definition.ts</h3><span class="tag viewer">viewer</span><span class="tag viewer">新</span></div>
+      <p><strong>9 行有效代码。这就是 M5 想证明的事。</strong></p><p>M6 的 slab / ceiling / column 各自也是这么一张表 —— 加类型的成本从 55 行样板降到这里。</p>
+<pre><code>import type { NodeDefinition } from '../../../core/registry/node-definition'
+import type { WallNode } from '../../../core/schema/wall'
+import type { MiterData } from '../../../core/systems/wall/wall-mitering'
+import { buildWallGeometry, computeWallLevelMiters } from './geometry'
+
+/**
+ * M5 唯一的注册表用户。
+ *
+ * 整个文件 8 行有效代码 —— 这就是 M5 想证明的事：
+ * 加一种参数化类型 = 一个 schema + 一个纯 builder + 这么一张表。
+ * 不需要 renderer.tsx，不需要 system.tsx。
+ */
+export const wallDefinition: NodeDefinition&lt;WallNode, MiterData&gt; = {
+  kind: 'wall',
+  geometry: buildWallGeometry,
+  computeLevelData: computeWallLevelMiters,
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/nodes/register.ts</h3><span class="tag viewer">viewer</span><span class="tag viewer">新</span></div>
+      <p>幂等的守卫在 <code>registerAllNodes</code>，冲突检测在 <code>registerNode</code>。<strong>两个不同层次，不要合并</strong>：前者挡的是 React 严格模式的双次调用，后者挡的是真 bug。</p>
+<pre><code>import { nodeRegistry, registerNode, resetNodeRegistry } from '../../core/registry/node-registry'
+import { wallDefinition } from './wall/definition'
+
+let registered = false
+
+/**
+ * 显式注册，不用 import 副作用。
+ *
+ * import 副作用（在 definition.ts 末尾直接 registerNode）省事，但依赖
+ * 「有人 import 了这个文件」—— 没人 import 就没注册，而 tree-shaking
+ * 会积极地帮这个倒忙。症状是生产构建里节点画不出来，开发时一切正常。
+ *
+ * 幂等的原因不是省事，是 React 严格模式会把 useState 的初始化函数
+ * 跑两次；而 registerNode 本身**仍然**在重复 kind 时抛 —— 那是真 bug
+ * （两个文件声明了同一个 kind），必须炸出来。
+ */
+export function registerAllNodes(): void {
+  if (registered) return
+  registered = true
+  registerNode(wallDefinition)
+}
+
+/** 测试用：清表再注册。注册表活得比任何一次 mount 都久。 */
+export function resetRegisteredNodes(): void {
+  resetNodeRegistry()
+  registered = false
+  registerAllNodes()
+}
+
+export { nodeRegistry }</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/components/parametric-node-renderer.tsx</h3><span class="tag viewer">viewer</span><span class="tag viewer">新</span></div>
+      <p><strong>这 19 行有效代码就是 M5 消灭的那 46 行 <code>wall-renderer.tsx</code>。</strong>加第二种类型时它一行都不用改。</p><p>全部难点在那个依赖数组的三项：<code>node</code>（文档变了）、<code>override</code>（拖拽期主 store 不动）、<code>isSelected</code>（React 已经不碰材质了）。少哪一项对应哪个症状，注释里都写了。</p>
+<pre><code>import { useContext, useLayoutEffect, useRef } from "react";
+import type * as THREE from 'three'
+
+import type { AnyNode } from "../../core/schema/types";
+import { useRegistry } from "../../core/registry/scene-registry";
+import { useLiveOverrides } from "../../core/store/use-live-overrides";
+import { useScene } from "../../core/store/use-scene";
+import { useNodeEvents } from "../hooks/use-node-events";
+import { SelectionContext } from "./scene-context";
+
+/**
+ * 每一种「有 def.geometry、没有 def.renderer」的类型共用的渲染器。
+ *
+ * 它刻意什么都不做：
+ *  - 挂一个空 `&lt;group&gt;`
+ *  - 注册进 sceneRegistry，好让 GeometrySystem 找得到它往里塞子节点
+ *  - 接上 useNodeEvents，指针事件照常走总线
+ *  - 挂载时标脏一次，让几何在第一帧就被建出来
+ *
+ * **这 30 行就是 M5 消灭的那 55 行 wall-renderer.tsx。**
+ * 加第二种类型时它一行都不用改 —— 这是 M6 验收「加第三种 ≈ 加第二种」的物质基础。
+ */
+export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
+    const ref = useRef&lt;THREE.Group&gt;(null)
+    useRegistry(node.id, node.type, ref)
+
+    const events = useNodeEvents(node, node.type)
+
+    // 拖拽期间主 store 一动不动，变的是覆盖。M4 里几何靠 useMemo 的依赖
+    // 数组重建；现在几何归 GeometrySystem 管，而它只看脏集 ——
+    // 所以覆盖变化必须转成一次标脏，否则拖动时墙不跟手。
+    const override = useLiveOverrides((s) =&gt; s.overrides.get(node.id))
+
+    // 选中高亮由 builder 挑颜色（appearance.selected），所以选中态变化
+    // 也得转成一次标脏。M4 时它是 material 的一个 prop，React 自己会更新；
+    // 现在几何整个归系统管，React 已经不碰材质了。
+    const isSelected = useContext(SelectionContext) === node.id
+
+    useLayoutEffect(() =&gt; {
+        useScene.getState().makeDirty(node.id)
+    }, [node, override, isSelected])
+
+    return &lt;group ref={ref} visible={node.visible !== false} {...events} /&gt;
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/systems/geometry-system.tsx</h3><span class="tag viewer">viewer</span><span class="tag viewer">新</span></div>
+      <p>85 行有效代码。对照仓库 441 行，差的是 <code>geometryKey</code>、<code>surfaceRole</code>、场景材质库、appearance 全量重标脏 —— 全是 M7/M14 的。</p><p><strong>三处值得单独看的：</strong>① <code>if (!group) continue</code> 那里<em>故意不清脏</em>（§04 第 06 步）；② <code>computeLevelData</code> 的 siblings 也要过 <code>getEffectiveNode</code>，否则拖拽时主墙用新位置、斜接图用旧位置；③ <code>disposeGeometryChildren</code> 只碰带 <code>__fromGeometry</code> 的。</p>
+<pre><code>import { useFrame } from "@react-three/fiber";
+import { useContext, useRef } from "react";
+import type * as THREE from 'three'
+
+import { nodeRegistry } from "../../core/registry/node-registry";
+import type { GeometryContext } from "../../core/registry/node-definition";
+import { sceneRegistry } from "../../core/registry/scene-registry";
+import type { AnyNode, AnyNodeId, AnyNodeType } from "../../core/schema/types";
+import { getEffectiveNode } from "../../core/store/use-live-overrides";
+import { useScene } from "../../core/store/use-scene";
+import { SelectionContext } from "../components/scene-context";
+
+/**
+ * 通用几何系统。每帧：
+ *   脏集 → 查 def.geometry → 建 → 换子节点 → 清脏。
+ *
+ * 对照仓库同名文件是 441 行，多出来的是 geometryKey 跳过、surfaceRole
+ * 主题着色、场景材质库、appearance 变化时的全量重标脏 —— 全是 M7/M14 的东西。
+ */
+export function GeometrySystem(): null {
+    // dirtyNodes 是可变 Set，引用永远不变，所以这个订阅永远不会触发 ——
+    // 我们要的就是那个稳定引用，每帧自己读 .size。
+    const dirtyNodes = useScene((s) =&gt; s.dirtyNodes)
+
+    // 选中态是「呈现意图」，不是几何输入，但 builder 要用它选颜色。
+    // 放 ref 里避免 selectId 变化时重建整个 useFrame 闭包。
+    const selectId = useContext(SelectionContext)
+    const selectIdRef = useRef(selectId)
+    selectIdRef.current = selectId
+
+    useFrame(() =&gt; {
+        if (dirtyNodes.size === 0) return
+
+        const { nodes, clearDirty } = useScene.getState()
+        const dirtyIds = [...dirtyNodes] as AnyNodeId[]
+
+        // ── 阶段一：按类型批处理 ────────────────────────────────
+        // 声明了 computeLevelData 的类型，整层跑一次，产物给这一类共用。
+        // 墙的斜接是动机：逐墙算是 O(N²)，而且拖一堵墙时每个邻居都会
+        // 各自算一遍完整的交点图。
+        const levelDataByKind = new Map&lt;AnyNodeType, unknown&gt;()
+        const effectiveByKind = new Map&lt;AnyNodeType, AnyNode[]&gt;()
+
+        for (const id of dirtyIds) {
+            const node = nodes[id]
+            if (!node) continue
+            const def = nodeRegistry.get(node.type)
+            if (!def?.computeLevelData || levelDataByKind.has(node.type)) continue
+
+            const siblings = Object.values(nodes)
+                .filter((n) =&gt; n.type === node.type)
+                .map((n) =&gt; getEffectiveNode(n))
+            effectiveByKind.set(node.type, siblings)
+            levelDataByKind.set(node.type, def.computeLevelData(siblings))
+        }
+
+        // ── 阶段二：逐个重建 ────────────────────────────────────
+        for (const id of dirtyIds) {
+            const documentNode = nodes[id]
+            if (!documentNode) {
+                clearDirty(id)          // 节点已删，脏标记跟着走
+                continue
+            }
+
+            const def = nodeRegistry.get(documentNode.type)
+            if (!def?.geometry) {
+                clearDirty(id)          // 这一类不走通用几何路径
+                continue
+            }
+
+            const group = sceneRegistry.nodes.get(id) as THREE.Group | undefined
+            if (!group) {
+                // ⚠ 故意**不**清脏。渲染器还没挂载完（第一帧、或读档后
+                //   React 还在 commit），下一帧再来。清了的话这个节点
+                //   就永远不会被建出来 —— 症状是「读档后场景空白，
+                //   直到你动一下鼠标才冒出来」。
+                continue
+            }
+
+            const node = getEffectiveNode(documentNode)
+            const siblings =
+                effectiveByKind.get(node.type) ??
+                Object.values(nodes)
+                    .filter((n) =&gt; n.type === node.type)
+                    .map((n) =&gt; getEffectiveNode(n))
+
+            const ctx: GeometryContext = {
+                resolve: (target) =&gt; nodes[target],
+                siblings,
+                levelData: levelDataByKind.get(node.type),
+            }
+
+            const built = def.geometry(node, ctx, { selected: selectIdRef.current === id })
+
+            disposeGeometryChildren(group)
+            // 从后往前搬：built.children 会随着 group.add 就地缩短。
+            for (const child of [...built.children]) {
+                child.userData.__fromGeometry = true
+                group.add(child)
+            }
+
+            clearDirty(id)
+        }
+    })
+
+    return null
+}
+
+/**
+ * 只 dispose 上一轮 builder 产出的子节点。
+ *
+ * 一个注册的 group 会同时挂两种子节点：builder 造的网格，
+ * 和 React 渲染的宿主子节点（M7 的门窗）。不打标记就分不清 ——
+ * 症状是把门拖到墙上，门消失且再也不回来。
+ *
+ * M5 还没有宿主，但现在做只要三行，M7 补做要重新理解整条 dispose 路径。
+ */
+function disposeGeometryChildren(group: THREE.Group): void {
+    for (const child of [...group.children]) {
+        if (child.userData.__fromGeometry !== true) continue
+        group.remove(child)
+        disposeSubtree(child)
+    }
+}
+
+function disposeSubtree(object: THREE.Object3D): void {
+    object.traverse((node) =&gt; {
+        const mesh = node as Partial&lt;THREE.Mesh&gt;
+        mesh.geometry?.dispose()
+        const material = mesh.material
+        if (Array.isArray(material)) for (const m of material) m.dispose()
+        else material?.dispose()
+    })
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">09</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/components/node-renderer.tsx</h3><span class="tag viewer">viewer</span><span class="tag debt">改</span></div>
+      <p><code>switch (node.type)</code> 死了。换成两条 <code>if</code>，加多少类型都不改这个文件。</p><p>第三条分支（都没声明 → 返回 null）是 M8 的 site / building / level 预留的 —— 结构节点存在于树里但不渲染任何东西。</p>
+<pre><code>import { nodeRegistry } from "../../core/registry/node-registry"
+import type { AnyNodeId } from "../../core/schema/types"
+import { useScene } from "../../core/store/use-scene"
+import { ParametricNodeRenderer } from "./parametric-node-renderer"
+
+export const SceneRenderer = () =&gt; {
+    const rootNodeIds = useScene((state) =&gt; state.rootNodeIds)
+
+    return (
+        &lt;group name="scene-renderer"&gt;
+            {rootNodeIds.map((nodeId) =&gt; &lt;NodeRenderer key={nodeId} nodeId={nodeId} /&gt;)}
+        &lt;/group&gt;
+    )
+}
+
+/**
+ * 分发点。**M4 时这里是 `switch (node.type)`，每加一种类型多一个 case。**
+ * 现在是两条 if，加多少种类型都不动。
+ */
+export const NodeRenderer = ({ nodeId }: { nodeId: AnyNodeId }) =&gt; {
+    const node = useScene((state) =&gt; state.nodes[nodeId])
+    if (!node) return null
+
+    const def = nodeRegistry.get(node.type)
+    if (!def) return null
+
+    // ① 自定义渲染器：设了它就自己拥有挂载（GLB、&lt;Html&gt;、drei helper）。
+    //    def.geometry 仍然会跑 —— 自定义渲染器可以注册一个空 group 让系统来填。
+    if (def.renderer) {
+        const Renderer = def.renderer
+        return &lt;Renderer node={node} /&gt;
+    }
+
+    // ② 参数化：空 group + GeometrySystem 填。M5 的 wall 走这条。
+    if (def.geometry) return &lt;ParametricNodeRenderer node={node} /&gt;
+
+    // ③ 纯结构节点（M8 的 site / building / level）：不渲染任何东西。
+    return null
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">10</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/components/scene-context.ts</h3><span class="tag viewer">viewer</span><span class="tag debt">改</span></div>
+      <p><code>MiterContext</code> 删了。斜接改由 <code>def.computeLevelData</code> 每帧算一次经 <code>ctx.levelData</code> 交给 builder，不再需要一条穿过 React 树的通道。</p>
+<pre><code>import { createContext } from "react"
+import type { AnyNodeId } from "../../core/schema/types"
+
+// MiterContext 在 M5 消失了 —— 斜接改由 def.computeLevelData 每帧算一次，
+// 通过 ctx.levelData 交给 builder，不再需要一条穿过 React 树的通道。
+export const SelectionContext = createContext&lt;AnyNodeId | null&gt;(null)</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">11</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/components/viewer.tsx</h3><span class="tag viewer">viewer</span><span class="tag debt">改</span></div>
+      <p>两处：<code>useState</code> 初始化里注册（<strong>必须在渲染前</strong>），以及把 <code>&lt;GeometrySystem /&gt;</code> 挂在 <code>&lt;SceneRenderer /&gt;</code> 之后。</p>
+<pre><code>import { useState, type ReactNode } from "react";
+import type { AnyNodeId } from "../../core/schema/types";
+import { Canvas } from "@react-three/fiber";
+import { CameraRig } from "./camera-rig";
+import { usePointerGesture } from "../hooks/use-pointer-gesture";
+import { useGridEvents } from "../hooks/use-grid-events";
+import { Ground } from "./ground";
+import { SelectionContext } from "./scene-context";
+import { SceneRenderer } from "./node-renderer";
+import { GeometrySystem } from "../systems/geometry-system";
+import { registerAllNodes } from "../nodes/register";
+
+export function Viewer({
+    mode,
+    selectId = null,
+    children,
+}: {
+    mode: '3d' | 'plan',
+    selectId?: AnyNodeId | null,
+    children?: ReactNode
+}) {
+    // 注册必须发生在第一次渲染**之前** —— NodeRenderer 在渲染期间就要查表。
+    // useState 的初始化函数在渲染前跑且只跑一次；放 useEffect 里就晚了，
+    // 第一帧会因为查不到定义而什么都不画。
+    useState(() =&gt; {
+        registerAllNodes()
+        return null
+    })
+
+    return (
+        &lt;Canvas&gt;
+            &lt;CameraRig mode={mode} /&gt;
+            &lt;ViewInput /&gt;
+
+            &lt;ambientLight /&gt;
+            &lt;directionalLight /&gt;
+
+            &lt;Ground /&gt;
+
+            &lt;SelectionContext.Provider value={selectId}&gt;
+                &lt;SceneRenderer /&gt;
+                {/* 系统挂在渲染器**之后** —— 它消费 sceneRegistry 里的 group，
+                    而那是渲染器挂载时才填进去的。 */}
+                &lt;GeometrySystem /&gt;
+            &lt;/SelectionContext.Provider&gt;
+            {children}
+        &lt;/Canvas&gt;
+    )
+}
+
+function ViewInput(): null {
+    usePointerGesture()
+    useGridEvents()
+    return null
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">12</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/nodes/wall/geometry.test.ts</h3><span class="tag viewer">viewer</span><span class="tag viewer">新 · 12 例</span></div>
+      <div class="trap"><span class="trap-label">这一份是三复选框模型最大的一笔红利</span><p style="margin-bottom:0">D11 写着「React/渲染层不测，靠跑起来看」。而 <code>def.geometry</code> 是纯函数 —— 输入数据、输出 <code>Object3D</code>，不需要 React、不需要画布、不需要 GPU。three 在 Node 里构造几何完全没问题，只是不能渲染。<strong>M4 时这段逻辑锁在 <code>wall-renderer.tsx</code> 的 <code>useMemo</code> 里，一行都测不了。</strong></p></div><p>四组：返回值结构（信封 / transform / 局部坐标 / 挤出高度 / 退化墙）、appearance（选中变色但不改几何）、<code>ctx.levelData</code>（斜接真的接上了）、纯度（幂等 + 不改入参）。</p>
+<pre><code>import { describe, expect, it } from 'vitest'
+import * as THREE from 'three'
+import type { GeometryContext } from '../../../core/registry/node-definition'
+import { WallNode } from '../../../core/schema/wall'
+import type { MiterData } from '../../../core/systems/wall/wall-mitering'
+import { buildWallGeometry, computeWallLevelMiters, wallTransform } from './geometry'
+
+/**
+ * **这一份是三复选框模型最大的一笔红利。**
+ *
+ * D11 写着「React/渲染层不测，靠跑起来看」。而 `def.geometry` 是纯函数 ——
+ * 输入是数据，输出是 Object3D，不需要 React、不需要画布、不需要 GPU。
+ * three 在 Node 里构造几何完全没问题，只是不能渲染。
+ *
+ * M4 时这段逻辑锁在 `wall-renderer.tsx` 的 `useMemo` 里，一行都测不了。
+ */
+
+const wall = (id: string, start: [number, number], end: [number, number], patch = {}) =&gt;
+  WallNode.parse({ id: `wall_${id}`, type: 'wall', start, end, thickness: 0.2, height: 2.5, ...patch })
+
+function ctxOf(walls: WallNode[]): GeometryContext&lt;MiterData&gt; {
+  return {
+    resolve: (id) =&gt; walls.find((w) =&gt; w.id === id),
+    siblings: walls,
+    levelData: computeWallLevelMiters(walls),
+  }
+}
+
+const NO_CTX: GeometryContext&lt;MiterData&gt; = {
+  resolve: () =&gt; undefined,
+  siblings: [],
+  levelData: undefined,
+}
+
+const meshOf = (root: THREE.Object3D): THREE.Mesh =&gt; {
+  let found: THREE.Mesh | null = null
+  root.traverse((o) =&gt; {
+    if (!found &amp;&amp; (o as THREE.Mesh).isMesh) found = o as THREE.Mesh
+  })
+  if (!found) throw new Error('没找到 mesh')
+  return found
+}
+
+describe('返回值的结构', () =&gt; {
+  const a = wall('a', [0, 0], [4, 0])
+
+  it('外层 root 只是信封，真正带 transform 的是它的子节点', () =&gt; {
+    const root = buildWallGeometry(a, NO_CTX, { selected: false })
+
+    // GeometrySystem 取的是 root.children，root 自己会被丢掉 ——
+    // 所以位置/朝向必须挂在子节点上。挂在 root 上等于没挂。
+    expect(root.children).toHaveLength(1)
+    const body = root.children[0]!
+    expect(body.position.toArray()).toEqual([2, 0, 0]) // 中点
+    expect(body.rotation.y).toBeCloseTo(0, 9)
+  })
+
+  it('斜墙的 body 带正确的朝向', () =&gt; {
+    const diagonal = wall('d', [0, 0], [3, 3])
+    const body = buildWallGeometry(diagonal, NO_CTX, { selected: false }).children[0]!
+
+    const { position, rotationY } = wallTransform(diagonal)
+    expect(body.position.toArray()).toEqual(position)
+    expect(body.rotation.y).toBeCloseTo(rotationY, 9)
+    // Point2D.y 是世界 Z（D3），所以顺时针为正 —— 这里是 -45°
+    expect(body.rotation.y).toBeCloseTo(-Math.PI / 4, 9)
+  })
+
+  it('顶点是局部坐标，没有把世界位置烘进去（Rule ②）', () =&gt; {
+    const far = wall('far', [100, 100], [104, 100])
+    const mesh = meshOf(buildWallGeometry(far, NO_CTX, { selected: false }))
+    mesh.geometry.computeBoundingBox()
+    const box = mesh.geometry.boundingBox!
+
+    // 墙长 4、厚 0.2：局部包围盒应该在原点附近，不是 (100,100) 附近
+    expect(Math.abs(box.min.x)).toBeLessThan(3)
+    expect(Math.abs(box.max.x)).toBeLessThan(3)
+    expect(Math.abs(box.min.z)).toBeLessThan(1)
+  })
+
+  it('挤出高度等于 wall.height', () =&gt; {
+    const tall = wall('t', [0, 0], [4, 0], { height: 3.2 })
+    const mesh = meshOf(buildWallGeometry(tall, NO_CTX, { selected: false }))
+    mesh.geometry.computeBoundingBox()
+    const box = mesh.geometry.boundingBox!
+
+    // D3：局部 Y ∈ [0, height]，墙底在局部原点
+    expect(box.min.y).toBeCloseTo(0, 6)
+    expect(box.max.y).toBeCloseTo(3.2, 6)
+  })
+
+  it('退化墙（起点终点重合）返回空信封，不抛', () =&gt; {
+    const degenerate = wall('z', [1, 1], [1, 1])
+    const root = buildWallGeometry(degenerate, NO_CTX, { selected: false })
+    expect(root.children).toHaveLength(0)
+  })
+})
+
+describe('appearance', () =&gt; {
+  const a = wall('a', [0, 0], [4, 0])
+
+  it('选中与否给不同的材质颜色', () =&gt; {
+    const plain = meshOf(buildWallGeometry(a, NO_CTX, { selected: false }))
+    const picked = meshOf(buildWallGeometry(a, NO_CTX, { selected: true }))
+
+    const colorOf = (m: THREE.Mesh) =&gt;
+      (m.material as THREE.MeshStandardMaterial).color.getHexString()
+
+    expect(colorOf(plain)).not.toBe(colorOf(picked))
+  })
+
+  it('appearance 不影响几何 —— 它只是呈现意图', () =&gt; {
+    const plain = meshOf(buildWallGeometry(a, NO_CTX, { selected: false }))
+    const picked = meshOf(buildWallGeometry(a, NO_CTX, { selected: true }))
+
+    expect(picked.geometry.attributes.position!.count).toBe(
+      plain.geometry.attributes.position!.count,
+    )
+  })
+})
+
+describe('ctx.levelData —— 斜接真的接上了', () =&gt; {
+  it('L 型墙角比孤立墙多出斜接顶点', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    const b = wall('b', [4, 0], [4, 3])
+
+    const isolated = meshOf(buildWallGeometry(a, NO_CTX, { selected: false }))
+    const mitered = meshOf(buildWallGeometry(a, ctxOf([a, b]), { selected: false }))
+
+    // 孤立时轮廓是矩形 4 点；有墙角时 getWallPlanFootprint 会把交点
+    // 推进去，轮廓变 5 点 —— 顶点数必然不同。
+    expect(mitered.geometry.attributes.position!.count).not.toBe(
+      isolated.geometry.attributes.position!.count,
+    )
+  })
+
+  it('levelData 为 undefined 时退化成「只有自己」，不崩', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    expect(() =&gt; buildWallGeometry(a, NO_CTX, { selected: false })).not.toThrow()
+  })
+
+  it('不相邻的墙不改变彼此的轮廓', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    const far = wall('far', [50, 50], [54, 50])
+
+    const alone = meshOf(buildWallGeometry(a, ctxOf([a]), { selected: false }))
+    const together = meshOf(buildWallGeometry(a, ctxOf([a, far]), { selected: false }))
+
+    expect(together.geometry.attributes.position!.count).toBe(
+      alone.geometry.attributes.position!.count,
+    )
+  })
+})
+
+describe('纯度（Rule ①）', () =&gt; {
+  it('同样的输入给同样的输出 —— 幂等', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    const first = meshOf(buildWallGeometry(a, NO_CTX, { selected: false }))
+    const second = meshOf(buildWallGeometry(a, NO_CTX, { selected: false }))
+
+    const pa = first.geometry.attributes.position!
+    const pb = second.geometry.attributes.position!
+    expect(pb.count).toBe(pa.count)
+    expect(Array.from(pb.array)).toEqual(Array.from(pa.array))
+  })
+
+  it('不改动入参节点', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    const snapshot = JSON.stringify(a)
+    buildWallGeometry(a, ctxOf([a]), { selected: true })
+    expect(JSON.stringify(a)).toBe(snapshot)
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <h3 style="margin-top:40px">删掉的四个</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>文件</th><th>代码行</th><th>被谁取代</th></tr></thead>
+    <tbody>
+      <tr><td><code>viewer/components/wall-renderer.tsx</code></td><td>46</td><td><code>ParametricNodeRenderer</code>（19 行，所有类型共用）</td></tr>
+      <tr><td><code>viewer/lib/wall-geometry.ts</code></td><td>41</td><td>搬进 <code>viewer/nodes/wall/geometry.ts</code></td></tr>
+      <tr><td><code>viewer/hooks/use-level-miters.ts</code></td><td>18</td><td><code>def.computeLevelData</code></td></tr>
+      <tr><td><code>viewer/lib/level-miter-cache.ts</code>（+ 14 个测试）</td><td>33</td><td><strong>没人取代 —— 问题消失了</strong>。<code>GeometrySystem</code> 第一行就是 <code>if (dirtyNodes.size === 0) return</code>，空闲帧根本不进循环</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:40px">实测的净增删账 —— 和 §03 的估算差了多少</h3>
+  <div class="trap">
+    <span class="trap-label">§03 估的是 +76 行，实际是 +115 行</span>
+    <p>差 1.5 倍。三处低估，每一处都值得记：</p>
+    <ul>
+      <li><code>geometry-system.tsx</code> 估 50，实际 <strong>85</strong>。多出来的是 <code>__fromGeometry</code> 的 dispose 路径（+15）和 <code>computeLevelData</code> 的批处理阶段（+20）—— §03 写这两条时把它们当成了「顺手」。</li>
+      <li><strong>漏算了 <code>register.ts</code>（14 行）。</strong>§03 的文件树里根本没有这个文件 —— 「什么时候注册」当时是 §03 的三个悬而未决之一，而悬而未决的东西<em>算不进行数账</em>。</li>
+      <li><code>wall/geometry.ts</code> 估「搬家 ±0」，实际从 41 涨到 <strong>69</strong>。ctx / appearance 的形参、信封结构、材质创建 —— 都是从 renderer 里挪过来的，<em>总量没变，只是从「删掉的那栏」挪到了「新增的那栏」</em>。</li>
+    </ul>
+    <p style="margin-bottom:0"><strong>结论没变：M6 加三种类型仍然回本</strong>（省 3×46 = 138 行样板 &gt; 115 行框架）。但这个 1.5 倍的偏差说明一件事 —— <em>在做出「悬而未决」的决定之前，行数账只能算个量级</em>。</p>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>文件</th><th>M5</th><th>M4</th></tr></thead>
+    <tbody>
+      <tr><td><code>core/registry/node-definition.ts</code> <span class="tag core">新</span></td><td>25</td><td>—</td></tr>
+      <tr><td><code>core/registry/node-registry.ts</code> <span class="tag core">新</span></td><td>27</td><td>—</td></tr>
+      <tr><td><code>viewer/nodes/wall/geometry.ts</code> <span class="tag core">新</span></td><td>69</td><td>—</td></tr>
+      <tr><td><code>viewer/nodes/wall/definition.ts</code> <span class="tag core">新</span></td><td>9</td><td>—</td></tr>
+      <tr><td><code>viewer/nodes/register.ts</code> <span class="tag core">新</span></td><td>14</td><td>—</td></tr>
+      <tr><td><code>viewer/components/parametric-node-renderer.tsx</code> <span class="tag core">新</span></td><td>19</td><td>—</td></tr>
+      <tr><td><code>viewer/systems/geometry-system.tsx</code> <span class="tag core">新</span></td><td>85</td><td>—</td></tr>
+      <tr><td><code>viewer/components/node-renderer.tsx</code> <span class="tag debt">改</span></td><td>24</td><td>25</td></tr>
+      <tr><td><code>viewer/components/viewer.tsx</code> <span class="tag debt">改</span></td><td>45</td><td>37</td></tr>
+      <tr><td><code>viewer/components/scene-context.ts</code> <span class="tag debt">改</span></td><td>3</td><td>5</td></tr>
+      <tr><td><code>viewer/components/wall-renderer.tsx</code> <span class="tag debt">删</span></td><td>—</td><td>46</td></tr>
+      <tr><td><code>viewer/hooks/use-level-miters.ts</code> <span class="tag debt">删</span></td><td>—</td><td>18</td></tr>
+      <tr><td><code>viewer/lib/wall-geometry.ts</code> <span class="tag debt">删</span></td><td>—</td><td>41</td></tr>
+      <tr><td><code>viewer/lib/level-miter-cache.ts</code> <span class="tag debt">删</span></td><td>—</td><td>33</td></tr>
+      <tr><td><strong>合计（仅代码行，去注释去空行）</strong></td><td><strong>320</strong></td><td><strong>205</strong></td></tr>
+      <tr><td colspan="3" style="padding-top:10px"><strong>净增 +115 行；加一种参数化类型的成本：46 行 → 9 行，框架文件改动 1 → 0。</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<hr class="dim">
+
+<footer style="color:var(--ink-3);font-family:var(--mono);font-size:12px;letter-spacing:.04em">
+  <p style="margin:0">
+    这份是 <code>m5-registry.html</code> 留白部分的一个答案，不是唯一答案。
+    三处分叉（定义放哪层 / <code>AnyNode</code> 怎么来 / 斜接走哪条路）
+    换一种选法都能成立 —— 分歧本身比结论有价值，带着你的选法来对。
+  </p>
+  <p style="margin:8px 0 0">
+    验证：tsc ✅ · eslint ✅ · vitest 14 文件 / 153 例 ✅ · vite build 692 modules ✅ ·
+    <strong>未经浏览器验收</strong>。前提是 <code>m4-drag.html</code> §08 已全部应用。
+  </p>
+  <p style="margin:8px 0 0">配套：<code>m5-registry.html</code>（§00 推导 + §03 文件树）</p>
+</footer>
+
+</div>

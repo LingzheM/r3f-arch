@@ -1,0 +1,3292 @@
+<title>M6 楼板、天花、柱</title>
+<style>
+:root {
+  --paper:#EDF1EF; --card:#F8FAF9; --code-bg:#E4EBE8;
+  --ink:#131B19; --ink-2:#4A5754; --ink-3:#74827E;
+  --rule:#C4CFCB; --rule-soft:#D7E0DC;
+  --accent:#0B6E5F; --accent-bg:#DBE9E5;
+  --warn:#9E4520; --warn-bg:#F1E2D9;
+  --core:#0B6E5F;  --core-bg:#DBE9E5;
+  --viewer:#2A5A79; --viewer-bg:#DBE5EC;
+  --app:#6A5843;   --app-bg:#ECE5DB;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --body: Georgia, "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+    --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+    --rule:#2A3733; --rule-soft:#1E2926;
+    --accent:#4FC3AA; --accent-bg:#12312B;
+    --warn:#E2916A; --warn-bg:#32211A;
+    --core:#4FC3AA;  --core-bg:#12312B;
+    --viewer:#79B4DA; --viewer-bg:#14262F;
+    --app:#C9AC85;   --app-bg:#2A2318;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+  --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+  --rule:#2A3733; --rule-soft:#1E2926;
+  --accent:#4FC3AA; --accent-bg:#12312B;
+  --warn:#E2916A; --warn-bg:#32211A;
+  --core:#4FC3AA;  --core-bg:#12312B;
+  --viewer:#79B4DA; --viewer-bg:#14262F;
+  --app:#C9AC85;   --app-bg:#2A2318;
+}
+* { box-sizing:border-box; }
+body {
+  background:var(--paper); color:var(--ink); font-family:var(--body);
+  font-size:17px; line-height:1.72; margin:0; padding:0 24px 120px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:940px; margin:0 auto; }
+.prose { max-width:68ch; }
+.masthead { padding:72px 0 0; }
+.eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 20px; display:flex; gap:14px; flex-wrap:wrap;
+}
+.eyebrow b { color:var(--accent); font-weight:600; }
+h1 {
+  font-family:var(--mono); font-size:clamp(32px,5.5vw,50px); line-height:1.08;
+  letter-spacing:-.02em; font-weight:600; margin:0 0 18px; text-wrap:balance;
+}
+.standfirst { font-size:19px; color:var(--ink-2); max-width:60ch; margin:0 0 8px; }
+.dim { position:relative; height:1px; background:var(--rule); border:0; margin:56px 0 40px; }
+.dim::before,.dim::after { content:""; position:absolute; top:-4px; width:1px; height:9px; background:var(--rule); }
+.dim::before{left:0} .dim::after{right:0}
+h2 {
+  font-family:var(--mono); font-size:13px; letter-spacing:.16em; text-transform:uppercase;
+  font-weight:600; color:var(--accent); margin:0 0 6px;
+}
+h2 .num { color:var(--ink-3); margin-right:12px; }
+.h2sub { font-family:var(--mono); font-size:22px; font-weight:600; margin:0 0 24px; letter-spacing:-.01em; }
+h3 { font-family:var(--mono); font-size:16px; font-weight:600; margin:34px 0 10px; }
+h4 { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--accent); margin:24px 0 6px; }
+p { margin:0 0 16px; }
+ul,ol { margin:0 0 16px; padding-left:22px; }
+li { margin-bottom:7px; }
+strong { font-weight:700; color:var(--ink); }
+em { font-style:italic; color:var(--ink-2); }
+code { font-family:var(--mono); font-size:.86em; background:var(--code-bg); padding:1px 5px; border-radius:2px; }
+pre {
+  background:var(--code-bg); border:1px solid var(--rule-soft); border-radius:3px;
+  padding:16px 18px; overflow-x:auto; margin:14px 0 18px; line-height:1.62;
+}
+pre code { background:none; padding:0; font-size:13px; white-space:pre; }
+.cm { color:var(--ink-3); }
+.cw { color:var(--warn); }
+.step {
+  display:grid; grid-template-columns:52px 1fr; gap:0 20px;
+  padding:26px 0; border-top:1px solid var(--rule-soft);
+}
+.step:first-of-type { border-top:1px solid var(--rule); }
+.step-n { font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink-3); padding-top:4px; font-variant-numeric:tabular-nums; }
+.step-body { min-width:0; }
+.step-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.step-title { font-family:var(--mono); font-size:17px; font-weight:600; margin:0; }
+.step-body > p { max-width:64ch; }
+.tag {
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  font-weight:600; padding:3px 8px; border-radius:2px; white-space:nowrap;
+}
+.tag.core{color:var(--core);background:var(--core-bg)}
+.tag.viewer{color:var(--viewer);background:var(--viewer-bg)}
+.tag.app{color:var(--app);background:var(--app-bg)}
+.tag.debt{color:var(--warn);background:var(--warn-bg)}
+.trap {
+  background: repeating-linear-gradient(-45deg, transparent 0 6px,
+    color-mix(in srgb, var(--warn) 7%, transparent) 6px 7px), var(--warn-bg);
+  border-left:3px solid var(--warn); padding:14px 18px; margin:18px 0; border-radius:0 3px 3px 0;
+}
+.trap-label {
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  font-weight:600; color:var(--warn); display:block; margin-bottom:6px;
+}
+.trap p:last-child,.trap ul:last-child { margin-bottom:0; }
+.note { border-left:3px solid var(--rule); padding:2px 0 2px 18px; margin:18px 0; color:var(--ink-2); font-size:16px; }
+.note p:last-child { margin-bottom:0; }
+.tablewrap { overflow-x:auto; margin:18px 0 24px; }
+table { border-collapse:collapse; width:100%; font-family:var(--mono); font-size:13px; min-width:560px; }
+th {
+  text-align:left; font-weight:600; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule); padding:0 14px 8px 0;
+}
+td { padding:9px 14px 9px 0; border-bottom:1px solid var(--rule-soft); vertical-align:top; line-height:1.55; }
+td:last-child,th:last-child { padding-right:0; }
+.check { list-style:none; padding:0; margin:0; }
+.check li {
+  display:grid; grid-template-columns:26px 1fr; gap:10px; padding:11px 0;
+  border-bottom:1px solid var(--rule-soft); margin:0;
+}
+.check li::before { content:""; width:14px; height:14px; border:1.5px solid var(--accent); border-radius:2px; margin-top:6px; }
+.defect { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--rule-soft); }
+.defect-to { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--accent); white-space:nowrap; }
+a { color:var(--accent); }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media (max-width:620px) {
+  body { font-size:16px; padding:0 18px 80px; }
+  .step { grid-template-columns:1fr; }
+  .step-n { padding-top:0; margin-bottom:4px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">
+    <span>r3f-arch</span><span>里程碑 <b>06</b> / 14</span><span>模式型</span>
+    <span>D13 · 一次交完 §01–§07</span>
+  </p>
+  <h1>M6 楼板、天花、柱</h1>
+  <p class="standfirst">
+    一口气加三种节点类型。<strong>这不是"下一个里程碑"，是 M5 的验收</strong>——
+    <code>ROADMAP.md</code> 的原话是「加第三种类型的工作量 ≈ 加第二种，
+    这一条本身就是对 M5 的检验」。
+  </p>
+
+  <div class="trap" style="margin-top:28px">
+    <span class="trap-label">读这份文档的顺序</span>
+    <p>
+      前面有三节<strong>前置</strong>，不是 §00–§07 的一部分：
+      <strong>前置 A</strong> 是实际代码与计划的偏差（含 <code>pnpm verify</code> 的颜色），
+      <strong>前置 B</strong> 是 M5 的检验测量（<code>handoff-m6.md</code> ③ 第 1 条要的那个），
+      <strong>前置 C</strong> 是开工闸门——<strong>20 处编辑，敲完再敲 §07</strong>。
+    </p>
+    <p style="margin-bottom:0">
+      前置 C 不是流程洁癖。<code>GeometrySystem</code> 现在有两个编译器看不见的 bug，
+      其中一个让 M2 的墙角斜接<em>整个失效</em>。带着它写 M6，
+      你会以为是新写的 slab 把什么东西弄坏了。
+    </p>
+  </div>
+  <div class="note" style="margin-top:24px">
+    <p><strong>这份文档是在你 <code>src/</code> 的一份完整拷贝上跑绿过的，不是纸上推演。</strong></p>
+    <p style="margin-bottom:0">
+      前置 C 的 20 处 + §07 的全部代码应用之后：<br>
+      <code>tsc --build --force --noEmit</code> ✅ ·
+      <code>eslint src</code> ✅ ·
+      <code>vitest run</code> ✅ <strong>5 文件 / 51 用例</strong> ·
+      <code>vite build</code> 706 modules，0 error。<br>
+      另外跑了 9 条一次性几何探针（挤出坐标链 / 三种类型的 Y 区间 /
+      column 的局部坐标 / <code>AnyNode</code> 能 parse 四种类型），全绿。
+      <strong>那 9 条不在 §07 里</strong>——它们验的是文档的声明，不是产品代码。
+    </p>
+  </div>
+</header>
+
+<hr class="dim">
+
+<!-- ═══════════ 前置 A -->
+<section>
+  <h2><span class="num">前置 A</span>实际代码与计划的偏差</h2>
+  <p class="h2sub">2026-09-02 实测 · 逐个文件核过，不是照抄上一个会话的计划</p>
+
+  <h3>pnpm verify 的颜色</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>阶段</th><th>结果</th><th>细节</th></tr></thead>
+    <tbody>
+      <tr><td><code>check-types</code></td><td style="color:var(--warn)"><strong>红 · 12 个错</strong></td><td>比 <code>STATE.md</code> 记的 9 个多 3 个——M5 又新增了 3 个</td></tr>
+      <tr><td><code>lint</code></td><td>绿</td><td>单跑是绿的（<code>verify</code> 里根本没跑到）</td></tr>
+      <tr><td><code>test</code></td><td>绿</td><td>2 文件 / 31 用例。单跑是绿的</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>
+    <code>pnpm verify</code> 停在第一步，所以<strong>整体是红的</strong>。
+    但要说清楚：<code>lint</code> 和 <code>test</code> 单独跑都是绿的——
+    红的只有类型检查这一段。
+  </p>
+
+  <div class="trap">
+    <span class="trap-label">test 绿得有点假</span>
+    <p style="margin-bottom:0">
+      31 个用例全部来自 M2（<code>geometry-2d.test.ts</code> + <code>wall-mitering.test.ts</code>）。
+      <strong>M4 §07 给的四个测试文件一个都没敲</strong>（应该是 6 文件 / 64 用例），
+      M5 的注册表也没有任何测试。所以"绿"的意思是"M2 的几何还对"，
+      不是"M4 和 M5 是对的"。
+    </p>
+  </div>
+
+  <h3>12 个类型错的来源</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>位置</th><th>错</th><th>来自</th></tr></thead>
+    <tbody>
+      <tr><td><code>core/store/history-control.ts:75</code></td><td>×3</td><td>M4 遗留 · <code>retainedPastStateCount</code> 函数体是空的</td></tr>
+      <tr><td><code>app/hooks/use-history-shortcuts.ts:1,48</code></td><td>×2</td><td>M4 遗留 · 多余的 <code>use</code> 导入 / <code>afterHistoryJump</code> 没人调</td></tr>
+      <tr><td><code>app/lib/interaction/drag-session.ts:1</code></td><td>×1</td><td>M4 遗留 · <code>events</code> 自动导入幽灵（第三次）</td></tr>
+      <tr><td><code>app/store/use-interaction-scope.ts:19</code></td><td>×1</td><td>M4 遗留 · <code>update</code> 的守卫退回了 M3 版本</td></tr>
+      <tr><td><code>app/tools/move-tool.tsx:6</code></td><td>×1</td><td>M4 遗留 · 未使用的 <code>THREE</code></td></tr>
+      <tr><td><code>app/app.tsx:20</code></td><td>×1</td><td>M4 遗留 · <code>inputDragging</code> 读了没用</td></tr>
+      <tr><td><code>viewer/components/node-renderer.tsx:28</code></td><td>×1</td><td><strong>M5 新增</strong> · <code>geometry</code> 写成了必填 → TS2774</td></tr>
+      <tr><td><code>viewer/components/wall-renderer.tsx:5,6</code></td><td>×2</td><td><strong>M5 新增</strong> · 应删未删，import 了两个不存在的东西</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>计划 vs 实际，六处偏差</h3>
+
+  <h4>1 · <code>handoff-m6.md</code> 说 9 个错，实际 12 个</h4>
+  <p>
+    多出来的 3 个全是 M5 引入的（上表最后两行）。<code>STATE.md</code> 停在 2026-08-26，
+    M5 的两次提交（<code>abda947</code> / <code>7a822e4</code>）之后没更新过。
+  </p>
+
+  <h4>2 · <code>viewer/lib/level-miter-cache.ts</code> 已经被删了</h4>
+  <p>
+    <code>git status</code> 显示 <code>D src/viewer/lib/level-miter-cache.ts</code>。
+    这让 <strong><code>m4-drag.html</code> §08 的第 08 条整条作废</strong>——
+    它教你把 <code>use-level-miters.ts</code> 改成调 <code>getCachedLevelMiters</code>，
+    而那个文件已经不在了。
+  </p>
+  <div class="note">
+    <p style="margin-bottom:0">
+      这不是错误，是 M5 的正确后果：斜接缓存的位置从"viewer 的一个 hook"
+      搬到了 <code>def.computeLevelData</code> + <code>GeometrySystem</code> 的每帧分组。
+      §08 那条写于 M5 之前。<strong>前置 C 里我把它换成了「删掉 use-level-miters.ts」。</strong>
+    </p>
+  </div>
+
+  <h4>3 · <code>InteractionScope</code> 只有 4 个态，不是 ROADMAP 说的 5 个</h4>
+  <p>
+    <code>ROADMAP.md</code> M3 写的是 <code>idle | drafting | placing | moving | handle-drag</code>，
+    实际 <code>scope.ts</code> 里<strong>没有 <code>placing</code></strong>。
+    M3 那时没有单击放置类的工具，所以它没被敲进去。
+    <strong>M6 的 column 就是第一个需要它的工具</strong>，§03 里补上。
+  </p>
+
+  <h4>4 · <code>SelectionManager</code> 硬编码了 <code>'wall:click'</code></h4>
+  <p>
+    <code>app/components/selection-manager.tsx:20</code> 只订阅了墙。
+    M5 没碰它——因为 M5 结束时只有一种类型，看不出问题。
+    <strong>这是"加类型要改框架文件"的唯一真缺口</strong>，前置 B 里单独算账。
+  </p>
+
+  <h4>5 · <code>ParametricNodeRenderer</code> 没有 <code>position</code> 绑定</h4>
+  <p>
+    规格书 <code>node-definitions.md:185</code> 的原话是
+    「<em>The registered <code>&lt;group&gt;</code> is positioned by
+    <code>&lt;ParametricNodeRenderer&gt;</code> via JSX
+    (<code>position={liveTransform?.position ?? node.position}</code>)</em>」。
+    我们的版本是 <code>&lt;group ref visible {...events} /&gt;</code>——没有这一句。
+  </p>
+  <p>
+    同样不是错：wall 没有 <code>position</code> 字段（只有 <code>start</code>/<code>end</code>），
+    绑了也没东西可绑。<strong>column 是第一个有 <code>position</code> 的类型</strong>，
+    §02 正面处理这条分叉。
+  </p>
+
+  <h4>6 · <code>GeometrySystem</code> 的两个 bug 仍在</h4>
+  <p>
+    <code>handoff-m6.md</code> ① C 列的两条，逐行核过，<strong>都还在</strong>：
+    <code>levelDataBykind</code> 声明了、读了、从没写过（第 25/32/37/68 行），
+    重建成功后没有 <code>clearDirty(id)</code>（第 79 行之后）。
+    前置 C 的 C 组。
+  </p>
+
+  <h4>7 · 三处 M4 代码假设了「<code>AnyNode</code> 只有一个成员」<span class="tag debt">实测发现</span></h4>
+  <p>
+    这一条不是读代码读出来的，是<strong>把 slab 加进联合之后 <code>tsc</code> 报出来的</strong>——
+    <code>types.ts</code> 一变成两个成员，立刻 5 个新错。详见前置 C · E 组。
+    <strong>它们和注册表无关</strong>，全是 M4 期间写的、当时只有 wall 一种类型所以看不出来的东西。
+  </p>
+
+  <div class="trap">
+    <span class="trap-label">第一个 bug 的实际后果，比「缓存失效」严重</span>
+    <p style="margin-bottom:0">
+      <code>ctx.levelData</code> 恒为 <code>undefined</code> ⟹
+      <code>buildWallGeometry</code> 走 <code>?? calculateLevelMiters([node])</code> 这条兜底 ⟹
+      每堵墙都以为<strong>场上只有自己一堵墙</strong> ⟹
+      <code>hasJunctionAt</code> 永远假 ⟹ <strong>M2 的斜接全部失效，墙角回到 M1 的样子</strong>。
+      而画面上它<em>看起来还是墙</em>，只是角上有缝。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 前置 B -->
+<section>
+  <h2><span class="num">前置 B</span>M5 检验测量</h2>
+  <p class="h2sub">照 src/ 里<em>实际的</em>注册表加一个 slab，要碰几个文件</p>
+
+  <p>
+    基线来自 <code>m5-registry-answers.html</code>：改造前加一种类型要碰
+    <strong>18 处 / 11 个文件</strong>，改造后应该是
+    <strong>5 处，且框架文件 0 处</strong>。下面是照真实代码数出来的。
+  </p>
+
+  <h3>渲染路径 —— 让一块 slab 出现在画面上</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>#</th><th>文件</th><th>动作</th><th>行</th><th>框架文件？</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>core/schema/slab.ts</code></td><td>新建</td><td>~18</td><td>否 · 类型自己的</td></tr>
+      <tr><td>2</td><td><code>core/schema/types.ts</code></td><td>改：import + 联合加一项</td><td>2</td><td><strong>否 · 它是清单，不是逻辑</strong></td></tr>
+      <tr><td>3</td><td><code>viewer/nodes/slab/geometry.ts</code></td><td>新建</td><td>~20</td><td>否</td></tr>
+      <tr><td>4</td><td><code>viewer/nodes/slab/definition.ts</code></td><td>新建</td><td>6</td><td>否</td></tr>
+      <tr><td>5</td><td><code>viewer/nodes/register.ts</code></td><td>改：import + 一行注册</td><td>2</td><td><strong>否 · 清单</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p style="font-size:19px">
+    <strong>5 处，框架文件 0 处。和 §05 的预测一字不差 —— 注册表这条路 M5 成立。</strong>
+  </p>
+  <p>
+    这不是数出来的，是<strong>做出来的</strong>：在你 <code>src/</code> 的拷贝上真加了
+    slab / ceiling / column 三种，<code>tsc</code> / <code>eslint</code> /
+    <code>vitest</code> / <code>vite build</code> 全绿（见开头那块）。
+    下面「零改动的框架文件」那张表里每一行都是<em>真的没动过</em>。
+  </p>
+
+  <h4>零改动的框架文件（逐个核过，不是推测）</h4>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>文件</th><th>为什么不用改</th></tr></thead>
+    <tbody>
+      <tr><td><code>viewer/components/node-renderer.tsx</code></td><td><code>nodeRegistry.get(node.type)</code> 查表，没有 <code>switch</code></td></tr>
+      <tr><td><code>viewer/components/parametric-node-renderer.tsx</code></td><td>全程泛型 <code>AnyNode</code>，<code>node.type</code> 当字符串传</td></tr>
+      <tr><td><code>viewer/systems/geometry-system.tsx</code></td><td>slab 没有 <code>computeLevelData</code> → 阶段一 <code>continue</code>；阶段二 <code>levelData</code> 取到 <code>undefined</code>，builder 不读它。<strong>两个阶段都正确跳过</strong></td></tr>
+      <tr><td><code>core/events/types.ts</code></td><td><code>NodeEventKey = `${AnyNodeType}:${Suffix}`</code> 是模板字面量类型，联合一变它自动展开出 <code>'slab:click'</code></td></tr>
+      <tr><td><code>viewer/hooks/use-node-events.ts</code></td><td><code>&lt;K extends AnyNodeType&gt;</code>，自动</td></tr>
+      <tr><td><code>core/store/use-scene.ts</code></td><td><code>AnyNode.parse(input)</code> —— 联合一变，<code>addNode({type:'slab', …})</code> 就能过</td></tr>
+      <tr><td><code>core/store/use-live-overrides.ts</code></td><td><code>Partial&lt;AnyNode&gt;</code>，自动</td></tr>
+      <tr><td><code>app/hooks/use-history-shortcuts.ts</code></td><td>Del 走的是 <code>removeNode(selectId)</code>，不认类型 —— <strong>slab 的删除和撤销是白送的</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">但是：闸门问的问题不等于 M6 的全部工作</span>
+    <p>
+      「让 slab 出现在画面上」= 5 处 / 0 框架文件。
+      「让 slab 能画、能选」还要碰另外 4 个地方，
+      而且<strong>「让项目还能编译」另外要碰 3 个地方</strong>（实测发现的，见下）。
+      <strong>把它们混在一起算，会得出「M5 没成立」的错误结论；
+      混着不算，又会漏掉真实工作量。</strong>下面分开算账。
+    </p>
+  </div>
+
+  <h3>另外四处，逐条判定</h3>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>要什么</th><th>碰什么</th><th>是"M5 没成立"吗</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>能<strong>画</strong> slab</td>
+        <td><code>use-editor.ts</code> 的 <code>Tool</code> 联合 ·<br><code>app.tsx</code> 挂工具 + 快捷键 ·<br><code>scope.ts</code> 的 <code>drafting.tool</code> 联合</td>
+        <td><strong>不是。</strong><code>m5-registry-answers.html</code> §01 把这三个明确划进 <strong>C 类「真·类型特有 —— 注册表不该碰，碰了就是过度抽象」</strong>；<code>def.tool</code> 在 §06 里排期到 <strong>M12</strong></td>
+      </tr>
+      <tr>
+        <td>能<strong>选中</strong> slab</td>
+        <td><code>selection-manager.tsx</code> 硬编码 <code>'wall:click'</code></td>
+        <td><strong>是个真缺口</strong>，但不是每类型固定成本 —— 改成按 <code>nodeRegistry.entries()</code> 订阅，<strong>一次 3 行，此后 0</strong>。对照仓库的 <code>selection-manager.tsx:386</code> 就是这么写的</td>
+      </tr>
+      <tr>
+        <td>column 走规格书原路</td>
+        <td><code>parametric-node-renderer.tsx</code> 加 <code>position</code> 绑定</td>
+        <td>同上：<strong>一次 4 行，此后 0</strong>。而且 slab / ceiling <em>完全不需要它</em></td>
+      </tr>
+      <tr>
+        <td><strong>让项目还能编译</strong><br><span class="tag debt">实测发现</span></td>
+        <td><code>core/systems/wall/wall-adjacency.ts</code> ·<br>
+            <code>app/lib/interaction/wall-linking.ts</code> ·<br>
+            <code>core/store/use-live-overrides.ts</code></td>
+        <td><strong>不是 M5 的问题</strong> —— 这三处是 <strong>M4</strong> 写的，
+            当时 <code>AnyNode</code> 只有一个成员，所以
+            <code>AnyNodeId</code>、<code>Partial&lt;AnyNode&gt;</code>
+            退化成了单一类型。联合一涨到 2 个就报错。<br>
+            <strong>一次性：加第 3、第 4 种类型时这三处不用再动</strong>（已实测）</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">最后这一行值得你自己判一次 —— 我按「通过」处理了</span>
+    <p>
+      <code>handoff-m6.md</code> 的闸门原话是「<strong>要改框架文件就说明 M5 没成立，
+      停下来报告</strong>」。<code>use-live-overrides.ts</code> 确实是框架文件，
+      确实必须改。按字面，应该停。
+    </p>
+    <p>
+      我判断<strong>不停</strong>，三条理由：
+    </p>
+    <ol>
+      <li>
+        <strong>它是 M4 的代码，不是 M5 的。</strong>
+        闸门要检验的是「注册表这层抽象成不成立」。
+        注册表相关的六个文件（<code>node-renderer</code> / <code>parametric-node-renderer</code> /
+        <code>geometry-system</code> / <code>node-registry</code> / <code>node-definition</code> /
+        <code>events/types</code>）<strong>实测零改动</strong>。
+      </li>
+      <li>
+        <strong>它是「联合从 1 涨到 2」的通行费，不是「每加一种付一次」。</strong>
+        判据在下面那一段：加第四种类型要不要再改？实测不用。
+      </li>
+      <li>
+        <strong><code>STATE.md</code> 已经把它记成 M4 的债了</strong>——
+        「live 覆盖是 <code>Partial&lt;AnyNode&gt;</code>，无 per-type 校验，M4 引入，M5 到期」。
+        M5 没还，M6 现在还。
+      </li>
+    </ol>
+    <p style="margin-bottom:0">
+      <strong>你不同意的话，M6 的方案就在下面，先别敲。</strong>
+      这是个判断，不是事实——我把证据和理由都摆在这里，结论归你。
+    </p>
+  </div>
+
+  <h3>结论</h3>
+  <div class="note">
+    <p>
+      <strong>闸门问的是「加 slab 要不要改框架文件」，答案是<em>不要</em>。测量通过，可以写 M6。</strong>
+    </p>
+    <p style="margin-bottom:0">
+      后两条是「框架还缺两个一次性能力」，不是「每种类型的固定成本」。
+      判据很简单：<strong>加第四种类型时它们还要不要再改一次？</strong>
+      不要 → 是一次性能力。要 → 才是 M5 没成立。
+      这两条都是不要。
+    </p>
+  </div>
+
+  <p>
+    换个说法：M5 结束时注册表只有<strong>一个</strong>用户，而那个用户
+    （wall）既没有 <code>position</code>，也是唯一可选中的东西。
+    <strong>一个从没有过第二个用户的接口，不可能提前长出第二个用户需要的形状。</strong>
+    这正是 M6 存在的理由——它是 M5 的第一次真实负载测试。
+  </p>
+
+  <h4>把这次测量记进账本</h4>
+  <p>
+    M6 收尾时把这几行加进 <code>STATE.md</code>：
+  </p>
+<pre><code><span class="cm">## M5 检验测量（2026-09-02，在 src/ 的完整拷贝上实测）</span>
+渲染路径加一种类型：5 处 / 框架文件 0 处 —— 与 m5-registry-answers §05 预测一致 ✅
+注册表六个文件（node-renderer / parametric-node-renderer / geometry-system /
+  node-registry / node-definition / events-types）零改动 ✅
+一次性补齐（加第 4 种类型时不用再动）：
+  · selection-manager 按注册表订阅（3 行）
+  · ParametricNodeRenderer 绑 position（4 行）
+  · M4 的三处「AnyNode 只有一个成员」假设（wall-adjacency / wall-linking / use-live-overrides）
+工具路径（Tool 联合 / app.tsx / scope.tool）属 C 类，注册表不管，def.tool 排期 M12
+</code></pre>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 前置 C -->
+<section>
+  <h2><span class="num">前置 C</span>开工闸门 · 20 处编辑</h2>
+  <p class="h2sub">敲完这些再敲 §07。A 组让 verify 变绿，B/C 组是编译器看不见的</p>
+
+  <div class="trap">
+    <span class="trap-label">为什么不能「边写 M6 边修」</span>
+    <p style="margin-bottom:0">
+      C 组两条会让 M6 的验收<strong>全部失真</strong>：C1 让墙角斜接静默失效
+      （你会以为是 slab 的锅），C2 让每个节点每帧重建
+      （M6 §05 第 10 条「画 20 块板不重算」必然失败，而且失败得看不出来）。
+      A 组不修则 <code>tsc</code> 根本跑不完，你敲的 slab 有没有类型错都不知道。
+    </p>
+  </div>
+
+  <h3>A 组 · 让 check-types 从 12 个错变 0 个</h3>
+
+  <h4>A1 · <code>core/store/history-control.ts:75</code> —— 函数体是空的（消 3 个错）</h4>
+  <p>三个错都出自这一行签名：<code>before</code> 未用、<code>after</code> 未用、声明返回 <code>number</code> 却不返回。</p>
+<pre><code>function retainedPastStateCount&lt;TPast&gt;(before: readonly TPast[], after: readonly TPast[]): number {
+<span class="cw">+    for (let start = 0; start &lt; before.length; start += 1) {</span>
+<span class="cw">+        const retained = before.length - start</span>
+<span class="cw">+        if (retained &gt; after.length) continue</span>
+<span class="cw">+</span>
+<span class="cw">+        let matches = true</span>
+<span class="cw">+        for (let index = 0; index &lt; retained; index += 1) {</span>
+<span class="cw">+            if (before[start + index] !== after[index]) { matches = false; break }</span>
+<span class="cw">+        }</span>
+<span class="cw">+        if (matches) return retained</span>
+<span class="cw">+    }</span>
+<span class="cw">+    return 0</span>
+}
+</code></pre>
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>不能</strong>简化成 <code>after.length - before.length</code>。
+      <code>zundo</code> 的 <code>limit</code> 是<em>从头部截断</em>的：历史满了之后
+      <code>after.length</code> 不再增长，差值恒为 0。这个函数要找的是
+      「<code>before</code> 的哪个后缀还留在 <code>after</code> 的头部」。
+    </p>
+  </div>
+
+  <h4>A2–A3 · <code>app/hooks/use-history-shortcuts.ts</code></h4>
+<pre><code><span class="cm">// 第 1 行 —— React 19 的 use，自动导入塞的</span>
+<span class="cw">-import { use, useEffect } from "react";</span>
+<span class="cw">+import { useEffect } from "react";</span>
+
+<span class="cm">// 第 20 / 27 行 —— undo 和 redo 后面各留了一个空行，函数没人调</span>
+         useScene.temporal.getState().undo()
+<span class="cw">+        afterHistoryJump()</span>
+         return
+         …
+         useScene.temporal.getState().redo()
+<span class="cw">+        afterHistoryJump()</span>
+         return
+</code></pre>
+  <p>
+    <code>afterHistoryJump</code> 干两件事：<code>markAllDirty()</code>
+    （撤销后几何要重建）和「选中的节点被撤没了就清空选中」。
+    <strong>没接上的话，Ctrl+Z 之后画面不变</strong>——因为脏集是空的。
+  </p>
+
+  <h4>A4–A5 · 两个未使用的导入</h4>
+<pre><code><span class="cm">// app/lib/interaction/drag-session.ts:1 —— 自动导入幽灵，第三次</span>
+<span class="cw">-import { events } from "@react-three/fiber"</span>
+
+<span class="cm">// app/tools/move-tool.tsx:6 —— move-tool 全程走 Point2D</span>
+<span class="cw">-import * as THREE from 'three'</span>
+</code></pre>
+  <div class="note">
+    <p style="margin-bottom:0">
+      <code>@react-three/fiber</code> 的 <code>events</code> 导出在这个项目里
+      <strong>一次都不该被 import</strong>（它只在 <code>&lt;Canvas events=…&gt;</code> 上用，而我们不传）。
+      <code>STATE.md</code>「待处理」里那条 lint 规则建议就是为它写的——
+      同一个幽灵已经出现三次，三次都不产生红字（前两次是<em>遮蔽</em>，不是未使用）。
+    </p>
+  </div>
+
+  <h4>A6 · <code>app/store/use-interaction-scope.ts:21</code> —— 守卫退回了 M3 版本</h4>
+  <p>这一处最要紧。症状只是「<code>kind</code> 参数未使用」，看上去像签名多写了个参数。</p>
+<pre><code>    update: (kind, patch) =&gt;
+        set((state) =&gt; {
+<span class="cw">-            if (state.scope.kind === 'idle') return state</span>
+<span class="cw">+            if (state.scope.kind !== kind) return state</span>
+            return { scope: { ...state.scope, ...patch } as InteractionScope }
+        }),
+</code></pre>
+  <p>
+    守卫要判的是「<strong>这次更新是不是发给我这场交互的</strong>」。
+    判 <code>=== 'idle'</code> 只挡住了 idle，于是在 <code>moving</code> 里调
+    <code>update('drafting', { points })</code> 会照样合并，得到
+    <code>{ kind:'moving', nodeId, origin, points }</code>——判别联合里不存在的形状，
+    末尾那句 <code>as InteractionScope</code> 正好把它盖住。
+  </p>
+  <div class="trap">
+    <span class="trap-label">M6 会立刻踩到它</span>
+    <p style="margin-bottom:0">
+      M6 有<strong>两个</strong> drafting 工具（slab / ceiling）和一个 placing 工具（column）。
+      不修这一处，切工具时残留的 <code>points</code> 会跨工具泄漏，
+      而 <code>PolygonTool</code> 读到的是上一个工具的草稿。
+      M4 时只有一个工具，所以看不出来。
+    </p>
+  </div>
+
+  <h4>A7 · <code>app/app.tsx:45</code> —— OrbitControls 少了 enabled</h4>
+<pre><code>                &lt;OrbitControls
+                makeDefault
+<span class="cw">+                enabled={!inputDragging}</span>
+                enableRotate={!isPlan}
+</code></pre>
+  <p>真正的后果不是编译错，是 <strong>3D 视角下拖墙的同时相机在转</strong>。</p>
+
+  <h4>A8 · <code>core/registry/node-definition.ts:19</code> —— <code>geometry</code> 该是可选的</h4>
+<pre><code><span class="cw">-    geometry: (node: N, ctx: GeometryContext&lt;L&gt;, appearance: NodeAppearance) =&gt; THREE.Object3D</span>
+<span class="cw">+    geometry?: (node: N, ctx: GeometryContext&lt;L&gt;, appearance: NodeAppearance) =&gt; THREE.Object3D</span>
+</code></pre>
+  <p>
+    规格书的三复选框是 <code>geometry?</code> / <code>renderer?</code> / <code>system?</code>——
+    <strong>三个都可选，「声明即参与」</strong>。写成必填之后，
+    <code>node-renderer.tsx:28</code> 的 <code>if (def.geometry)</code> 变成恒真，
+    TS 报 TS2774「这个条件永远为真，你是不是想调用它」。
+  </p>
+
+  <h4>A9 · 删两个孤儿文件（消 2 个错）</h4>
+<pre><code>rm src/viewer/components/wall-renderer.tsx   <span class="cm"># M5 应删未删；没人 import 它，但它 import 了两个不存在的东西</span>
+rm src/viewer/hooks/use-level-miters.ts      <span class="cm"># 同上，零调用点</span>
+</code></pre>
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>这两条取代 <code>m4-drag.html</code> §08 的第 08 条。</strong>
+      那一条教你把 <code>use-level-miters.ts</code> 改成调
+      <code>getCachedLevelMiters</code>，但 <code>viewer/lib/level-miter-cache.ts</code>
+      已经在 M5 期间删掉了（<code>git status</code> 里的那个 <code>D</code>）。
+      斜接缓存的位置搬到了 <code>def.computeLevelData</code> + <code>GeometrySystem</code> 的分组，
+      §08 那条写于 M5 之前。
+    </p>
+  </div>
+
+  <h3>B 组 · 编译器看不见的（M4 §08 B 组，第 08 条已作废）</h3>
+
+  <h4>B1 · <code>core/store/use-scene.ts:42,48</code> —— 脏标记没接上</h4>
+  <p>
+    现在只有 <code>addNode</code> 调 <code>makeDirty</code>；
+    <code>clearDirty</code> 声明了、实现了、<strong>零调用</strong>。
+    改墙根本不进脏集。<strong>这是 M5 的地基，也是 M6 的地基。</strong>
+  </p>
+<pre><code>        updateNode: (id, patch) =&gt; <span class="cw">{</span>
+            set((s) =&gt; {
+                const prev = s.nodes[id]
+                if (!prev) return s
+                return { nodes: { ...s.nodes, [id]: { ...prev, ...patch } as AnyNode } }
+            })
+<span class="cw">+            if (get().nodes[id]) get().makeDirty(id)</span>
+        <span class="cw">},</span>
+
+        removeNode: (id) =&gt; <span class="cw">{</span>
+            set((s) =&gt; { <span class="cm">/* 原样 */</span> })
+<span class="cw">+            get().clearDirty(id)</span>
+        <span class="cw">},</span>
+</code></pre>
+
+  <h4>B2 · <code>core/systems/wall/wall-adjacency.ts:35</code> —— 四项里第一项写重了</h4>
+<pre><code>            if (
+<span class="cw">-                startKey === dirtyEndKey ||</span>
+<span class="cw">+                startKey === dirtyStartKey ||</span>
+                 startKey === dirtyEndKey ||
+                 endKey === dirtyStartKey ||
+                 endKey === dirtyEndKey
+            ) {
+</code></pre>
+  <p>「起点撞起点」丢了 —— 两堵从同一个墙角向外画的墙检测不到相邻。</p>
+
+  <h4>B3 · <code>core/store/history-control.ts:84</code> —— 花括号展开数组</h4>
+<pre><code><span class="cw">-    const before = {...store.temporal.getState().pastStates}</span>
+<span class="cw">+    const before = [...store.temporal.getState().pastStates]</span>
+<span class="cw">-    const after =store.temporal.getState().pastStates</span>
+<span class="cw">+    const after = store.temporal.getState().pastStates</span>
+</code></pre>
+  <p>
+    本项目<strong>第四个「类型系统看不见」的 bug</strong>。TS 把数组的对象展开推成数组类型，
+    赋给 <code>readonly TPast[]</code> 一路绿灯。运行时是 <code>{0:…, 1:…}</code>，
+    <strong>没有 <code>.length</code></strong> ⟹ <code>start &lt; undefined</code> 恒假 ⟹
+    <code>retainedPastStateCount</code> 恒返回 0 ⟹ <strong>每次事务把整个历史截成一条</strong>。
+  </p>
+
+  <h4>B4–B6 · 三处小的</h4>
+<pre><code><span class="cm">// app/hooks/use-history-shortcuts.ts:45 —— useEffect 少了依赖数组</span>
+         return () =&gt; window.removeEventListener('keydown', onKeyDown)
+<span class="cw">-    })</span>
+<span class="cw">+    }, [])</span>
+
+<span class="cm">// app/tools/wall-tool.tsx:112 —— ⚠ 这一条已作废，见下方更正框，别敲</span>
+<span class="cm">       ]}</span>
+<span class="cm">-      visible={false}   ← 原方案，会让橡皮筋预览永久不可见</span>
+<span class="cm">       color="#0b6e5f"</span>
+
+<span class="cm">// app/tools/move-tool.tsx:154 —— 卸载时停在候选阶段（按下但没超 4px），teardown 不会跑</span>
+             sessionRef.current?.end('cancel')
+<span class="cw">+            candidateRef.current = null</span>
+             useViewer.getState().setInputDragging(false)
+</code></pre>
+  <div class="trap">
+        <span class="trap-label">2026-09-02 更正 —— 这一条是错的，别敲</span>
+        <p>
+          <strong>原方案「加 <code>visible={false}</code>」行不通。</strong>
+          <code>@react-three/drei</code> 的 <code>core/Line.js</code> 只解构了
+          <code>points / color / vertexColors / linewidth / lineWidth / segments / dashed</code>，
+          <strong><code>visible</code> 落进 <code>...rest</code></strong>，而 <code>rest</code> 被<em>同时</em>铺到
+          <code>&lt;primitive object={line2}&gt;</code> 和
+          <code>&lt;primitive object={lineMaterial}&gt;</code> 上。
+        </p>
+        <p>
+          <code>WebGLRenderer</code> 判的是 <code>material.visible</code>，
+          而 <code>useFrame</code> 里那句 <code>line.visible = true</code> 只翻 Object3D ——
+          <strong>材质那半永远关着，橡皮筋预览一个像素都不会画。</strong>
+          （<code>grep -n visible Line.js</code> 结果为空，静态可证。）
+        </p>
+        <p>
+          <strong>而且这一条针对的"病"本身也没被观察过。</strong>
+          「挂载第一帧会在原点闪一下」是推断：按 R3F 的循环顺序
+          （<code>useFrame</code> 订阅者 → <code>gl.render</code>），
+          挂载后第一帧在绘制之前就已经跑过一次 <code>useFrame</code> 并设了
+          <code>line.visible = false</code>，<strong>很可能根本不闪</strong>。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>改成 Z</strong>：先<em>只删掉</em>这一行（如果已经敲了），跑起来看。
+          真的闪，再用 ref 设、不要用 prop —— 只碰 Object3D，绕开 drei 的转发：
+        </p>
+<pre style="margin-top:12px"><code><span style="color:var(--warn)">-import { useEffect, useRef, type ComponentRef } from "react";</span>
+<span style="color:var(--accent)">+import { useEffect, useLayoutEffect, useRef, type ComponentRef } from "react";</span>
+
+ function WallDraftPreview({ cursorRef }) {
+   const lineRef = useRef&lt;ComponentRef&lt;typeof Line&gt;&gt;(null)
+<span style="color:var(--accent)">+  useLayoutEffect(() =&gt; {</span>
+<span style="color:var(--accent)">+    if (lineRef.current) lineRef.current.visible = false</span>
+<span style="color:var(--accent)">+  }, [])</span></code></pre>
+        <p style="margin:12px 0 0">
+          事故全过程见 <code>STATE.md</code> 的「事故记录 · 2026-09-02」，
+          由此产生的三条规则是 <code>DECISIONS.md</code> 的 <strong>D16 / D17 / D18</strong>。
+        </p>
+      </div>
+
+  <h3>C 组 · GeometrySystem 的两个 bug —— verify 修绿之后它们还在</h3>
+
+  <h4>C1 · 阶段一算了 siblings，但从没调 <code>def.computeLevelData</code></h4>
+<pre><code>            const siblings = Object.values(nodes)
+                .filter((n) =&gt; n.type === node.type)
+                .map((n) =&gt; getEffectiveNode(n))
+            effectiveBykind.set(node.type, siblings)
+<span class="cw">+            levelDataBykind.set(node.type, def.computeLevelData(siblings))</span>
+        }
+</code></pre>
+  <p>
+    <code>levelDataBykind</code> 在第 25 行声明、第 68 行读、<strong>中间从没写过</strong>。
+    后果见前置 A 第 6 条：<strong>M2 的墙角斜接全部失效</strong>。
+  </p>
+
+  <h4>C2 · 重建成功后没有 <code>clearDirty(id)</code></h4>
+<pre><code>            disposeGeometryChildren(group)
+            for (const child of [...built.children]) {
+                child.userData.__fromGeometry = true
+                group.add(child)
+            }
+<span class="cw">+            clearDirty(id)</span>
+        }
+</code></pre>
+  <p>
+    脏集只增不减 ⟹ 每一堵墙<strong>每帧</strong>都 dispose + 重建一次
+    <code>ExtrudeGeometry</code> ⟹ M4 的头号目标（「只移动鼠标时一次不重算」）
+    反向达成。注意 <code>clearDirty</code> 在两条<em>失败</em>分支里已经调了
+    （第 43 / 50 行），只有成功分支漏了——这是它看起来没问题的原因。
+  </p>
+
+  <h3>D 组 · M6 要用的一个新函数</h3>
+
+  <h4>D1 · <code>core/registry/node-registry.ts</code> —— 加 <code>resetNodeRegistry()</code></h4>
+<pre><code><span class="cw">+export function resetNodeRegistry(): void {</span>
+<span class="cw">+    definitions.clear()</span>
+<span class="cw">+}</span>
+</code></pre>
+  <p>
+    §07 有一个注册表测试文件。<strong>没有它，测试之间会互相污染</strong>——
+    <code>registerNode</code> 遇到重名会 <code>throw</code>，第二个 <code>it()</code> 直接炸。
+    只给测试用，生产代码不该调。
+  </p>
+
+  <h3>E 组 · 三处「<code>AnyNode</code> 只有一个成员」的假设 <span class="tag debt">实测发现</span></h3>
+  <p>
+    <strong>这三条不在 <code>handoff-m6.md</code> 的清单里，是把 slab 加进联合之后
+    <code>tsc</code> 报出来的。</strong>它们全是 M4 期间写的：
+    当时 <code>AnyNode</code> 只有 <code>WallNode</code> 一个成员，于是
+    <code>AnyNodeId</code> 退化成 <code>`wall_${string}`</code>、
+    <code>Partial&lt;AnyNode&gt;</code> 退化成单一对象类型。
+    联合一涨到 2 个成员，这三处立刻红。
+  </p>
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>敲的时机：§04 第 04 步（<code>types.ts</code> 加进联合）之后立刻。</strong>
+      那一步敲完 <code>tsc</code> 会报 5 个错，就是这三处。
+      <em>放进前置 C 是因为它们是先决条件，不是 M6 的新功能。</em>
+    </p>
+  </div>
+
+  <h4>E1 · <code>core/systems/wall/wall-adjacency.ts:13</code></h4>
+<pre><code><span class="cw">-    const byId = new Map(walls.map((w) =&gt; [w.id, w] as const))</span>
+<span class="cw">+    const byId = new Map&lt;AnyNodeId, WallNode&gt;(walls.map((w) =&gt; [w.id, w] as const))</span>
+</code></pre>
+  <p>
+    <code>walls</code> 是 <code>WallNode[]</code>，所以推出来的键类型是
+    <code>`wall_${string}`</code>；但 <code>byId.get(dirtyId)</code> 传进去的是
+    <code>AnyNodeId</code>（现在是四种 id 的联合）。显式写宽键类型即可——
+    <code>AnyNodeId</code> 已经 import 过了。
+  </p>
+
+  <h4>E2 · <code>app/lib/interaction/wall-linking.ts:37</code></h4>
+<pre><code><span class="cw">-        const patch: NodeOverride = {}</span>
+<span class="cw">+        const patch: Partial&lt;WallNode&gt; = {}</span>
+</code></pre>
+  <p>
+    <code>patch.start = …</code> 在只有墙的时候合法，现在
+    <code>NodeOverride</code> 是四种 <code>Partial</code> 的联合，
+    <code>start</code> 不在所有成员上。
+    <strong>而这个函数本来就是墙专有的</strong>（它叫 <code>linkedWallOverrides</code>），
+    所以窄回 <code>Partial&lt;WallNode&gt;</code> 是<em>更正确</em>而不只是让编译过。
+    <code>WallNode</code> 已经 import 过了。
+  </p>
+
+  <h4>E3 · <code>core/store/use-live-overrides.ts:21,29</code> —— 这条要说清楚</h4>
+<pre><code>export type NodeOverride = Partial&lt;AnyNode&gt;
+
+<span class="cw">+/**</span>
+<span class="cw">+ * NodeOverride 是【判别联合】（Partial 是同态映射类型，对联合分配），所以</span>
+<span class="cw">+ * `{ ...a, ...b }` 的结果类型是各成员的交叉积 —— 联合里不存在的形状，</span>
+<span class="cw">+ * TS 拒绝把它赋回 NodeOverride。</span>
+<span class="cw">+ *</span>
+<span class="cw">+ * 运行时是对的：同一个 id 的两个补丁一定属于同一种节点。</span>
+<span class="cw">+ * 但这件事类型系统表达不了，所以把不健全性收进这一个函数里，</span>
+<span class="cw">+ * 而不是散在两个 spread 上。调用方仍然享受 per-type 检查（见 E2）。</span>
+<span class="cw">+ *</span>
+<span class="cw">+ * 对照仓库直接放弃了：它的 LiveNodeOverrides 就是 Record&lt;string, unknown&gt;。</span>
+<span class="cw">+ */</span>
+<span class="cw">+function mergeOverride(prev: NodeOverride | undefined, next: NodeOverride): NodeOverride {</span>
+<span class="cw">+    return { ...prev, ...next } as NodeOverride</span>
+<span class="cw">+}</span>
+
+<span class="cm">// set: 里</span>
+<span class="cw">-            next.set(id, { ...next.get(id), ...values })</span>
+<span class="cw">+            next.set(id, mergeOverride(next.get(id), values))</span>
+
+<span class="cm">// setMany: 里</span>
+<span class="cw">-            for (const [id, values] of entries) next.set(id, { ...next.get(id), ...values })</span>
+<span class="cw">+            for (const [id, values] of entries) next.set(id, mergeOverride(next.get(id), values))</span>
+</code></pre>
+  <div class="trap">
+    <span class="trap-label">这是 STATE.md 里那条 M4 债的还款，不是新增的债</span>
+    <p>
+      <code>STATE.md</code>「当前的故意保留的缺陷」有一行：
+      「<em>live 覆盖是 <code>Partial&lt;AnyNode&gt;</code>，无 per-type 校验 · 引入于 M4 · 到期 M5</em>」。
+      <strong>M5 没还</strong>——因为 M5 结束时联合只有一个成员，
+      <code>Partial&lt;AnyNode&gt;</code> 和「一个具体类型的 Partial」<em>完全等价</em>，
+      问题根本不存在。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>这就是「一个从没有过第二个用户的接口」的第二个例子</strong>（前置 B 结论那段）。
+      对照仓库遇到同一个问题时选择的是彻底放弃类型
+      （<code>Record&lt;string, unknown&gt;</code>）；我们保留 <code>Partial&lt;AnyNode&gt;</code>
+      让调用方还能被检查，只把不健全性关进一个 3 行的函数。
+      <em>哪种更好可以争论，但必须知道自己在选。</em>
+    </p>
+  </div>
+
+  <h3>做完之后应该看到</h3>
+  <ul class="check">
+    <li><code>pnpm check-types</code> 绿（12 → 0）</li>
+    <li><code>pnpm lint</code> 绿</li>
+    <li><code>pnpm test</code> 绿，仍是 2 文件 / 31 用例（B/C/E 组不带测试）</li>
+    <li>跑起来：<strong>墙角还是严丝合缝的</strong>（C1 的回归，最重要的一条）</li>
+    <li>跑起来：拖一堵墙松手，<code>Ctrl+Z</code> 一次回到原位（B3 的回归）</li>
+  </ul>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>M4 §08 的 C 组四个测试文件（64 用例那批）不在本闸门内。</strong>
+      它们是好东西，但和 M6 无关，什么时候补都行。
+      闸门只要「verify 绿 + 两个静默 bug 已死」。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 00 -->
+<section>
+  <h2><span class="num">00</span>这个设计是怎么推出来的</h2>
+  <p class="h2sub">七步 + 一步原型。这一节是过程，不是结论</p>
+
+  <div class="step">
+    <div class="step-n">①</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">找规格书，读全文</h3></div>
+      <p>
+        <strong>M6 没有专属的 wiki 规格书</strong>——这是它和 M3/M5/M7/M8 的第一个区别，
+        也是它被标成 <span class="tag debt">模式</span> 而不是 <span class="tag core">机制</span> 的原因。
+        M5 已经把规格书读完了，M6 是同一份规格书的第二、三、四个用户。
+      </p>
+      <p>要回头查的只有两段，各十行：</p>
+<pre><code><span class="cm">1.</span> node-definitions.md:185   <span class="cm">「Builders emit local-space children」 ← §02 的全部依据</span>
+<span class="cm">2.</span> node-definitions.md:215   <span class="cm">「GeometrySystem must not mutate group.position」 ← 反面教材</span>
+</code></pre>
+      <p>然后读三份 schema，只读字段，不读实现：</p>
+<pre><code>packages/core/src/schema/nodes/slab.ts      <span class="cm">polygon + elevation + thickness，没有 position</span>
+packages/core/src/schema/nodes/ceiling.ts   <span class="cm">同 slab，但用 height 不用 elevation</span>
+packages/core/src/schema/nodes/column.ts    <span class="cm">position + 60 多个造型参数</span>
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">column 那 60 个参数是个陷阱</span>
+        <p style="margin-bottom:0">
+          <code>column.ts</code> 有 <code>fluteCount</code>（凹槽数）、<code>voluteCount</code>（涡卷数）、
+          <code>capitalStyle</code>（12 种柱头）、<code>ColumnSupportStyle</code>（11 种支撑）……
+          <strong>D2 明确写了不做家具级细节</strong>。我们要的是
+          <code>position / crossSection / height</code> 加两个尺寸，六个字段。
+          读到 <code>ColumnCapitalStyle</code> 就该停。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">②</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">找「之前是怎么错的」</h3></div>
+      <p>
+        对照仓库的 slab 几何有一段 12 行的注释，记的正是一次踩坑
+        （<code>packages/viewer/src/systems/slab/slab-system.tsx:85</code>）：
+      </p>
+      <div class="note">
+        <p style="margin-bottom:0">
+          「<em>Built directly in 3D (Y-up) rather than via ExtrudeGeometry so the hole side
+          walls can be emitted double-sided. …ExtrudeGeometry's hole walls are single-sided,
+          so their interior faces get back-face culled and you see straight through the cut.</em>」
+        </p>
+      </div>
+      <p>
+        翻译：<strong>一旦楼板上要挖洞（楼梯井），<code>ExtrudeGeometry</code> 就不够用了</strong>——
+        洞的内壁是单面的，从洞里往下看会直接看穿。他们为此手写了 200 行三角化。
+      </p>
+      <p>
+        <strong>但 M6 不挖洞</strong>（洞属于 M11 楼梯）。所以我们用
+        <code>ExtrudeGeometry</code>，<em>并且知道自己什么时候会撞墙</em>——
+        这条写进 §06，到期 M11。这就是"读别人的错误"的价值：
+        不是照抄他们的解法，是提前知道自己那条捷径的有效期。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">③</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">量成本，决定手写还是抄</h3></div>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>对照源码</th><th>行数</th><th>我们要</th><th>怎么办</th></tr></thead>
+        <tbody>
+          <tr><td><code>nodes/src/slab/geometry.ts</code></td><td>335</td><td>~20</td><td>只取"轮廓 → 挤出"这条主线，材质槽位全跳</td></tr>
+          <tr><td><code>nodes/src/slab/definition.ts</code></td><td>381</td><td>6</td><td>只取 <code>kind</code> + <code>geometry</code></td></tr>
+          <tr><td><code>nodes/src/slab/tool.tsx</code></td><td>394</td><td>~90</td><td>只取"点击成环"，音效/施工面/地形全跳</td></tr>
+          <tr><td><code>nodes/src/ceiling/definition.ts</code></td><td>233</td><td>6</td><td>同 slab</td></tr>
+          <tr><td><code>nodes/src/column/definition.ts</code></td><td>428</td><td>6</td><td>handle 描述符全跳（那是 M13）</td></tr>
+          <tr><td><code>nodes/src/column/tool.tsx</code></td><td>220</td><td>~45</td><td>单击放置 + 一个半透明预览</td></tr>
+          <tr><td><code>core/src/lib/slab-polygon.ts</code></td><td>825</td><td>0</td><td><strong>整个跳过</strong> —— 自相交 / 布尔 / 洞</td></tr>
+          <tr><td><code>editor/…/polygon-editor.tsx</code></td><td>1267</td><td>0</td><td><strong>整个跳过</strong> —— 顶点编辑，M13</td></tr>
+          <tr><td><code>core/src/lib/polygon-geometry.ts</code></td><td>109</td><td>~12</td><td>只要有符号面积（挡退化多边形用）</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="font-size:19px">
+        <strong>4192 行里我们要 ~185 行。</strong>
+      </p>
+      <p>
+        跳过的两个大件（<code>slab-polygon.ts</code> 825 行 + <code>polygon-editor.tsx</code> 1267 行）
+        <strong>合起来占了 50%</strong>。它们解决的是同一类问题：
+        <em>用户画出来的多边形是脏的</em>（自交、重合点、需要事后改）。
+        M6 的立场是：<strong>脏就不让它进 store</strong>——一个面积守卫，12 行。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">④</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">抽不变量 —— 它们就是测试用例</h3></div>
+      <ol>
+        <li>
+          <strong>挤出方向和标高的约定，两种类型正好相反。</strong>
+          slab 的 <code>elevation</code> 是<em>顶面</em>（行走面），实体向下长到
+          <code>elevation - thickness</code>；ceiling 的 <code>height</code> 是<em>底面</em>
+          （抬头看到的那个面），实体向上长到 <code>height + thickness</code>。
+          <span class="tag core">可测</span>
+        </li>
+        <li>
+          <strong>shape 空间 → 世界的映射，和 wall 是同一条链。</strong>
+          <code>(x, y)</code> 里 <code>y = -worldZ</code>，挤出 <code>depth</code> 之后
+          <code>rotateX(-π/2)</code>，得到世界 <code>(x, 挤出量, worldZ)</code>。
+          <strong>抄 <code>wall/geometry.ts:56</code> 那两行 <code>moveTo(x, -y)</code>，不要自己推。</strong>
+          <span class="tag viewer">跑起来看</span>
+        </li>
+        <li>
+          <strong>退化多边形不进 store。</strong>
+          三点共线、面积 ≈ 0 的环，闭合时必须被拒——
+          否则 <code>ExtrudeGeometry</code> 生成 NaN 法线，画面上是一块黑斑。
+          <span class="tag core">可测</span>
+        </li>
+        <li>
+          <strong>闭合判定只看首点距离，不看点数以外的东西。</strong>
+          <code>points.length ≥ 3</code> 且离首点 &lt; 0.25m。
+          <span class="tag core">可测</span>
+        </li>
+        <li>
+          <strong>由点定义的类型走信封，由 position 定义的类型走渲染器绑定。</strong>
+          判据是<em>schema 里有没有 <code>position</code> 字段</em>，不是"感觉像哪种"。
+          <span class="tag viewer">§02 的结论</span>
+        </li>
+        <li>
+          <strong>注册表的注册是幂等的，重名要抛。</strong>
+          <span class="tag core">可测</span>（这是 M5 从没测过的东西）
+        </li>
+      </ol>
+      <p>
+        1 / 3 / 4 / 6 都是纯函数，写 vitest（D11）。2 和 5 靠跑起来看。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">⑤</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">切最薄的垂直片</h3></div>
+      <p>
+        <code>handoff-m6.md</code> ④ 已经定了顺序：<strong>slab → ceiling → column</strong>。
+        理由值得复述，因为它决定了<em>什么时候抽公共代码</em>：
+      </p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>顺序</th><th>为什么在这个位置</th><th>这一步<em>不</em>做什么</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>1 · slab</strong></td>
+            <td>最简单，且是 ceiling 的基础</td>
+            <td><strong>不抽任何公共代码。</strong>几何和工具都写死在 slab 里</td>
+          </tr>
+          <tr>
+            <td><strong>2 · ceiling</strong></td>
+            <td>复用 slab 的几乎全部</td>
+            <td><strong>这一步才抽</strong> —— 多边形挤出器 + 多边形绘制工具。D10 的 rule of three</td>
+          </tr>
+          <tr>
+            <td><strong>3 · column</strong></td>
+            <td>和前两个完全不同：有 <code>position</code>、参数化截面、不用多边形</td>
+            <td>不复用任何东西。<strong>它是对照组</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>column 的角色要说清楚。</strong>slab 和 ceiling 共享太多——
+          只用它们俩验收，证明的是"注册表对多边形节点通用"，不是"注册表通用"。
+          <strong>只有 column 能证伪</strong>：它是唯一一个可能逼出框架改动的类型
+          （事实上它确实逼出了一处，见 §02）。
+        </p>
+      </div>
+      <div class="trap">
+        <span class="trap-label">写 slab 时忍住不抽</span>
+        <p style="margin-bottom:0">
+          写 <code>buildSlabGeometry</code> 时你会很想直接写成
+          <code>buildPolygonPrism</code>——因为你已经<em>知道</em> ceiling 要用。
+          <strong>忍住。</strong>先写死一版 slab 的，跑通，再写 ceiling 的时候
+          <em>看着两份代码</em>抽。这样抽出来的参数是真的差异
+          （<code>bottomY</code> / <code>topY</code> / <code>color</code> / <code>name</code>），
+          凭想象抽出来的会多两个用不上的钩子。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">⑥</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">去用户代码里找病灶 —— 动机必须先于机制</h3></div>
+      <p>M6 的三种类型各自对应你代码里一个具体的空缺：</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>类型</th><th>病灶在哪</th><th>不做会怎样</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>slab</td>
+            <td><code>viewer/components/ground.tsx</code> —— 现在只有一张 100×100 的灰底板。<strong>墙站在"地面"上，而"地面"不是场景数据</strong>，它是硬编码的装饰</td>
+            <td>M8 做多楼层时二层没有可站的东西</td>
+          </tr>
+          <tr>
+            <td>ceiling</td>
+            <td>同上的反面：<strong>3D 视角下从上往下看永远能看进屋里</strong>，因为屋顶那一面是空的</td>
+            <td>M10 屋顶接不上——屋顶要和天花共享同一个多边形</td>
+          </tr>
+          <tr>
+            <td>column</td>
+            <td><code>parametric-node-renderer.tsx:24</code> —— <code>&lt;group&gt;</code> 上<strong>没有 <code>position</code></strong>。M5 之后这条路一直是空的</td>
+            <td><strong>M7 的门窗也有 position</strong>。到 M7 才发现这条路不存在，就得在做开洞 CSG 的同时改渲染器</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p>
+        第三行是本 M 最有价值的一条：<strong>column 不是"再加一种节点"，
+        它是替 M7 把渲染器的第二条路踩通</strong>。而 column 是安全的踩法——
+        它没有宿主关系、没有 CSG、没有级联删除，出问题只可能出在
+        <code>position</code> 这一处。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">⑦</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">列故意缺陷并标到期</h3></div>
+      <p>见 §06。这里只说定这一条口径：</p>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>M6 的三种类型「能画、能选、能删、能撤销」，但<em>不能拖动</em>。</strong>
+          <code>MoveTool</code> 只监听 <code>wall:pointerdown</code>，而且它的整套逻辑
+          （<code>linkedWallOverrides</code> 共端点联动）是墙专有的。
+          让它支持多边形节点＝重写它，那是 M13 的工作量。
+          <strong>这一条要在 §05 之前说清楚，否则你会以为是 bug。</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">⑧</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">先跑原型的那件事：标高的默认值</h3></div>
+      <p>
+        <code>slab.elevation</code> 默认写 <code>0</code> 看起来最自然，
+        <strong>但那样楼板顶面正好落在 <code>Ground</code> 的平面上（<code>y=0</code>）</strong>，
+        网格线在 <code>y=0.001</code>。两个共面的东西 → z-fighting，
+        画面上是一片闪烁的麻点。
+      </p>
+      <p>
+        对照仓库的默认值是 <code>elevation: 0.05</code>——不是随手写的，是同一个坑的解。
+        我们照抄。<strong>副作用要一起记下来</strong>：墙底在 <code>y=0</code>，
+        楼板顶在 <code>0.05</code>，所以<em>墙看起来陷进楼板 5cm</em>。
+        这也是对照仓库的原样行为，真正的修法是 M8 的 level 平面。→ §06
+      </p>
+      <div class="trap">
+        <span class="trap-label">这一步不跑原型的话</span>
+        <p style="margin-bottom:0">
+          你会敲完 §07 全码，看到一片闪烁的楼板，然后去查
+          <code>ExtrudeGeometry</code> 的法线、查材质的 <code>polygonOffset</code>、
+          查 <code>logarithmicDepthBuffer</code>——查三样都不对，
+          因为病根在一个 <code>z.number().default(0)</code> 上。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 01 -->
+<section>
+  <h2><span class="num">01</span>这一步解决什么问题</h2>
+  <p class="h2sub">一个只有墙的编辑器，画不出房间</p>
+
+  <p>
+    M1–M5 之后你手里的东西是：能画墙、墙角严丝合缝、能拖能撤销、
+    渲染走注册表。<strong>但它不是一个"住宅编辑器"，是一个"墙编辑器"</strong>。
+    差别不在功能条数，在于三件事现在做不到：
+  </p>
+
+  <h3>① 没有"地面"这个概念，只有一张装饰板</h3>
+  <p>
+    <code>Ground</code> 是 <code>viewer/components/ground.tsx</code> 里写死的
+    100×100 平面 + <code>gridHelper</code>，而且 <code>raycast={NEVER_RAYCAST}</code>——
+    <strong>它连射线都不接</strong>。它不在 <code>sceneRegistry</code> 里，
+    不在 <code>useScene.nodes</code> 里，不能选中、不能删、不进撤销。
+  </p>
+  <p>
+    这在 M1–M5 是对的（我们只需要一个参照系）。但 M8 一来就崩：
+    二层的墙站在哪？"二楼的地面"必须是<strong>数据</strong>，
+    而且必须是<strong>有边界的多边形</strong>——不是无限大的平面。
+  </p>
+
+  <h3>② 3D 视角下永远能看进屋里</h3>
+  <p>
+    四堵墙围一圈，从上往下看是个敞口盒子。没有天花，
+    <strong>"房间"这个视觉概念不成立</strong>。
+    而且 M10 的屋顶要贴着天花的多边形长——没有天花，屋顶没有基准面。
+  </p>
+
+  <h3>③ 渲染器的第二条路是空的，而 M7 必须走它</h3>
+  <p>
+    规格书 <code>node-definitions.md:185</code> 写的是：
+    builder 产出<em>局部坐标</em>的子节点，<code>ParametricNodeRenderer</code>
+    用 JSX 绑 <code>position</code>。<strong>我们的 wall 走的是另一条路</strong>——
+    因为 <code>WallNode</code> 没有 <code>position</code>，只有 <code>start</code>/<code>end</code>，
+    所以 builder 只能把世界坐标烤进几何里，返回一个"信封"。
+  </p>
+  <p>
+    <code>m5-registry-answers.html</code> §06「来源三」第四条把这个记成了债：
+    「<em>墙的 transform 由 builder 算…和 M6 的 slab / column 会走两条不同的路 → M6 复核</em>」。
+    <strong>现在复核的时候到了，而且答案是"债是真的"</strong>：
+  </p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>类型</th><th>schema 里有 <code>position</code> 吗</th><th>必须走哪条路</th></tr></thead>
+    <tbody>
+      <tr><td>wall</td><td>没有（<code>start</code> / <code>end</code>）</td><td>信封</td></tr>
+      <tr><td>slab</td><td>没有（<code>polygon</code>）</td><td>信封</td></tr>
+      <tr><td>ceiling</td><td>没有（<code>polygon</code>）</td><td>信封</td></tr>
+      <tr><td><strong>column</strong></td><td><strong>有</strong></td><td><strong>渲染器绑定</strong></td></tr>
+      <tr><td><em>door / window（M7）</em></td><td><em>有</em></td><td><em>渲染器绑定</em></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>这一步的账</h3>
+  <p>
+    M5 的账是「省下 3×52 = 156 行样板，代价是 115 行框架」。
+    <strong>M6 是这笔账的兑现</strong>：
+  </p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th></th><th>M5 之前的做法</th><th>M6 实际</th></tr></thead>
+    <tbody>
+      <tr><td>三种类型的渲染代码</td><td>3 × 55 行 renderer.tsx = 165 行</td><td>3 × (geometry + definition) ≈ 75 行</td></tr>
+      <tr><td>分发点</td><td><code>switch</code> 从 1 个 case 长到 4 个</td><td><strong>0 行</strong></td></tr>
+      <tr><td>框架文件改动</td><td>3 次（每加一种改一次 <code>node-renderer</code>）</td><td><strong>2 次，且都是一次性能力</strong>（见前置 B）</td></tr>
+      <tr><td>几何能单测吗</td><td>不能（锁在 <code>useMemo</code> 里）</td><td>能</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 02 -->
+<section>
+  <h2><span class="num">02</span>机制说明</h2>
+  <p class="h2sub">两种节点形状的第一次碰撞：信封 vs 渲染器绑定</p>
+
+  <h3>结论先说：两条路并存，判据是 schema 里有没有 <code>position</code></h3>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>节点 schema 里有 <code>position</code> 字段 → builder 产出<em>局部坐标</em>，
+      <code>ParametricNodeRenderer</code> 用 JSX 绑 <code>&lt;group position&gt;</code>。<br>
+      没有 <code>position</code>（由点/线/环定义）→ builder 把世界坐标烤进几何，返回信封，
+      渲染器的 <code>&lt;group&gt;</code> 留在原点。</strong>
+    </p>
+  </div>
+
+  <p>
+    <strong>两条路并存不是失败。</strong>规格书自己就允许——
+    <code>node-definitions.md:185</code> 写的是
+    <code>position={liveTransform?.position ?? node.position}</code>，
+    <code>??</code> 右边取不到时它就是 <code>[0,0,0]</code>，
+    <em>信封路线正是这个式子的退化情形</em>。但"为什么并存"必须写清楚，
+    否则 M7 门窗（也有 position）来的时候没人知道该走哪条。
+  </p>
+
+  <h3>为什么 wall / slab / ceiling 不能走规格书原路</h3>
+  <p>
+    试着给 slab 加一个 <code>position</code> 会怎样。多边形是
+    <code>[[0,0], [4,0], [4,3], [0,3]]</code>，你得选一个原点——质心？包围盒中心？首点？
+    然后把每个顶点减掉它，存成局部坐标。于是：
+  </p>
+  <ul>
+    <li>拖一个顶点 → 质心变了 → <strong>其余三个顶点的局部坐标全要重算</strong>，
+      而它们在世界里根本没动</li>
+    <li>两块楼板拼在一起 → 它们的顶点在世界里重合，
+      但在各自局部坐标里是两个不同的数 → <strong>吸附、共边检测全部要先转世界</strong></li>
+    <li>M7 的门要落在墙上、M11 的楼梯要落在楼板上 →
+      <strong>宿主关系全是世界坐标的</strong></li>
+  </ul>
+  <p>
+    这就是"<strong>由点定义，几何和位置分不开</strong>"的确切含义：
+    对这类节点，<em>position 是一个派生量，不是一个自变量</em>。
+    存一个派生量当自变量，就得在每次编辑后维护它的一致性——
+    那是 bug 的温床。
+  </p>
+
+  <h3>为什么 column 必须走规格书原路</h3>
+  <p>反过来，column 的 <code>position</code> 是<strong>真自变量</strong>：</p>
+  <ul>
+    <li>柱子的形状（半径、高、截面）和它站在哪<strong>完全无关</strong></li>
+    <li>移动柱子 = 改一个三元组，<strong>几何一个字节都不用重算</strong></li>
+    <li>M13 做属性面板时，"X / Y / Z"是三个可以直接编辑的数字</li>
+  </ul>
+  <div class="trap">
+    <span class="trap-label">如果 column 也走信封会怎样</span>
+    <p style="margin-bottom:0">
+      拖一根柱子，每一帧都要 <code>new THREE.CylinderGeometry(...)</code> +
+      <code>dispose()</code> 上一个。<strong>一个纯粹的位移，付了一次完整的几何重建</strong>。
+      现在场上只有几根柱子看不出来，M8 的多楼层一来就是几十根。
+      更要命的是它会把这个模式<em>教给 M7</em> —— 门窗数量比柱子多一个量级。
+    </p>
+  </div>
+
+  <h3>要动的那 4 行</h3>
+  <p><code>viewer/components/parametric-node-renderer.tsx</code>：</p>
+<pre><code>const override = useLiveOverrides((s) =&gt; s.overrides.get(node.id))
+
+<span class="cw">+// 规格书 node-definitions.md:185 —— 有 position 的类型走这条，没有的退化成 ORIGIN。</span>
+<span class="cw">+// override 在前：拖拽期的临时位置要立刻生效，不等提交。</span>
+<span class="cw">+const position =</span>
+<span class="cw">+    (override &amp;&amp; 'position' in override ? override.position : undefined) ??</span>
+<span class="cw">+    ('position' in node ? node.position : undefined) ??</span>
+<span class="cw">+    ORIGIN</span>
+
+<span class="cw">-return &lt;group ref={ref} visible={node.visible !== false} {...events} /&gt;</span>
+<span class="cw">+return &lt;group ref={ref} position={position} visible={node.visible !== false} {...events} /&gt;</span>
+</code></pre>
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong><code>'position' in node</code> 为什么能通过类型检查</strong>：
+      <code>AnyNode</code> 是判别联合，<code>in</code> 会把它收窄到<em>声明了该属性的成员</em>，
+      也就是 <code>ColumnNode</code>。<code>NodeOverride = Partial&lt;AnyNode&gt;</code>
+      也一样——<code>Partial</code> 是同态映射类型，<strong>它对联合是分配的</strong>，
+      所以 <code>Partial&lt;AnyNode&gt;</code> 展开成
+      <code>Partial&lt;WallNode&gt; | Partial&lt;SlabNode&gt; | …</code>，
+      <code>in</code> 照样收窄。<strong>不需要 <code>as</code>。</strong>
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">规格书 node-definitions.md:215 的反面教材，别踩</span>
+    <p style="margin-bottom:0">
+      「<em><code>&lt;GeometrySystem&gt;</code> must not mutate <code>group.position</code></em>」。
+      位置由 JSX 绑定，React 只在<em>值变了</em>的时候重新应用它。
+      如果 <code>GeometrySystem</code> 在重建几何之后顺手
+      <code>group.position.set(0,0,0)</code>，React 没有理由重渲染，
+      <strong>柱子会永久停在原点</strong>。症状：改一次柱子参数，它就跳回世界原点。
+      我们的 <code>GeometrySystem</code> 只 <code>add</code> / <code>remove</code> 子节点，
+      不碰 transform —— <strong>保持这样</strong>。
+    </p>
+  </div>
+
+  <h3>第二处一次性改动：SelectionManager 按注册表订阅</h3>
+  <p>现在是硬编码的一行：</p>
+<pre><code>emitter.on('wall:click', onNodeClick)
+</code></pre>
+  <p>改成按注册表已注册的 kind 循环订阅（对照仓库 <code>selection-manager.tsx:386</code> 同款）：</p>
+<pre><code>const clickKeys = [...nodeRegistry.entries()]
+    .map(([kind]) =&gt; `${kind}:click` as NodeEventKey)
+
+for (const key of clickKeys) emitter.on(key, onNodeClick)
+emitter.on('grid:click', onGridClick)
+return () =&gt; {
+    for (const key of clickKeys) emitter.off(key, onNodeClick)
+    emitter.off('grid:click', onGridClick)
+}
+</code></pre>
+  <div class="trap">
+    <span class="trap-label">注册顺序：为什么这样是安全的</span>
+    <p style="margin-bottom:0">
+      <code>registerAllNodes()</code> 在 <code>Viewer</code> 的 <code>useState</code>
+      初始化器里跑，那是<strong>渲染期</strong>；
+      <code>SelectionManager</code> 的订阅在 <code>useEffect</code> 里，那是<strong>挂载后</strong>。
+      React 保证父组件的渲染早于任何子组件的 effect，
+      所以 effect 跑的时候注册表一定是满的。
+      <strong>但这是个隐式依赖</strong>——如果哪天 <code>registerAllNodes</code>
+      被挪进 <code>useEffect</code>，这里就会静默变成"只订阅到一半"。
+      §07 里我在两处都留了注释互指。
+    </p>
+  </div>
+
+  <h3>三种类型的几何，一张表</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th></th><th>slab</th><th>ceiling</th><th>column</th></tr></thead>
+    <tbody>
+      <tr><td>由什么定义</td><td><code>polygon</code>（世界 XZ）</td><td><code>polygon</code>（世界 XZ）</td><td><code>position</code>（世界 XYZ）</td></tr>
+      <tr><td>坐标空间</td><td>世界（信封）</td><td>世界（信封）</td><td><strong>局部</strong></td></tr>
+      <tr><td>Y 区间</td><td><code>[elevation-t, elevation]</code><br><em>顶面是基准，向下长</em></td><td><code>[height, height+t]</code><br><em>底面是基准，向上长</em></td><td><code>[0, height]</code><br><em>局部，柱底在原点</em></td></tr>
+      <tr><td>几何来源</td><td><code>Shape</code> + <code>ExtrudeGeometry</code></td><td>同左（<strong>同一个函数</strong>）</td><td><code>Cylinder</code> / <code>Box</code></td></tr>
+      <tr><td><code>computeLevelData</code></td><td>无</td><td>无</td><td>无</td></tr>
+      <tr><td>绘制工具</td><td colspan="2"><code>&lt;PolygonTool tool="slab|ceiling"/&gt;</code> —— <strong>同一个组件</strong></td><td><code>&lt;ColumnTool/&gt;</code> 单击放置</td></tr>
+      <tr><td>scope</td><td colspan="2"><code>drafting</code></td><td><code>placing</code>（<strong>新增</strong>）</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>为什么三种都不需要 <code>computeLevelData</code></h3>
+  <p>
+    <code>computeLevelData</code> 存在的唯一理由是<strong>同类节点之间要互相求解</strong>——
+    墙需要知道邻墙才能算斜接。楼板之间不斜接、天花之间不斜接、柱子之间不相干。
+  </p>
+  <p>
+    所以 <code>GeometrySystem</code> 的阶段一对这三种类型全是
+    <code>continue</code>，阶段二拿到的 <code>ctx.levelData</code> 是
+    <code>undefined</code>，而 builder 根本不读它。
+    <strong>"不用的钩子不接"本身就是 M5 三复选框设计的验收</strong>——
+    如果这里被迫写一个空的 <code>computeLevelData</code>，说明那个字段设计成必填了。
+  </p>
+
+  <h3>多边形绘制工具：三种结束方式，一个纯函数</h3>
+  <p>
+    对照仓库的 <code>slab/tool.tsx</code> 有三种闭合方式，我们全部照抄
+    （这部分是纯手感，没有可推导的东西）：
+  </p>
+  <ol>
+    <li><strong>点回起点附近</strong>（&lt; 0.25m，且已有 ≥3 个点）</li>
+    <li><strong>Enter</strong></li>
+    <li><em>双击</em> —— <strong>不做</strong>，我们没有 <code>grid:double-click</code> 事件</li>
+  </ol>
+  <p>
+    判定逻辑抽成 <code>app/lib/interaction/polygon-draft.ts</code> 三个纯函数
+    （<code>isClosingClick</code> / <code>isCommittablePolygon</code> / <code>toPolygonTuples</code>），
+    <strong>因为它们是 M6 唯一能写自动化测试的交互逻辑</strong>——
+    R3F 那部分按 D11 靠跑起来看。
+  </p>
+
+  <div class="trap">
+    <span class="trap-label">PolygonTool 里最容易写错的一处</span>
+    <p style="margin-bottom:0">
+      工具是 <code>&lt;PolygonTool tool="slab"/&gt;</code> 和
+      <code>&lt;PolygonTool tool="ceiling"/&gt;</code> <strong>两个实例同时挂载</strong>，
+      靠 <code>activeTool === tool</code> 决定谁活跃。
+      所以每次读 scope 都必须<strong>同时校验 <code>tool</code></strong>：
+      <code>scope.kind === 'drafting' &amp;&amp; scope.tool === tool</code>。
+      只判 <code>kind</code> 的话，两个实例会读到对方的草稿点。
+      <strong>这正是前置 C 的 A6（<code>update</code> 的守卫）必须先修的原因</strong>——
+      那一处修的是写入侧的同一个问题。
+    </p>
+  </div>
+
+  <h3>提交路径：工具对类型一无所知</h3>
+<pre><code>useScene.getState().addNode({ type: tool, polygon: toPolygonTuples(points) })
+</code></pre>
+  <p>
+    <strong><code>PolygonTool</code> 里没有一行 slab 或 ceiling 特有的代码。</strong>
+    厚度、标高、高度全部由 zod 的 <code>.default()</code> 填。
+    这意味着 <em>加 ceiling 的工具成本是 0 行</em>——
+    只是在 <code>app.tsx</code> 多挂一个实例、多一个快捷键。
+  </p>
+  <div class="note">
+    <p style="margin-bottom:0">
+      这是 M5 的另一层红利，而且是<strong>意外的</strong>：
+      M5 抽的是渲染路径，但 <code>addNode(input: unknown)</code> + <code>AnyNode.parse</code>
+      这条路（M1 就定的）让<em>创建</em>路径也天然通用了。
+      <code>m5-registry-answers.html</code> §01 把工具划进"C 类·真·类型特有"，
+      现在看那个判断偏保守了——<strong>C 类里至少"提交"这一段是通用的</strong>。
+      值得记进 <code>DECISIONS.md</code>。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 03 -->
+<section>
+  <h2><span class="num">03</span>文件树增量</h2>
+  <p class="h2sub">12 个新文件 · 6 处改动 · 其中框架文件 2 处（都是一次性能力）</p>
+
+<pre><code>src/
+├─ core/
+│  ├─ lib/
+│  │  ├─ <span class="cw">polygon-2d.ts</span>              <span class="cm">新 · 有符号面积。挡退化多边形用</span>
+│  │  └─ <span class="cw">polygon-2d.test.ts</span>         <span class="cm">新 · 6 用例</span>
+│  ├─ schema/
+│  │  ├─ <span class="cw">slab.ts</span>                    <span class="cm">新 · polygon + elevation + thickness</span>
+│  │  ├─ <span class="cw">ceiling.ts</span>                 <span class="cm">新 · polygon + height + thickness</span>
+│  │  ├─ <span class="cw">column.ts</span>                  <span class="cm">新 · position + crossSection + 尺寸</span>
+│  │  └─ types.ts                   <span class="cw">改 · 联合从 1 项到 4 项（+4 行）</span>
+│  ├─ registry/
+│  │  ├─ node-definition.ts         <span class="cw">改 · geometry 改成可选（前置 C · A8）</span>
+│  │  ├─ node-registry.ts           <span class="cw">改 · + resetNodeRegistry（前置 C · D1）</span>
+│  │  └─ <span class="cw">node-registry.test.ts</span>      <span class="cm">新 · 5 用例。M5 从没测过</span>
+│  ├─ store/
+│  │  └─ use-live-overrides.ts      <span class="cw">改 ⚠ 框架 · + mergeOverride（前置 C · E3）</span>
+│  └─ systems/wall/
+│     └─ wall-adjacency.ts          <span class="cw">改 · byId 的键类型（前置 C · E1）</span>
+│
+├─ viewer/
+│  ├─ nodes/
+│  │  ├─ <span class="cw">shared/polygon-prism.ts</span>    <span class="cm">新 · slab + ceiling 共用的挤出器</span>
+│  │  ├─ <span class="cw">slab/geometry.ts</span>           <span class="cm">新 · 20 行</span>
+│  │  ├─ <span class="cw">slab/definition.ts</span>         <span class="cm">新 · 6 行</span>
+│  │  ├─ <span class="cw">ceiling/geometry.ts</span>        <span class="cm">新 · 20 行</span>
+│  │  ├─ <span class="cw">ceiling/definition.ts</span>      <span class="cm">新 · 6 行</span>
+│  │  ├─ <span class="cw">column/geometry.ts</span>         <span class="cm">新 · 局部坐标！</span>
+│  │  ├─ <span class="cw">column/definition.ts</span>       <span class="cm">新 · 6 行</span>
+│  │  └─ register.ts                <span class="cw">改 · +3 行注册</span>
+│  └─ components/
+│     └─ parametric-node-renderer.tsx  <span class="cw">改 ⚠ 框架 · +4 行 position 绑定</span>
+│
+└─ app/
+   ├─ lib/interaction/
+   │  ├─ <span class="cw">polygon-draft.ts</span>           <span class="cm">新 · 三个纯函数</span>
+   │  ├─ <span class="cw">polygon-draft.test.ts</span>      <span class="cm">新 · 9 用例</span>
+   │  ├─ wall-linking.ts            <span class="cw">改 · patch 窄回 Partial&lt;WallNode&gt;（前置 C · E2）</span>
+   │  └─ scope.ts                   <span class="cw">改 · drafting.tool 联合 +2；新增 placing 态</span>
+   ├─ tools/
+   │  ├─ <span class="cw">polygon-tool.tsx</span>           <span class="cm">新 · slab / ceiling 共用</span>
+   │  └─ <span class="cw">column-tool.tsx</span>            <span class="cm">新 · 单击放置 + 半透明预览</span>
+   ├─ store/use-editor.ts           <span class="cw">改 · Tool 联合 +3</span>
+   ├─ components/selection-manager.tsx  <span class="cw">改 ⚠ 框架 · 按注册表订阅</span>
+   └─ app.tsx                       <span class="cw">改 · 挂 3 个工具 + 3 个快捷键</span>
+</code></pre>
+
+  <h3>删除</h3>
+<pre><code>src/viewer/components/wall-renderer.tsx   <span class="cm">前置 C · A9</span>
+src/viewer/hooks/use-level-miters.ts      <span class="cm">前置 C · A9</span>
+</code></pre>
+
+  <h3>行数账</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>分组</th><th>新增</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>三份 schema</td><td>~55</td><td>slab 18 / ceiling 18 / column 22</td></tr>
+      <tr><td>三份 geometry + 共用挤出器</td><td>~90</td><td>其中挤出器 35 行是 slab/ceiling 共用</td></tr>
+      <tr><td>三份 definition</td><td>18</td><td>每份 6 行</td></tr>
+      <tr><td>两个工具 + 纯函数</td><td>~155</td><td>PolygonTool 90 / ColumnTool 45 / polygon-draft 20</td></tr>
+      <tr><td>三个测试文件</td><td>~120</td><td>20 用例</td></tr>
+      <tr><td>框架改动</td><td><strong>7</strong></td><td>renderer +4 / selection-manager +3</td></tr>
+      <tr><td>联合涨到 2 个成员的一次性通行费</td><td><strong>~16</strong></td><td>前置 C · E 组三处。<em>加第 4 种类型时为 0</em></td></tr>
+      <tr><td>清单改动</td><td>10</td><td>types 4 / register 3 / Tool 1 / scope 2</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>
+    <strong>净增 ~470 行，其中框架 7 行 + 一次性 16 行。</strong>
+    对照 §01 的表：M5 之前同样三种类型光 renderer 样板就 165 行，
+    还要改 3 次 <code>node-renderer.tsx</code>。
+  </p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 04 -->
+<section>
+  <h2><span class="num">04</span>建造顺序</h2>
+  <p class="h2sub">19 步。方法签名 + hint，实现体在 §07</p>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>每一段结束都能跑起来看见东西</strong>——这是分段的判据。
+      第 06 步之后有楼板，第 11 步之后有天花，第 15 步之后有柱子。
+      中间任何一步跑不通，问题一定在这一步<em>刚敲的那几行</em>里。
+    </p>
+  </div>
+
+  <h3>第一段 · slab（第 01–06 步）· 忍住不抽公共代码</h3>
+
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/lib/polygon-2d.ts</h3><span class="tag core">core</span></div>
+<pre><code>export function signedArea(polygon: readonly Point2D[]): number
+export function polygonArea(polygon: readonly Point2D[]): number
+</code></pre>
+      <p>
+        鞋带公式。<code>Point2D.y</code> 是世界 Z（D3）。
+        <strong>hint</strong>：<code>polygonArea = Math.abs(signedArea)</code>；
+        少于 3 个点返回 0。有符号那个现在没有消费者，
+        <strong>但 M7 挖洞时洞必须和外轮廓反向，那时要靠它判绕向</strong>——
+        所以现在就导出并测，不留到那时候临时写。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/lib/polygon-2d.test.ts</h3><span class="tag core">core</span></div>
+      <p>
+        6 用例：正方形面积 = 边长²；顺时针 / 逆时针的 <code>signedArea</code> 符号相反、
+        绝对值相同；三点共线面积 = 0；两个点返回 0；L 形凹多边形面积正确。
+        <strong>先写测试再写实现</strong>——鞋带公式的索引很容易差一位。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/schema/slab.ts</h3><span class="tag core">core</span></div>
+<pre><code>export const DEFAULT_SLAB_THICKNESS = 0.12
+export const DEFAULT_SLAB_ELEVATION = 0.05
+export const SlabNode = BaseNode.extend({ … })
+export const getSlabThickness = (s: SlabNode) =&gt; number
+</code></pre>
+      <p>
+        照 <code>wall.ts</code> 的写法：<code>objectId('slab')</code> +
+        <code>nodeType('slab')</code>，可选字段配 <code>getXxx</code> 读取器。
+        <strong>hint</strong>：<code>elevation</code> 用 <code>.default(0.05)</code>
+        不是 <code>.optional()</code>——它总是要有值，而且 <code>0.05</code>
+        是为了躲开 <code>Ground</code>（§00 第 ⑧ 步）。
+        <code>polygon</code> 不加 <code>.min(3)</code>，
+        <strong>点数守卫放在工具侧</strong>（store 只做类型，不做业务规则）。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/schema/types.ts —— 联合加一项</h3><span class="tag core">core</span></div>
+      <p>
+        <code>z.discriminatedUnion('type', [WallNode, SlabNode])</code>。
+        <strong>敲完这一步 <code>pnpm check-types</code> 会报 5 个错</strong>，
+        全部来自前置 C · E 组那三处（M4 假设了 <code>AnyNode</code> 只有一个成员）。
+        <strong>如果你已经按前置 C 敲过 E 组，这里应该是 0 个错。</strong>
+      </p>
+      <p>
+        除了那三处之外还有别的红——特别是
+        <code>NodeEventKey</code> / <code>useNodeEvents</code> /
+        <code>node-renderer</code> / <code>parametric-node-renderer</code> /
+        <code>geometry-system</code> ——那说明 M5 的泛型没做干净，
+        <strong>停下来看，别往下走</strong>。实测这五个是零改动的。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/nodes/slab/geometry.ts</h3><span class="tag viewer">viewer</span></div>
+<pre><code>export function buildSlabGeometry(
+  node: SlabNode, ctx: GeometryContext, appearance: NodeAppearance,
+): THREE.Object3D
+</code></pre>
+      <p>
+        <strong>这一步先写死，不抽 <code>buildPolygonPrism</code></strong>（§00 第 ⑤ 步）。
+        <strong>hint</strong>：整条链照抄 <code>wall/geometry.ts:55–83</code>——
+        <code>shape.moveTo(x, -y)</code> → <code>ExtrudeGeometry({depth, bevelEnabled:false})</code>
+        → <code>rotateX(-Math.PI/2)</code>。多一句
+        <code>geometry.translate(0, elevation - thickness, 0)</code>
+        把它抬到标高上。<code>ctx</code> 用不到，参数留着占位。
+      </p>
+      <div class="trap">
+        <span class="trap-label">-y 那个负号别省</span>
+        <p style="margin-bottom:0">
+          <code>rotateX(-π/2)</code> 把 shape 空间的 <code>(x,y,w)</code>
+          映射成世界的 <code>(x, w, -y)</code>。所以要让世界 Z 等于
+          <code>p.y</code>，shape 里必须写 <code>-p.y</code>。
+          省掉负号的话楼板会<strong>沿 Z 轴镜像</strong>——
+          正方形看不出来，L 形一眼就看出来。<em>用 L 形试。</em>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">definition + register + 手塞一个节点</h3><span class="tag viewer">viewer</span></div>
+      <p>
+        <code>slabDefinition</code> 6 行，<code>register.ts</code> 加一行。
+        <strong>然后在浏览器控制台里手塞一块板</strong>：
+      </p>
+<pre><code>useScene.getState().addNode({ type:'slab', polygon:[[0,0],[4,0],[4,3],[0,3]] })
+</code></pre>
+      <p>
+        <strong>这一步是整个 M6 的第一个检查点。</strong>
+        板出现了 ⟹ 注册表通用性成立，剩下两种类型是重复劳动。
+        板没出现 ⟹ 停下来查 <code>GeometrySystem</code>，别继续写 ceiling。
+      </p>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <code>useScene</code> 要在控制台里够得着，临时加一句
+          <code>if (import.meta.env.DEV) (window as any).useScene = useScene</code>。
+          M9 做存档时会有正经的导入口，现在这样够了。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <h3>第二段 · ceiling（第 07–11 步）· 现在才抽</h3>
+
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/schema/ceiling.ts</h3><span class="tag core">core</span></div>
+<pre><code>export const DEFAULT_CEILING_HEIGHT = DEFAULT_WALL_HEIGHT   <span class="cm">// 显式 import，不写 2.5</span>
+export const DEFAULT_CEILING_THICKNESS = 0.05
+</code></pre>
+      <p>
+        <strong>hint</strong>：<code>DEFAULT_CEILING_HEIGHT</code> 一定要
+        <em>import 自 <code>wall.ts</code></em> 而不是重新写一个 <code>2.5</code>。
+        天花贴着墙顶不是巧合，是<strong>约束</strong>——
+        M8 有了真楼层之后两者都要改成读 <code>level.height</code>，
+        写成 import 才能一 grep 就找齐。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/nodes/ceiling/geometry.ts —— 先复制粘贴</h3><span class="tag viewer">viewer</span></div>
+      <p>
+        <strong>真的先复制粘贴一份 slab 的</strong>，改两处：
+        <code>bottomY = height</code>、<code>topY = height + thickness</code>。
+        跑起来，确认天花在 2.5m 处、从下往上看得见。
+        <strong>确认之后再进第 09 步。</strong>
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">09</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/nodes/shared/polygon-prism.ts —— 抽</h3><span class="tag viewer">viewer</span></div>
+<pre><code>export function buildPolygonPrism(args: {
+  polygon: readonly (readonly [number, number])[]
+  bottomY: number
+  topY: number
+  color: string
+  name: string
+}): THREE.Object3D
+</code></pre>
+      <p>
+        <strong>对着两份已经跑通的代码抽</strong>，不是凭想象。
+        参数就是你刚才改的那两处 + 颜色 + 名字，<strong>四个，不多不少</strong>。
+        <strong>hint</strong>：<code>topY - bottomY &lt;= 0</code> 或
+        <code>polygon.length &lt; 3</code> 时返回空 <code>Group</code>——
+        和 <code>buildWallGeometry</code> 的 <code>worldFootprint.length &lt; 3</code>
+        是同一个防线。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">10</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">两个 geometry.ts 改成调它</h3><span class="tag viewer">viewer</span></div>
+      <p>各自剩 ~15 行。跑一遍确认画面没变——<strong>纯重构，任何肉眼变化都是 bug</strong>。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">11</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">ceiling definition + register</h3><span class="tag viewer">viewer</span></div>
+      <p>控制台手塞一个天花验证。到这里注册表里有 3 种类型了。</p>
+    </div>
+  </div>
+
+  <h3>第三段 · 多边形工具（第 12–14 步）</h3>
+
+  <div class="step">
+    <div class="step-n">12</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/lib/interaction/scope.ts</h3><span class="tag app">app</span></div>
+<pre><code>export type PolygonToolKind = 'slab' | 'ceiling'
+export type DraftToolKind = 'wall' | PolygonToolKind
+
+  | { kind: 'drafting'; tool: DraftToolKind; points: Point2D[] }
+  | { kind: 'placing'; tool: 'column' }        <span class="cm">// 新增</span>
+</code></pre>
+      <p>
+        <code>ActiveInteractionScope</code> / <code>scopeOfKind</code> /
+        <code>selectionEnabled</code> <strong>一个字都不用改</strong>——
+        它们是从联合派生的。<strong>这就是 M3 判别联合的红利</strong>：
+        加一个交互态，铁律"只有 idle 能选中"自动继续成立。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">13</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/lib/interaction/polygon-draft.ts + test</h3><span class="tag app">app</span></div>
+<pre><code>export const CLOSE_RADIUS = 0.25
+export const MIN_POLYGON_AREA = 1e-4
+export function isClosingClick(points: readonly Point2D[], p: Point2D): boolean
+export function isCommittablePolygon(points: readonly Point2D[]): boolean
+export function toPolygonTuples(points: readonly Point2D[]): [number, number][]
+</code></pre>
+      <p>
+        <strong>hint</strong>：<code>isClosingClick</code> 必须先判
+        <code>points.length &gt;= 3</code>——第二个点落在第一个点附近是合法的
+        （画很小的板），不该被当成闭合。
+        <code>isCommittablePolygon</code> 用 <code>polygonArea &gt; MIN_POLYGON_AREA</code>
+        挡三点共线。9 个用例。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">14</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/tools/polygon-tool.tsx</h3><span class="tag app">app</span></div>
+<pre><code>export function PolygonTool({ tool }: { tool: PolygonToolKind })
+function PolygonDraftPreview({ tool, cursorRef })
+</code></pre>
+      <p>
+        骨架照抄 <code>wall-tool.tsx</code>：两个 <code>useEffect</code>
+        （一个管 scope 生命周期，一个挂 DOM 监听），一个 <code>cursorRef</code>，
+        一个走 <code>useFrame</code> 的预览。<strong>不走事件总线</strong>——D15
+        「工具在自己的 scope 活跃期间直接监听 canvas DOM」。
+      </p>
+      <p>
+        <strong>hint 三条</strong>：<br>
+        ① 每次读 scope 都要连 <code>tool</code> 一起判（§02 那个 trap）。<br>
+        ② 预览用<strong>定长缓冲</strong>（<code>MAX_PREVIEW_POINTS</code> 个点），
+        <code>setPositions</code> 要求点数不变；多余的位置用最后一个点填满，
+        退化线段不产生可见像素。<strong>初始不可见用 <code>useLayoutEffect</code> + ref 设，
+        不许写 <code>&lt;Line visible={false}&gt;</code></strong>（前置 C 的更正框说明了为什么）。<br>
+        ③ 提交只写 <code>{ type: tool, polygon }</code>，
+        <strong>其余字段交给 zod 的 default</strong>。
+      </p>
+    </div>
+  </div>
+
+  <h3>第四段 · column（第 15–17 步）· 对照组</h3>
+
+  <div class="step">
+    <div class="step-n">15</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/schema/column.ts</h3><span class="tag core">core</span></div>
+      <p>
+        六个字段：<code>position</code> / <code>crossSection</code> /
+        <code>radius</code> / <code>width</code> / <code>depth</code> / <code>height</code>。
+        <strong>hint</strong>：<code>position</code> 用
+        <code>.default([0,0,0])</code>——工具总会传，但 default 让
+        <code>parse</code> 在缺字段时不炸（M9 的迁移会感谢这个）。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">16</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/nodes/column/geometry.ts —— 局部坐标</h3><span class="tag viewer">viewer</span></div>
+      <p>
+        <strong>这一步和前两种完全不同，也是本 M 最容易写错的一处。</strong>
+        <code>CylinderGeometry</code> / <code>BoxGeometry</code> 的原点都在<em>几何中心</em>，
+        而我们要柱底在局部 <code>y=0</code>（D3 对墙的同一条约定）。
+        所以 <code>geometry.translate(0, height/2, 0)</code>。
+      </p>
+      <div class="trap">
+        <span class="trap-label">不许在 builder 里读 node.position</span>
+        <p style="margin-bottom:0">
+          规格书 <code>node-definitions.md:185</code>：
+          「<em>never bake the node's world position into vertex coords</em>」。
+          写成 <code>translate(position[0], …)</code> 会<strong>同时</strong>
+          被 builder 和渲染器的 <code>&lt;group position&gt;</code> 应用两次，
+          柱子出现在<strong>两倍距离</strong>处。
+          症状很有辨识度：柱子总是在你点的地方的两倍远。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">17</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/components/parametric-node-renderer.tsx —— 框架改动</h3><span class="tag viewer">viewer</span></div>
+      <p>§02 那 4 行。<strong>敲完先跑一遍墙和楼板</strong>——它们的 <code>position</code>
+      取不到，退化成 <code>ORIGIN</code>，画面必须<strong>一模一样</strong>。
+      墙动了 = 你把 <code>ORIGIN</code> 写成了别的东西。</p>
+    </div>
+  </div>
+
+  <h3>第五段 · 接上（第 18–19 步）</h3>
+
+  <div class="step">
+    <div class="step-n">18</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">column-tool + selection-manager + use-editor + app.tsx</h3><span class="tag app">app</span></div>
+      <p>
+        <code>ColumnTool</code> 45 行（<code>placing</code> scope + 单击放置 + 半透明预览）；
+        <code>SelectionManager</code> 改成按注册表订阅；
+        <code>Tool</code> 联合加 3 项；<code>app.tsx</code> 挂 3 个工具 + 快捷键
+        <strong>F 楼板 · G 天花 · C 柱</strong>。
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">19</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/registry/node-registry.test.ts</h3><span class="tag core">core</span></div>
+      <p>
+        5 用例：注册后 <code>has</code>/<code>get</code> 拿得到；重名抛错；
+        <code>size</code> 正确；<code>entries</code> 能枚举；
+        <code>resetNodeRegistry</code> 之后清空。
+        <strong>每个 <code>it</code> 之前 <code>beforeEach(resetNodeRegistry)</code></strong>——
+        没有它，第二个用例必然撞重名。
+      </p>
+    </div>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 05 -->
+<section>
+  <h2><span class="num">05</span>验收清单</h2>
+  <p class="h2sub">第 1 条是 M6 存在的全部意义，第 9–10 条是不许倒退</p>
+
+  <h3>A · M5 的检验（这一条通不过，M6 就白做了）</h3>
+  <ul class="check">
+    <li>
+      <strong>数一数：加 ceiling（第二种）和加 column（第三种）各改了几处。</strong>
+      预期都是 <strong>5 处</strong>：<code>schema/&lt;kind&gt;.ts</code> ·
+      <code>schema/types.ts</code> 一行 · <code>nodes/&lt;kind&gt;/geometry.ts</code> ·
+      <code>nodes/&lt;kind&gt;/definition.ts</code> · <code>register.ts</code> 一行。
+      <strong>两个数字相等 = ROADMAP 的 M6 验收原文成立。</strong>
+    </li>
+    <li>
+      框架文件改动总共 <strong>2 处 / 7 行</strong>
+      （<code>parametric-node-renderer</code> +4，<code>selection-manager</code> +3），
+      而且<strong>加第四种类型时这两处都不用再动</strong>——这是判断"一次性能力"
+      和"每类型成本"的唯一标准。
+    </li>
+    <li>
+      <code>node-renderer.tsx</code> 里仍然<strong>没有 <code>switch</code>、没有 <code>case</code>、
+      没有任何类型名字符串</strong>。
+    </li>
+  </ul>
+
+  <h3>B · 三种类型各自能用</h3>
+  <ul class="check">
+    <li>按 <strong>F</strong> → 依次点 4 下 → 点回第一个点附近 → <strong>一块楼板出现</strong>。</li>
+    <li>按 <strong>F</strong> → 点 4 下 → 按 <strong>Enter</strong> → 同样出现（第二种闭合方式）。</li>
+    <li>画到一半按 <strong>Esc</strong> → 草稿清空，预览线消失，<em>不产生节点</em>。</li>
+    <li>
+      <strong>点三个共线的点然后闭合 → 什么都不该发生。</strong>
+      面积守卫。产生了节点的话画面上是一块黑斑（NaN 法线）。
+    </li>
+    <li>按 <strong>G</strong> 画天花 → 出现在 <strong>2.5m</strong> 处；
+      切到 3D 从下往上看得见，从上往下看被它挡住。</li>
+    <li>按 <strong>C</strong> → 半透明的柱子跟着光标 → 点一下 → 柱子留在那儿，
+      <strong>柱底贴地（y=0），不是半截埋在地里</strong>。</li>
+    <li>
+      <strong>柱子出现在你点击的位置，不是两倍远的地方。</strong>
+      （§04 第 16 步那个 trap 的验收。两倍远 = builder 里读了 <code>node.position</code>。）
+    </li>
+    <li>切到圆柱/方柱：改 <code>crossSection</code> 后重新画，两种截面都对。</li>
+  </ul>
+
+  <h3>C · 通用路径对三种新类型都成立</h3>
+  <ul class="check">
+    <li>按 <strong>V</strong> 切到选择工具，<strong>点楼板 / 天花 / 柱子都能选中变色</strong>。
+      （<code>SelectionManager</code> 按注册表订阅的验收。）</li>
+    <li>选中后按 <strong>Del</strong> → 消失。按 <strong>Ctrl+Z</strong> → 回来。</li>
+    <li>点空地 → 取消选中（<code>grid:click</code> 对新类型也要正确判"没命中"，
+      因为它们都进了 <code>sceneRegistry</code>）。</li>
+    <li>画墙中途（<code>drafting</code>）点楼板 → <strong>不会选中</strong>。
+      铁律 <code>selectionEnabled(scope)</code> 对新增的 <code>placing</code> 态也成立。</li>
+    <li>F → G → C → V 来回切工具 → <strong>不留残状态</strong>：
+      切走时草稿清空，切回来是干净的。</li>
+  </ul>
+
+  <h3>D · 不许倒退（前置 C 的回归）</h3>
+  <ul class="check">
+    <li>
+      <strong>墙角还是严丝合缝的。</strong>
+      画一个 L 形的两堵墙，转角处没有缝、没有重叠。
+      <em>这一条挂了 = C1 没修或者修错了。</em>
+    </li>
+    <li>
+      <strong>画 20 块楼板，然后只移动鼠标不点击 → 帧率不掉。</strong>
+      更硬的测法：在 <code>buildPolygonPrism</code> 里加一个
+      <code>console.count('prism')</code>，鼠标空移 5 秒，
+      <strong>计数一次都不涨</strong>。<em>涨了 = C2 没修。</em>
+    </li>
+    <li>拖一堵墙松手，<code>Ctrl+Z</code> <strong>一次</strong>回到原位（不是每帧一步）。</li>
+    <li>3D 视角下拖墙时相机<strong>不转</strong>（前置 C · A7）。</li>
+  </ul>
+
+  <h3>E · 工程</h3>
+  <ul class="check">
+    <li>
+      <code>pnpm verify</code> 全绿。测试 <strong>5 文件 / 51 用例</strong>
+      （M2 的 31 + polygon-2d 6 + polygon-draft 9 + node-registry 5）。
+      <em>这个数字是实测的，不是估的。</em>
+    </li>
+    <li>
+      <code>eslint</code> 的三层边界规则没报错——
+      特别是 <code>core/schema/*.ts</code> 里<strong>一行 three 都没有</strong>。
+    </li>
+    <li>
+      <code>src/viewer/components/wall-renderer.tsx</code> 和
+      <code>src/viewer/hooks/use-level-miters.ts</code> 已经不存在。
+    </li>
+  </ul>
+
+  <div class="trap">
+    <span class="trap-label">D11 的边界：这一节有一半机器测不了</span>
+    <p style="margin-bottom:0">
+      B / C / D 组全是<strong>肉眼验收</strong>——没有 <code>jsdom</code>，
+      R3F 组件、指针事件、键盘快捷键跑不了自动化测试
+      （<code>STATE.md</code>「待处理」第三条）。
+      <strong>所以这 22 条要真的一条一条走一遍</strong>，
+      不能因为 <code>pnpm verify</code> 绿了就算完。
+      M3 的教训就在这里：§05 八条肉眼验收当时没走完，
+      结果 <code>wall:click</code> 从未 emit 过这件事拖到 M4 才发现。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 06 -->
+<section>
+  <h2><span class="num">06</span>故意保留的缺陷</h2>
+  <p class="h2sub">每一条都标了到期里程碑。没有到期的不算"故意"，算"忘了"</p>
+
+  <h3>来源一 · 对照仓库有、我们看懂了但不做</h3>
+
+  <div class="defect"><div>
+    <strong>多边形不能挖洞</strong>（楼板上的楼梯井、天花上的挑空）。<br>
+    <code>ExtrudeGeometry</code> 的洞内壁是单面的，从洞里看会看穿——
+    对照仓库为此手写了 200 行三角化（§00 第 ②步）。
+  </div><div class="defect-to">→ M11</div></div>
+
+  <div class="defect"><div>
+    <strong>自相交多边形不检测。</strong>画一个"8"字形会得到一块诡异的板。<br>
+    对照仓库的 <code>slab-polygon.ts</code> 有 825 行专治这个。
+    我们只有一个面积守卫，挡得住退化，挡不住自交。
+  </div><div class="defect-to">→ M11</div></div>
+
+  <div class="defect"><div>
+    <strong>画完不能改顶点。</strong>没有顶点手柄、不能加点删点、不能拖边。<br>
+    对照仓库的 <code>polygon-editor.tsx</code> 1267 行。
+  </div><div class="defect-to">→ M13</div></div>
+
+  <div class="defect"><div>
+    <strong>slab / ceiling / column 都不能拖动。</strong>
+    <code>MoveTool</code> 只监听 <code>wall:pointerdown</code>，
+    而且它整套逻辑（<code>linkedWallOverrides</code> 共端点联动）是墙专有的。
+  </div><div class="defect-to">→ M13</div></div>
+
+  <div class="defect"><div>
+    <strong>不能从闭合墙环自动生成楼板</strong>（<code>autoFromWalls</code>）。<br>
+    对照仓库有 <code>space-detection.ts</code>，那是个独立的机制。
+  </div><div class="defect-to">→ M8</div></div>
+
+  <div class="defect"><div>
+    <strong>column 只有圆/方两种截面</strong>，没有柱础、柱头、凹槽、涡卷。<br>
+    对照仓库的 <code>ColumnNode</code> 有 60+ 个造型字段。<strong>D2 明确排除。</strong>
+  </div><div class="defect-to">不做</div></div>
+
+  <h3>来源二 · 我们自己的简化，会付利息</h3>
+
+  <div class="defect"><div>
+    <strong>墙看起来陷进楼板 5cm。</strong>墙底在 <code>y=0</code>，
+    楼板顶在 <code>elevation=0.05</code>。这是对照仓库的原样行为
+    （它的默认值也是 0.05），真正的修法是 level 平面。<br>
+    <em>为什么不干脆用 0</em>：会和 <code>Ground</code> 共面 z-fighting（§00 第 ⑧步）。
+  </div><div class="defect-to">→ M8</div></div>
+
+  <div class="defect"><div>
+    <strong>天花高度是一个硬编码常量</strong>（<code>= DEFAULT_WALL_HEIGHT</code>），
+    不"吸附到层顶"。ROADMAP 的 M6 原文写的是「ceiling：同 slab，但吸附到层顶」——
+    <strong>而"层"这个概念要 M8 才存在</strong>。<br>
+    <em>这是一处方案偏差，按工作约定第 6 条显式记录</em>：
+    原计划的"吸附到层顶"在 M6 无法实现，因为它依赖 M8 的 <code>LevelNode</code>；
+    改成"默认高度 = 墙的默认高度，两个常量用 import 绑在一起"。
+  </div><div class="defect-to">→ M8</div></div>
+
+  <div class="defect"><div>
+    <strong>绕向不做归一化。</strong>顺时针还是逆时针画的多边形都能出正确的板，
+    因为 <code>THREE.ExtrudeGeometry</code> 内部会把外轮廓转成 CCW。<br>
+    <strong>M7 挖洞时洞必须和外轮廓反向</strong>，那时才需要
+    <code>signedArea</code> 判绕向——所以第 01 步已经把它写好并测好了。
+  </div><div class="defect-to">→ M7</div></div>
+
+  <div class="defect"><div>
+    <strong>没有质心 / 点在多边形内。</strong>属性面板要显示面积和中心，
+    拾取要判点是否落在板内（现在靠 mesh 射线，够用）。
+  </div><div class="defect-to">→ M13</div></div>
+
+  <div class="defect"><div>
+    <strong>绘制时不吸附到墙端点</strong>，只吸网格（0.1m）。
+    所以楼板边缘和墙中心线对不齐，差半个墙厚。
+  </div><div class="defect-to">→ M12</div></div>
+
+  <div class="defect"><div>
+    <strong>column 不吸附到墙、不吸附到柱网。</strong>
+    对照仓库有 <code>structural-grid</code> 协调。
+  </div><div class="defect-to">→ M12</div></div>
+
+  <div class="defect"><div>
+    <strong>厚度 / 标高 / 高度 / 截面只能靠默认值</strong>，UI 里改不了。
+  </div><div class="defect-to">→ M13</div></div>
+
+  <div class="defect"><div>
+    <strong>预览缓冲是定长的（64 个点）。</strong>
+    画超过 62 个顶点的多边形，预览线会截断（<em>数据不会</em>，只是预览）。
+  </div><div class="defect-to">→ M13</div></div>
+
+  <div class="defect"><div>
+    <strong>三种类型都没有材质，只有一个 <code>MeshStandardMaterial</code> + 一个颜色常量。</strong>
+    选中高亮仍然是换颜色，不是描边。
+  </div><div class="defect-to">→ M14</div></div>
+
+  <h3>来源三 · M6 自己新引入的债</h3>
+
+  <div class="defect"><div>
+    <strong>「有 <code>position</code> 就绑，没有就信封」这条判据没有任何机制强制。</strong>
+    它现在只活在这份文档和两行注释里。
+    有人给 <code>SlabNode</code> 加一个 <code>position</code> 字段，
+    楼板会立刻<strong>被平移两次</strong>，而且不报错。<br>
+    <em>可能的强制方式</em>：<code>NodeDefinition</code> 加一个显式的
+    <code>space: 'world' | 'local'</code> 字段，让 builder 的坐标空间成为声明的一部分。
+    <strong>M7 门窗进来时再决定</strong>——那时会有第二个 local 类型，
+    才知道这个字段值不值。
+  </div><div class="defect-to">→ M7 复核</div></div>
+
+  <div class="defect"><div>
+    <strong><code>SelectionManager</code> 的订阅依赖"注册表在它 effect 之前已填满"。</strong>
+    现在成立（<code>registerAllNodes</code> 在 <code>Viewer</code> 渲染期跑），
+    但这是隐式的。哪天它被挪进 <code>useEffect</code>，
+    这里会静默变成"只订阅到一半"。
+  </div><div class="defect-to">待定</div></div>
+
+  <div class="defect"><div>
+    <strong><code>PolygonTool</code> 的两个实例同时挂载</strong>，
+    靠 <code>activeTool === tool</code> 各自失活。
+    工具多了之后这个模式会变成 N 个常驻组件。
+    对照仓库用的是「注册表里的 <code>def.tool</code>，按当前工具动态挂一个」。
+  </div><div class="defect-to">→ M12</div></div>
+
+  <div class="defect"><div>
+    <strong><code>elevation</code> 的默认值 <code>0.05</code> 是个 magic number</strong>，
+    它的真实含义是"比 <code>Ground</code> 高一点点"。
+    <code>Ground</code> 的 <code>y</code> 改了它就要跟着改，但没有任何东西记录这个耦合。
+  </div><div class="defect-to">→ M8</div></div>
+
+  <div class="defect"><div>
+    <strong><code>NodeOverride</code> 现在有一处显式的不健全</strong>
+    （<code>mergeOverride</code> 里那句 <code>as NodeOverride</code>）。
+    运行时是对的（同一个 id 的补丁一定同类型），但没有东西保证这一点。<br>
+    <em>真正的解法</em>是让 override 按 kind 索引
+    （<code>Map&lt;AnyNodeId, Partial&lt;NodeOfKind&lt;K&gt;&gt;&gt;</code>），
+    但那要先有一个「id → kind」的类型级映射。<strong>M9 做 schema 版本化时一起做</strong>。
+  </div><div class="defect-to">→ M9</div></div>
+
+  <h3>M6 关掉的旧缺陷</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>缺陷</th><th>引入于</th><th>怎么关的</th></tr></thead>
+    <tbody>
+      <tr><td>没有 <code>GeometrySystem</code>，几何靠 <code>useMemo</code> 依赖数组</td><td>M4</td><td>M5 建好，<strong>M6 的前置 C 才让它真的工作</strong></td></tr>
+      <tr><td>改一堵墙 → 全场景 miter 重算 + 所有墙重建几何</td><td>M2</td><td>前置 C · C2 的 <code>clearDirty</code>。<strong>M4 §08 第 08 条本来该关它，但那条已作废</strong></td></tr>
+      <tr><td>live 覆盖是 <code>Partial&lt;AnyNode&gt;</code>，无 per-type 校验</td><td>M4</td><td>前置 C · E2/E3。<strong>M5 到期没还</strong>（那时联合只有一个成员，问题不存在）—— M6 还了一半：调用方有检查，合并处有一个显式的 <code>as</code></td></tr>
+      <tr><td><code>sceneRegistry.byType</code> 有写入无读者</td><td>M1</td><td>仍然无读者 —— <strong>没关</strong>，M7 空间查询时才有第一个消费者</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 07 -->
+<section>
+  <h2><span class="num">07</span>全部代码</h2>
+  <p class="h2sub">19 个片段，按 §04 的顺序。前置 C 没敲完不要从这里开始</p>
+
+  <div class="trap">
+    <span class="trap-label">§07 相对 §03/§04 的三处偏差（工作约定第 6 条）</span>
+    <ol style="margin-bottom:0">
+      <li>
+        <strong><code>ColumnTool</code> 多了「按住 Shift = 方柱」。</strong>
+        §04 第 18 步只写了"单击放置"。加这一条是为了让 §05 B 组第 8 条
+        （两种截面都对）能真的走通——否则要改代码才能试方柱。
+      </li>
+      <li>
+        <strong><code>ParametricNodeRenderer</code> 里抽了一个
+        <code>positionOf()</code> 小函数</strong>，而不是 §02 里写的三元表达式内联。
+        原因是 <code>tsconfig</code> 开了 <code>noUncheckedIndexedAccess</code> 和
+        <code>strict</code>，内联版本的收窄在 <code>??</code> 链里读起来太绕。
+        <em>行为完全一样。</em>
+      </li>
+      <li>
+        <strong>§04 第 06 步说的 <code>window.useScene</code> 调试口没写进 §07。</strong>
+        它是临时的，不该留在代码里。要用就自己临时加一行，验完删掉。
+      </li>
+      <li>
+        <strong><code>PolygonDraftPreview</code> 的初始不可见改用
+        <code>useLayoutEffect</code> + ref，而不是 <code>&lt;Line visible={false}&gt;</code>。</strong>
+        <span class="tag debt">2026-09-02 更正</span>
+        原稿写的是后者 —— 和 <code>m4-drag.html</code> §08 第 13 条同一个 bug，
+        会让 slab / ceiling 的预览线永久不可见。
+        <strong>这是 D16 落地后抓到的第一条</strong>：按新规则回头审计
+        「§07 里哪些是没在浏览器里跑过的」，第一个就翻出了它。
+      </li>
+      <li>
+        <strong><code>app.tsx</code> 里多了一句 <code>if (e.ctrlKey || e.metaKey) return</code>。</strong>
+        §04 第 18 步只说了加三个快捷键。加这一句是因为 <code>C</code> 会和
+        <code>Ctrl+C</code> 撞车（原来 <code>W</code>/<code>V</code> 也有这个问题）。
+        <em>这是顺手修的 M4 遗留问题，不是 M6 的新功能</em>——不想要就删掉那一行。
+      </li>
+    </ol>
+  </div>
+
+  <h3>01 · <code>src/core/lib/polygon-2d.ts</code> <span class="tag core">core</span></h3>
+<pre><code><span class="cm">import</span> type { Point2D } from './geometry-2d'
+
+<span class="cm">/**
+ * 鞋带公式。Point2D.y 是世界 Z（D3），所以这是「世界 XZ 平面上的有符号面积」。
+ *
+ * 符号的含义现在没有消费者 —— M6 不做绕向归一化，因为 THREE.ExtrudeGeometry
+ * 自己会把外轮廓转成 CCW（见 §06）。留着导出是因为 M7 挖洞时
+ * 洞必须和外轮廓反向，那时判绕向就靠它。
+ */</span>
+export function signedArea(polygon: readonly Point2D[]): number {
+    if (polygon.length &lt; 3) return 0
+
+    let sum = 0
+    for (let i = 0; i &lt; polygon.length; i += 1) {
+        const p = polygon[i]!
+        const q = polygon[(i + 1) % polygon.length]!
+        sum += p.x * q.y - q.x * p.y
+    }
+    return sum / 2
+}
+
+<span class="cm">/** 面积。工具用它挡住退化多边形（三点共线 / 首尾重合）。 */</span>
+export function polygonArea(polygon: readonly Point2D[]): number {
+    return Math.abs(signedArea(polygon))
+}
+</code></pre>
+
+  <h3>02 · <code>src/core/lib/polygon-2d.test.ts</code> <span class="tag core">core</span></h3>
+<pre><code>import { describe, expect, it } from 'vitest'
+import type { Point2D } from './geometry-2d'
+import { polygonArea, signedArea } from './polygon-2d'
+
+const p = (x: number, y: number): Point2D =&gt; ({ x, y })
+
+<span class="cm">// 4×3 的矩形，逆时针（在世界 XZ 里看）</span>
+const RECT = [p(0, 0), p(4, 0), p(4, 3), p(0, 3)]
+
+describe('signedArea', () =&gt; {
+    it('矩形的面积是长乘宽', () =&gt; {
+        expect(polygonArea(RECT)).toBeCloseTo(12)
+    })
+
+    it('反向绕行，符号相反、绝对值相同', () =&gt; {
+        const reversed = [...RECT].reverse()
+        expect(signedArea(reversed)).toBeCloseTo(-signedArea(RECT))
+        expect(polygonArea(reversed)).toBeCloseTo(polygonArea(RECT))
+    })
+
+    it('三点共线 → 0', () =&gt; {
+        expect(polygonArea([p(0, 0), p(1, 0), p(2, 0)])).toBeCloseTo(0)
+    })
+
+    it('少于三个点 → 0', () =&gt; {
+        expect(polygonArea([p(0, 0), p(1, 1)])).toBe(0)
+        expect(polygonArea([])).toBe(0)
+    })
+
+    it('凹多边形（L 形）也对', () =&gt; {
+        <span class="cm">// 4×4 的正方形挖掉右上角 2×2 → 16 - 4 = 12</span>
+        const L = [p(0, 0), p(4, 0), p(4, 2), p(2, 2), p(2, 4), p(0, 4)]
+        expect(polygonArea(L)).toBeCloseTo(12)
+    })
+
+    it('首尾重复一个点不影响面积', () =&gt; {
+        expect(polygonArea([...RECT, p(0, 0)])).toBeCloseTo(12)
+    })
+})
+</code></pre>
+
+  <h3>03 · <code>src/core/schema/slab.ts</code> <span class="tag core">core</span></h3>
+<pre><code>import { z } from 'zod'
+import { BaseNode, nodeType, objectId } from './base'
+
+export const DEFAULT_SLAB_THICKNESS = 0.12
+
+<span class="cm">/**
+ * ⚠ 0.05 不是随便选的：Ground 的平面在 y=0、网格线在 y=0.001。
+ *   elevation 写 0 的话楼板顶面和它们共面 → z-fighting，画面上是一片闪烁麻点。
+ *   对照仓库的默认值也是 0.05，同一个坑。
+ *   副作用：墙底在 y=0，所以墙看起来陷进楼板 5cm。真正的修法是 M8 的 level 平面。
+ */</span>
+export const DEFAULT_SLAB_ELEVATION = 0.05
+
+export const SlabNode = BaseNode.extend({
+    id: objectId('slab'),
+    type: nodeType('slab'),
+
+    <span class="cm">// [x, z] 世界坐标，闭环但首尾不重复。
+    // 不加 .min(3) —— 点数是业务规则，归工具管；schema 只管形状。</span>
+    polygon: z.array(z.tuple([z.number(), z.number()])),
+
+    <span class="cm">// 行走面（顶面）标高。实体占 [elevation - thickness, elevation]，向下长。</span>
+    elevation: z.number().default(DEFAULT_SLAB_ELEVATION),
+    thickness: z.number().positive().optional(),
+})
+
+export type SlabNode = z.infer&lt;typeof SlabNode&gt;
+
+export const getSlabThickness = (slab: SlabNode) =&gt; slab.thickness ?? DEFAULT_SLAB_THICKNESS
+</code></pre>
+
+  <h3>04 · <code>src/core/schema/ceiling.ts</code> <span class="tag core">core</span></h3>
+<pre><code>import { z } from 'zod'
+import { BaseNode, nodeType, objectId } from './base'
+import { DEFAULT_WALL_HEIGHT } from './wall'
+
+<span class="cm">/**
+ * ⚠ 这里必须 import 墙高，不许写字面量 2.5。
+ *   「天花贴着墙顶」不是巧合，是约束。M8 有了 LevelNode 之后
+ *   两者都要改成读 level.height —— 写成 import，一 grep 就找齐。
+ *
+ * ROADMAP 的 M6 原文是「ceiling：同 slab，但吸附到层顶」。
+ * 那条在 M6 做不到，因为「层」要 M8 才存在（§06 已显式记录这处偏差）。
+ */</span>
+export const DEFAULT_CEILING_HEIGHT = DEFAULT_WALL_HEIGHT
+export const DEFAULT_CEILING_THICKNESS = 0.05
+
+export const CeilingNode = BaseNode.extend({
+    id: objectId('ceiling'),
+    type: nodeType('ceiling'),
+
+    polygon: z.array(z.tuple([z.number(), z.number()])),
+
+    <span class="cm">// 天花底面（抬头看到的那个面）的标高。实体占 [height, height + thickness]，向上长。
+    // 和 slab 的 elevation 方向正好相反 —— §00 第 ④ 步的不变量 1。</span>
+    height: z.number().optional(),
+    thickness: z.number().positive().optional(),
+})
+
+export type CeilingNode = z.infer&lt;typeof CeilingNode&gt;
+
+export const getCeilingHeight = (c: CeilingNode) =&gt; c.height ?? DEFAULT_CEILING_HEIGHT
+export const getCeilingThickness = (c: CeilingNode) =&gt; c.thickness ?? DEFAULT_CEILING_THICKNESS
+</code></pre>
+
+  <h3>05 · <code>src/core/schema/column.ts</code> <span class="tag core">core</span></h3>
+<pre><code>import { z } from 'zod'
+import { BaseNode, nodeType, objectId } from './base'
+
+export const DEFAULT_COLUMN_HEIGHT = 2.5
+export const DEFAULT_COLUMN_RADIUS = 0.15
+export const DEFAULT_COLUMN_SIZE = 0.3
+
+<span class="cm">// 对照仓库有 5 种截面 + 60 多个造型字段（柱础/柱头/凹槽/涡卷…）。
+// D2 明确排除家具级细节 —— 我们要两种。</span>
+export const ColumnCrossSection = z.enum(['round', 'square'])
+export type ColumnCrossSection = z.infer&lt;typeof ColumnCrossSection&gt;
+
+export const ColumnNode = BaseNode.extend({
+    id: objectId('column'),
+    type: nodeType('column'),
+
+    <span class="cm">// [x, y, z] 世界坐标，y 是柱底标高。
+    // 这是 M6 唯一一个有 position 的类型，也是唯一走「渲染器绑定」的类型（§02）。
+    // 用 .default 而不是必填：M9 的迁移遇到缺字段的旧数据时不会炸。</span>
+    position: z.tuple([z.number(), z.number(), z.number()]).default([0, 0, 0]),
+
+    crossSection: ColumnCrossSection.default('round'),
+    radius: z.number().positive().optional(),   <span class="cm">// round 用</span>
+    width: z.number().positive().optional(),    <span class="cm">// square 用</span>
+    depth: z.number().positive().optional(),    <span class="cm">// square 用</span>
+    height: z.number().positive().optional(),
+})
+
+export type ColumnNode = z.infer&lt;typeof ColumnNode&gt;
+
+export const getColumnHeight = (c: ColumnNode) =&gt; c.height ?? DEFAULT_COLUMN_HEIGHT
+export const getColumnRadius = (c: ColumnNode) =&gt; c.radius ?? DEFAULT_COLUMN_RADIUS
+export const getColumnWidth = (c: ColumnNode) =&gt; c.width ?? DEFAULT_COLUMN_SIZE
+export const getColumnDepth = (c: ColumnNode) =&gt; c.depth ?? DEFAULT_COLUMN_SIZE
+</code></pre>
+
+  <h3>06 · <code>src/core/schema/types.ts</code> —— 全文替换 <span class="tag core">core</span></h3>
+<pre><code>import { z } from 'zod'
+import { CeilingNode } from './ceiling'
+import { ColumnNode } from './column'
+import { SlabNode } from './slab'
+import { WallNode } from './wall'
+
+<span class="cm">// 这是一张清单，不是逻辑。加类型时改这里是设计的一部分 ——
+// M5 的账（5 处 / 框架文件 0 处）把它算在那 5 处里面。</span>
+export const AnyNode = z.discriminatedUnion('type', [WallNode, SlabNode, CeilingNode, ColumnNode])
+
+export type AnyNode = z.infer&lt;typeof AnyNode&gt;
+export type AnyNodeId = AnyNode['id']
+export type AnyNodeType = AnyNode['type']
+</code></pre>
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>敲完这一步立刻 <code>pnpm check-types</code>。</strong>
+      <code>NodeEventKey</code>（模板字面量）、<code>Partial&lt;AnyNode&gt;</code>、
+      <code>useNodeEvents&lt;K&gt;</code>、<code>AnyNode.parse</code> 全都应该自动跟上。
+      <strong>有任何一处红了就停下来</strong>——那说明 M5 的泛型没做干净，
+      前置 B 的测量结论要重写。
+    </p>
+  </div>
+
+  <h3>07 · <code>src/viewer/nodes/shared/polygon-prism.ts</code> <span class="tag viewer">viewer</span></h3>
+<pre><code>import * as THREE from 'three'
+
+<span class="cm">/**
+ * 把世界 XZ 多边形挤出成 [bottomY, topY] 之间的实体。slab 和 ceiling 共用。
+ *
+ * 返回的是一个「信封」：root &gt; mesh，mesh 的顶点已经是世界坐标。
+ * slab / ceiling 的 schema 里没有 position 字段 —— 它们由点定义，
+ * 几何和位置分不开，所以不走规格书的「builder 出局部坐标 + 渲染器绑 position」
+ * 那条路。判据和理由见 §02。
+ *
+ * 坐标链和 wall/geometry.ts 完全一致：
+ *   shape 空间 (x, y) --ExtrudeGeometry(depth)--&gt; (x, y, w)
+ *   --rotateX(-π/2)--&gt; 世界 (x, w, -y)
+ * 所以要让世界 Z = p.y，shape 里必须写 -p.y。这个负号省不得（§04 第 05 步）。
+ */</span>
+export function buildPolygonPrism({
+    polygon,
+    bottomY,
+    topY,
+    color,
+    name,
+}: {
+    polygon: readonly (readonly [number, number])[]
+    bottomY: number
+    topY: number
+    color: string
+    name: string
+}): THREE.Object3D {
+    const root = new THREE.Group()
+
+    const height = topY - bottomY
+    <span class="cm">// 和 buildWallGeometry 的 worldFootprint.length &lt; 3 是同一条防线。</span>
+    if (polygon.length &lt; 3 || height &lt;= 0) return root
+
+    const shape = new THREE.Shape()
+    shape.moveTo(polygon[0]![0], -polygon[0]![1])
+    for (let i = 1; i &lt; polygon.length; i += 1) {
+        shape.lineTo(polygon[i]![0], -polygon[i]![1])
+    }
+    shape.closePath()
+
+    const geometry = new THREE.ExtrudeGeometry(shape, { depth: height, bevelEnabled: false })
+    geometry.rotateX(-Math.PI / 2)
+    geometry.translate(0, bottomY, 0)
+
+    const material = new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0 })
+
+    const mesh = new THREE.Mesh(geometry, material)
+    mesh.name = name
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+
+    root.add(mesh)
+    return root
+}
+</code></pre>
+
+  <h3>08 · <code>src/viewer/nodes/slab/geometry.ts</code> <span class="tag viewer">viewer</span></h3>
+<pre><code>import type * as THREE from 'three'
+import type { GeometryContext, NodeAppearance } from '../../../core/registry/node-definition'
+import { getSlabThickness, type SlabNode } from '../../../core/schema/slab'
+import { buildPolygonPrism } from '../shared/polygon-prism'
+
+const SLAB_COLOR = '#cfd6d2'
+const SLAB_SELECTED_COLOR = '#7dd3c0'
+
+<span class="cm">// _ctx 用不到：slab 之间不互相求解，所以没有 computeLevelData，
+// ctx.levelData 恒为 undefined。「不用的钩子不接」本身就是 M5 三复选框的验收（§02）。
+// 下划线前缀让 noUnusedParameters 放行。</span>
+export function buildSlabGeometry(
+    node: SlabNode,
+    _ctx: GeometryContext,
+    appearance: NodeAppearance,
+): THREE.Object3D {
+    const thickness = getSlabThickness(node)
+
+    return buildPolygonPrism({
+        polygon: node.polygon,
+        <span class="cm">// elevation 是行走面（顶面），实体向下长</span>
+        bottomY: node.elevation - thickness,
+        topY: node.elevation,
+        color: appearance.selected ? SLAB_SELECTED_COLOR : SLAB_COLOR,
+        name: 'slab-body',
+    })
+}
+</code></pre>
+
+  <h3>09 · <code>src/viewer/nodes/slab/definition.ts</code> <span class="tag viewer">viewer</span></h3>
+<pre><code>import type { NodeDefinition } from '../../../core/registry/node-definition'
+import type { SlabNode } from '../../../core/schema/slab'
+import { buildSlabGeometry } from './geometry'
+
+export const slabDefinition: NodeDefinition&lt;SlabNode&gt; = {
+    kind: 'slab',
+    geometry: buildSlabGeometry,
+}
+</code></pre>
+
+  <h3>10 · <code>src/viewer/nodes/ceiling/geometry.ts</code> <span class="tag viewer">viewer</span></h3>
+<pre><code>import type * as THREE from 'three'
+import type { GeometryContext, NodeAppearance } from '../../../core/registry/node-definition'
+import { type CeilingNode, getCeilingHeight, getCeilingThickness } from '../../../core/schema/ceiling'
+import { buildPolygonPrism } from '../shared/polygon-prism'
+
+const CEILING_COLOR = '#e6e9e7'
+const CEILING_SELECTED_COLOR = '#7dd3c0'
+
+export function buildCeilingGeometry(
+    node: CeilingNode,
+    _ctx: GeometryContext,
+    appearance: NodeAppearance,
+): THREE.Object3D {
+    const bottomY = getCeilingHeight(node)
+
+    return buildPolygonPrism({
+        polygon: node.polygon,
+        <span class="cm">// height 是底面（抬头看到的那个面），实体向上长 —— 和 slab 相反</span>
+        bottomY,
+        topY: bottomY + getCeilingThickness(node),
+        color: appearance.selected ? CEILING_SELECTED_COLOR : CEILING_COLOR,
+        name: 'ceiling-body',
+    })
+}
+</code></pre>
+
+  <h3>11 · <code>src/viewer/nodes/ceiling/definition.ts</code> <span class="tag viewer">viewer</span></h3>
+<pre><code>import type { NodeDefinition } from '../../../core/registry/node-definition'
+import type { CeilingNode } from '../../../core/schema/ceiling'
+import { buildCeilingGeometry } from './geometry'
+
+export const ceilingDefinition: NodeDefinition&lt;CeilingNode&gt; = {
+    kind: 'ceiling',
+    geometry: buildCeilingGeometry,
+}
+</code></pre>
+
+  <h3>12 · <code>src/viewer/nodes/column/geometry.ts</code> <span class="tag viewer">viewer</span></h3>
+<pre><code>import * as THREE from 'three'
+import type { GeometryContext, NodeAppearance } from '../../../core/registry/node-definition'
+import {
+    type ColumnNode,
+    getColumnDepth,
+    getColumnHeight,
+    getColumnRadius,
+    getColumnWidth,
+} from '../../../core/schema/column'
+
+const COLUMN_COLOR = '#d9d3c8'
+const COLUMN_SELECTED_COLOR = '#7dd3c0'
+const RADIAL_SEGMENTS = 24
+
+<span class="cm">/**
+ * ⚠ 这个 builder 产出的是【局部坐标】，和 slab / ceiling / wall 都不一样。
+ *
+ * ColumnNode 有 position 字段 → 走规格书原路：
+ * builder 当作父节点在原点来产几何，位置由 ParametricNodeRenderer
+ * 的 &lt;group position={node.position}&gt; 负责（node-definitions.md:185）。
+ *
+ * 所以这里【绝不能】读 node.position。读了的话位置会被应用两次，
+ * 柱子出现在你点击处的两倍远 —— 症状很有辨识度，见 §04 第 16 步。
+ */</span>
+export function buildColumnGeometry(
+    node: ColumnNode,
+    _ctx: GeometryContext,
+    appearance: NodeAppearance,
+): THREE.Object3D {
+    const root = new THREE.Group()
+    const height = getColumnHeight(node)
+
+    const geometry =
+        node.crossSection === 'round'
+            ? new THREE.CylinderGeometry(
+                  getColumnRadius(node), getColumnRadius(node), height, RADIAL_SEGMENTS,
+              )
+            : new THREE.BoxGeometry(getColumnWidth(node), height, getColumnDepth(node))
+
+    <span class="cm">// 两种几何的原点都在体心，但我们要「柱底在局部 y=0」——
+    // 和 D3 给墙定的那条（局部 Y ∈ [0, height]）是同一条约定。</span>
+    geometry.translate(0, height / 2, 0)
+
+    const material = new THREE.MeshStandardMaterial({
+        color: appearance.selected ? COLUMN_SELECTED_COLOR : COLUMN_COLOR,
+        roughness: 0.85,
+        metalness: 0,
+    })
+
+    const mesh = new THREE.Mesh(geometry, material)
+    mesh.name = 'column-body'
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+
+    root.add(mesh)
+    return root
+}
+</code></pre>
+
+  <h3>13 · <code>src/viewer/nodes/column/definition.ts</code> <span class="tag viewer">viewer</span></h3>
+<pre><code>import type { NodeDefinition } from '../../../core/registry/node-definition'
+import type { ColumnNode } from '../../../core/schema/column'
+import { buildColumnGeometry } from './geometry'
+
+export const columnDefinition: NodeDefinition&lt;ColumnNode&gt; = {
+    kind: 'column',
+    geometry: buildColumnGeometry,
+}
+</code></pre>
+
+  <h3>14 · <code>src/viewer/nodes/register.ts</code> —— 全文替换 <span class="tag viewer">viewer</span></h3>
+<pre><code>import { nodeRegistry, registerNode } from "../../core/registry/node-registry"
+import { ceilingDefinition } from "./ceiling/definition"
+import { columnDefinition } from "./column/definition"
+import { slabDefinition } from "./slab/definition"
+import { wallDefinition } from "./wall/definition"
+
+let registered = false
+
+<span class="cm">// ⚠ 这个函数在 Viewer 的 useState 初始化器里跑 —— 也就是【渲染期】。
+//   SelectionManager 靠这个时机：它在 useEffect（挂载后）里按
+//   nodeRegistry.entries() 订阅点击事件，而 React 保证父组件渲染
+//   早于任何子组件的 effect。把这里挪进 useEffect 会让选择静默失效一半。</span>
+export function registerAllNodes(): void {
+    if (registered) return
+    registered = true
+    registerNode(wallDefinition)
+    registerNode(slabDefinition)
+    registerNode(ceilingDefinition)
+    registerNode(columnDefinition)
+}
+
+export { nodeRegistry }
+</code></pre>
+
+  <h3>15 · <code>src/viewer/components/parametric-node-renderer.tsx</code> —— 全文替换 <span class="tag viewer">viewer</span> <span class="tag debt">框架</span></h3>
+<pre><code>import type * as THREE from 'three'
+import { useContext, useLayoutEffect, useRef } from "react";
+import type { AnyNode } from "../../core/schema/types";
+import { useRegistry } from '../../core/registry/scene-registry';
+import { useNodeEvents } from '../hooks/use-node-events';
+import { useLiveOverrides, type NodeOverride } from '../../core/store/use-live-overrides';
+import { SelectionContext } from './scene-context';
+import { useScene } from '../../core/store/use-scene';
+
+const ORIGIN: [number, number, number] = [0, 0, 0]
+
+<span class="cm">/**
+ * 有 position 字段的类型（M6 的 column，M7 的 door/window）走这条：
+ * builder 出局部坐标，位置由这里的 JSX 绑定 —— node-definitions.md:185。
+ *
+ * 没有 position 的类型（wall / slab / ceiling）由点定义，几何和位置分不开，
+ * builder 把世界坐标烤进顶点，这里退化成 ORIGIN。两条路并存，判据见 §02。
+ *
+ * 'position' in source 能通过类型检查，是因为 AnyNode 是判别联合、
+ * Partial&lt;AnyNode&gt; 是同态映射类型（对联合分配）—— in 会把它们
+ * 都收窄到声明了该属性的成员，也就是 ColumnNode。不需要 as。
+ */</span>
+function positionOf(
+    source: AnyNode | NodeOverride | undefined,
+): [number, number, number] | undefined {
+    if (!source) return undefined
+    return 'position' in source ? source.position : undefined
+}
+
+export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
+    const ref = useRef&lt;THREE.Group&gt;(null)
+    useRegistry(node.id, node.type, ref)
+
+    const events = useNodeEvents(node, node.type)
+
+    const override = useLiveOverrides((s) =&gt; s.overrides.get(node.id))
+
+    const isSelected = useContext(SelectionContext) === node.id
+
+    <span class="cm">// override 在前：拖拽期的临时位置要立刻生效，不等提交进 store。</span>
+    const position = positionOf(override) ?? positionOf(node) ?? ORIGIN
+
+    useLayoutEffect(() =&gt; {
+        useScene.getState().makeDirty(node.id)
+    }, [node, override, isSelected])
+
+    return (
+        &lt;group
+            ref={ref}
+            position={position}
+            visible={node.visible !== false}
+            {...events}
+        /&gt;
+    )
+}
+</code></pre>
+  <div class="trap">
+    <span class="trap-label">敲完立刻验一遍墙和楼板</span>
+    <p style="margin-bottom:0">
+      它们的 <code>positionOf</code> 都返回 <code>undefined</code>，
+      退化成 <code>ORIGIN</code>，画面必须<strong>一模一样</strong>。
+      墙动了 = <code>ORIGIN</code> 写错了。<br>
+      另：<code>GeometrySystem</code> <strong>绝不能</strong>去 mutate
+      <code>group.position</code>（<code>node-definitions.md:215</code>）——
+      React 只在值变了时重新应用 prop，命令式清零之后柱子会永久停在原点。
+      我们的 <code>GeometrySystem</code> 只 add / remove 子节点，保持这样。
+    </p>
+  </div>
+
+  <h3>16 · <code>src/app/lib/interaction/scope.ts</code> —— 改两处 <span class="tag app">app</span></h3>
+<pre><code>export type WallHandle = 'start' | 'end'
+
+<span class="cw">+export type PolygonToolKind = 'slab' | 'ceiling'</span>
+<span class="cw">+export type DraftToolKind = 'wall' | PolygonToolKind</span>
+
+export type InteractionScope =
+    | { kind: 'idle' }
+<span class="cw">-    | { kind: 'drafting'; tool: 'wall'; points: Point2D[] }</span>
+<span class="cw">+    | { kind: 'drafting'; tool: DraftToolKind; points: Point2D[] }</span>
+<span class="cw">+    | { kind: 'placing'; tool: 'column' }</span>
+    | { kind: 'moving'; nodeId: AnyNodeId; origin: Point2D }
+    | { kind: 'handle-drag'; nodeId: AnyNodeId; handle: WallHandle }
+</code></pre>
+  <p>
+    <strong>文件的其余部分一个字都不改。</strong>
+    <code>ActiveInteractionScope</code>、<code>scopeOfKind</code>、
+    <code>selectionEnabled</code>、<code>draftPoints</code>、<code>lastDraftPoint</code>
+    全是从这个联合派生的——加一个交互态，铁律「只有 idle 能选中」
+    自动继续成立。<em>这是 M3 判别联合的红利，第一次真的兑现。</em>
+  </p>
+
+  <h3>17 · <code>src/app/lib/interaction/polygon-draft.ts</code> <span class="tag app">app</span></h3>
+<pre><code>import type { Point2D } from '../../../core/lib/geometry-2d'
+import { polygonArea } from '../../../core/lib/polygon-2d'
+
+<span class="cm">// 点回起点附近就闭合。0.25m 相对网格步长 0.1m 足够宽容，
+// 又不至于在画很小的板时误判。</span>
+export const CLOSE_RADIUS = 0.25
+
+<span class="cm">// 挡退化多边形：三点共线、所有点重合。
+// 放过去的话 ExtrudeGeometry 会生成 NaN 法线，画面上是一块黑斑。</span>
+export const MIN_POLYGON_AREA = 1e-4
+
+<span class="cm">/** 这一次点击是不是「闭合」而不是「加一个顶点」。 */</span>
+export function isClosingClick(points: readonly Point2D[], p: Point2D): boolean {
+    <span class="cm">// ⚠ 必须先判点数：第二个点落在第一个点附近是合法的（画很小的板），
+    //   不该被当成闭合。</span>
+    if (points.length &lt; 3) return false
+    const first = points[0]!
+    return Math.hypot(p.x - first.x, p.y - first.y) &lt;= CLOSE_RADIUS
+}
+
+<span class="cm">/** 这个草稿能不能变成一个真节点。 */</span>
+export function isCommittablePolygon(points: readonly Point2D[]): boolean {
+    return points.length &gt;= 3 &amp;&amp; polygonArea(points) &gt; MIN_POLYGON_AREA
+}
+
+<span class="cm">/** Point2D[] → schema 要的 [x, z][]。 */</span>
+export function toPolygonTuples(points: readonly Point2D[]): [number, number][] {
+    return points.map((p) =&gt; [p.x, p.y])
+}
+</code></pre>
+
+  <h3>18 · <code>src/app/lib/interaction/polygon-draft.test.ts</code> <span class="tag app">app</span></h3>
+<pre><code>import { describe, expect, it } from 'vitest'
+import type { Point2D } from '../../../core/lib/geometry-2d'
+import {
+    CLOSE_RADIUS,
+    isClosingClick,
+    isCommittablePolygon,
+    toPolygonTuples,
+} from './polygon-draft'
+
+const p = (x: number, y: number): Point2D =&gt; ({ x, y })
+const TRIANGLE = [p(0, 0), p(2, 0), p(2, 2)]
+
+describe('isClosingClick', () =&gt; {
+    it('三个点之后，点回起点附近 → 闭合', () =&gt; {
+        expect(isClosingClick(TRIANGLE, p(0.1, 0.1))).toBe(true)
+    })
+
+    it('离起点太远 → 不闭合', () =&gt; {
+        expect(isClosingClick(TRIANGLE, p(1, 1))).toBe(false)
+    })
+
+    it('刚好在半径上 → 闭合（含等号）', () =&gt; {
+        expect(isClosingClick(TRIANGLE, p(CLOSE_RADIUS, 0))).toBe(true)
+    })
+
+    it('不足三个点时，点回起点不算闭合 —— 那是在画很小的板', () =&gt; {
+        expect(isClosingClick([p(0, 0), p(0.05, 0)], p(0, 0))).toBe(false)
+        expect(isClosingClick([p(0, 0)], p(0, 0))).toBe(false)
+        expect(isClosingClick([], p(0, 0))).toBe(false)
+    })
+})
+
+describe('isCommittablePolygon', () =&gt; {
+    it('正常三角形可以提交', () =&gt; {
+        expect(isCommittablePolygon(TRIANGLE)).toBe(true)
+    })
+
+    it('三点共线不能提交', () =&gt; {
+        expect(isCommittablePolygon([p(0, 0), p(1, 0), p(2, 0)])).toBe(false)
+    })
+
+    it('少于三个点不能提交', () =&gt; {
+        expect(isCommittablePolygon([p(0, 0), p(1, 1)])).toBe(false)
+    })
+
+    it('所有点重合不能提交', () =&gt; {
+        expect(isCommittablePolygon([p(1, 1), p(1, 1), p(1, 1)])).toBe(false)
+    })
+})
+
+describe('toPolygonTuples', () =&gt; {
+    it('Point2D.y 落进元组的第二位（世界 Z）', () =&gt; {
+        expect(toPolygonTuples(TRIANGLE)).toEqual([[0, 0], [2, 0], [2, 2]])
+    })
+})
+</code></pre>
+
+  <h3>19 · <code>src/app/tools/polygon-tool.tsx</code> <span class="tag app">app</span></h3>
+<pre><code>import { Line } from "@react-three/drei"
+import { useFrame, useThree } from "@react-three/fiber"
+import { useEffect, useLayoutEffect, useRef, type ComponentRef, type RefObject } from "react"
+import type { Point2D } from "../../core/lib/geometry-2d"
+import { snapToGrid } from "../../core/schema/snap-2d"
+import { useScene } from "../../core/store/use-scene"
+import { eventToGround } from "../../viewer/lib/pointer-plane"
+import { isClickGesture } from "../../viewer/lib/pointer-gesture"
+import type { PolygonToolKind } from "../lib/interaction/scope"
+import {
+    isClosingClick,
+    isCommittablePolygon,
+    toPolygonTuples,
+} from "../lib/interaction/polygon-draft"
+import { getScope, useInteractionScope } from "../store/use-interaction-scope"
+import { useEditor } from "../store/use-editor"
+
+const PREVIEW_Y = 0.02
+
+<span class="cm">// Line2 的 setPositions 要求点数不变，所以预览用定长缓冲。
+// 超过 62 个顶点预览线会截断（数据不会）—— §06 记了，到期 M13。</span>
+const MAX_PREVIEW_POINTS = 64
+const PREVIEW_INIT: [number, number, number][] = Array.from(
+    { length: MAX_PREVIEW_POINTS },
+    () =&gt; [0, PREVIEW_Y, 0] as [number, number, number],
+)
+
+<span class="cm">/**
+ * slab 和 ceiling 共用的「点击成环」工具。
+ *
+ * ⚠ 两个实例同时挂载（&lt;PolygonTool tool="slab"/&gt; 和 tool="ceiling"），
+ *   靠 activeTool === tool 各自失活。所以每次读 scope 都必须【连 tool 一起判】，
+ *   否则两个实例会读到对方的草稿。见 §02 最后那个 trap。
+ *
+ * 不走事件总线 —— D15：「工具在自己的 scope 活跃期间直接监听 canvas DOM」。
+ */</span>
+export function PolygonTool({ tool }: { tool: PolygonToolKind }) {
+    const activeTool = useEditor((s) =&gt; s.activeTool)
+    const { gl, camera } = useThree()
+
+    const cursorRef = useRef&lt;Point2D | null&gt;(null)
+    const active = activeTool === tool
+
+    useEffect(() =&gt; {
+        if (!active) return
+        useInteractionScope.getState().begin({ kind: 'drafting', tool, points: [] })
+        return () =&gt; {
+            useInteractionScope.getState().endIf((s) =&gt; s.kind === 'drafting' &amp;&amp; s.tool === tool)
+            cursorRef.current = null
+        }
+    }, [active, tool])
+
+    useEffect(() =&gt; {
+        if (!active) return
+        const el = gl.domElement
+
+        const currentPoints = (): readonly Point2D[] =&gt; {
+            const scope = getScope()
+            return scope.kind === 'drafting' &amp;&amp; scope.tool === tool ? scope.points : []
+        }
+
+        const reset = () =&gt; {
+            useInteractionScope.getState().update('drafting', { points: [] })
+            cursorRef.current = null
+        }
+
+        const commit = () =&gt; {
+            const points = currentPoints()
+            if (!isCommittablePolygon(points)) return
+
+            <span class="cm">// 工具对类型一无所知：只写 type + polygon，
+            // 厚度 / 标高 / 高度全部由 zod 的 .default() 填。
+            // 所以加 ceiling 的工具成本是 0 行（§02 末尾）。</span>
+            useScene.getState().addNode({ type: tool, polygon: toPolygonTuples(points) })
+            reset()
+        }
+
+        const onPointerUp = (e: PointerEvent) =&gt; {
+            if (e.button !== 0) return
+            if (!isClickGesture(e)) return
+
+            const raw = eventToGround(e, el, camera)
+            if (!raw) return
+            const point = snapToGrid(raw)
+
+            const points = currentPoints()
+            if (isClosingClick(points, point)) {
+                commit()
+                return
+            }
+            useInteractionScope.getState().update('drafting', { points: [...points, point] })
+        }
+
+        const onPointerMove = (e: PointerEvent) =&gt; {
+            cursorRef.current = eventToGround(e, el, camera)
+        }
+
+        const onKeyDown = (e: KeyboardEvent) =&gt; {
+            if (e.key === 'Escape') reset()
+            if (e.key === 'Enter') {
+                e.preventDefault()
+                commit()
+            }
+        }
+
+        el.addEventListener('pointerup', onPointerUp)
+        el.addEventListener('pointermove', onPointerMove)
+        window.addEventListener('keydown', onKeyDown)
+
+        return () =&gt; {
+            el.removeEventListener('pointerup', onPointerUp)
+            el.removeEventListener('pointermove', onPointerMove)
+            window.removeEventListener('keydown', onKeyDown)
+        }
+    }, [active, tool, gl, camera])
+
+    if (!active) return null
+    return &lt;PolygonDraftPreview tool={tool} cursorRef={cursorRef} /&gt;
+}
+
+function PolygonDraftPreview({
+    tool,
+    cursorRef,
+}: {
+    tool: PolygonToolKind
+    cursorRef: RefObject&lt;Point2D | null&gt;
+}) {
+    const lineRef = useRef&lt;ComponentRef&lt;typeof Line&gt;&gt;(null)
+    const bufferRef = useRef&lt;number[]&gt;(new Array(MAX_PREVIEW_POINTS * 3).fill(0))
+
+    <span class="cm">// ⚠ 初始不可见只能用 ref 设，【不能】写成 &lt;Line visible={false}&gt;。
+    //   drei 的 Line 把未解构的 props 同时铺到 line2 和 lineMaterial 上，
+    //   material.visible=false 之后渲染器根本不画，下面 useFrame 里那句
+    //   line.visible = true 就白设了。M4 的橡皮筋预览就是这么死的
+    //   —— 见 STATE.md 事故记录 2026-09-02 / DECISIONS D16。</span>
+    useLayoutEffect(() =&gt; {
+        if (lineRef.current) lineRef.current.visible = false
+    }, [])
+
+    useFrame(() =&gt; {
+        const line = lineRef.current
+        if (!line) return
+
+        const scope = getScope()
+        const points = scope.kind === 'drafting' &amp;&amp; scope.tool === tool ? scope.points : []
+        const cursor = cursorRef.current
+
+        if (points.length === 0 || !cursor) {
+            line.visible = false
+            return
+        }
+
+        <span class="cm">// 已落的点 → 光标 → 回到起点（闭合提示）</span>
+        const path = [...points, cursor, points[0]!].slice(0, MAX_PREVIEW_POINTS)
+        const buffer = bufferRef.current
+
+        for (let i = 0; i &lt; path.length; i += 1) {
+            const q = path[i]!
+            buffer[i * 3] = q.x
+            buffer[i * 3 + 1] = PREVIEW_Y
+            buffer[i * 3 + 2] = q.y
+        }
+        <span class="cm">// 余量用最后一个点填满 —— 长度为零的线段不产生可见像素。</span>
+        const last = path[path.length - 1]!
+        for (let i = path.length; i &lt; MAX_PREVIEW_POINTS; i += 1) {
+            buffer[i * 3] = last.x
+            buffer[i * 3 + 1] = PREVIEW_Y
+            buffer[i * 3 + 2] = last.y
+        }
+
+        line.visible = true
+        line.geometry.setPositions(buffer)
+        line.computeLineDistances()
+    })
+
+    return (
+        &lt;Line
+            ref={lineRef}
+            points={PREVIEW_INIT}
+            color="#0b6e5f"
+            lineWidth={2}
+            dashed
+            dashScale={20}
+        /&gt;
+    )
+}
+</code></pre>
+
+  <h3>20 · <code>src/app/tools/column-tool.tsx</code> <span class="tag app">app</span></h3>
+<pre><code>import { useFrame, useThree } from "@react-three/fiber"
+import { useEffect, useRef, type RefObject } from "react"
+import type * as THREE from 'three'
+import type { Point2D } from "../../core/lib/geometry-2d"
+import {
+    DEFAULT_COLUMN_HEIGHT,
+    DEFAULT_COLUMN_RADIUS,
+} from "../../core/schema/column"
+import { snapToGrid } from "../../core/schema/snap-2d"
+import { useScene } from "../../core/store/use-scene"
+import { eventToGround } from "../../viewer/lib/pointer-plane"
+import { isClickGesture } from "../../viewer/lib/pointer-gesture"
+import { useInteractionScope } from "../store/use-interaction-scope"
+import { useEditor } from "../store/use-editor"
+
+const NEVER_RAYCAST = () =&gt; null
+
+<span class="cm">/**
+ * 单击放置。和 PolygonTool 的区别不只是「点一下 vs 点很多下」——
+ * column 有 position 字段，走的是规格书原路（渲染器绑 position），
+ * 所以它是「注册表真的通用吗」的对照组（§00 第 ⑤ 步）。
+ *
+ * 按住 Shift 点击 = 方柱。这是给 §05 B 组第 8 条准备的，
+ * 正经的截面切换要等 M13 的属性面板。
+ */</span>
+export function ColumnTool() {
+    const activeTool = useEditor((s) =&gt; s.activeTool)
+    const { gl, camera } = useThree()
+
+    const cursorRef = useRef&lt;Point2D | null&gt;(null)
+    const active = activeTool === 'column'
+
+    useEffect(() =&gt; {
+        if (!active) return
+        <span class="cm">// placing 是 M6 新增的交互态。ROADMAP M3 就设计了它，
+        // 但当时没有单击放置类的工具，所以一直没敲进去（前置 A 第 3 条）。</span>
+        useInteractionScope.getState().begin({ kind: 'placing', tool: 'column' })
+        return () =&gt; {
+            useInteractionScope.getState().endIf((s) =&gt; s.kind === 'placing')
+            cursorRef.current = null
+        }
+    }, [active])
+
+    useEffect(() =&gt; {
+        if (!active) return
+        const el = gl.domElement
+
+        const onPointerUp = (e: PointerEvent) =&gt; {
+            if (e.button !== 0) return
+            if (!isClickGesture(e)) return
+
+            const raw = eventToGround(e, el, camera)
+            if (!raw) return
+            const p = snapToGrid(raw)
+
+            useScene.getState().addNode({
+                type: 'column',
+                position: [p.x, 0, p.y],
+                crossSection: e.shiftKey ? 'square' : 'round',
+            })
+        }
+
+        const onPointerMove = (e: PointerEvent) =&gt; {
+            cursorRef.current = eventToGround(e, el, camera)
+        }
+
+        el.addEventListener('pointerup', onPointerUp)
+        el.addEventListener('pointermove', onPointerMove)
+
+        return () =&gt; {
+            el.removeEventListener('pointerup', onPointerUp)
+            el.removeEventListener('pointermove', onPointerMove)
+        }
+    }, [active, gl, camera])
+
+    if (!active) return null
+    return &lt;ColumnGhost cursorRef={cursorRef} /&gt;
+}
+
+function ColumnGhost({ cursorRef }: { cursorRef: RefObject&lt;Point2D | null&gt; }) {
+    const groupRef = useRef&lt;THREE.Group&gt;(null)
+
+    useFrame(() =&gt; {
+        const group = groupRef.current
+        if (!group) return
+
+        const cursor = cursorRef.current
+        if (!cursor) {
+            group.visible = false
+            return
+        }
+        group.visible = true
+        group.position.set(cursor.x, 0, cursor.y)
+    })
+
+    return (
+        <span class="cm">// &lt;group&gt; 上的 visible 是安全的：Group 没有材质，R3F 只会把它设到 Object3D 上。
+        // 出事的是 drei 的 &lt;Line&gt;（它把 props 转发给材质），别把这两个搞混。</span>
+        &lt;group ref={groupRef} visible={false}&gt;
+            &lt;mesh position={[0, DEFAULT_COLUMN_HEIGHT / 2, 0]} raycast={NEVER_RAYCAST}&gt;
+                &lt;cylinderGeometry
+                    args={[DEFAULT_COLUMN_RADIUS, DEFAULT_COLUMN_RADIUS, DEFAULT_COLUMN_HEIGHT, 24]}
+                /&gt;
+                &lt;meshStandardMaterial
+                    color="#0b6e5f"
+                    transparent
+                    opacity={0.3}
+                    depthWrite={false}
+                /&gt;
+            &lt;/mesh&gt;
+        &lt;/group&gt;
+    )
+}
+</code></pre>
+
+  <h3>21 · <code>src/app/components/selection-manager.tsx</code> —— 全文替换 <span class="tag app">app</span> <span class="tag debt">框架</span></h3>
+<pre><code>import { useEffect } from "react";
+import { emitter } from "../../core/events/bus";
+import type { GridEvent, NodeEvent, NodeEventKey } from "../../core/events/types";
+import { nodeRegistry } from "../../core/registry/node-registry";
+import { useEditor } from "../store/use-editor";
+import { isSelectionEnabled } from "../store/use-interaction-scope";
+
+export function SelectionManager(): null {
+    useEffect(() =&gt; {
+        const onNodeClick = (e: NodeEvent) =&gt; {
+            if (!isSelectionEnabled()) return
+            e.stopPropagation()
+            useEditor.getState().select(e.node.id)
+        }
+
+        const onGridClick = (_e: GridEvent) =&gt; {
+            if (!isSelectionEnabled()) return
+            useEditor.getState().select(null)
+        }
+
+        <span class="cm">// 按注册表订阅，不硬编码类型名。加第 N 种类型时这里 0 改动。
+        // 对照仓库 viewer/.../selection-manager.tsx:386 是同一个写法。
+        //
+        // ⚠ 依赖 registerAllNodes() 已经跑过。它在 Viewer 的 useState 初始化器
+        //   （渲染期）里跑，而 React 保证父组件渲染早于子组件 effect ——
+        //   所以这里拿到的注册表一定是满的。register.ts 顶上有对应的注释。</span>
+        const clickKeys = [...nodeRegistry.entries()].map(
+            ([kind]) =&gt; `${kind}:click` as NodeEventKey,
+        )
+
+        for (const key of clickKeys) emitter.on(key, onNodeClick)
+        emitter.on('grid:click', onGridClick)
+
+        return () =&gt; {
+            for (const key of clickKeys) emitter.off(key, onNodeClick)
+            emitter.off('grid:click', onGridClick)
+        }
+    }, [])
+
+    return null
+}
+</code></pre>
+
+  <h3>22 · <code>src/app/store/use-editor.ts</code> —— 改一行 <span class="tag app">app</span></h3>
+<pre><code><span class="cw">-export type Tool = 'select' | 'wall'</span>
+<span class="cw">+export type Tool = 'select' | 'wall' | 'slab' | 'ceiling' | 'column'</span>
+</code></pre>
+  <p>
+    <em>其余不动。</em>这一行属于 <code>m5-registry-answers.html</code> §01 划的
+    <strong>C 类「真·类型特有 —— 注册表不该碰」</strong>，
+    不计入"框架文件改动"（前置 B）。
+  </p>
+
+  <h3>23 · <code>src/app/app.tsx</code> —— 三处改动 <span class="tag app">app</span></h3>
+<pre><code>import { ColumnTool } from "./tools/column-tool";
+import { PolygonTool } from "./tools/polygon-tool";
+<span class="cm">// …原有 import 不动</span>
+
+        const onKey = (e: KeyboardEvent) =&gt; {
+            if (e.key === 'Tab') { e.preventDefault(); useEditor.getState().toggleViewMode() }
+<span class="cw">+            if (e.ctrlKey || e.metaKey) return</span>
+            if (e.key.toLowerCase() === 'w') useEditor.getState().setActiveTool('wall')
+            if (e.key.toLowerCase() === 'v') useEditor.getState().setActiveTool('select')
+<span class="cw">+            if (e.key.toLowerCase() === 'f') useEditor.getState().setActiveTool('slab')</span>
+<span class="cw">+            if (e.key.toLowerCase() === 'g') useEditor.getState().setActiveTool('ceiling')</span>
+<span class="cw">+            if (e.key.toLowerCase() === 'c') useEditor.getState().setActiveTool('column')</span>
+        }
+
+<span class="cm">// …Viewer 里：</span>
+                &lt;SelectionManager /&gt;
+                &lt;WallTool /&gt;
+<span class="cw">+                &lt;PolygonTool tool="slab" /&gt;</span>
+<span class="cw">+                &lt;PolygonTool tool="ceiling" /&gt;</span>
+<span class="cw">+                &lt;ColumnTool /&gt;</span>
+                &lt;MoveTool /&gt;
+                &lt;EndpointHandles /&gt;
+
+<span class="cm">// …底部提示条：</span>
+                {activeTool} · {viewMode} · sel={selectId ?? '—'}
+<span class="cw">-                &amp;nbsp;|&amp;nbsp; W 墙 · V 选 · Tab 视图 · Esc 断链/取消</span>
+<span class="cw">+                &amp;nbsp;|&amp;nbsp; W 墙 · F 楼板 · G 天花 · C 柱（Shift=方） · V 选 · Tab 视图</span>
+<span class="cw">+                &amp;nbsp;|&amp;nbsp; 多边形：点回起点 或 Enter 闭合 · Esc 取消</span>
+                &amp;nbsp;|&amp;nbsp; 拖墙移动 · 拖端点球 · Del 删 · Ctrl+Z 撤销
+</code></pre>
+  <div class="trap">
+    <span class="trap-label">那一句 ctrlKey 守卫是干什么的</span>
+    <p style="margin-bottom:0">
+      <code>C</code> 会和 <code>Ctrl+C</code> 撞车：
+      <code>e.key.toLowerCase() === 'c'</code> 不判修饰键的话，
+      按 Ctrl+C 会切到柱工具。<strong>现在没有复制功能所以不影响，
+      但 M13 做复制粘贴时会。</strong>
+      <em>W / V 从 M4 起就有同样的问题</em>，这一句一并挡掉——
+      注意位置：<strong>要在 Tab 那一句之后</strong>，
+      否则 Ctrl+Tab 切视图也会被挡掉（那个我们想保留）。
+    </p>
+  </div>
+
+  <h3>24 · <code>src/core/registry/node-registry.test.ts</code> <span class="tag core">core</span></h3>
+<pre><code>import { beforeEach, describe, expect, it } from 'vitest'
+import type { AnyNode, AnyNodeType } from '../schema/types'
+import type { NodeDefinition } from './node-definition'
+import { nodeRegistry, registerNode, resetNodeRegistry } from './node-registry'
+
+<span class="cm">// 只有 kind 的桩定义。geometry 在前置 C · A8 之后是可选的，
+// 所以 core 的测试不需要 import three —— D4 的边界不用破例。</span>
+const stub = (kind: AnyNodeType): NodeDefinition&lt;AnyNode, unknown&gt; =&gt; ({ kind })
+
+describe('nodeRegistry', () =&gt; {
+    <span class="cm">// ⚠ 没有这一句，第二个 it 会撞重名直接抛。</span>
+    beforeEach(() =&gt; resetNodeRegistry())
+
+    it('注册之后 has / get 拿得到', () =&gt; {
+        registerNode(stub('slab'))
+        expect(nodeRegistry.has('slab')).toBe(true)
+        expect(nodeRegistry.get('slab')?.kind).toBe('slab')
+    })
+
+    it('没注册的 kind 返回 undefined', () =&gt; {
+        expect(nodeRegistry.has('column')).toBe(false)
+        expect(nodeRegistry.get('column')).toBeUndefined()
+    })
+
+    it('重复注册同一个 kind 抛错', () =&gt; {
+        registerNode(stub('wall'))
+        expect(() =&gt; registerNode(stub('wall'))).toThrow(/wall/)
+    })
+
+    it('size 和 entries 反映已注册的全部', () =&gt; {
+        registerNode(stub('wall'))
+        registerNode(stub('slab'))
+        registerNode(stub('ceiling'))
+
+        expect(nodeRegistry.size).toBe(3)
+        expect([...nodeRegistry.entries()].map(([kind]) =&gt; kind).sort())
+            .toEqual(['ceiling', 'slab', 'wall'])
+    })
+
+    it('reset 之后是空的', () =&gt; {
+        registerNode(stub('wall'))
+        resetNodeRegistry()
+        expect(nodeRegistry.size).toBe(0)
+        expect(nodeRegistry.has('wall')).toBe(false)
+    })
+})
+</code></pre>
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>这是 M5 的第一个测试。</strong>注册表写完到现在一个用例都没有——
+      <code>m5-registry-answers.html</code> §06「来源三」第二条把它记成了债
+      （「注册是显式的，每个碰注册表的测试都要记得调，忘了就是『注册表是空的』
+      而不是编译错误」）。<code>beforeEach</code> 那一行就是那条债的还款。
+    </p>
+  </div>
+
+  <h3>敲完之后</h3>
+<pre><code>pnpm verify
+</code></pre>
+  <p>
+    应该是 <strong>5 文件 / 51 用例</strong>：
+    M2 的 31（<code>geometry-2d</code> 16 + <code>wall-mitering</code> 15）
+    + <code>polygon-2d</code> 6 + <code>polygon-draft</code> 9 + <code>node-registry</code> 5。
+    <code>vite build</code> 应该是 706 modules / 0 error。
+    然后走 §05 那 22 条肉眼验收——<strong>D 组四条是回归，最要紧</strong>。
+  </p>
+</section>
+
+<hr class="dim">
+
+<footer style="color:var(--ink-3);font-family:var(--mono);font-size:12px;letter-spacing:.04em">
+  <p style="margin:0">
+    对照源码：<code>core/src/schema/nodes/slab.ts</code> ·
+    <code>ceiling.ts</code> · <code>column.ts</code> ·
+    <code>nodes/src/slab/{geometry,definition,tool}</code>（335+381+394） ·
+    <code>nodes/src/column/{definition,tool}</code>（428+220） ·
+    <code>viewer/src/systems/slab/slab-system.tsx:85</code>（为什么他们不用 ExtrudeGeometry） ·
+    <code>viewer/.../selection-manager.tsx:386</code>（按注册表订阅） ·
+    <code>wiki/architecture/node-definitions.md:185,215</code>（局部坐标 + 不许 mutate transform）
+  </p>
+  <p style="margin:8px 0 0">
+    <strong>4192 行里取了 ~185 行。</strong>
+    跳过的两个大件 —— <code>slab-polygon.ts</code>(825，自相交/布尔/洞) 与
+    <code>polygon-editor.tsx</code>(1267，顶点编辑) —— 合起来占对照源码的一半，
+    到期分别是 M11 / M13。
+  </p>
+  <p style="margin:8px 0 0">上一站 · M5 节点注册表　　下一站 · M7 门窗与开洞</p>
+</footer>
+
+</div>

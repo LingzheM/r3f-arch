@@ -69,7 +69,8 @@ docs/ROADMAP.md，然后扫一遍 src/ 的真实代码并跑 pnpm verify。
 | [m5-registry-answers.html](m5-registry-answers.html) | **M5 参考答案（封存）** —— §01/§02/§04/§05/§06 + §07 全码。<br>**写完自己的版本再看** | 🔒 |
 | [m6-prep.md](m6-prep.md) | 场景存档（M9 的一半，提前）。**开工闸门看 M6 文档的前置 C** | 开 M6 前 |
 | [handoff-m6.md](handoff-m6.md) | M6 开新会话的前置闸门 + 粘贴的提示词 | 开 M6 前 |
-| [m6-slab-ceiling-column.html](m6-slab-ceiling-column.html) | M6 楼板、天花、柱（**前置 A 偏差 · 前置 B M5 检验测量 · 前置 C 开工闸门 21 处** + §00–§07 全码）。<br>已在 `src/` 的完整拷贝上跑绿 | 🔨 |
+| [m6-slab-ceiling-column.html](m6-slab-ceiling-column.html) | M6 楼板、天花、柱（前置 A 偏差 · 前置 B M5 检验测量 · 前置 C 开工闸门 20 处 + §00–§07 全码） | ✅ |
+| [handoff-m7.md](handoff-m7.md) | M7 开新会话的前置闸门 + 粘贴的提示词 | 开 M7 前 |
 | [roadmap.html](roadmap.html) | 路线图可读版（权威版是 ROADMAP.md） | 范围变化时 |
 | [deploy-and-ci.md](deploy-and-ci.md) | GitHub Pages 部署与 Actions CI 调查 | — |
 

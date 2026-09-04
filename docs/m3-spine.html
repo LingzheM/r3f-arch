@@ -1,0 +1,2059 @@
+<title>M3 一次点击只干一件事</title>
+<style>
+:root {
+  --paper:#EDF1EF; --card:#F8FAF9; --code-bg:#E4EBE8;
+  --ink:#131B19; --ink-2:#4A5754; --ink-3:#74827E;
+  --rule:#C4CFCB; --rule-soft:#D7E0DC;
+  --accent:#0B6E5F; --accent-bg:#DBE9E5;
+  --warn:#9E4520; --warn-bg:#F1E2D9;
+  --core:#0B6E5F;  --core-bg:#DBE9E5;
+  --viewer:#2A5A79; --viewer-bg:#DBE5EC;
+  --app:#6A5843;   --app-bg:#ECE5DB;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --body: Georgia, "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+    --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+    --rule:#2A3733; --rule-soft:#1E2926;
+    --accent:#4FC3AA; --accent-bg:#12312B;
+    --warn:#E2916A; --warn-bg:#32211A;
+    --core:#4FC3AA;  --core-bg:#12312B;
+    --viewer:#79B4DA; --viewer-bg:#14262F;
+    --app:#C9AC85;   --app-bg:#2A2318;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+  --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+  --rule:#2A3733; --rule-soft:#1E2926;
+  --accent:#4FC3AA; --accent-bg:#12312B;
+  --warn:#E2916A; --warn-bg:#32211A;
+  --core:#4FC3AA;  --core-bg:#12312B;
+  --viewer:#79B4DA; --viewer-bg:#14262F;
+  --app:#C9AC85;   --app-bg:#2A2318;
+}
+* { box-sizing:border-box; }
+body {
+  background:var(--paper); color:var(--ink); font-family:var(--body);
+  font-size:17px; line-height:1.72; margin:0; padding:0 24px 120px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:940px; margin:0 auto; }
+.prose { max-width:68ch; }
+.masthead { padding:72px 0 0; }
+.eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 20px; display:flex; gap:14px; flex-wrap:wrap;
+}
+.eyebrow b { color:var(--accent); font-weight:600; }
+h1 {
+  font-family:var(--mono); font-size:clamp(32px,5.5vw,50px); line-height:1.08;
+  letter-spacing:-.02em; font-weight:600; margin:0 0 18px; text-wrap:balance;
+}
+.standfirst { font-size:19px; color:var(--ink-2); max-width:60ch; margin:0 0 8px; }
+.dim { position:relative; height:1px; background:var(--rule); border:0; margin:56px 0 40px; }
+.dim::before,.dim::after { content:""; position:absolute; top:-4px; width:1px; height:9px; background:var(--rule); }
+.dim::before{left:0} .dim::after{right:0}
+h2 {
+  font-family:var(--mono); font-size:13px; letter-spacing:.16em; text-transform:uppercase;
+  font-weight:600; color:var(--accent); margin:0 0 6px;
+}
+h2 .num { color:var(--ink-3); margin-right:12px; }
+.h2sub { font-family:var(--mono); font-size:22px; font-weight:600; margin:0 0 24px; letter-spacing:-.01em; }
+h3 { font-family:var(--mono); font-size:16px; font-weight:600; margin:34px 0 10px; }
+h4 { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--accent); margin:24px 0 6px; }
+p { margin:0 0 16px; }
+ul,ol { margin:0 0 16px; padding-left:22px; }
+li { margin-bottom:7px; }
+strong { font-weight:700; color:var(--ink); }
+em { font-style:italic; color:var(--ink-2); }
+code { font-family:var(--mono); font-size:.86em; background:var(--code-bg); padding:1px 5px; border-radius:2px; }
+pre {
+  background:var(--code-bg); border:1px solid var(--rule-soft); border-radius:3px;
+  padding:16px 18px; overflow-x:auto; margin:14px 0 18px; line-height:1.62;
+}
+pre code { background:none; padding:0; font-size:13px; white-space:pre; }
+.cm { color:var(--ink-3); }
+.cw { color:var(--warn); }
+.step {
+  display:grid; grid-template-columns:52px 1fr; gap:0 20px;
+  padding:26px 0; border-top:1px solid var(--rule-soft);
+}
+.step:first-of-type { border-top:1px solid var(--rule); }
+.step-n { font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink-3); padding-top:4px; font-variant-numeric:tabular-nums; }
+.step-body { min-width:0; }
+.step-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.step-title { font-family:var(--mono); font-size:17px; font-weight:600; margin:0; }
+.step-body > p { max-width:64ch; }
+.tag {
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  font-weight:600; padding:3px 8px; border-radius:2px; white-space:nowrap;
+}
+.tag.core{color:var(--core);background:var(--core-bg)}
+.tag.viewer{color:var(--viewer);background:var(--viewer-bg)}
+.tag.app{color:var(--app);background:var(--app-bg)}
+.tag.debt{color:var(--warn);background:var(--warn-bg)}
+.trap {
+  background: repeating-linear-gradient(-45deg, transparent 0 6px,
+    color-mix(in srgb, var(--warn) 7%, transparent) 6px 7px), var(--warn-bg);
+  border-left:3px solid var(--warn); padding:14px 18px; margin:18px 0; border-radius:0 3px 3px 0;
+}
+.trap-label {
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  font-weight:600; color:var(--warn); display:block; margin-bottom:6px;
+}
+.trap p:last-child,.trap ul:last-child { margin-bottom:0; }
+.note { border-left:3px solid var(--rule); padding:2px 0 2px 18px; margin:18px 0; color:var(--ink-2); font-size:16px; }
+.note p:last-child { margin-bottom:0; }
+.tablewrap { overflow-x:auto; margin:18px 0 24px; }
+table { border-collapse:collapse; width:100%; font-family:var(--mono); font-size:13px; min-width:560px; }
+th {
+  text-align:left; font-weight:600; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule); padding:0 14px 8px 0;
+}
+td { padding:9px 14px 9px 0; border-bottom:1px solid var(--rule-soft); vertical-align:top; line-height:1.55; }
+td:last-child,th:last-child { padding-right:0; }
+.check { list-style:none; padding:0; margin:0; }
+.check li {
+  display:grid; grid-template-columns:26px 1fr; gap:10px; padding:11px 0;
+  border-bottom:1px solid var(--rule-soft); margin:0;
+}
+.check li::before { content:""; width:14px; height:14px; border:1.5px solid var(--accent); border-radius:2px; margin-top:6px; }
+.defect { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--rule-soft); }
+.defect-to { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--accent); white-space:nowrap; }
+a { color:var(--accent); }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media (max-width:620px) {
+  body { font-size:16px; padding:0 18px 80px; }
+  .step { grid-template-columns:1fr; }
+  .step-n { padding-top:0; margin-bottom:4px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">
+    <span>r3f-arch</span><span>里程碑 <b>03</b> / 14</span><span>机制型 · 只给 hint</span><span>预计 2–3 周</span>
+  </p>
+  <h1>M3 一次点击只干一件事</h1>
+  <p class="standfirst">
+    两个工具（选择、画墙）共存，指针输入永远只有一个归属。
+    画墙画到一半点在已有墙上——落点，不选中。松开相机拖拽——什么都不发生。
+    再加上链式画墙：画完一堵，终点自动接下一堵。
+  </p>
+  <p class="standfirst" style="color:var(--ink-3);font-size:17px">
+    这是全项目<strong>认知密度最高</strong>的一个里程碑。代码量不到 M2 的一半，
+    但它决定了后面 11 个里程碑里每一个新工具的接入方式。
+  </p>
+</header>
+
+<hr class="dim">
+
+<!-- ═══════════ 00 -->
+<section>
+  <h2><span class="num">00</span>这个设计是怎么推出来的</h2>
+  <p class="h2sub">七步 + 一次翻车。M5 你照这个格式自己写一份</p>
+
+  <div class="note">
+    <p>
+      <strong>本节是样板，不是内容。</strong>下面 §01–§07 是思考的<em>产物</em>；
+      这一节是产生它们的<em>过程</em>。两者的区别就是"能读懂"和"能自己做一遍"的区别。
+    </p>
+    <p style="margin-bottom:0">
+      读完之后，M5（节点注册表）按同样七步由你产出 §01–§06，我只挑毛病不给答案。
+      末尾有一份可直接照抄的清单。
+    </p>
+  </div>
+
+  <!-- ① -->
+  <div class="step">
+    <div class="step-n">①</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">找规格书，读全文</h3></div>
+      <p>
+        机制型里程碑在原项目里<strong>都有一页 wiki 是它的规格书</strong>。
+        不是源码——是 wiki。源码告诉你"怎么做"，wiki 告诉你"为什么"。
+      </p>
+      <p>M3 读的顺序，严格是这个顺序：</p>
+<pre><code><span class="cm">1.</span> wiki/architecture/interaction-scope.md      ~200 行  <span class="cm">← 主规格书，读两遍</span>
+<span class="cm">2.</span> wiki/architecture/selection-managers.md      ~90 行   <span class="cm">← 事件如何流向选择</span>
+<span class="cm">3.</span> wiki/architecture/events.md                  ~50 行   <span class="cm">← 总线的键格式与载荷</span>
+   <span class="cm">—— 到这里为止都还没看一行实现 ——</span>
+<span class="cm">4.</span> editor/src/lib/interaction/scope.ts          243 行
+<span class="cm">5.</span> editor/src/store/use-interaction-scope.ts    140 行
+<span class="cm">6.</span> viewer/src/hooks/use-node-events.ts          ~100 行
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">最常见的错误做法</span>
+        <p style="margin-bottom:0">
+          直接打开 <code>scope.ts</code> 读源码。那样你会学到<strong>一个判别联合长什么样</strong>，
+          但学不到<strong>它为什么必须是判别联合</strong>——而后者才是你换个项目还能用的东西。
+          <strong>wiki 在前，源码在后，不许颠倒。</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② -->
+  <div class="step">
+    <div class="step-n">②</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">找「之前是怎么错的」</h3></div>
+      <p>
+        规格书里最值钱的段落，是描述<strong>它取代了什么</strong>的那一段。
+        M3 的那段在 <code>interaction-scope.md</code> 开头：
+      </p>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <em>"...was re-derived from <strong>7+ independent flags</strong>
+          (<code>movingNode</code>, <code>placementDragMode</code>, <code>activeHandleDrag</code>,
+          <code>curvingWall</code>, <code>editingHole</code>, <code>movingWallEndpoint</code>…).
+          Every overlay and pick site re-derived its behaviour from a different subset,
+          so the flags could <strong>drift into illegal combinations</strong>."</em>
+        </p>
+      </div>
+      <p>
+        那七个标志的<strong>名字</strong>本身就是一张地图——它告诉你这个 scope
+        最终要吞掉哪些交互。<code>movingNode</code> → M4，<code>editingHole</code> → M7，
+        <code>curvingWall</code> → 我们不做。
+      </p>
+      <p><strong>可迁移的判据：</strong></p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>问题</th><th>答不上来意味着</th></tr></thead>
+        <tbody>
+          <tr><td>这个设计排除了哪些非法状态？</td><td>你不知道它解决什么，抄了也是背诵</td></tr>
+          <tr><td>不用它会怎么错？</td><td>无法判断自己需不需要它</td></tr>
+          <tr><td>它是设计出来的还是重构出来的？</td><td>重构出来的通常不能省，设计出来的常常可以</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="margin-bottom:0">
+        <strong>一个设计的价值 = 它排除掉的错误状态。</strong>M3 的 spine 是重构的产物
+        （文档明说了 <em>"Before this..."</em>），所以它不能省——只能精简。
+      </p>
+    </div>
+  </div>
+
+  <!-- ③ -->
+  <div class="step">
+    <div class="step-n">③</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">量成本</h3></div>
+      <p><code>wc -l</code>。这个数字决定<strong>手写还是照抄</strong>。</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>原项目文件</th><th>行数</th><th>M3 的处置</th></tr></thead>
+        <tbody>
+          <tr><td><code>lib/interaction/scope.ts</code></td><td>243</td><td>取其中 ~20 行的思想，手写</td></tr>
+          <tr><td><code>store/use-interaction-scope.ts</code></td><td>140</td><td>取 4 个方法 ~40 行，手写</td></tr>
+          <tr><td><code>lib/interaction/hot-set.ts</code></td><td>67</td><td><strong>整个跳过</strong>（依赖 attachTo 资产模型 → M7）</td></tr>
+          <tr><td><code>lib/interaction/overlay-policy.ts</code></td><td>59</td><td><strong>整个跳过</strong>（还没有叠加层 → M12）</td></tr>
+          <tr><td><code>viewer/hooks/use-node-events.ts</code></td><td>~100</td><td>抄结构，砍掉 inputDragging 分支</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="margin-bottom:0">
+        509 行里我真正需要的是 60 行。<strong>剩下 449 行不是"以后再抄"，是"永远不抄"</strong>——
+        它们服务的是我们范围外的功能。量成本的意义在这里：
+        它把"这个机制很复杂"变成"这个机制的<em>核心</em>只有 60 行，其余是它长了三年的枝叶"。
+      </p>
+    </div>
+  </div>
+
+  <!-- ④ -->
+  <div class="step">
+    <div class="step-n">④</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">抽不变量</h3></div>
+      <p>
+        每个机制都能压成 <strong>1–3 句永远为真的话</strong>。
+        <code>interaction-scope.md</code> 末尾正好有一节叫 <code>## Rules</code>，
+        规格书自己抽好了：
+      </p>
+<pre><code><span class="cm">① One owner, one scope.</span>
+   只有 useInteractionScope 写 scope，且只经 begin/update/end/endIf。
+
+<span class="cm">② end is atomic and payload-free.</span>
+   永远不许在 idle 上留下 nodeId / 半清的标志。
+
+<span class="cm">③ update cannot change kind.</span>
+   换交互是 begin，不是打补丁。
+
+<span class="cm">④ selectionEnabled(scope) === (kind === 'idle')</span>
+   任何活跃交互进行中，指针属于那个交互的躯体。
+</code></pre>
+      <p><strong>这四句直接翻译成了 §07 第 18 项的 8 个测试用例</strong>，一一对应：</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>不变量</th><th>测试用例</th></tr></thead>
+        <tbody>
+          <tr><td>④</td><td><code>idle 允许选择</code> / <code>任何活跃交互都掐断选择</code></td></tr>
+          <tr><td>③</td><td><code>update 不能改变 kind</code> / <code>update 在 idle 时被忽略</code></td></tr>
+          <tr><td>②</td><td><code>end 是原子的：没有载荷能活过它</code></td></tr>
+          <tr><td>①</td><td><code>endIf 不掐掉不匹配的 scope</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>这一步是整个七步里最可迁移的。</strong>不变量同时是三样东西：
+          <strong>测试用例</strong>、<strong>code review 的标准</strong>、
+          <strong>三个月后你判断某处改动合不合法的依据</strong>。
+          写不出不变量，说明你还没真的理解这个机制——不是没记住，是没理解。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑤ -->
+  <div class="step">
+    <div class="step-n">⑤</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">切最薄的垂直片</h3></div>
+      <p>
+        原项目 <code>InteractionScope</code> 有 <strong>9 个变体</strong>。
+        我问的问题是：<strong>要演示"两个工具抢指针"，最少需要几个？</strong>
+      </p>
+      <p>答案是 2 个，外加第二个工具。于是：</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>变体</th><th>M3</th><th>理由</th></tr></thead>
+        <tbody>
+          <tr><td><code>idle</code></td><td>✅</td><td>不可省，铁律的另一半</td></tr>
+          <tr><td><code>drafting</code></td><td>✅</td><td>画墙工具需要它</td></tr>
+          <tr><td><code>moving</code> / <code>handle-drag</code> / <code>placing</code></td><td>→ M4</td><td>还不能拖动任何东西</td></tr>
+          <tr><td><code>reshaping</code></td><td>→ M4+</td><td>端点拖拽属于 M4，曲线墙不做</td></tr>
+          <tr><td><code>box-select</code></td><td>→ M13</td><td>多选是面板阶段的事</td></tr>
+          <tr><td><code>painting</code></td><td>→ M14</td><td>材质上色</td></tr>
+          <tr><td><code>sculpting</code></td><td>❌ 永不</td><td>地形雕刻在产品边界外（D2）</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="trap">
+        <span class="trap-label">这里最容易犯的错</span>
+        <p>
+          把 9 个变体<strong>都定义出来</strong>，理由是"反正只是类型，不花钱，先占位"。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>没人构造的变体是死代码，不是预留扩展点。</strong>
+          它的成本不在字节数，在于：每个读代码的人都要判断"这个 <code>painting</code> 态
+          是谁进的？"然后花十分钟确认答案是"没人"。原项目 <code>AGENTS.md</code>
+          的原话：<em>"Don't introduce backwards-compatibility shims, dead code,
+          or speculative abstractions."</em>
+        </p>
+      </div>
+      <p style="margin-bottom:0">
+        <strong>判据：能不能说出"谁会构造这个变体，在哪一行"。</strong>
+        说不出就不写。§06 的"故意保留的缺陷"就是这一步的副产品。
+      </p>
+    </div>
+  </div>
+
+  <!-- ⑥ -->
+  <div class="step">
+    <div class="step-n">⑥</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">去你的代码里找病灶</h3></div>
+      <p>
+        前五步产出的是一个<em>抽象上正确</em>的方案。这一步把它接到<strong>你手上已经存在的
+        具体痛处</strong>。它决定了文档的第一节该写什么。
+      </p>
+      <p>M3 的实际操作：读你的两个文件，找出所有摸指针的地方。</p>
+<pre><code><span class="cm">// src/app/tools/wall-tool.tsx:56</span>
+el.addEventListener('pointerdown', onPointerDown)   <span class="cm">← canvas DOM 级，点哪都触发</span>
+
+<span class="cm">// src/viewer/components/wall-renderer.tsx:36</span>
+onClick={(e) =&gt; { e.stopPropagation(); console.log('[pick]', node.id) }}
+                                       <span class="cm">↑ R3F 射线级，点中墙才触发</span>
+</code></pre>
+      <p>
+        <strong>两条互不知情的路径 = bug 已经在了，只是还没显形</strong>，
+        因为 <code>[pick]</code> 只是 <code>console.log</code>。
+        把它换成真的选中，bug 就现形——所以 §01 的第一步是"先制造故障"。
+      </p>
+      <p>然后从同一个根因推出另外三个症状（这一步纯靠推，不用跑）：</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>症状</th><th>怎么推出来的</th></tr></thead>
+        <tbody>
+          <tr><td>相机转完视角松手会选中东西</td><td>R3F 在 pointerup 合成 click，没人知道刚才在拖相机</td></tr>
+          <tr><td>画墙到一半切工具，起点去向不明</td><td><code>pendingRef</code> 的清理时机取决于依赖数组，不取决于意图</td></tr>
+          <tr><td>Esc 该取消谁</td><td>两个监听器都想响应，没有仲裁者</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="note">
+        <p>
+          <strong>四个症状，一个根因：没有任何一处代码知道"用户此刻在干什么"。</strong>
+          这句话就是 §01 的论点，也是整个 M3 存在的理由。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>动机必须先于机制</strong>，而且动机必须来自<em>你自己的代码</em>，
+          不是来自教科书。从"什么是判别联合"讲起，你学到的是词汇；
+          从"你现在点一堵墙会同时干两件事"讲起，你学到的是判断力。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ -->
+  <div class="step">
+    <div class="step-n">⑦</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">列故意缺陷，标到期</h3></div>
+      <p>
+        "这个 M 我故意<strong>不</strong>做什么，什么时候还"。§06 那张表就是这一步。
+      </p>
+      <p>
+        写完之后看一眼有没有<strong>聚集</strong>——M3 列出的 8 条里，有 5 条到期都是 M4：
+      </p>
+<pre><code>改一堵墙 → 全场景重算           → M4
+交点检测 O(交点×墙)             → M4
+落点不吸附                      → M4
+不能移动 / 删除 / 撤销          → M4
+橡皮筋每次 move 都重渲染        → M4
+</code></pre>
+      <p style="margin-bottom:0">
+        <strong>这不是巧合。</strong>它们全部指向同一件事：M1–M3 一直只有
+        "改数据 → React 重渲染 → 重建几何"这一条路径。M4 开第二条
+        （每帧 mutate <code>Object3D</code> 但一次都不 <code>setState</code>），
+        五条一起消失。<strong>缺陷聚集本身就是下一个 M 的边界证据</strong>——
+        如果一个 M 的缺陷散落在五个不同的到期点，说明这个 M 切歪了。
+      </p>
+    </div>
+  </div>
+
+  <!-- ⑧ -->
+  <div class="step">
+    <div class="step-n">⑧</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">纸上对，代码上错</h3><span class="tag debt">这一步我栽了</span></div>
+      <p>
+        七步走完，我认为 M3 方案是对的。<strong>然后写代码时发现 §04 行不通。</strong>
+      </p>
+      <p>
+        原方案让 <code>WallTool</code> 监听 <code>grid:pointerdown</code> 落点、
+        <code>SelectionManager</code> 监听 <code>grid:click</code> 取消选中。
+        纸面上分工清晰。落到代码才想到：<strong>DOM 级监听器不知道 R3F 命中了什么</strong>，
+        点一堵墙会同时触发"选中"和"取消选中"，
+        <strong>谁赢取决于两个监听器的注册顺序</strong>。
+      </p>
+      <p>修法见 §07 顶部，结论写进了 <code>DECISIONS.md</code> D15。但真正的教训是：</p>
+      <div class="trap">
+        <span class="trap-label">前七步有天花板</span>
+        <p>
+          <strong>涉及运行时顺序、状态时序、"这个手感对不对"的问题，纸上推不出来。</strong>
+          这三类问题只能跑一遍才知道答案。
+        </p>
+        <p style="margin-bottom:0">
+          如果我当时先写 30 行扔掉的代码验证"两个 canvas 监听器谁先跑"，
+          方案就不会带着缺陷发出来。这正是<strong>原型</strong>存在的理由——
+          写一小段一次性代码，只为回答一个设计问题，答案并进真实代码，原型本身留作依据。
+          <strong>M5 你自己设计时，遇到这三类问题就停下来先跑一段。</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="dim" style="margin:44px 0 32px">
+
+  <h3>M5 的清单 —— 照着填</h3>
+  <p class="prose">
+    M5 是<strong>节点注册表</strong>。选它当你的第一次，理由有四个：
+    规格书 <code>node-definitions.md</code> 只有 55 行（四份里最短）；
+    不变量极干净（三个字段互相独立，<em>presence is participation</em>）；
+    触发条件明确（第三个节点类型出现，你已经能感受到 <code>switch</code> 的重复）；
+    <strong>错了代价小</strong>——注册表设计错是重构，不是重写。
+  </p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>步</th><th>M5 要产出什么</th><th>去哪找</th></tr></thead>
+    <tbody>
+      <tr><td>①</td><td>读完规格书再碰源码</td>
+        <td><code>wiki/architecture/node-definitions.md</code> → <code>systems.md</code> → <code>renderers.md</code>，然后才是 <code>core/src/registry/</code></td></tr>
+      <tr><td>②</td><td>抄下"之前是怎么错的"那段原文</td>
+        <td>找 <code>node-definitions.md</code> 里描述它取代了什么的句子。<strong>找不到就说明它是设计出来的不是重构出来的——那要另外判断值不值得抄</strong></td></tr>
+      <tr><td>③</td><td><code>wc -l</code> 表：哪些抄、哪些跳过、跳过的到期在哪个 M</td>
+        <td><code>core/src/registry/</code> · <code>viewer/src/systems/geometry/</code> · <code>renderers/parametric-node-renderer.tsx</code></td></tr>
+      <tr><td>④</td><td>2–4 句不变量，每句配一个测试用例名</td>
+        <td>规格书里找"三个字段是独立的""没有 discriminator 标签"这类断言</td></tr>
+      <tr><td>⑤</td><td>切片表：哪些字段/能力 M5 做，哪些推后，各自到期</td>
+        <td>原项目的 <code>NodeDefinition</code> 字段远不止三个（capabilities / snapProfile / presentation / parametrics…）</td></tr>
+      <tr><td>⑥</td><td>你代码里的病灶：<code>switch (node.type)</code> 在几处？加第三个类型要动几个文件？</td>
+        <td><code>grep -rn "node.type" src/</code></td></tr>
+      <tr><td>⑦</td><td>故意缺陷表，标到期，检查有没有聚集</td>
+        <td>—</td></tr>
+      <tr><td>⑧</td><td>遇到顺序/时序/手感问题 → 停下来写 30 行验证</td>
+        <td>M5 的高危处：<code>GeometrySystem</code> 每帧读脏标记与 React 挂载的时序</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <p>
+      <strong>产出 §01–§06，不要 §07。</strong>写完发给我，我逐条挑，<strong>不给答案</strong>。
+      挑不动的地方就是你已经想清楚的地方；被挑穿的地方，你自己再推一遍。
+    </p>
+    <p style="margin-bottom:0">
+      预期：第一版大概会在 ⑤（切片）和 ⑦（缺陷到期）上被挑得最狠。
+      这两步都需要"知道后面九个 M 要什么"，而那正是你现在还没有的视野——
+      所以它们也是这次练习最大的收获点。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 01 -->
+<section>
+  <h2><span class="num">01</span>这个 bug 现在就在你的代码里</h2>
+  <p class="h2sub">一次点击，两个监听器，各干各的</p>
+
+  <div class="prose">
+    <p>你现在的代码有两条互不知情的指针输入路径：</p>
+  </div>
+<pre><code><span class="cm">// src/app/tools/wall-tool.tsx:56</span>
+el.addEventListener('pointerdown', onPointerDown)   <span class="cm">← canvas DOM 级，点哪都触发</span>
+
+<span class="cm">// src/viewer/components/wall-renderer.tsx:36</span>
+onClick={(e) =&gt; { e.stopPropagation(); console.log('[pick]', node.id) }}
+                                       <span class="cm">↑ R3F 射线级，点中墙才触发</span>
+</code></pre>
+  <div class="prose">
+    <p>
+      在墙工具激活时点一堵已有的墙，<strong>两个都会触发</strong>：
+      落一个点，同时打印一次 <code>[pick]</code>。
+      现在无害，因为 <code>[pick]</code> 只是 <code>console.log</code>。
+      <strong>M3 第一件事就是把它换成真的选中——那一刻 bug 就现形了。</strong>
+    </p>
+    <p>还有三个同源的：</p>
+    <ul>
+      <li><strong>相机拖拽的松手会选中东西。</strong>OrbitControls 转视角，松手时 R3F 合成一次
+        click，落在光标下的任何 mesh 上。</li>
+      <li><strong>画墙到一半切工具，起点去哪了？</strong><code>pendingRef</code> 在
+        <code>useEffect</code> 清理里被清——但清理时机取决于依赖数组，不取决于你的意图。</li>
+      <li><strong>Esc 该取消什么？</strong>取消画墙的起点，还是取消选中？两个监听器都想响应。</li>
+    </ul>
+    <p>
+      这四个问题看起来是四个 bug。<strong>它们是同一个 bug</strong>：
+      没有任何一处代码知道"用户此刻在干什么"。每个监听器都在用自己那点局部信息猜。
+    </p>
+  </div>
+
+  <h3>原项目的原话</h3>
+  <p class="prose">
+    <code>wiki/architecture/interaction-scope.md</code> 开头记的就是这段历史——
+    他们猜了很久才收手：
+  </p>
+  <div class="note">
+    <p>
+      <em>"Before this, 'what is the user doing right now?' was re-derived from
+      <strong>7+ independent flags</strong> (<code>movingNode</code>, <code>placementDragMode</code>,
+      <code>activeHandleDrag</code>, <code>curvingWall</code>, <code>editingHole</code>,
+      <code>movingWallEndpoint</code>…). Every overlay and pick site re-derived its behaviour
+      from a different subset, so the flags could <strong>drift into illegal combinations</strong>
+      (moving + curving at once; a stale <code>movingNode</code> after a drag ended)."</em>
+    </p>
+  </div>
+  <p class="prose">
+    修法是一个判别联合，叫 <strong>the spine</strong>，配一条铁律：
+  </p>
+<pre><code>selectionEnabled(scope) === (scope.kind === 'idle')
+
+<span class="cm">// 任何交互进行中，指针属于那个交互的躯体，</span>
+<span class="cm">// 拾取选择必须被掐断 —— 不是"尽量避让"，是掐断。</span>
+</code></pre>
+
+  <div class="trap">
+    <span class="trap-label">M3 最重要的一个设计决定</span>
+    <p>
+      <strong>工具一旦被选中就持有 scope，不是等到指针按下才持有。</strong>
+      按 W 切到墙工具的那一刻就 <code>begin({ kind: 'drafting', tool: 'wall', points: [] })</code>，
+      切回选择工具才 <code>end()</code>。
+    </p>
+    <p>
+      为什么不是"按下时进入、松开时退出"？因为那样第一次点击时 scope 还是
+      <code>idle</code>，<code>selectionEnabled</code> 返回 true，
+      <strong>你的第一个落点会同时选中那堵墙</strong>——bug 原封不动。
+    </p>
+    <p style="margin-bottom:0">
+      原项目在 <code>sculpting</code> 变体上写了同样的道理：
+      <em>"A brush that only claimed the scope between pointer-down and -up would
+      flicker all of that back on between dabs."</em>
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 02 -->
+<section>
+  <h2><span class="num">02</span>事件的两次转身</h2>
+  <p class="h2sub">viewer 发生了什么，app 决定它意味着什么</p>
+
+  <p class="prose">
+    M3 引入事件总线（<code>mitt</code>）。不是为了解耦而解耦——它是
+    "viewer 不许知道选中"这条边界唯一能落地的形式。
+  </p>
+
+<pre><code>mesh 上的 R3F 指针事件
+   │
+   │  <span class="cm">第一次转身：R3F 事件 → 领域事件（viewer 做）</span>
+   ▼
+useNodeEvents(node, 'wall')  →  emitter.emit('wall:click', { node, point, … })
+   │
+   │  <span class="cm">viewer 的职责到此为止。它不知道 click 意味着什么。</span>
+   ▼
+   │  <span class="cm">第二次转身：领域事件 → 编辑语义（app 做）</span>
+   ▼
+SelectionManager 监听 'wall:click'
+   ├─ selectionEnabled(scope) 为假 → <span class="cw">直接丢弃</span>
+   └─ 为真 → useEditor.select(node.id)
+</code></pre>
+
+  <div class="prose">
+    <p>
+      中间那道横线就是 viewer-isolation。<strong>换掉 app 层，viewer 一行不用改</strong>——
+      一个只读展示页可以监听同样的 <code>wall:click</code> 去弹出信息卡片，
+      而不是选中。
+    </p>
+    <p>
+      为什么不用回调 props（<code>&lt;Viewer onNodeClick={…}&gt;</code>）？M3 只有一种事件时
+      确实更简单。但到 M7 你会有 <code>click / enter / leave / move / pointerdown /
+      pointerup / double-click</code> 七种 × 若干节点类型，而且要穿过
+      <code>SceneRenderer → NodeRenderer → WallRenderer</code> 三层。
+      <strong>总线的价值不在解耦，在于不用逐层穿线。</strong>
+    </p>
+  </div>
+
+  <div class="note">
+    <p>
+      事件键的格式是 <code>&lt;nodeType&gt;:&lt;suffix&gt;</code>——<code>wall:click</code>、
+      <code>door:enter</code>。另外一族是 <code>grid:*</code>，表示"点在空地上"，
+      由一个手动射线的 hook 发出，不来自任何 mesh。
+      M3 用它来做"点空白处取消选中"。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 03 -->
+<section>
+  <h2><span class="num">03</span>文件树增量</h2>
+  <p class="h2sub">新增 9 个，改写 4 个</p>
+
+<pre><code>src/
+  core/
+    events/
+      types.ts                 <span class="cm">新  NodeEvent / EventMap（键与载荷的类型）</span>
+      bus.ts                   <span class="cm">新  mitt 单例，10 行</span>
+    lib/
+      geometry-2d.test.ts      <span class="cm">新  <span class="cw">M2 的欠账</span></span>
+    systems/wall/
+      wall-mitering.test.ts    <span class="cm">新  <span class="cw">M2 的欠账</span></span>
+
+  viewer/
+    store/
+      use-viewer.ts            <span class="cm">新  cameraDragging（真·呈现状态）</span>
+    hooks/
+      use-node-events.ts       <span class="cm">新  R3F 事件 → 领域事件</span>
+    components/
+      wall-renderer.tsx        <span class="cw">改</span>  <span class="cm">挂 useNodeEvents，去掉 onClick 里的 console</span>
+
+  app/
+    lib/interaction/
+      scope.ts                 <span class="cm">新  InteractionScope 判别联合 + 纯函数</span>
+      scope.test.ts            <span class="cm">新</span>
+    store/
+      use-interaction-scope.ts <span class="cm">新  单一所有者：begin / update / end / endIf</span>
+      use-editor.ts            <span class="cw">改</span>  <span class="cm">selectedId 的读写口</span>
+    hooks/
+      use-grid-events.ts       <span class="cm">新  空地射线 → grid:* 事件</span>
+    components/
+      selection-manager.tsx    <span class="cm">新  监听 wall:click / grid:click，按 scope 决定要不要理</span>
+    tools/
+      wall-tool.tsx            <span class="cw">改</span>  <span class="cm">迁进 drafting scope + 链式画墙</span>
+    app.tsx                    <span class="cw">改</span>  <span class="cm">挂 SelectionManager、相机拖拽上报</span>
+</code></pre>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 04 -->
+<section>
+  <h2><span class="num">04</span>建造顺序</h2>
+  <p class="h2sub">十步。第 00 步是 M2 的欠账，别跳</p>
+
+  <!-- 00 -->
+  <div class="step">
+    <div class="step-n">00</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">补上 vitest 与 M2 的测试</h3><span class="tag debt">欠账</span></div>
+      <p>
+        M2 的斜接算法<strong>从未被验证过</strong>。它可能是对的，也可能在钝角、T 型、
+        共线三种情况里错了两种，而你在 3D 画面上看不出来。
+      </p>
+      <p>
+        这不是洁癖。M3 要在几何之上叠一层交互状态机——如果几何本身是错的，
+        你调"墙角为什么歪"时会分不清是 M2 的算法问题还是 M3 的事件问题。
+        <strong>把不确定性锁死在一层里，是这个项目唯一能保持可调试的方法。</strong>
+      </p>
+<pre><code>pnpm add -D vitest
+<span class="cm"># package.json scripts 里加：</span>
+"test":   "vitest run",
+"verify": "pnpm check-types &amp;&amp; pnpm lint &amp;&amp; pnpm test"
+</code></pre>
+      <p>
+        然后照 <code>m2-miter.html</code> §07 的第 10、11 项，把
+        <code>geometry-2d.test.ts</code> 和 <code>wall-mitering.test.ts</code> 敲进去。
+        全码已经给过，直接抄。
+      </p>
+      <div class="trap">
+        <span class="trap-label">跑绿之前不要写 M3 的任何一行</span>
+        <p>
+          尤其注意 §07 里那三个用例：<strong>end 端左右互换</strong>（矩形房间四角）、
+          <strong>T 型两侧都要切齐</strong>（passthrough 必须返回两条腿）、
+          <strong>miter limit 角度扫描</strong>。这三个各自对应一个我在 M2 标过的深坑。
+        </p>
+        <p>
+          <strong>这些测试已经跑过了，结果是红的。</strong>根因是一个字符：
+        </p>
+<pre style="background:transparent;border:0;padding:0;margin:10px 0"><code><span class="cm">// core/lib/geometry-2d.ts —— pointOnSegment</span>
+const L2 = ab.x + ab.y * ab.y      <span class="cw">// ❌ 第一项少了一个平方</span>
+<span class="cm">//         ^^^^ 应该是 ab.x * ab.x</span>
+</code></pre>
+        <p style="margin-bottom:0">
+          对 (0,0)→(4,0)，正确的 L2 是 16，实际算出 4。投影参数 t 被放大 4 倍，
+          中点 (2,0) 算出 t = 2，被判成「在延长线上」⟹
+          <strong>pointOnSegment 永远返回 false ⟹ T 型接头永远检测不到 ⟹
+          撞上来的墙不切齐</strong>。三个失败用例同一个根因。
+          它在 3D 画面上的表现只是「T 型墙角有条缝」，你会先去怀疑挤出、绕向、法线。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 -->
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">先制造故障</h3><span class="tag app">app</span></div>
+      <p>
+        在写任何 spine 代码之前，先让 bug 现形。两处小改，五分钟：
+      </p>
+      <ol>
+        <li><code>wall-renderer.tsx</code> 的 <code>onClick</code> 里，
+          把 <code>console.log</code> 换成真的写 <code>useEditor.select(node.id)</code>，
+          选中的墙换个颜色。<em>（这一步故意破坏分层——viewer import 了 app。
+          下面第 05 步会把它拆掉，你会亲眼看到那条 lint 规则为什么存在。）</em></li>
+        <li>在 <code>app.tsx</code> 的 HUD 里显示当前 <code>selectedId</code>。</li>
+      </ol>
+      <p>然后依次复现这四个：</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>操作</th><th>你会看到</th><th>本该发生</th></tr></thead>
+        <tbody>
+          <tr><td>墙工具下点已有墙</td><td>落点 <strong>并且</strong>选中了它</td><td>只落点</td></tr>
+          <tr><td>拖动相机转视角后松手</td><td>选中了光标下的墙</td><td>什么都不发生</td></tr>
+          <tr><td>画墙到一半按 V 切换</td><td>起点残留 / 或莫名消失</td><td>明确取消</td></tr>
+          <tr><td>按 Esc</td><td>只有画墙响应，选中不响应</td><td>取消当前那件事</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="note">
+        <p>
+          <strong>录一段屏或者截四张图。</strong>M3 结束时再走一遍同样的四步——
+          这是本里程碑唯一的"before / after"，而它比任何测试都更能让你记住 spine 解决了什么。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">事件总线</h3><span class="tag core">core</span></div>
+<pre><code>pnpm add mitt
+</code></pre>
+<pre><code><span class="cm">// src/core/events/types.ts</span>
+
+export type NodeEventSuffix =
+  | 'click' | 'pointerdown' | 'pointerup' | 'enter' | 'leave' | 'move'
+<span class="cm">// hint: 'double-click' / 'context-menu' 现在没人用，别加。M13 右键菜单时再加。</span>
+
+export interface NodeEvent&lt;N extends AnyNode = AnyNode&gt; {
+  node: N
+  point: [number, number, number]          <span class="cm">// 世界坐标命中点</span>
+  object: THREE.Object3D                   <span class="cm">// import type，core 保持零运行时依赖</span>
+  stopPropagation: () =&gt; void
+}
+
+export interface GridEvent {
+  point: [number, number, number]
+  nativeEvent: PointerEvent
+}
+
+export type EventMap =
+  &amp; { [K in `${AnyNodeType}:${NodeEventSuffix}`]: NodeEvent }
+  &amp; { [K in `grid:${NodeEventSuffix}`]: GridEvent }
+<span class="cm">// hint: AnyNodeType = AnyNode['type']。模板字面量类型让键自动跟着</span>
+<span class="cm">//       AnyNode 联合长 —— M6 加 slab 时，'slab:click' 自动合法，</span>
+<span class="cm">//       不需要手维护一张 kind→事件 的表。这是原项目的做法。</span>
+</code></pre>
+<pre><code><span class="cm">// src/core/events/bus.ts —— 10 行</span>
+export const emitter = mitt&lt;EventMap&gt;()
+<span class="cm">// hint: 全局单例。和 sceneRegistry 一样，是有意为之的全局可变状态。</span>
+<span class="cm">// hint: 别包一层 React context —— 监听者是 effect，不是渲染，包了只会</span>
+<span class="cm">//       让"谁在监听"变得更难查。</span>
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">监听器必须自己解绑</span>
+        <p>
+          <code>mitt</code> 没有自动清理。每个 <code>emitter.on(...)</code> 必须配一个
+          <code>useEffect</code> 的 <code>emitter.off(...)</code>，
+          <strong>并且传的是同一个函数引用</strong>——写成内联箭头函数会解绑失败，
+          热更新几次之后一次点击触发 N 个陈旧监听器。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer 的事件出口</h3><span class="tag viewer">viewer</span></div>
+<pre><code><span class="cm">// src/viewer/store/use-viewer.ts —— 真·呈现状态，不进存档不进历史</span>
+type ViewerState = {
+  cameraDragging: boolean
+  setCameraDragging: (v: boolean) =&gt; void
+}
+<span class="cm">// hint: 为什么它在 viewer 而不在 app？因为"相机正在被拖"是渲染层的事实，</span>
+<span class="cm">//       和编辑意图无关。M12 你把 viewer 单独发包时，它要跟着走。</span>
+</code></pre>
+<pre><code><span class="cm">// src/viewer/hooks/use-node-events.ts</span>
+export function useNodeEvents&lt;K extends AnyNodeType&gt;(node: NodeByKind&lt;K&gt;, type: K)
+<span class="cm">// hint: 返回一组 R3F 指针处理器，直接 {...handlers} 摊到 mesh 上。</span>
+<span class="cm">// hint: NodeByKind&lt;K&gt; = Extract&lt;AnyNode, { type: K }&gt; —— 从判别联合里</span>
+<span class="cm">//       取出该 kind 的节点形状，调用处就有精确类型。</span>
+<span class="cm">//</span>
+<span class="cm">// hint: <span class="cw">click 要在 onPointerUp 里合成，不要用 R3F 的 onClick。</span></span>
+<span class="cm">//       R3F 的 onClick 在指针移动 1px 时就不触发了 —— 用户觉得"点了没反应"。</span>
+<span class="cm">//       原项目的注释：「to be more forgiving than R3F's default onClick」。</span>
+<span class="cm">//       同时把 onClick 显式设成空函数，否则会双触发。</span>
+<span class="cm">//</span>
+<span class="cm">// hint: <span class="cw">cameraDragging 时全部丢弃。</span>这就是"转完视角松手就选中"的修法。</span>
+<span class="cm">//       在 emit 之前读 useViewer.getState().cameraDragging（getState，不是 hook —</span>
+<span class="cm">//       事件处理器里读快照，别订阅）。</span>
+<span class="cm">//</span>
+<span class="cm">// hint: 载荷里的 stopPropagation 转发 e.stopPropagation()。叠在一起的墙，</span>
+<span class="cm">//       监听者决定要不要让事件继续穿透。</span>
+</code></pre>
+      <p>
+        然后 <code>wall-renderer.tsx</code> 把第 01 步那个临时 <code>onClick</code> 删掉，
+        换成 <code>{...useNodeEvents(node, 'wall')}</code>。
+        <strong>此刻 viewer 对 app 的 import 消失，lint 重新变绿。</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">InteractionScope 联合</h3><span class="tag app">app</span></div>
+      <p>纯类型 + 纯函数，零依赖，全部可测。这是本里程碑的核心，慢慢写。</p>
+<pre><code><span class="cm">// src/app/lib/interaction/scope.ts</span>
+
+export type InteractionScope =
+  | { kind: 'idle' }
+  | { kind: 'drafting'; tool: 'wall'; points: Point2D[] }
+
+<span class="cm">// hint: <span class="cw">只写你现在真的会构造的变体。</span>原项目有 9 个（placing / moving /</span>
+<span class="cm">//       handle-drag / reshaping / box-select / painting / sculpting…），</span>
+<span class="cm">//       那是三年长出来的。M4 才加 moving 和 handle-drag。</span>
+<span class="cm">//       没人构造的变体是死代码，不是"预留扩展点"。</span>
+
+export type ActiveInteractionScope = Exclude&lt;InteractionScope, { kind: 'idle' }&gt;
+export const IDLE_SCOPE: InteractionScope = { kind: 'idle' }
+
+export function isIdle(s: InteractionScope): s is { kind: 'idle' }
+export function isActive(s: InteractionScope): s is ActiveInteractionScope
+<span class="cm">// hint: 写成类型守卫（`s is …`），不是返回 boolean。调用处才能收窄类型。</span>
+
+export function selectionEnabled(s: InteractionScope): boolean
+<span class="cm">// hint: 一行 `return s.kind === 'idle'`。<span class="cw">整个 M3 就是为了这一行存在的。</span></span>
+<span class="cm">//       它现在看着可笑地简单 —— 但它是唯一的拾取闸门，</span>
+<span class="cm">//       所有"点击该不该选中"的判断都必须经过它，不许在别处重新推导。</span>
+
+export function draftPoints(s: InteractionScope): Point2D[]
+<span class="cm">// hint: 非 drafting 返回 []。让调用处不用写 s.kind === 'drafting' ? … : …</span>
+</code></pre>
+
+      <div class="note">
+        <p>
+          <strong>为什么 <code>points</code> 是数组而不是 <code>start: Point2D | null</code>？</strong>
+          因为链式画墙：画完一堵，终点自动成为下一堵的起点。数组天然表达"已确定的折线顶点"。
+          M6 画楼板轮廓时同一个变体直接复用。
+        </p>
+        <p style="margin-bottom:0">
+          这不是提前设计——链式画墙是 M3 <em>本身</em>要交付的功能，
+          而且它顺手解决了 M2 的一个真实痛点：<strong>没有端点吸附时，
+          手动画出一个闭合矩形几乎不可能</strong>，而闭合矩形正是验证斜接的最佳场景。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 -->
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">单一所有者</h3><span class="tag app">app</span></div>
+<pre><code><span class="cm">// src/app/store/use-interaction-scope.ts</span>
+
+type InteractionScopeState = {
+  scope: InteractionScope
+  begin:  (scope: ActiveInteractionScope) =&gt; void
+  update: (patch: Partial&lt;ActiveInteractionScope&gt;) =&gt; void
+  end:    () =&gt; void
+  endIf:  (match: (s: ActiveInteractionScope) =&gt; boolean) =&gt; void
+}
+<span class="cm">// hint: <span class="cw">唯一可写的形状就是 InteractionScope 本身</span> —— 不提供任何</span>
+<span class="cm">//       setXxx 单字段 setter。没有 setter 能留下半个状态，这是全部意义。</span>
+
+<span class="cm">// begin  hint: 直接 set，已有的活跃 scope 被原子替换。单一所有者，无竞态。</span>
+<span class="cm">// update hint: 两道闸 —— idle 时忽略；patch.kind 与当前 kind 不同时忽略。</span>
+<span class="cm">//              <span class="cw">payload 更新不许改变正在运行的是哪个交互</span>（那要用 begin）。</span>
+<span class="cm">// end    hint: 一次写回 IDLE_SCOPE。<span class="cw">原子性是硬要求</span> ——</span>
+<span class="cm">//              不许有任何 payload 活过它所属的交互（没有陈旧 nodeId，</span>
+<span class="cm">//              没有清了一半的标志）。</span>
+<span class="cm">// endIf  hint: 只在当前 scope 满足 match 时才结束。</span>
+<span class="cm">//              用途：Esc 的全局监听器不该掐掉一个不属于它的交互。</span>
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">这里最容易犯的错</span>
+        <p>
+          你会想加一个 <code>setDraftPoints(points)</code>，因为它比
+          <code>update({ kind: 'drafting', tool: 'wall', points })</code> 短。
+          <strong>别加。</strong>一旦有了单字段 setter，就有了"drafting 的 points
+          被写了但 kind 已经是 idle"这种状态，
+          而那正是 7 个布尔标志时代的形状。
+        </p>
+        <p style="margin-bottom:0">
+          嫌长就在 <code>wall-tool.tsx</code> 里包一个局部函数，
+          <strong>不要把它放进 store 的公共接口</strong>。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 -->
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">空地事件</h3><span class="tag app">app</span></div>
+<pre><code><span class="cm">// src/app/hooks/use-grid-events.ts</span>
+export function useGridEvents(planeY = 0): void
+<span class="cm">// hint: 挂在 canvas DOM 上监听 pointerdown / pointerup / move，</span>
+<span class="cm">//       用 M1 的 screenToGround 算地面交点，emit('grid:pointerdown', …)。</span>
+<span class="cm">// hint: 复用 wall-tool.tsx 现在那段 NDC 换算 —— 它要从工具里搬出来，</span>
+<span class="cm">//       因为选择工具（点空白取消选中）也需要同一份。</span>
+<span class="cm">// hint: <span class="cw">grid 事件不判断"是否命中了某个 mesh"。</span>它无条件发。</span>
+<span class="cm">//       谁该响应由监听者按 scope 决定 —— 这正是 spine 的分工。</span>
+<span class="cm">// hint: 同样要在 cameraDragging 时丢弃。</span>
+</code></pre>
+      <div class="note">
+        <p>
+          <strong>为什么不用 R3F 的 <code>onPointerMissed</code>？</strong>
+          它只在"没命中任何物体"时触发，而画墙时你需要<em>即使命中了一堵墙也拿到地面点</em>
+          （在已有墙上继续画是合法操作）。<code>onPointerMissed</code> 那时不会触发。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 -->
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">选择管理器</h3><span class="tag app">app</span></div>
+<pre><code><span class="cm">// src/app/components/selection-manager.tsx —— 返回 null 的监听器组件</span>
+export function SelectionManager(): null
+<span class="cm">// hint: useEffect 里 emitter.on('wall:click', onNodeClick) 和</span>
+<span class="cm">//       emitter.on('grid:pointerdown', onEmptyClick)，清理里 off 掉。</span>
+<span class="cm">//       <span class="cw">处理器提到 effect 外面或用 useRef 存，保证 off 拿到同一个引用。</span></span>
+<span class="cm">//</span>
+<span class="cm">// hint: 两个处理器的第一行都是同一句闸门：</span>
+<span class="cm">//         if (!selectionEnabled(useInteractionScope.getState().scope)) return</span>
+<span class="cm">//       getState() 而不是 hook —— 监听器注册一次，不该因为 scope 变化重挂。</span>
+<span class="cm">//</span>
+<span class="cm">// hint: onNodeClick → select(e.node.id) + e.stopPropagation()</span>
+<span class="cm">//       onEmptyClick → select(null)</span>
+<span class="cm">//</span>
+<span class="cm">// hint: 组件放在 &lt;Viewer&gt; 的 children 里（app 注入），不是放进 viewer。</span>
+</code></pre>
+      <p>
+        选中高亮：<code>WallRenderer</code> 需要知道自己选没选中。
+        <strong>但 viewer 不许 import <code>useEditor</code></strong>——所以由 app 把
+        <code>selectedId</code> 通过 <code>&lt;Viewer selectedId={…}&gt;</code> 传进去，
+        viewer 内部用 context 往下发。
+      </p>
+      <div class="note">
+        <p>
+          M3 的高亮就换个材质颜色即可（比如 <code>#7dd3c0</code>）。
+          描边后期（<code>PostProcessing</code> + outline pass）是 M12 的事，
+          现在做会让你在 M4 调拖拽时多一层干扰。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 08 -->
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">画墙工具迁进 scope</h3><span class="tag app">app</span></div>
+<pre><code><span class="cm">// src/app/tools/wall-tool.tsx —— 重写</span>
+export function WallTool(): null
+<span class="cm">// hint: <span class="cw">工具武装即持有 scope。</span>useEffect 依赖 activeTool：</span>
+<span class="cm">//         activeTool === 'wall' → begin({ kind:'drafting', tool:'wall', points: [] })</span>
+<span class="cm">//         清理函数 → endIf(s =&gt; s.kind === 'drafting')</span>
+<span class="cm">//       用 endIf 不用 end：切走时如果 scope 已经被别人换掉了，别乱掐。</span>
+<span class="cm">//</span>
+<span class="cm">// hint: 落点改成监听 emitter.on('grid:pointerdown', …)，不再自己监听 DOM。</span>
+<span class="cm">//       pendingRef 整个删掉 —— 状态搬进 scope.points。</span>
+<span class="cm">//</span>
+<span class="cm">// hint: 落点逻辑：</span>
+<span class="cm">//         points 为空 → update({ points: [p] })</span>
+<span class="cm">//         否则 → addNode({ type:'wall', start: last, end: p })</span>
+<span class="cm">//                然后 <span class="cw">update({ points: [p] })</span> ← 链式：终点变新起点</span>
+<span class="cm">//</span>
+<span class="cm">// hint: Esc / 右键 → update({ points: [] })，断开链条但留在 drafting。</span>
+<span class="cm">//       <span class="cw">不要 end()</span> —— 用户按 Esc 是"这条线画完了"，不是"我不想画墙了"。</span>
+<span class="cm">//       想退出画墙工具是按 V。这两件事必须分开，否则 Esc 会让工具栏状态跳。</span>
+</code></pre>
+      <p>橡皮筋预览线：从 <code>points</code> 的最后一点连到当前光标点。</p>
+<pre><code><span class="cm">// hint: 用 drei 的 &lt;Line&gt;，监听 grid:move 拿光标地面点存进本地 state。</span>
+<span class="cm">// hint: <span class="cw">预览墙绝不 addNode 进 store</span> —— 会污染撤销历史（M4 就知道疼了）。</span>
+<span class="cm">// hint: 光标点存 useState 会每次 move 都重渲染。M3 可以接受（只有一条线）；</span>
+<span class="cm">//       M4 学会命令式路径后回来改。</span>
+</code></pre>
+    </div>
+  </div>
+
+  <!-- 09 -->
+  <div class="step">
+    <div class="step-n">09</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">相机拖拽上报 + 测试</h3><span class="tag app">app</span></div>
+<pre><code><span class="cm">// src/app/app.tsx</span>
+&lt;OrbitControls
+  makeDefault
+  enableRotate={viewMode === '3d'}
+  onStart={() =&gt; useViewer.getState().setCameraDragging(true)}
+  onEnd={()   =&gt; useViewer.getState().setCameraDragging(false)}
+/&gt;
+<span class="cm">// hint: <span class="cw">enableRotate 里那个 activeTool !== 'wall' 现在可以删了。</span></span>
+<span class="cm">//       M1 加它是为了防左键打架；现在 scope 管这件事，画墙时也能转视角了。</span>
+<span class="cm">//       —— 这是 spine 带来的第一个「顺手变好」，值得停下来体会一秒。</span>
+</code></pre>
+      <p><strong><code>scope.test.ts</code></strong>——纯函数，五个用例够了：</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>用例</th><th>期望</th></tr></thead>
+        <tbody>
+          <tr><td><code>selectionEnabled(IDLE_SCOPE)</code></td><td>true</td></tr>
+          <tr><td><code>selectionEnabled(drafting)</code></td><td>false</td></tr>
+          <tr><td><code>update</code> 在 idle 时</td><td>被忽略，scope 仍是 idle</td></tr>
+          <tr><td><code>update({ kind: 'other' })</code></td><td>被忽略，kind 不变</td></tr>
+          <tr><td><code>end()</code> 之后</td><td><code>draftPoints()</code> 为 <code>[]</code>，无残留</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="note">
+        <p>
+          最后一条是 <strong>atomic-end 不变量</strong>的测试化：
+          先 <code>begin</code> 一个带 3 个点的 drafting，<code>end()</code>，
+          断言拿不到任何残留 payload。这条测试将来会保护你——M4 加
+          <code>moving</code> 变体时，如果有人写了个"只清一半"的 end，它会立刻红。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 05 -->
+<section>
+  <h2><span class="num">05</span>验收</h2>
+  <p class="h2sub">回到第 01 步那四张截图，逐条对</p>
+
+  <ul class="check">
+    <li><span>墙工具下点在已有墙上 → <strong>只落点，不选中</strong>。</span></li>
+    <li><span>拖动相机转视角，松手 → <strong>什么都不发生</strong>。</span></li>
+    <li><span>画墙中途按 V 切到选择工具 → 草稿明确清空，工具栏状态正确。</span></li>
+    <li><span>按 Esc → 断开链条但仍在墙工具里；再按 V 才退出。</span></li>
+    <li><span><strong>链式画墙</strong>：点 5 下画出闭合矩形，四个墙角严丝合缝（这同时是 M2 的迟到验收）。</span></li>
+    <li><span>选择工具下点空白 → 取消选中；点墙 → 选中并高亮。</span></li>
+    <li><span>画墙时也能拖动相机转视角（<code>enableRotate</code> 那个补丁已删）。</span></li>
+    <li><span><code>pnpm verify</code> 全绿，包含 <code>geometry-2d</code> / <code>wall-mitering</code> / <code>scope</code> 三组测试。</span></li>
+  </ul>
+
+  <h3>提交回来的方式</h3>
+  <p class="prose">
+    贴四个文件：<code>app/lib/interaction/scope.ts</code>、
+    <code>app/store/use-interaction-scope.ts</code>、
+    <code>app/components/selection-manager.tsx</code>、
+    <code>app/tools/wall-tool.tsx</code>，
+    加上 <code>pnpm test</code> 的输出，再加一张闭合矩形的顶视截图。
+  </p>
+  <p class="prose">
+    我按三条 review：<strong>有没有绕过 <code>selectionEnabled</code> 直接判断</strong>、
+    <strong><code>end()</code> 是否真的原子</strong>、
+    <strong>viewer 里有没有偷偷 import app</strong>。
+  </p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 06 -->
+<section>
+  <h2><span class="num">06</span>故意保留的缺陷</h2>
+  <p class="h2sub">M3 结束时这些必须还在</p>
+
+  <div class="defect"><span>墙画完不能移动、不能删——只有选中</span><span class="defect-to">→ M4</span></div>
+  <div class="defect"><span>没有撤销</span><span class="defect-to">→ M4</span></div>
+  <div class="defect"><span>改一堵墙仍然全场景重算 miter</span><span class="defect-to">→ M4</span></div>
+  <div class="defect"><span>落点不吸附到已有端点（链式画墙只是绕过了这个问题）</span><span class="defect-to">→ M4</span></div>
+  <div class="defect"><span>橡皮筋预览用 useState，每次鼠标移动都重渲染</span><span class="defect-to">→ M4</span></div>
+  <div class="defect"><span>不能多选（Ctrl/Shift + 点击）</span><span class="defect-to">→ M13</span></div>
+  <div class="defect"><span>选中高亮是换材质色，不是描边</span><span class="defect-to">→ M12</span></div>
+  <div class="defect"><span>没有悬停高亮（<code>enter</code>/<code>leave</code> 事件已经发了，只是没人听）</span><span class="defect-to">→ M12</span></div>
+
+  <div class="note" style="margin-top:28px">
+    <p>
+      <strong>最后一条值得留意。</strong><code>useNodeEvents</code> 会发出
+      <code>enter</code> / <code>leave</code> / <code>move</code>，但 M3 一个监听者都没有。
+      这<em>不是</em>死代码——它们是同一个翻译层的自然产物，
+      少发反而要加分支。M12 加悬停高亮时零改动接上。
+    </p>
+    <p style="margin-bottom:0">
+      判据是这样的：<strong>"多写一个联合变体"是死代码（没人构造），
+      "多发一种事件"不是（发送方本来就要处理那个 R3F 回调）。</strong>
+      这个区别在 M5 设计注册表时会再考你一次。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 07 -->
+<section>
+  <h2><span class="num">07</span>全部代码</h2>
+  <p class="h2sub">新增 12 个，改写 6 个</p>
+
+  <div class="trap">
+    <span class="trap-label">写代码时发现方案有一处行不通，先说清楚</span>
+    <p>
+      §04 原方案让 <code>WallTool</code> 监听 <code>grid:pointerdown</code> 落点、
+      <code>SelectionManager</code> 监听 <code>grid:click</code> 取消选中。
+      <strong>这行不通</strong>——DOM 级监听器不知道 R3F 有没有命中 mesh，
+      所以点一堵墙会同时触发"选中"和"取消选中"，
+      <strong>谁赢取决于两个监听器的注册顺序</strong>。依赖注册顺序的代码不可调试。
+    </p>
+    <p style="margin-bottom:0">改成三条：</p>
+    <ul style="margin-bottom:0">
+      <li><code>grid:click</code> 的语义收窄为<strong>「点击且没命中任何节点」</strong>，
+        由 viewer 主动对 <code>sceneRegistry</code> 射一次线来判定。确定性答案，与顺序无关。</li>
+      <li><code>WallTool</code> <strong>保留自己的 DOM 监听器</strong>。这不是倒退——
+        spine 的原话就是 <em>"During any active interaction the pointer belongs to
+        that interaction's body."</em> 工具在自己的 scope 里本来就该直接拥有指针，
+        总线是给 <strong>idle 路径</strong>（选择、悬停）用的。</li>
+      <li>新增 <code>pointer-gesture.ts</code>：<strong>捕获阶段</strong>记录按下位置，
+        松手时按 4px 阈值判定点击还是拖拽。捕获永远早于冒泡，
+        彻底摆脱顺序依赖——顺带把"转视角松手会选中"和"拖拽误落点"一起修了。</li>
+    </ul>
+  </div>
+
+  <h3>0 · 依赖与脚本</h3>
+<pre><code>pnpm add mitt
+pnpm add -D vitest
+
+<span class="cm">// package.json scripts</span>
+"test":   "vitest run",
+"verify": "pnpm check-types &amp;&amp; pnpm lint &amp;&amp; pnpm test"
+</code></pre>
+
+  <h3>1 · core/schema/types.ts <span class="tag core">改</span></h3>
+<pre><code><span class="cm">// 末尾追加一行</span>
+
+<span class="cm">/** 所有节点 kind 的联合。事件键 `${AnyNodeType}:${suffix}` 靠它自动跟着 AnyNode 长。 */</span>
+export type AnyNodeType = AnyNode['type']
+</code></pre>
+
+  <h3>2 · core/events/types.ts <span class="tag core">新</span></h3>
+<pre><code>import type * as THREE from 'three'
+import type { AnyNode, AnyNodeType } from '../schema/types'
+
+export type NodeEventSuffix =
+  | 'click' | 'pointerdown' | 'pointerup' | 'enter' | 'leave' | 'move'
+
+export interface NodeEvent&lt;N extends AnyNode = AnyNode&gt; {
+  node: N
+  <span class="cm">/** 世界坐标命中点 */</span>
+  point: [number, number, number]
+  object: THREE.Object3D
+  <span class="cm">/** 让事件继续穿透给下面叠着的对象；不调就是本层消费掉 */</span>
+  stopPropagation: () =&gt; void
+}
+
+<span class="cm">/** 点击落在空地上（没有命中任何已注册节点）。point 是地平面交点。 */</span>
+export interface GridEvent {
+  point: [number, number, number]
+  nativeEvent: PointerEvent
+}
+
+export type NodeEventKey = `${AnyNodeType}:${NodeEventSuffix}`
+
+<span class="cm">/**
+ * 事件键格式：`&lt;nodeType&gt;:&lt;suffix&gt;`，外加一个 `grid:click`。
+ *
+ * 用模板字面量类型而不是手维护一张表 —— M6 往 AnyNode 里加 slab 的那一刻，
+ * 'slab:click' 自动成为合法键，一行都不用改。
+ */</span>
+export type EventMap =
+  &amp; { [K in NodeEventKey]: NodeEvent }
+  &amp; { 'grid:click': GridEvent }
+</code></pre>
+
+  <h3>3 · core/events/bus.ts <span class="tag core">新</span></h3>
+<pre><code>import mitt from 'mitt'
+import type { EventMap } from './types'
+
+<span class="cm">/**
+ * 全局事件总线。和 sceneRegistry 一样，是有意为之的全局可变单例。
+ *
+ * 它存在的唯一理由是 viewer 不许知道「选中」是什么意思：
+ * viewer 发生了什么（wall:click），app 决定它意味着什么。
+ *
+ * ⚠ mitt 没有自动清理。每个 on 必须配一个 off，并且传<span class="cw">同一个函数引用</span> ——
+ *   写成内联箭头函数会解绑失败，热更新几次后一次点击触发 N 个陈旧监听器。
+ */</span>
+export const emitter = mitt&lt;EventMap&gt;()
+</code></pre>
+
+  <h3>4 · viewer/store/use-viewer.ts <span class="tag viewer">新</span></h3>
+<pre><code>import { create } from 'zustand'
+
+<span class="cm">/**
+ * 真·呈现状态：不进存档、不进撤销历史、换个宿主应用也还是同样的语义。
+ * 这是它和 app 层 useEditor 的根本区别。
+ */</span>
+type ViewerState = {
+  <span class="cm">/** OrbitControls 正在被拖动。用来抑制悬停高亮的抖动。 */</span>
+  cameraDragging: boolean
+  setCameraDragging: (v: boolean) =&gt; void
+}
+
+export const useViewer = create&lt;ViewerState&gt;((set) =&gt; ({
+  cameraDragging: false,
+  setCameraDragging: (cameraDragging) =&gt; set({ cameraDragging }),
+}))
+</code></pre>
+
+  <h3>5 · viewer/lib/pointer-gesture.ts <span class="tag viewer">新</span></h3>
+<pre><code><span class="cm">/**
+ * 「这一次松手到底是点击还是拖拽？」—— 全局唯一的判据。
+ *
+ * <span class="cw">为什么不用 cameraDragging 判断：</span>OrbitControls 的 start/end 和 R3F 的指针
+ * 处理器都挂在同一个 canvas 的<span class="cw">冒泡阶段</span>，谁先跑取决于注册顺序，
+ * 而注册顺序取决于组件挂载顺序。依赖它的代码不可调试。
+ *
+ * 这里用<span class="cw">捕获阶段</span>记录按下位置（捕获永远早于冒泡），松手时比较位移。
+ * 与任何监听器的注册顺序无关。
+ */</span>
+const CLICK_SLOP_PX = 4
+
+let downX = 0
+let downY = 0
+let armed = false
+
+export function beginGesture(e: { clientX: number; clientY: number }): void {
+  downX = e.clientX
+  downY = e.clientY
+  armed = true
+}
+
+<span class="cm">/** 松手位置离按下位置不超过 4px 才算点击。转视角、拖拽都会超过。 */</span>
+export function isClickGesture(e: { clientX: number; clientY: number }): boolean {
+  if (!armed) return false
+  const dx = e.clientX - downX
+  const dy = e.clientY - downY
+  return dx * dx + dy * dy &lt;= CLICK_SLOP_PX * CLICK_SLOP_PX
+}
+</code></pre>
+
+  <h3>6 · viewer/hooks/use-pointer-gesture.ts <span class="tag viewer">新</span></h3>
+<pre><code>import { useThree } from '@react-three/fiber'
+import { useEffect } from 'react'
+import { beginGesture } from '../lib/pointer-gesture'
+
+<span class="cm">/**
+ * 在捕获阶段记录每一次 pointerdown 的屏幕位置。
+ * 由 &lt;Viewer&gt; 挂载一次，全场景共用。
+ */</span>
+export function usePointerGesture(): void {
+  const gl = useThree((s) =&gt; s.gl)
+
+  useEffect(() =&gt; {
+    const el = gl.domElement
+    const onDown = (e: PointerEvent) =&gt; beginGesture(e)
+    <span class="cm">// capture: true —— 保证早于 OrbitControls 和 R3F 的冒泡监听器</span>
+    el.addEventListener('pointerdown', onDown, { capture: true })
+    return () =&gt; el.removeEventListener('pointerdown', onDown, { capture: true })
+  }, [gl])
+}
+</code></pre>
+
+  <h3>7 · viewer/hooks/use-grid-events.ts <span class="tag viewer">新</span></h3>
+<pre><code>import { useThree } from '@react-three/fiber'
+import { useEffect } from 'react'
+import * as THREE from 'three'
+import { emitter } from '../../core/events/bus'
+import { sceneRegistry } from '../../core/registry/scene-registry'
+import { isClickGesture } from '../lib/pointer-gesture'
+import { screenToGround } from '../lib/pointer-plane'
+
+const ndc = new THREE.Vector2()
+const raycaster = new THREE.Raycaster()
+
+<span class="cm">/**
+ * 发出 grid:click：<span class="cw">点击且没有命中任何已注册节点</span>。
+ *
+ * 为什么要自己再射一次线，而不是靠「谁先谁后」：
+ * DOM 级监听器不知道 R3F 命中了什么。如果 grid 无条件发，点一堵墙就会
+ * 同时触发「选中」和「取消选中」，谁赢取决于两个监听器的注册顺序。
+ * 对 sceneRegistry 直接射一次线是<span class="cw">确定性</span>的答案，与顺序无关。
+ *
+ * 代价是一次多余的射线。几十堵墙无所谓。
+ */</span>
+export function useGridEvents(planeY = 0): void {
+  const { gl, camera } = useThree()
+
+  useEffect(() =&gt; {
+    const el = gl.domElement
+
+    const onPointerUp = (e: PointerEvent) =&gt; {
+      if (e.button !== 0) return
+      if (!isClickGesture(e)) return          <span class="cm">// 拖拽，不是点击</span>
+
+      const r = el.getBoundingClientRect()
+      ndc.set(
+        ((e.clientX - r.left) / r.width) * 2 - 1,
+        -((e.clientY - r.top) / r.height) * 2 + 1,
+      )
+
+      <span class="cm">// 命中了任何节点 → 这一击属于那个节点，grid 不发声</span>
+      raycaster.setFromCamera(ndc, camera)
+      const targets = Array.from(sceneRegistry.nodes.values())
+      if (targets.length &gt; 0 &amp;&amp; raycaster.intersectObjects(targets, true).length &gt; 0) return
+
+      const p = screenToGround(ndc, camera, planeY)
+      if (!p) return
+      emitter.emit('grid:click', { point: [p.x, planeY, p.y], nativeEvent: e })
+    }
+
+    el.addEventListener('pointerup', onPointerUp)
+    return () =&gt; el.removeEventListener('pointerup', onPointerUp)
+  }, [gl, camera, planeY])
+}
+</code></pre>
+
+  <h3>8 · viewer/hooks/use-node-events.ts <span class="tag viewer">新</span></h3>
+<pre><code>import type { ThreeEvent } from '@react-three/fiber'
+import { emitter } from '../../core/events/bus'
+import type { NodeEvent, NodeEventKey, NodeEventSuffix } from '../../core/events/types'
+import type { AnyNode, AnyNodeType } from '../../core/schema/types'
+import { isClickGesture } from '../lib/pointer-gesture'
+import { useViewer } from '../store/use-viewer'
+
+<span class="cm">/**
+ * 从判别联合里取出某个 kind 的节点形状。
+ * 加新 kind 时这里自动跟上，不需要手维护 kind → 节点类型 的映射表。
+ */</span>
+type NodeByKind&lt;K extends AnyNodeType&gt; = Extract&lt;AnyNode, { type: K }&gt;
+
+<span class="cm">/**
+ * 第一次转身：R3F 指针事件 → 领域事件。
+ * viewer 的职责到 emit 为止 —— 它不知道 click 意味着什么。
+ *
+ * 用法：&lt;mesh {...useNodeEvents(node, 'wall')} /&gt;
+ */</span>
+export function useNodeEvents&lt;K extends AnyNodeType&gt;(node: NodeByKind&lt;K&gt;, type: K) {
+  const emit = (suffix: NodeEventSuffix, e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+    const payload: NodeEvent&lt;NodeByKind&lt;K&gt;&gt; = {
+      node,
+      point: [e.point.x, e.point.y, e.point.z],
+      object: e.object,
+      stopPropagation: () =&gt; e.stopPropagation(),
+    }
+    <span class="cm">// mitt 的 emit 按固定键联合定型；这里的键是它的子集，</span>
+    <span class="cm">// 用 as 把 kind 具体的载荷送过泛型表面。</span>
+    emitter.emit(`${type}:${suffix}` as NodeEventKey, payload as NodeEvent)
+  }
+
+  <span class="cm">// 相机拖拽时抑制悬停类事件，避免转视角时高亮乱闪。</span>
+  <span class="cm">// 点击类不靠它 —— 靠 isClickGesture，那个与监听器顺序无关。</span>
+  const hoverSuppressed = () =&gt; useViewer.getState().cameraDragging
+
+  return {
+    onPointerDown: (e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+      if (e.button !== 0) return
+      emit('pointerdown', e)
+    },
+    onPointerUp: (e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+      if (e.button !== 0) return
+      emit('pointerup', e)
+      <span class="cm">// 在 pointerup 里合成 click，比 R3F 自带的 onClick 宽容 ——</span>
+      <span class="cm">// 后者在指针移动 1px 时就不触发，用户会觉得「点了没反应」。</span>
+      if (isClickGesture(e.nativeEvent)) emit('click', e)
+    },
+    <span class="cm">// 显式吃掉 R3F 自带的 click，否则和上面合成的那次双触发。</span>
+    onClick: (_e: ThreeEvent&lt;MouseEvent&gt;) =&gt; {},
+    onPointerEnter: (e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+      if (!hoverSuppressed()) emit('enter', e)
+    },
+    onPointerLeave: (e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+      if (!hoverSuppressed()) emit('leave', e)
+    },
+    onPointerMove: (e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+      if (!hoverSuppressed()) emit('move', e)
+    },
+  }
+}
+</code></pre>
+
+  <h3>9 · viewer/components/scene-context.ts <span class="tag viewer">新</span></h3>
+<pre><code>import { createContext } from 'react'
+import type { AnyNodeId } from '../../core/schema/types'
+import { EMPTY_MITER_DATA, type MiterData } from '../../core/systems/wall/wall-mitering'
+
+<span class="cm">/**
+ * 两个跨渲染器的 context 单独放一个模块。
+ *
+ * <span class="cw">放在 viewer.tsx / node-renderer.tsx 里会形成循环 import：</span>
+ *   viewer → node-renderer → wall-renderer → viewer
+ * 打包器能容忍，但模块求值顺序一旦变化，context 可能在读取时还是 undefined。
+ * 拆出来就没有环。
+ */</span>
+
+<span class="cm">/** 整层墙的斜接结果。由 SceneRenderer 算一次往下发。 */</span>
+export const MiterContext = createContext&lt;MiterData&gt;(EMPTY_MITER_DATA)
+
+<span class="cm">/**
+ * 选中的节点 id。由宿主通过 &lt;Viewer selectedId&gt; 传进来 ——
+ * viewer 不许 import useEditor，因为「谁被选中」是编辑语义，不是渲染事实。
+ */</span>
+export const SelectionContext = createContext&lt;AnyNodeId | null&gt;(null)
+</code></pre>
+
+  <h3>10 · viewer/components/viewer.tsx <span class="tag viewer">改</span></h3>
+<pre><code>import { Canvas } from '@react-three/fiber'
+import type { ReactNode } from 'react'
+import type { AnyNodeId } from '../../core/schema/types'
+import { useGridEvents } from '../hooks/use-grid-events'
+import { usePointerGesture } from '../hooks/use-pointer-gesture'
+import { CameraRig } from './camera-rig'
+import { Ground } from './ground'
+import { SceneRenderer } from './node-renderer'
+import { SelectionContext } from './scene-context'
+
+export function Viewer({
+  mode,
+  selectedId = null,
+  children,
+}: {
+  mode: '3d' | 'plan'
+  selectedId?: AnyNodeId | null
+  children?: ReactNode
+}) {
+  return (
+    &lt;Canvas dpr={[1, 1.5]} shadows style={{ background: '#fafafa' }}&gt;
+      &lt;CameraRig mode={mode} /&gt;
+      &lt;ViewerInput /&gt;
+
+      &lt;ambientLight intensity={0.6} /&gt;
+      &lt;directionalLight position={[10, 10, 5]} intensity={1.2} castShadow /&gt;
+
+      &lt;Ground /&gt;
+
+      &lt;SelectionContext.Provider value={selectedId}&gt;
+        &lt;SceneRenderer /&gt;
+      &lt;/SelectionContext.Provider&gt;
+
+      {children}
+    &lt;/Canvas&gt;
+  )
+}
+
+<span class="cm">/** 画布级输入基建：手势判定 + 空地点击事件。必须在 Canvas 内部才拿得到 gl/camera。 */</span>
+function ViewerInput(): null {
+  usePointerGesture()
+  useGridEvents()
+  return null
+}
+</code></pre>
+
+  <h3>11 · viewer/components/node-renderer.tsx <span class="tag viewer">改</span></h3>
+<pre><code>import type { AnyNodeId } from '../../core/schema/types'
+import { useScene } from '../../core/store/use-scene'
+import { useLevelMiters } from '../hooks/use-level-miters'
+import { MiterContext } from './scene-context'      <span class="cm">// ← 不再在本文件里 createContext</span>
+import { WallRenderer } from './wall-renderer'
+
+export const SceneRenderer = () =&gt; {
+  const rootNodeIds = useScene((state) =&gt; state.rootNodeIds)
+  const miter = useLevelMiters()
+
+  return (
+    &lt;MiterContext.Provider value={miter}&gt;
+      &lt;group name="scene-renderer"&gt;
+        {rootNodeIds.map((nodeId) =&gt; (
+          &lt;NodeRenderer key={nodeId} nodeId={nodeId} /&gt;
+        ))}
+      &lt;/group&gt;
+    &lt;/MiterContext.Provider&gt;
+  )
+}
+
+export const NodeRenderer = ({ nodeId }: { nodeId: AnyNodeId }) =&gt; {
+  const node = useScene((state) =&gt; state.nodes[nodeId])
+  if (!node) return null
+  switch (node.type) {
+    case 'wall':
+      return &lt;WallRenderer node={node} /&gt;
+    default:
+      return null
+  }
+}
+</code></pre>
+
+  <h3>12 · viewer/components/wall-renderer.tsx <span class="tag viewer">改</span></h3>
+<pre><code>import { useContext, useEffect, useMemo, useRef } from 'react'
+import type * as THREE from 'three'
+import { useRegistry } from '../../core/registry/scene-registry'
+import type { WallNode } from '../../core/schema/wall'
+import { useNodeEvents } from '../hooks/use-node-events'
+import { buildWallGeometry, wallTransform } from '../lib/wall-geometry'
+import { MiterContext, SelectionContext } from './scene-context'
+
+const WALL_COLOR = '#e8e8e8'
+const WALL_SELECTED_COLOR = '#7dd3c0'
+
+export function WallRenderer({ node }: { node: WallNode }) {
+  const ref = useRef&lt;THREE.Mesh&gt;(null)
+  useRegistry(node.id, 'wall', ref)
+
+  const miter = useContext(MiterContext)
+  const selectedId = useContext(SelectionContext)
+  const isSelected = selectedId === node.id
+
+  <span class="cm">// R3F 指针事件 → 领域事件。viewer 的职责到 emit 为止。</span>
+  <span class="cm">// 原来那个 onClick={console.log} 删掉。</span>
+  const events = useNodeEvents(node, 'wall')
+
+  const geometry = useMemo(
+    () =&gt; buildWallGeometry(node, miter),
+    [node.start[0], node.start[1], node.end[0], node.end[1], node.thickness, node.height, miter],
+  )
+
+  useEffect(() =&gt; () =&gt; geometry.dispose(), [geometry])
+
+  const { position, rotationY } = useMemo(
+    () =&gt; wallTransform(node),
+    [node.start[0], node.start[1], node.end[0], node.end[1]],
+  )
+
+  return (
+    &lt;mesh
+      ref={ref}
+      geometry={geometry}
+      position={position}
+      rotation-y={rotationY}
+      visible={node.visible !== false}
+      castShadow
+      receiveShadow
+      {...events}
+    &gt;
+      &lt;meshStandardMaterial
+        color={isSelected ? WALL_SELECTED_COLOR : WALL_COLOR}
+        roughness={0.9}
+        metalness={0}
+      /&gt;
+    &lt;/mesh&gt;
+  )
+}
+</code></pre>
+
+  <h3>13 · app/lib/interaction/scope.ts <span class="tag app">新</span></h3>
+<pre><code>import type { Point2D } from '../../../core/lib/geometry-2d'
+
+<span class="cm">/**
+ * 「用户此刻在干什么」的唯一权威描述。
+ *
+ * 在这之前，这个问题由若干个互不知情的布尔标志各自回答：wall-tool 的
+ * pendingRef、wall-renderer 的 onClick、OrbitControls 的 enableRotate。
+ * 每一处都用自己那点局部信息猜，于是它们会漂移到非法组合里。
+ *
+ * 收成一个判别联合之后，这些组合<span class="cw">在类型上就不可表达</span>：
+ * 任一时刻恰好一个交互，idle 不携带任何载荷。
+ */</span>
+export type InteractionScope =
+  | { kind: 'idle' }
+  <span class="cm">// 逐点绘制折线（M6 的楼板轮廓复用同一个变体）。</span>
+  <span class="cm">// points 是<span class="cw">已确定</span>的顶点，不含跟随光标的那一个。</span>
+  | { kind: 'drafting'; tool: 'wall'; points: Point2D[] }
+
+export type InteractionKind = InteractionScope['kind']
+export type ActiveInteractionScope = Exclude&lt;InteractionScope, { kind: 'idle' }&gt;
+
+export const IDLE_SCOPE: InteractionScope = { kind: 'idle' }
+
+<span class="cm">/** 共享的空数组：每次返回新数组会让下游的 memo / 相等性判断永远失效。 */</span>
+const NO_POINTS: readonly Point2D[] = Object.freeze([])
+
+export function isIdle(s: InteractionScope): s is { kind: 'idle' } {
+  return s.kind === 'idle'
+}
+
+export function isActive(s: InteractionScope): s is ActiveInteractionScope {
+  return s.kind !== 'idle'
+}
+
+<span class="cm">/**
+ * <span class="cw">唯一的拾取闸门。</span>
+ *
+ * 一行，看着可笑地简单 —— 但所有「这次点击该不该选中」的判断都必须经过它，
+ * 不许在别处重新推导。重新推导正是 7 个布尔标志时代的形状。
+ */</span>
+export function selectionEnabled(s: InteractionScope): boolean {
+  return s.kind === 'idle'
+}
+
+<span class="cm">/** 当前草稿的已确定顶点。非 drafting 返回共享空数组。 */</span>
+export function draftPoints(s: InteractionScope): readonly Point2D[] {
+  return s.kind === 'drafting' ? s.points : NO_POINTS
+}
+
+<span class="cm">/** 草稿的最后一个顶点 —— 链式画墙的起点。 */</span>
+export function lastDraftPoint(s: InteractionScope): Point2D | null {
+  const pts = draftPoints(s)
+  return pts.length &gt; 0 ? pts[pts.length - 1]! : null
+}
+</code></pre>
+
+  <h3>14 · app/store/use-interaction-scope.ts <span class="tag app">新</span></h3>
+<pre><code>import { create } from 'zustand'
+import {
+  type ActiveInteractionScope,
+  IDLE_SCOPE,
+  type InteractionScope,
+  selectionEnabled,
+} from '../lib/interaction/scope'
+
+<span class="cm">/**
+ * 交互状态机的<span class="cw">单一所有者</span>。
+ *
+ * 唯一可写的形状就是 InteractionScope 本身 —— 不提供任何 setXxx 单字段
+ * setter。没有 setter 能留下半个状态，这是全部意义所在。
+ */</span>
+type InteractionScopeState = {
+  scope: InteractionScope
+  <span class="cm">/** 进入一个交互。已有的活跃 scope 被原子替换（单一所有者，无生产者竞态）。 */</span>
+  begin: (scope: ActiveInteractionScope) =&gt; void
+  <span class="cm">/** 修补当前 scope 的载荷。idle 时忽略；kind 不同时忽略。 */</span>
+  update: (patch: Partial&lt;ActiveInteractionScope&gt;) =&gt; void
+  <span class="cm">/** 原子回到 idle。提交和取消都走它，写回还是回滚的区别在交互躯体里解决。 */</span>
+  end: () =&gt; void
+  <span class="cm">/** 只在当前 scope 满足 match 时结束 —— 别掐掉不属于你的交互。 */</span>
+  endIf: (match: (s: ActiveInteractionScope) =&gt; boolean) =&gt; void
+}
+
+export const useInteractionScope = create&lt;InteractionScopeState&gt;((set, get) =&gt; ({
+  scope: IDLE_SCOPE,
+
+  begin: (scope) =&gt; set({ scope }),
+
+  update: (patch) =&gt;
+    set((state) =&gt; {
+      if (state.scope.kind === 'idle') return state
+      <span class="cm">// 载荷更新不许改变正在运行的是哪个交互 —— 换交互要用 begin。</span>
+      if ('kind' in patch &amp;&amp; patch.kind !== state.scope.kind) return state
+      return { scope: { ...state.scope, ...patch } as InteractionScope }
+    }),
+
+  end: () =&gt; {
+    if (get().scope.kind === 'idle') return
+    set({ scope: IDLE_SCOPE })
+  },
+
+  endIf: (match) =&gt; {
+    const scope = get().scope
+    if (scope.kind === 'idle') return
+    if (match(scope)) set({ scope: IDLE_SCOPE })
+  },
+}))
+
+<span class="cm">// —— 命令式读取，给事件处理器和 effect 用 ——</span>
+<span class="cm">// 监听器注册一次就不该因为 scope 变化重挂，所以读快照而不是订阅。</span>
+
+export const getScope = (): InteractionScope =&gt; useInteractionScope.getState().scope
+
+export const isSelectionEnabled = (): boolean =&gt; selectionEnabled(getScope())
+</code></pre>
+
+  <h3>15 · app/components/selection-manager.tsx <span class="tag app">新</span></h3>
+<pre><code>import { useEffect } from 'react'
+import { emitter } from '../../core/events/bus'
+import type { GridEvent, NodeEvent } from '../../core/events/types'
+import { useEditor } from '../store/use-editor'
+import { isSelectionEnabled } from '../store/use-interaction-scope'
+
+<span class="cm">/**
+ * 第二次转身：领域事件 → 编辑语义。
+ *
+ * viewer 发出 wall:click，这里决定它意味着「选中」。
+ * 换掉这个组件，同一个 viewer 可以变成只读展示页（点击弹信息卡片）。
+ */</span>
+export function SelectionManager(): null {
+  useEffect(() =&gt; {
+    <span class="cm">// 处理器提到 effect 里定义一次，off 时才拿得到同一个引用。</span>
+    const onNodeClick = (e: NodeEvent) =&gt; {
+      if (!isSelectionEnabled()) return
+      e.stopPropagation()          <span class="cm">// 叠在一起的墙只选最上面那个</span>
+      useEditor.getState().select(e.node.id)
+    }
+
+    const onGridClick = (_e: GridEvent) =&gt; {
+      if (!isSelectionEnabled()) return
+      useEditor.getState().select(null)
+    }
+
+    emitter.on('wall:click', onNodeClick)
+    emitter.on('grid:click', onGridClick)
+    return () =&gt; {
+      emitter.off('wall:click', onNodeClick)
+      emitter.off('grid:click', onGridClick)
+    }
+  }, [])
+
+  return null
+}
+</code></pre>
+
+  <h3>16 · app/tools/wall-tool.tsx <span class="tag app">改写</span></h3>
+<pre><code>import { Line } from '@react-three/drei'
+import { useThree } from '@react-three/fiber'
+import { useEffect, useState } from 'react'
+import * as THREE from 'three'
+import type { Point2D } from '../../core/lib/geometry-2d'
+import { useScene } from '../../core/store/use-scene'
+import { isClickGesture } from '../../viewer/lib/pointer-gesture'
+import { screenToGround } from '../../viewer/lib/pointer-plane'
+import { draftPoints, lastDraftPoint } from '../lib/interaction/scope'
+import { useEditor } from '../store/use-editor'
+import { getScope, useInteractionScope } from '../store/use-interaction-scope'
+
+const ndc = new THREE.Vector2()
+
+<span class="cm">/**
+ * 画墙工具。链式：画完一堵，终点自动成为下一堵的起点。
+ *
+ * 工具<span class="cw">一被选中就持有 scope</span>，不是等指针按下才持有。
+ * 否则第一次落点时 scope 还是 idle，selectionEnabled 为真，
+ * 那一下会同时选中光标下的墙 —— 也就是原来的 bug 原封不动。
+ *
+ * 指针输入直接走 DOM 监听器，不走事件总线：drafting 期间指针本来就属于
+ * 这个交互的躯体。总线是给 idle 路径（选择 / 悬停）用的。
+ */</span>
+export function WallTool() {
+  const activeTool = useEditor((s) =&gt; s.activeTool)
+  const { gl, camera } = useThree()
+  <span class="cm">// 跟随光标的橡皮筋端点。M3 用 state，每次移动都重渲染 —— M4 换命令式路径。</span>
+  const [cursor, setCursor] = useState&lt;Point2D | null&gt;(null)
+
+  <span class="cm">// —— 武装即持有 scope ——</span>
+  useEffect(() =&gt; {
+    if (activeTool !== 'wall') return
+    useInteractionScope.getState().begin({ kind: 'drafting', tool: 'wall', points: [] })
+    return () =&gt; {
+      <span class="cm">// endIf 而不是 end：切走时若 scope 已被别人换掉，别乱掐。</span>
+      useInteractionScope.getState().endIf((s) =&gt; s.kind === 'drafting')
+      setCursor(null)
+    }
+  }, [activeTool])
+
+  <span class="cm">// —— 指针输入 ——</span>
+  useEffect(() =&gt; {
+    if (activeTool !== 'wall') return
+    const el = gl.domElement
+
+    const toGround = (e: PointerEvent): Point2D | null =&gt; {
+      const r = el.getBoundingClientRect()
+      ndc.set(
+        ((e.clientX - r.left) / r.width) * 2 - 1,
+        -((e.clientY - r.top) / r.height) * 2 + 1,
+      )
+      return screenToGround(ndc, camera)
+    }
+
+    const onPointerUp = (e: PointerEvent) =&gt; {
+      if (e.button !== 0) return
+      if (!isClickGesture(e)) return          <span class="cm">// 拖了相机，不是落点</span>
+
+      const p = toGround(e)
+      if (!p) return
+
+      const scope = getScope()
+      if (scope.kind !== 'drafting') return
+
+      const last = lastDraftPoint(scope)
+      if (last) {
+        useScene.getState().addNode({
+          type: 'wall',
+          start: [last.x, last.y],
+          end: [p.x, p.y],
+        })
+      }
+      <span class="cm">// 链式：无论是第一个点还是刚落成一堵墙，终点都成为下一段的起点。</span>
+      useInteractionScope.getState().update({ points: [p] })
+    }
+
+    const onPointerMove = (e: PointerEvent) =&gt; setCursor(toGround(e))
+
+    const onKeyDown = (e: KeyboardEvent) =&gt; {
+      <span class="cm">// Esc 断开链条，但<span class="cw">留在</span>画墙工具里。</span>
+      <span class="cm">// 「这条线画完了」和「我不想画墙了」是两件事，后者按 V。</span>
+      if (e.key === 'Escape') {
+        useInteractionScope.getState().update({ points: [] })
+        setCursor(null)
+      }
+    }
+
+    const onContextMenu = (e: MouseEvent) =&gt; {
+      e.preventDefault()
+      <span class="cm">// 右键还兼着平移相机。只有「点」才断链，「拖」是在平移。</span>
+      if (!isClickGesture(e)) return
+      useInteractionScope.getState().update({ points: [] })
+    }
+
+    el.addEventListener('pointerup', onPointerUp)
+    el.addEventListener('pointermove', onPointerMove)
+    el.addEventListener('contextmenu', onContextMenu)
+    window.addEventListener('keydown', onKeyDown)
+    return () =&gt; {
+      el.removeEventListener('pointerup', onPointerUp)
+      el.removeEventListener('pointermove', onPointerMove)
+      el.removeEventListener('contextmenu', onContextMenu)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [activeTool, gl, camera])
+
+  return &lt;WallDraftPreview cursor={cursor} /&gt;
+}
+
+<span class="cm">/** 橡皮筋：从最后一个已确定顶点连到光标。预览墙<span class="cw">绝不</span> addNode 进 store。 */</span>
+function WallDraftPreview({ cursor }: { cursor: Point2D | null }) {
+  const scope = useInteractionScope((s) =&gt; s.scope)
+  const pts = draftPoints(scope)
+  const last = pts.length &gt; 0 ? pts[pts.length - 1]! : null
+  if (!last || !cursor) return null
+
+  return (
+    &lt;Line
+      points={[
+        [last.x, 0.01, last.y],
+        [cursor.x, 0.01, cursor.y],
+      ]}
+      color="#0b6e5f"
+      lineWidth={2}
+      dashed
+      dashScale={20}
+    /&gt;
+  )
+}
+</code></pre>
+
+  <h3>17 · app/app.tsx <span class="tag app">改写</span></h3>
+<pre><code>import { OrbitControls } from '@react-three/drei'
+import { useEffect } from 'react'
+import { MOUSE } from 'three'
+import { Viewer } from '../viewer/components/viewer'
+import { useViewer } from '../viewer/store/use-viewer'
+import { SelectionManager } from './components/selection-manager'
+import { useEditor } from './store/use-editor'
+import { WallTool } from './tools/wall-tool'
+
+<span class="cm">// 平面图模式下左键拖 = 平移。OrbitControls 的 enableRotate={false} 只是让</span>
+<span class="cm">// 左键失效，不会把它改成平移 —— 而平面图里最自然的操作恰恰是左键拖动。</span>
+const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
+
+export function App() {
+  const viewMode = useEditor((s) =&gt; s.viewMode)
+  const activeTool = useEditor((s) =&gt; s.activeTool)
+  const selectId = useEditor((s) =&gt; s.selectId)
+
+  useEffect(() =&gt; {
+    const onKey = (e: KeyboardEvent) =&gt; {
+      if (e.key === 'Tab') {
+        e.preventDefault()
+        useEditor.getState().toggleViewMode()
+      }
+      if (e.key.toLowerCase() === 'w') useEditor.getState().setActiveTool('wall')
+      if (e.key.toLowerCase() === 'v') useEditor.getState().setActiveTool('select')
+    }
+    window.addEventListener('keydown', onKey)
+    return () =&gt; window.removeEventListener('keydown', onKey)
+  }, [])
+
+  const isPlan = viewMode === 'plan'
+
+  return (
+    &lt;div style={{ position: 'fixed', inset: 0 }}&gt;
+      &lt;Viewer mode={viewMode} selectedId={selectId}&gt;
+        <span class="cm">{/* 相机控制器由 app 注入 —— viewer 不该知道你想怎么操作它。
+            enableRotate 里那个 activeTool !== 'wall' 已经删掉：
+            归属现在由 scope 决定，不再靠禁用按键。画墙时也能转视角。 */}</span>
+        &lt;OrbitControls
+          makeDefault
+          enableRotate={!isPlan}
+          mouseButtons={isPlan ? PLAN_MOUSE_BUTTONS : undefined}
+          onStart={() =&gt; useViewer.getState().setCameraDragging(true)}
+          onEnd={() =&gt; useViewer.getState().setCameraDragging(false)}
+        /&gt;
+        &lt;SelectionManager /&gt;
+        &lt;WallTool /&gt;
+      &lt;/Viewer&gt;
+
+      &lt;div style={{
+        position: 'absolute', left: 12, bottom: 12, padding: '6px 10px',
+        font: '12px ui-monospace, monospace', background: 'rgba(255,255,255,.85)',
+        borderRadius: 3, pointerEvents: 'none',
+      }}&gt;
+        {activeTool} · {viewMode} · sel={selectId ?? '—'}
+        &amp;nbsp;|&amp;nbsp; W 墙 · V 选 · Tab 视图 · Esc 断链
+      &lt;/div&gt;
+    &lt;/div&gt;
+  )
+}
+</code></pre>
+
+  <h3>18 · app/lib/interaction/scope.test.ts <span class="tag app">新</span></h3>
+<pre><code>import { describe, expect, it } from 'vitest'
+import { useInteractionScope } from '../../store/use-interaction-scope'
+import {
+  draftPoints, IDLE_SCOPE, isActive, isIdle, lastDraftPoint, selectionEnabled,
+} from './scope'
+
+const drafting = (points: { x: number; y: number }[] = []) =&gt;
+  ({ kind: 'drafting', tool: 'wall', points }) as const
+
+const reset = () =&gt; useInteractionScope.setState({ scope: IDLE_SCOPE })
+
+describe('scope 纯函数', () =&gt; {
+  it('idle 允许选择', () =&gt; {
+    expect(selectionEnabled(IDLE_SCOPE)).toBe(true)
+    expect(isIdle(IDLE_SCOPE)).toBe(true)
+    expect(isActive(IDLE_SCOPE)).toBe(false)
+  })
+
+  it('任何活跃交互都掐断选择', () =&gt; {
+    expect(selectionEnabled(drafting())).toBe(false)
+    expect(isActive(drafting())).toBe(true)
+  })
+
+  it('draftPoints 在非 drafting 上返回稳定的空数组', () =&gt; {
+    <span class="cm">// 不能每次返回新数组，否则下游 memo 永远失效</span>
+    expect(draftPoints(IDLE_SCOPE)).toBe(draftPoints(IDLE_SCOPE))
+    expect(draftPoints(IDLE_SCOPE)).toHaveLength(0)
+  })
+
+  it('lastDraftPoint 取最后一个已确定顶点', () =&gt; {
+    expect(lastDraftPoint(IDLE_SCOPE)).toBeNull()
+    expect(lastDraftPoint(drafting([{ x: 1, y: 2 }, { x: 3, y: 4 }]))).toEqual({ x: 3, y: 4 })
+  })
+})
+
+describe('单一所有者 store', () =&gt; {
+  it('update 在 idle 时被忽略', () =&gt; {
+    reset()
+    useInteractionScope.getState().update({ points: [{ x: 1, y: 1 }] })
+    expect(useInteractionScope.getState().scope.kind).toBe('idle')
+  })
+
+  it('update 不能改变 kind', () =&gt; {
+    reset()
+    useInteractionScope.getState().begin(drafting([{ x: 0, y: 0 }]))
+    <span class="cm">// @ts-expect-error 故意传一个不存在的 kind，验证运行时也挡得住</span>
+    useInteractionScope.getState().update({ kind: 'moving' })
+    expect(useInteractionScope.getState().scope.kind).toBe('drafting')
+  })
+
+  it('end 是原子的：没有载荷能活过它', () =&gt; {
+    reset()
+    useInteractionScope.getState().begin(drafting([{ x: 1, y: 1 }, { x: 2, y: 2 }]))
+    useInteractionScope.getState().end()
+
+    const scope = useInteractionScope.getState().scope
+    expect(scope).toEqual(IDLE_SCOPE)
+    expect(draftPoints(scope)).toHaveLength(0)
+    expect(lastDraftPoint(scope)).toBeNull()
+  })
+
+  it('endIf 不掐掉不匹配的 scope', () =&gt; {
+    reset()
+    useInteractionScope.getState().begin(drafting([{ x: 1, y: 1 }]))
+    useInteractionScope.getState().endIf((s) =&gt; s.kind !== 'drafting')
+    expect(useInteractionScope.getState().scope.kind).toBe('drafting')
+
+    useInteractionScope.getState().endIf((s) =&gt; s.kind === 'drafting')
+    expect(useInteractionScope.getState().scope.kind).toBe('idle')
+  })
+})
+</code></pre>
+
+  <div class="note">
+    <p>
+      <strong>这份代码已经在一份干净的副本上验证过</strong>：
+      <code>tsc --build --noEmit</code>、<code>eslint</code>、<code>vitest</code>（8 个 scope 用例）、
+      <code>vite build</code>（678 modules，0 error）全部通过。
+      但它<strong>没有在真实浏览器里跑过</strong>——§05 的八条肉眼验收还是要你自己走一遍。
+    </p>
+  </div>
+</section>
+
+
+<hr class="dim">
+
+<footer style="color:var(--ink-3);font-family:var(--mono);font-size:12px;letter-spacing:.04em">
+  <p style="margin:0">
+    对照源码：<code>wiki/architecture/interaction-scope.md</code>（必读全文）·
+    <code>selection-managers.md</code> · <code>events.md</code> ·
+    <code>editor/src/lib/interaction/scope.ts</code>（243 行）·
+    <code>editor/src/store/use-interaction-scope.ts</code>（140 行）·
+    <code>viewer/src/hooks/use-node-events.ts</code>
+  </p>
+  <p style="margin:8px 0 0">上一站 · M2 墙角严丝合缝　　下一站 · M4 拖动、撤销、脏传播</p>
+</footer>
+
+</div>

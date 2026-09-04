@@ -1,0 +1,4859 @@
+<title>M4 拖动、撤销、脏传播</title>
+<style>
+:root {
+  --paper:#EDF1EF; --card:#F8FAF9; --code-bg:#E4EBE8;
+  --ink:#131B19; --ink-2:#4A5754; --ink-3:#74827E;
+  --rule:#C4CFCB; --rule-soft:#D7E0DC;
+  --accent:#0B6E5F; --accent-bg:#DBE9E5;
+  --warn:#9E4520; --warn-bg:#F1E2D9;
+  --core:#0B6E5F;  --core-bg:#DBE9E5;
+  --viewer:#2A5A79; --viewer-bg:#DBE5EC;
+  --app:#6A5843;   --app-bg:#ECE5DB;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --body: Georgia, "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+    --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+    --rule:#2A3733; --rule-soft:#1E2926;
+    --accent:#4FC3AA; --accent-bg:#12312B;
+    --warn:#E2916A; --warn-bg:#32211A;
+    --core:#4FC3AA;  --core-bg:#12312B;
+    --viewer:#79B4DA; --viewer-bg:#14262F;
+    --app:#C9AC85;   --app-bg:#2A2318;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+  --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+  --rule:#2A3733; --rule-soft:#1E2926;
+  --accent:#4FC3AA; --accent-bg:#12312B;
+  --warn:#E2916A; --warn-bg:#32211A;
+  --core:#4FC3AA;  --core-bg:#12312B;
+  --viewer:#79B4DA; --viewer-bg:#14262F;
+  --app:#C9AC85;   --app-bg:#2A2318;
+}
+* { box-sizing:border-box; }
+body {
+  background:var(--paper); color:var(--ink); font-family:var(--body);
+  font-size:17px; line-height:1.72; margin:0; padding:0 24px 120px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:940px; margin:0 auto; }
+.prose { max-width:68ch; }
+.masthead { padding:72px 0 0; }
+.eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 20px; display:flex; gap:14px; flex-wrap:wrap;
+}
+.eyebrow b { color:var(--accent); font-weight:600; }
+h1 {
+  font-family:var(--mono); font-size:clamp(32px,5.5vw,50px); line-height:1.08;
+  letter-spacing:-.02em; font-weight:600; margin:0 0 18px; text-wrap:balance;
+}
+.standfirst { font-size:19px; color:var(--ink-2); max-width:60ch; margin:0 0 8px; }
+.dim { position:relative; height:1px; background:var(--rule); border:0; margin:56px 0 40px; }
+.dim::before,.dim::after { content:""; position:absolute; top:-4px; width:1px; height:9px; background:var(--rule); }
+.dim::before{left:0} .dim::after{right:0}
+h2 {
+  font-family:var(--mono); font-size:13px; letter-spacing:.16em; text-transform:uppercase;
+  font-weight:600; color:var(--accent); margin:0 0 6px;
+}
+h2 .num { color:var(--ink-3); margin-right:12px; }
+.h2sub { font-family:var(--mono); font-size:22px; font-weight:600; margin:0 0 24px; letter-spacing:-.01em; }
+h3 { font-family:var(--mono); font-size:16px; font-weight:600; margin:34px 0 10px; }
+h4 { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--accent); margin:24px 0 6px; }
+p { margin:0 0 16px; }
+ul,ol { margin:0 0 16px; padding-left:22px; }
+li { margin-bottom:7px; }
+strong { font-weight:700; color:var(--ink); }
+em { font-style:italic; color:var(--ink-2); }
+code { font-family:var(--mono); font-size:.86em; background:var(--code-bg); padding:1px 5px; border-radius:2px; }
+pre {
+  background:var(--code-bg); border:1px solid var(--rule-soft); border-radius:3px;
+  padding:16px 18px; overflow-x:auto; margin:14px 0 18px; line-height:1.62;
+}
+pre code { background:none; padding:0; font-size:13px; white-space:pre; }
+.cm { color:var(--ink-3); }
+.cw { color:var(--warn); }
+.step {
+  display:grid; grid-template-columns:52px 1fr; gap:0 20px;
+  padding:26px 0; border-top:1px solid var(--rule-soft);
+}
+.step:first-of-type { border-top:1px solid var(--rule); }
+.step-n { font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink-3); padding-top:4px; font-variant-numeric:tabular-nums; }
+.step-body { min-width:0; }
+.step-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.step-title { font-family:var(--mono); font-size:17px; font-weight:600; margin:0; }
+.step-body > p { max-width:64ch; }
+.tag {
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  font-weight:600; padding:3px 8px; border-radius:2px; white-space:nowrap;
+}
+.tag.core{color:var(--core);background:var(--core-bg)}
+.tag.viewer{color:var(--viewer);background:var(--viewer-bg)}
+.tag.app{color:var(--app);background:var(--app-bg)}
+.tag.debt{color:var(--warn);background:var(--warn-bg)}
+.trap {
+  background: repeating-linear-gradient(-45deg, transparent 0 6px,
+    color-mix(in srgb, var(--warn) 7%, transparent) 6px 7px), var(--warn-bg);
+  border-left:3px solid var(--warn); padding:14px 18px; margin:18px 0; border-radius:0 3px 3px 0;
+}
+.trap-label {
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  font-weight:600; color:var(--warn); display:block; margin-bottom:6px;
+}
+.trap p:last-child,.trap ul:last-child { margin-bottom:0; }
+.note { border-left:3px solid var(--rule); padding:2px 0 2px 18px; margin:18px 0; color:var(--ink-2); font-size:16px; }
+.note p:last-child { margin-bottom:0; }
+.tablewrap { overflow-x:auto; margin:18px 0 24px; }
+table { border-collapse:collapse; width:100%; font-family:var(--mono); font-size:13px; min-width:560px; }
+th {
+  text-align:left; font-weight:600; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule); padding:0 14px 8px 0;
+}
+td { padding:9px 14px 9px 0; border-bottom:1px solid var(--rule-soft); vertical-align:top; line-height:1.55; }
+td:last-child,th:last-child { padding-right:0; }
+.check { list-style:none; padding:0; margin:0; }
+.check li {
+  display:grid; grid-template-columns:26px 1fr; gap:10px; padding:11px 0;
+  border-bottom:1px solid var(--rule-soft); margin:0;
+}
+.check li::before { content:""; width:14px; height:14px; border:1.5px solid var(--accent); border-radius:2px; margin-top:6px; }
+.defect { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--rule-soft); }
+.defect-to { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--accent); white-space:nowrap; }
+a { color:var(--accent); }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media (max-width:620px) {
+  body { font-size:16px; padding:0 18px 80px; }
+  .step { grid-template-columns:1fr; }
+  .step-n { padding-top:0; margin-bottom:4px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">
+    <span>r3f-arch</span><span>里程碑 <b>04</b> / 14</span><span>机制型 · 只给 hint</span><span>预计 2–3 周</span>
+  </p>
+  <h1>M4 拖动、撤销、脏传播</h1>
+  <p class="standfirst">
+    墙终于能动了：整墙拖、端点拖、吸附到已有端点、Delete 删除、Ctrl+Z 撤销。
+    一次拖拽是<strong>一条</strong>历史，不是六十条。
+    拖第 37 堵墙的时候，只有它和它的邻居重建几何，另外 98 堵一动不动。
+  </p>
+  <p class="standfirst" style="color:var(--ink-3);font-size:17px">
+    M3 建立了「此刻谁拥有指针」。M4 建立的是<strong>「此刻谁拥有真相」</strong>——
+    拖拽中的墙在哪，主 store 不知道也不该知道。这一条决定了后面所有拖拽型工具的写法。
+  </p>
+</header>
+
+<hr class="dim">
+
+<!-- ═══════════ 01 -->
+<section>
+  <h2><span class="num">01</span>为什么不能直接改 store</h2>
+  <p class="h2sub">最朴素的写法会同时踩三个坑</p>
+
+  <div class="prose">
+    <p>拖一堵墙，最直觉的实现是这样：</p>
+  </div>
+<pre><code><span class="cm">// 每次 pointermove：</span>
+useScene.getState().updateNode(wallId, { start: [x1, y1], end: [x2, y2] })
+</code></pre>
+  <div class="prose">
+    <p>这一行在你现在的代码里会同时引爆三样东西：</p>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>坑</th><th>为什么</th><th>你会看到</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>历史被打成碎片</td>
+        <td>zundo 记录每一次 <code>set</code></td>
+        <td>拖 1 秒 = 60 条 undo，Ctrl+Z 按到手酸才回到原位</td>
+      </tr>
+      <tr>
+        <td>全场景重算</td>
+        <td><code>useLevelMiters</code> 依赖整个 <code>nodes</code> 对象，<code>updateNode</code> 换掉它的引用</td>
+        <td>100 堵墙 × 60 帧 = 每秒 6000 次 ExtrudeGeometry</td>
+      </tr>
+      <tr>
+        <td>中途状态进了文档</td>
+        <td>主 store 就是文档本身</td>
+        <td>M9 的自动保存会把「拖到一半」的位置存进档</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="prose">
+    <p>
+      三个坑的共同点：<strong>主 store 是「文档」，而拖拽中的位置不是文档，是「意图」。</strong>
+      把意图写进文档，文档就得替它承担撤销、持久化、脏传播三份本不该承担的责任。
+    </p>
+    <p>M4 的全部设计都从这一句推出来：</p>
+  </div>
+
+<pre><code><span class="cm">主 store  = 已提交的文档      ← 进历史、进存档、驱动脏集</span>
+<span class="cm">live 覆盖 = 未提交的意图      ← 不进历史、不进存档、每帧可变</span>
+<span class="cm">Object3D  = 当前画面          ← 连 React 都不必知道它变了</span>
+
+<span class="cm">渲染读的是「文档 ⊕ 覆盖」，不是文档。</span>
+effectiveNode(node) = { ...node, ...override(node.id) }
+</code></pre>
+
+  <div class="trap">
+    <span class="trap-label">ROADMAP 里那句话需要当场修正</span>
+    <p>
+      <code>ROADMAP.md</code> 的 M4 条目写着「<em>拖拽中 <code>useFrame</code> 直接 mutate
+      <code>Object3D.position</code>，一次都不 <code>setState</code></em>」。
+      <strong>这句话对墙不成立。</strong>
+    </p>
+    <p>
+      直接 mutate <code>Object3D.position</code> 只对<em>刚体</em>有效——家具、柱子，
+      形状不随位置变。<strong>墙不是刚体。</strong>墙动一寸，它和邻墙的斜接角全变，
+      几何顶点必须重新生成。你只 mutate 了 position，画面上得到的是一堵歪着插进邻墙里的墙。
+    </p>
+    <p style="margin-bottom:0">
+      对照仓库自己就是这么分的：<code>packages/nodes/src/wall/move-tool.tsx</code> 走
+      <code>useLiveNodeOverrides</code>（一个 zustand store，<em>会</em> setState），
+      而 <code>useLiveTransforms</code> + <code>useFrame</code> 那条路留给 <code>item</code>
+      那种真刚体。<strong>M4 两条路都建，但用在不同地方——见 §02 D。</strong>
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 02 -->
+<section>
+  <h2><span class="num">02</span>四个机制，各关一个缺陷</h2>
+  <p class="h2sub">互相独立，可以分四天做，每天结束都能跑</p>
+
+  <h3>A · live 覆盖层 —— 关掉「历史被打成碎片」</h3>
+  <div class="prose">
+    <p>
+      一个模块级 zustand store，<code>Map&lt;nodeId, Partial&lt;AnyNode&gt;&gt;</code>。
+      拖拽期间工具往里写，渲染层读「文档 ⊕ 覆盖」。松手时清空覆盖、写一次主 store。
+    </p>
+    <p>
+      它<strong>仍然是 setState</strong>——每帧一次 zustand 通知。这没关系：
+      通知只惊动订阅了覆盖的那几个组件，而且它<strong>不在 zundo 的包裹范围内</strong>
+      （zundo 只包 <code>useScene</code>），所以历史是干净的。
+      三个坑里最狠的那个由它单独关掉。
+    </p>
+  </div>
+
+  <h3>B · 脏集 + 邻接 + miter 缓存 —— 关掉「全场景重算」</h3>
+  <div class="prose">
+    <p>三段接力，缺一段都不生效：</p>
+    <ol>
+      <li><code>useScene.dirtyNodes: Set&lt;AnyNodeId&gt;</code> —— 谁变了。</li>
+      <li><code>getAdjacentWallIds(walls, dirtyIds)</code> —— 谁因为它而变了（共端点 + T 接两个方向）。</li>
+      <li><code>getCachedLevelMiters(walls)</code> —— miter 解只在输入真变了时重算。</li>
+    </ol>
+    <p>
+      第 3 段的判据是<strong>逐字段精确比较</strong>，不是哈希、也不是引用比较。
+      对照仓库在 <code>level-miter-cache.ts</code> 里专门写了理由：
+    </p>
+  </div>
+  <div class="note">
+    <p>
+      <em>"The comparison is exact (no hashing): a stale hit would silently render wrong
+      joints, and 7 numeric compares × N walls is microseconds — far cheaper than the risk."</em>
+    </p>
+  </div>
+  <div class="prose">
+    <p>
+      引用比较为什么不行：你的 <code>updateNode</code> 每次都
+      <code>{ ...prev, ...patch }</code> 造新对象，哪怕改的只是 <code>name</code>。
+      用引用比较，改一次名字就重算全场斜接。
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">这一条推翻 STATE.md 的一项欠账</span>
+    <p>
+      <code>STATE.md</code> 把「<strong>交点检测 O(交点×墙)，无空间网格</strong>」标成 M4 到期。
+      <strong>M4 不建空间网格</strong>，改期到 M8 之后。
+    </p>
+    <p>
+      理由是成本结构和当初设想的不一样。<code>calculateLevelMiters</code> 是纯 2D 数值运算，
+      100 堵墙一趟约 2 万次 <code>pointOnSegment</code>，量级 1ms；
+      而<strong>单堵墙的一次 <code>ExtrudeGeometry</code> 就要几百微秒</strong>，100 堵是几十毫秒。
+      真正卡帧的是几何重建，不是交点检测。
+    </p>
+    <p>
+      先做缓存（idle 帧成本归零）+ 邻接脏集（几何重建从 100 堵降到 3 堵），
+      这两条把帧时间从几十毫秒压到一位数。
+      空间网格是在<em>这之后</em>才成为瓶颈的东西，现在做属于优化未测量的代码。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>缺陷清单里这一条不删，只改期</strong>，并且把「什么时候该做」写成可判定的条件：
+      <em>单层墙数 &gt; 300 且 miter 计算在 profile 里稳定超过 3ms。</em>
+      到不了这个条件就一直不做。
+    </p>
+  </div>
+
+  <h3>C · zundo + pause 租约 —— 让一次拖拽变成一条历史</h3>
+  <div class="prose">
+    <p>
+      有了 A 仍然需要 C。A 只保证「拖拽中不写主 store」，
+      而<strong>松手时那一次写</strong>本身还可能被拆成多条：
+      拖一堵墙会连带更新邻墙的端点，那是好几次 <code>updateNode</code>。
+    </p>
+    <p>两件工具：</p>
+    <ul>
+      <li>
+        <strong>pause 租约</strong>：拖拽开始时 <code>acquireSceneHistoryPause()</code>，
+        拿到一个 <code>release</code> 闭包。租约<em>可重入</em>——深度归零才真的 resume。
+        为什么不是一个布尔：两个东西同时暂停历史时，先结束的那个不能把后一个的暂停一起关掉。
+      </li>
+      <li>
+        <strong>事务</strong>：<code>runAsSingleHistoryStep(fn)</code>，跑完把
+        <code>pastStates</code> 里新增的 N 条截成 1 条。
+      </li>
+    </ul>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">顺序反了会丢掉一步撤销</span>
+    <p>
+      提交时必须是 <strong>先 resume 再写</strong>，不能 <strong>先写再 resume</strong>。
+      历史暂停期间的写入根本不产生 <code>pastState</code>——
+      你写完再 resume，那条改动就永远撤不回来了。
+    </p>
+    <p style="margin-bottom:0">
+      对照仓库把这三行单独抽成了一个 14 行的文件
+      （<code>editor/src/components/editor/handles/handle-drag-history.ts</code>），
+      只为了让顺序无处可错：<code>resumeHistory()</code> →
+      <code>runAsSingleHistoryStep(() =&gt; commit(patch))</code>。你也这么做。
+    </p>
+  </div>
+
+  <h3>D · 命令式预览 —— 关掉「橡皮筋每帧重渲染」</h3>
+  <div class="prose">
+    <p>
+      这才是 ROADMAP 那句「一次都不 setState」的<strong>真正落点</strong>。
+      橡皮筋是纯呈现，没有任何别的模块需要读它的值——于是
+      <code>pointermove</code> 只写 <code>ref</code>，
+      <code>useFrame</code> 每帧把 ref 的值刷进 line 的顶点。
+      React 全程不知道光标动过。
+    </p>
+    <p>
+      判据可以直接搬 M3 §06 那条：<strong>「有没有第二个读者」</strong>。
+      没有读者的值就不该进 store——进了就要付出每帧一次订阅通知的代价，
+      换来的只是「能在 DevTools 里看见它」。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 03 -->
+<section>
+  <h2><span class="num">03</span>文件树增量</h2>
+  <p class="h2sub">新增 10 个，改写 8 个</p>
+
+<pre><code>src/
+  core/
+    lib/
+      geometry-2d.ts             <span class="cw">改</span>  <span class="cm">pointOnSegment 的 L2 <span class="cw">（M2 欠账，第 00 步）</span></span>
+      snap-2d.ts                 <span class="cm">新  纯函数吸附：网格步长 + 最近端点</span>
+      snap-2d.test.ts            <span class="cm">新</span>
+    schema/
+      wall.ts                    <span class="cw">改</span>  <span class="cm">getWallThickness 的默认值 <span class="cw">（M2 欠账，第 00 步）</span></span>
+    store/
+      use-scene.ts               <span class="cw">改</span>  <span class="cm">zundo 包装 + dirtyNodes + markDirty / clearDirty</span>
+      use-live-overrides.ts      <span class="cm">新  拖拽期的临时真相 + getEffectiveNode</span>
+      history-control.ts         <span class="cm">新  pause 租约 + runAsSingleHistoryStep</span>
+      history-control.test.ts    <span class="cm">新  <span class="cw">租约重入必须测</span></span>
+    systems/wall/
+      wall-adjacency.ts          <span class="cm">新  getAdjacentWallIds</span>
+      wall-adjacency.test.ts     <span class="cm">新</span>
+
+  viewer/
+    lib/
+      level-miter-cache.ts       <span class="cm">新  sameMiterInputs + getCachedLevelMiters</span>
+    hooks/
+      use-level-miters.ts        <span class="cw">改</span>  <span class="cm">走缓存，输入换成 effective 墙</span>
+      use-effective-node.ts      <span class="cm">新  订阅「文档 ⊕ 覆盖」的单节点 hook</span>
+    components/
+      wall-renderer.tsx          <span class="cw">改</span>  <span class="cm">①接上 useNodeEvents <span class="cw">（M3 欠账）</span> ②读 effective 节点</span>
+
+  app/
+    lib/interaction/
+      scope.ts                   <span class="cw">改</span>  <span class="cm">加 moving / handle-drag 两个变体</span>
+    store/
+      use-interaction-scope.ts   <span class="cw">改</span>  <span class="cm">update 改成带 kind 的判别式</span>
+    hooks/
+      use-history-shortcuts.ts   <span class="cm">新  Ctrl+Z / Ctrl+Shift+Z / Delete</span>
+    tools/
+      wall-tool.tsx              <span class="cw">改</span>  <span class="cm">落点吸附 + 橡皮筋改命令式</span>
+      move-tool.tsx              <span class="cm">新  整墙拖拽（moving scope）</span>
+      endpoint-handles.tsx       <span class="cm">新  端点手柄（handle-drag scope）</span>
+    app.tsx                      <span class="cw">改</span>  <span class="cm">挂 MoveTool / EndpointHandles / 快捷键</span>
+</code></pre>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      <code>use-live-transforms.ts</code> 不在这张表里。§02 D 描述了它的机制，
+      但 M4 唯一的用户（橡皮筋）只有<strong>一个</strong>值要传，一个 <code>useRef</code> 就够。
+      等 M6 的柱子出现、需要跨组件读拖拽位置时再建——那才是它第一个<em>真</em>用户。
+      <strong>提前建 store 属于 D10 明令禁止的那类抽象。</strong>
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 04 -->
+<section>
+  <h2><span class="num">04</span>建造顺序</h2>
+  <p class="h2sub">十三步。第 00 步是三笔欠账，别跳</p>
+
+  <!-- 00 -->
+  <div class="step">
+    <div class="step-n">00</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">还掉三笔欠账，把 verify 弄绿</h3><span class="tag debt">欠账</span></div>
+      <p>
+        <code>pnpm verify</code> 现在是 <strong>check-types ✅ / lint ✅ / test 3 红 28 绿</strong>。
+        三处改动，全部一行，全部在你已经敲完的代码里。
+      </p>
+
+      <h4>① <code>core/lib/geometry-2d.ts:53</code> —— 三个红测试的唯一根因</h4>
+<pre><code>const L2 = ab.x + ab.y * ab.y      <span class="cw">// ❌ 第一项少一个平方</span>
+<span class="cm">//         ^^^^ 应为 ab.x * ab.x</span>
+</code></pre>
+      <p>
+        M3 文档里已经点过一次，还没改。对 (0,0)→(4,0)，正确 <code>L2</code> 是 16，实际算出 4；
+        投影参数 <code>t</code> 被放大 4 倍，中点 (2,0) 算出 <code>t = 2</code> 被判成「在延长线上」⟹
+        <strong><code>pointOnSegment</code> 恒假 ⟹ T 型接头恒检测不到</strong>。
+      </p>
+      <p>
+        M4 <strong>必须</strong>先修它：<code>getAdjacentWallIds</code> 判 T 接依赖同一个函数，
+        它假的话 T 接邻居永远不进脏集，你会看到「拖走主墙，撞上来的那堵墙留在原地不重算」，
+        然后去怀疑脏集写错了。
+      </p>
+
+      <h4>② <code>core/schema/wall.ts:18</code> —— 默认厚度写成了默认高度</h4>
+<pre><code>export const getWallThickness = (wall: WallNode) =&gt;
+  wall.thickness ?? DEFAULT_WALL_<span class="cw">HEIGHT</span>       <span class="cw">// ← 应为 DEFAULT_WALL_THICKNESS</span>
+</code></pre>
+      <p>
+        <code>WallTool</code> 建墙时不传 <code>thickness</code>，所以<strong>你画出来的每一堵墙
+        都是 2.5m 厚</strong>（而不是 0.1m）——2.5 × 2.5 的方柱子。
+      </p>
+      <div class="trap">
+        <span class="trap-label">为什么 28 个绿测试没抓到它</span>
+        <p style="margin-bottom:0">
+          <code>wall-mitering.test.ts:8</code> 的建墙工厂签名是
+          <code>wall(id, start, end, thickness = 0.2)</code>——<strong>测试永远显式传厚度</strong>，
+          默认分支一次都没被执行过。这是「测试全绿但产品是坏的」的标准形态：
+          <em>测试替你构造了生产代码从不构造的输入</em>。
+          修完顺手加一条 <code>expect(getWallThickness(wallWithoutThickness)).toBe(0.1)</code>。
+        </p>
+      </div>
+
+      <h4>③ <code>viewer/components/wall-renderer.tsx:7,43</code> —— 点墙毫无反应</h4>
+<pre><code><span class="cm">// 现在是这样：</span>
+import { events } from "@react-three/fiber"   <span class="cw">← 自动导入抢走了这个名字</span>
+...
+&lt;mesh {...events}&gt;                            <span class="cw">← 展开的是 createPointerEvents 函数</span>
+
+<span class="cm">// 应该是 m3-spine.html §07 的写法：</span>
+import { useNodeEvents } from '../hooks/use-node-events'
+...
+const events = useNodeEvents(node, 'wall')
+&lt;mesh {...events}&gt;
+</code></pre>
+      <p>
+        <code>@react-three/fiber</code> 导出的 <code>events</code> 是
+        <code>createPointerEvents</code>，一个<strong>函数</strong>。
+        展开一个函数得到零个属性——TS 不报错（函数类型确实没有可展开的自有属性），
+        eslint 不报错，<code>tsc</code> 不报错。
+        <strong>于是 <code>wall:click</code> 从来没有被 emit 过。</strong>
+      </p>
+      <p>
+        表现是：墙工具下点墙<em>看起来</em>正常（没有误选中），选择工具下点墙<em>也</em>没反应——
+        因为 <code>use-grid-events.ts:31</code> 的射线检测到了墙，于是连 <code>grid:click</code>
+        也不发。<strong>M3 §05 的第 6 条验收（「点墙 → 选中并高亮」）其实没通过。</strong>
+        <code>useNodeEvents</code> 至今是零调用点的死代码。
+      </p>
+      <div class="note">
+        <p style="margin-bottom:0">
+          这三笔全部是<strong>「类型系统看不见」</strong>类的 bug：一个是算术、一个是常量选错、
+          一个是标识符被同名导入遮蔽。它们是 <code>pnpm verify</code> 全绿也不代表能跑的活样本，
+          值得在 <code>DECISIONS.md</code> 里留一条。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 -->
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">zundo 接进 useScene</h3><span class="tag core">core</span></div>
+      <p><code>zundo</code> 已经在 <code>package.json</code> 里躺着了，没被 import 过。</p>
+<pre><code><span class="cm">// core/store/use-scene.ts</span>
+import { temporal } from 'zundo'
+
+export const useScene = create&lt;SceneState&gt;()(
+  temporal(
+    (set, get) =&gt; ({ <span class="cm">/* 原样不动 */</span> }),
+    {
+      partialize: (s) =&gt; ({ nodes: s.nodes, rootNodeIds: s.rootNodeIds }),
+      equality:   (a, b) =&gt; <span class="cm">/* 语义相等，不是引用相等 */</span>,
+      limit: 50,
+    },
+  ),
+)
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">两个当场会咬人的地方</span>
+        <p>
+          <strong>① <code>create&lt;T&gt;()(...)</code> 的双层调用不能省。</strong>
+          你现在写的是 <code>create&lt;SceneState&gt;((set, get) =&gt; ...)</code>。
+          套上 middleware 之后必须换成柯里化形式，否则 TS 推不出中间件叠加后的 store 类型，
+          <code>useScene.temporal</code> 会不存在。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>② <code>partialize</code> 只能进 <code>nodes</code> / <code>rootNodeIds</code>。</strong>
+          把 <code>dirtyNodes</code>（第 05 步要加）圈进去的话，
+          撤销会把脏集一起回滚——你撤销完，几何不重建，画面停在撤销前。
+          <em>脏集是「谁需要重算」的当下事实，不是文档的一部分。</em>
+        </p>
+      </div>
+      <p>
+        <code>equality</code> 用语义比较（递归比字段）而不是 <code>Object.is</code>：
+        <code>updateNode</code> 每次造新对象，引用相等永远为假，
+        于是「拖回原位」也会记一条历史。对照仓库的
+        <code>areSceneSnapshotsEqual</code> / <code>areSemanticValuesEqual</code>
+        （<code>core/src/store/history-control.ts:90-123</code>）可以直接改写，30 行。
+      </p>
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">history-control.ts —— pause 租约与事务</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// core/store/history-control.ts</span>
+
+<span class="cm">/** 拿一张暂停租约。返回的闭包幂等：重复 release 不会多减一次深度。 */</span>
+export function acquireSceneHistoryPause(): () =&gt; void
+
+<span class="cm">/** 当前有几张租约在手。测试用，也用于断言「拖拽结束后必须归零」。 */</span>
+export function getSceneHistoryPauseDepth(): number
+
+<span class="cm">/** 跑 fn，把它产生的 N 条历史截成 1 条。 */</span>
+export function runAsSingleSceneHistoryStep&lt;T&gt;(run: () =&gt; T): T
+</code></pre>
+      <p><strong>hint —— 租约：</strong></p>
+      <ul>
+        <li>模块级 <code>Set&lt;symbol&gt;</code> 存租约，不是一个计数器。
+          <code>size === 0</code> 时才 <code>temporal.getState().resume()</code>。</li>
+        <li>返回的闭包里放一个 <code>let released = false</code> 守卫。
+          React 18 严格模式的双次 effect 清理会 release 两次，没有守卫就提前 resume 了。</li>
+        <li><strong>为什么 symbol 不是数字</strong>：数字计数器无法诊断泄漏。
+          symbol 集合可以在开发模式下打印出「谁还没还」。</li>
+      </ul>
+      <p><strong>hint —— 事务：</strong></p>
+      <ul>
+        <li>记下 <code>run()</code> 前的 <code>pastStates</code>，跑完再读一次。</li>
+        <li>新增了 N &gt; 1 条 ⟹ 只保留第一条（第一条的 <em>before</em> 才是真起点）。</li>
+        <li>新增了 N 条但语义上前后相等 ⟹ 全部丢弃（拖回原位不该占一条历史）。</li>
+        <li>
+          <strong>不能假设「新增的都在数组尾部」</strong>——<code>limit: 50</code>
+          会从头部截断。对照仓库为此写了
+          <code>retainedPastStateCount</code>（<code>history-control.ts:236</code>），
+          从前往后找最长的公共后缀。15 行，照抄。
+        </li>
+      </ul>
+      <div class="trap">
+        <span class="trap-label">这一步必须写测试，而且要在接 UI 之前跑绿</span>
+        <p style="margin-bottom:0">
+          <code>history-control.test.ts</code> 至少四条：
+          <strong>重入</strong>（拿两张租约，还一张，历史仍暂停）、
+          <strong>幂等</strong>（同一张还两次，深度不变负）、
+          <strong>N 条截成 1 条</strong>、
+          <strong>空操作不占历史</strong>。
+          这是纯逻辑，可以在 Node 里裸跑（D11）。
+          等你在浏览器里发现「Ctrl+Z 少撤一步」再来查，涉及的文件会有五个。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">先接快捷键，验证撤销本身</h3><span class="tag app">app</span></div>
+<pre><code><span class="cm">// app/hooks/use-history-shortcuts.ts</span>
+export function useHistoryShortcuts(): void
+</code></pre>
+      <p>
+        <code>Ctrl/Cmd+Z</code> → <code>undo()</code>，<code>Ctrl+Shift+Z</code> /
+        <code>Ctrl+Y</code> → <code>redo()</code>，<code>Delete</code> / <code>Backspace</code> →
+        删掉当前 <code>selectId</code>。
+      </p>
+      <p>
+        <strong>为什么排在拖拽<em>前面</em></strong>：现在你已经能画墙、能删墙了，
+        「画一堵 → Ctrl+Z → 墙消失 → Ctrl+Shift+Z → 墙回来」是一条<em>不含任何拖拽逻辑</em>
+        的端到端验证。撤销本身如果是坏的，先在这里坏，别等到拖拽里一起坏。
+      </p>
+      <div class="trap">
+        <span class="trap-label">删除要走事务，哪怕现在只删一个节点</span>
+        <p style="margin-bottom:0">
+          <code>removeNode</code> 现在改两个字段（<code>nodes</code> 和 <code>rootNodeIds</code>），
+          在一次 <code>set</code> 里，所以只有一条历史。<strong>M7 门窗级联删除时不是。</strong>
+          现在就把它包进 <code>runAsSingleSceneHistoryStep</code>，
+          M7 加级联时零改动；不包的话 M7 会出现「删一堵带三个窗的墙要按四次 Ctrl+Z」。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">use-live-overrides.ts</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// core/store/use-live-overrides.ts</span>
+
+type LiveOverrideState = {
+  overrides: Map&lt;AnyNodeId, Partial&lt;AnyNode&gt;&gt;
+  set(id: AnyNodeId, values: Partial&lt;AnyNode&gt;): void
+  setMany(entries: ReadonlyArray&lt;readonly [AnyNodeId, Partial&lt;AnyNode&gt;]&gt;): void
+  clear(id: AnyNodeId): void
+  clearAll(): void
+}
+
+<span class="cm">/** 文档 ⊕ 覆盖。没有覆盖时原样返回入参（调用方不必再判一次）。 */</span>
+export function getEffectiveNode&lt;T extends AnyNode&gt;(node: T): T
+</code></pre>
+      <p><strong>hint：</strong></p>
+      <ul>
+        <li>
+          <code>setMany</code> 不是可选优化，是必需的。拖一堵墙会连带更新 2–4 堵邻墙；
+          逐个 <code>set</code> 是 N 次 Map 克隆 + N 次 zustand 通知，
+          <code>useLevelMiters</code> 会在<strong>一帧内重算 N 次斜接</strong>，
+          而且中间那几次算的是自相矛盾的半更新状态。
+        </li>
+        <li>
+          每次都克隆整个 Map（<code>new Map(state.overrides)</code>）。
+          原地 <code>.set</code> 不换引用，zustand 的默认相等判断会认为没变，订阅者收不到通知。
+        </li>
+        <li>
+          <code>getEffectiveNode</code> 用 <code>getState()</code> 读，<strong>不是 hook</strong>——
+          它要能在 <code>useFrame</code> 和事件回调里调。订阅交给第 07 步的
+          <code>useEffectiveNode</code>。
+        </li>
+      </ul>
+      <div class="note">
+        <p style="margin-bottom:0">
+          对照仓库的类型是 <code>Record&lt;string, unknown&gt;</code>（<code>use-live-node-overrides.ts:3</code>）——
+          它有 46 种节点，写不出精确类型。<strong>你只有一种，用 <code>Partial&lt;AnyNode&gt;</code>。</strong>
+          等 M5 注册表进来、节点类型变多时再看要不要放宽。
+          <em>从宽类型收紧很难，从紧类型放宽很容易。</em>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 -->
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">dirtyNodes 进 useScene</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// core/store/use-scene.ts 增补</span>
+dirtyNodes: Set&lt;AnyNodeId&gt;
+markDirty:  (id: AnyNodeId) =&gt; void
+clearDirty: (id: AnyNodeId) =&gt; void
+</code></pre>
+      <p><strong>hint：</strong></p>
+      <ul>
+        <li><code>addNode</code> / <code>updateNode</code> 里 <code>markDirty</code>，
+          <code>removeNode</code> 里 <code>clearDirty</code>。</li>
+        <li>
+          <strong>脏集是可变的，不进 <code>set()</code>。</strong>
+          <code>get().dirtyNodes.add(id)</code>，不是
+          <code>set(s =&gt; ({ dirtyNodes: new Set(...) }))</code>。
+          原因：它每帧被清空又填满，走 zustand 通知等于每帧唤醒所有订阅者，
+          而<em>它的消费者是 <code>useFrame</code>，本来就每帧主动读</em>。
+          这和第 04 步「必须克隆 Map」正好相反，区别就在于有没有订阅者。
+        </li>
+        <li>撤销 / 重做之后要把受影响的 id 全部 <code>markDirty</code>，
+          否则撤销回去了但几何不重建。<code>useScene.temporal.subscribe</code> 里挂一下。</li>
+      </ul>
+      <div class="trap">
+        <span class="trap-label">M4 只到「脏集被正确维护」为止</span>
+        <p style="margin-bottom:0">
+          真正<em>消费</em>脏集的 <code>GeometrySystem</code>（每帧读 <code>dirtyNodes</code> →
+          调 <code>def.geometry()</code> → 换子节点 → <code>clearDirty</code>）是 <strong>M5</strong> 的活。
+          M4 的消费者只有第 07 步的 miter 缓存和第 08 步的渲染。
+          <strong>不要在 M4 提前造 GeometrySystem</strong>——它需要注册表，而注册表要等第三种节点类型（D10）。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 -->
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">wall-adjacency.ts</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// core/systems/wall/wall-adjacency.ts</span>
+
+<span class="cm">/** 返回「因为 dirtyWallIds 变了而必须跟着重建」的墙 id（不含 dirty 自身）。 */</span>
+export function getAdjacentWallIds(
+  walls: WallNode[],
+  dirtyWallIds: ReadonlySet&lt;AnyNodeId&gt;,
+): Set&lt;AnyNodeId&gt;
+</code></pre>
+      <p><strong>三类邻接，一个都不能漏：</strong></p>
+      <ol>
+        <li><strong>共端点</strong>：<code>quantizeKey</code> 后字符串相等（四种组合：起-起 / 起-终 / 终-起 / 终-终）。</li>
+        <li><strong>T 接，脏墙撞别人</strong>：<code>pointOnSegment(dirtyStart|dirtyEnd, wall)</code>。</li>
+        <li><strong>T 接，别人撞脏墙</strong>：<code>pointOnSegment(wallStart|wallEnd, dirtyWall)</code>。</li>
+      </ol>
+      <div class="trap">
+        <span class="trap-label">第 3 类最容易漏，而且症状会误导你</span>
+        <p>
+          你把主墙拖走，一堵原本撞在它身上的 T 型墙<strong>留在原地不重算</strong>——
+          它的端点仍然被切成斜面，但对面的墙已经不在了，于是空中挂着一个斜切口。
+        </p>
+        <p style="margin-bottom:0">
+          漏它的原因很自然：直觉上「脏的是主墙，主墙动了，找它<em>碰到</em>了谁」。
+          但 T 接是不对称的——<strong>撞人的和被撞的，端点被切的是撞人的那一方</strong>，
+          而拖动的往往是被撞的那一方。方向必须双查。
+          对照仓库 <code>wall-mitering.ts:497-529</code> 三段并列，注释里明确标了
+          <em>"Check reverse T-junction"</em>。
+        </p>
+      </div>
+      <p>
+        <strong>测试（<code>wall-adjacency.test.ts</code>）</strong>：L 型共端点、
+        T 型两个方向各一条、<strong>不相邻的墙不在结果里</strong>（这条最重要——
+        邻接函数返回全集也能让画面正确，只是性能优化白做了，
+        而画面正确会让你以为它对）。
+      </p>
+    </div>
+  </div>
+
+  <!-- 07 -->
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">miter 缓存 + effective 节点</h3><span class="tag viewer">viewer</span></div>
+<pre><code><span class="cm">// viewer/lib/level-miter-cache.ts</span>
+export function sameMiterInputs(a: WallNode[], b: WallNode[]): boolean
+export function getCachedLevelMiters(walls: WallNode[]): MiterData
+export function clearLevelMiterCache(): void
+
+<span class="cm">// viewer/hooks/use-effective-node.ts</span>
+export function useEffectiveNode&lt;T extends AnyNode&gt;(id: AnyNodeId): T | undefined
+</code></pre>
+      <p><strong>hint：</strong></p>
+      <ul>
+        <li>
+          <code>sameMiterInputs</code> 只比<em>影响斜接</em>的字段：
+          <code>id</code> / <code>start</code> / <code>end</code> / <code>thickness</code>。
+          <strong>不要比 <code>height</code></strong>——改层高不改平面斜接，比了会让 M8
+          的「改层高」全场重算。
+        </li>
+        <li>
+          <code>useLevelMiters</code> 的输入从 <code>Object.values(nodes)</code> 换成
+          <strong>过完覆盖的墙</strong>，并且要同时订阅 <code>useScene.nodes</code> 和
+          <code>useLiveOverrides.overrides</code>。少订一个，拖拽时斜接不跟随。
+        </li>
+        <li>
+          <code>clearLevelMiterCache</code> 现在没人调，但必须写——
+          缓存是模块级的，比任何 mount 都活得久。M9 加载存档时要调它。
+          对照仓库为此写了一整段注释（<code>level-miter-cache.ts:45-49</code>）。
+        </li>
+      </ul>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>第 08 步之前先在这里量一次。</strong>
+          <code>calculateLevelMiters</code> 开头放一个 <code>console.count()</code>，
+          画 20 堵墙，然后<em>只是移动鼠标</em>。改造前它每次鼠标移动都会 +1（因为
+          <code>WallDraftPreview</code> 的 <code>setCursor</code> 触发重渲染）；
+          改造后应该纹丝不动。这个数字是 §05 验收的第一条。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 08 -->
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">scope 加两个变体</h3><span class="tag app">app</span></div>
+<pre><code><span class="cm">// app/lib/interaction/scope.ts</span>
+export type InteractionScope =
+  | { kind: 'idle' }
+  | { kind: 'drafting';    tool: 'wall'; points: Point2D[] }
+  | { kind: 'moving';      nodeId: AnyNodeId; origin: Point2D }
+  | { kind: 'handle-drag'; nodeId: AnyNodeId; handle: 'start' | 'end' }
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">M3 的 update() 签名到这里会开始骗人</span>
+        <p>你现在的写法（<code>use-interaction-scope.ts:17-23</code>）是：</p>
+<pre style="background:transparent;border:0;padding:0;margin:10px 0"><code>update: (patch: Partial&lt;ActiveInteractionScope&gt;) =&gt; ...
+  if ('kind' in patch &amp;&amp; patch.kind !== state.scope.kind) return state
+  return { scope: { ...state.scope, ...patch } as InteractionScope }
+</code></pre>
+        <p>
+          只有一个活跃变体时它是安全的。加到三个之后，
+          <code>Partial&lt;A | B | C&gt;</code> 会分配成 <code>Partial&lt;A&gt; | Partial&lt;B&gt; | Partial&lt;C&gt;</code>，
+          而<strong>不带 <code>kind</code> 的 patch 绕过了那道守卫</strong>：
+          在 <code>drafting</code> 里调 <code>update({ nodeId })</code> 完全合法，
+          你会得到一个 <code>{ kind: 'drafting', points: [...], nodeId: ... }</code>
+          ——判别联合里不存在的形状。那句 <code>as InteractionScope</code> 把它盖住了。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>改成把 kind 提成第一个必填参数：</strong>
+        </p>
+<pre style="background:transparent;border:0;padding:0;margin:10px 0"><code>update: &lt;K extends ActiveInteractionScope['kind']&gt;(
+  kind: K,
+  patch: Partial&lt;Extract&lt;InteractionScope, { kind: K }&gt;&gt;,
+) =&gt; void
+</code></pre>
+        <p style="margin-bottom:0">
+          调用方从 <code>update({ points: [p] })</code> 变成
+          <code>update('drafting', { points: [p] })</code>——多打九个字符，
+          换来「patch 的字段必须属于那个变体」由编译器保证，
+          而且 kind 不匹配时静默 no-op 的语义变成显式的。
+          <em>这是 M3 方案的一处修正，不是新增功能；改动只在两个文件里。</em>
+        </p>
+      </div>
+      <p>
+        <code>selectionEnabled</code> 一个字都不用改——它判的是
+        <code>kind === 'idle'</code>，加多少变体都还是那句话。
+        <strong>这就是当初选判别联合而不是布尔标志的全部回报。</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- 09 -->
+  <div class="step">
+    <div class="step-n">09</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">move-tool.tsx —— 整墙拖拽</h3><span class="tag app">app</span></div>
+      <p>第一个把 A + B + C 三个机制串起来的东西。生命周期五段：</p>
+<pre><code>pointerdown on wall  →  begin({ kind:'moving', nodeId, origin })
+                        release = acquireSceneHistoryPause()
+                        记下 originalStart / originalEnd
+
+pointermove          →  算 delta，算吸附
+                        liveOverrides.setMany([自己] + [邻墙们])
+
+pointerup            →  release()                     <span class="cw">← 先 resume</span>
+                        runAsSingleSceneHistoryStep(() =&gt; {
+                          updateNode(自己); updateNode(邻墙们)
+                        })                            <span class="cw">← 再写</span>
+                        liveOverrides.clearAll()
+                        end()
+
+Esc                  →  liveOverrides.clearAll(); release(); end()
+                        <span class="cm">（主 store 从未被写过，清覆盖就等于回到原位）</span>
+
+unmount              →  同 Esc。清理函数里必须有，否则租约泄漏 ⟹ 历史永久暂停
+</code></pre>
+      <p><strong>hint：</strong></p>
+      <ul>
+        <li>
+          <strong>M4 只做「拖整墙，邻墙端点跟着走」，不做联动插墙。</strong>
+          对照仓库的 <code>move-tool.tsx</code> 是 719 行，里面有桥接墙幽灵预览、
+          自动楼板重算、轴锁旋转——那些依赖 M6 楼板和 M8 楼层，现在做不了也不该做。
+          你的目标是 100 行以内。
+        </li>
+        <li>
+          按 M3 的 D15：<code>moving</code> 活跃期间<strong>直接监听 canvas DOM</strong>，
+          不走事件总线。进入拖拽靠 <code>wall:pointerdown</code>（总线，因为要知道点中了谁），
+          之后的 move / up 全部走 <code>window</code> 上的裸监听器。
+        </li>
+        <li>
+          监听器挂 <code>window</code> 不是 canvas——拖到画布外再松手，
+          canvas 收不到 <code>pointerup</code>，你会得到一堵永远粘着光标的墙。
+          配 <code>setPointerCapture</code> 也行，但要记得 <code>pointercancel</code> 也要收尾。
+        </li>
+      </ul>
+      <div class="trap">
+        <span class="trap-label">邻墙端点必须一起写进覆盖，否则拖拽期斜接会闪</span>
+        <p style="margin-bottom:0">
+          你只覆盖被拖的墙的话，<code>calculateLevelMiters</code> 看到的是
+          「主墙在新位置，邻墙还在旧位置」——共端点断开，斜接消失，
+          墙角在拖动过程中一直闪烁，松手才复原。
+          用第 06 步的 <code>getAdjacentWallIds</code> 找出邻墙，
+          把它们贴着主墙的那一端一起挪进覆盖，一次 <code>setMany</code>。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="step">
+    <div class="step-n">10</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">endpoint-handles.tsx —— 端点手柄</h3><span class="tag app">app</span></div>
+      <p>
+        选中一堵墙时，在它两个端点各画一个小球。拖球 = <code>handle-drag</code> scope。
+        逻辑和第 09 步同构，只改一个字段（<code>start</code> 或 <code>end</code>），
+        所以先写 move-tool 再写它，第二个会快很多。
+      </p>
+      <ul>
+        <li>
+          手柄自己也是 mesh，也会被 <code>use-grid-events.ts</code> 的射线打到——
+          但它<strong>不在 <code>sceneRegistry</code> 里</strong>（没调 <code>useRegistry</code>），
+          所以那条射线看不见它，点手柄会被判成「点空地」并触发取消选中。
+          <strong>手柄的 <code>pointerdown</code> 必须 <code>stopPropagation</code>，
+          并且要在捕获阶段就开始 <code>handle-drag</code> scope</strong>——
+          scope 一开，<code>selectionEnabled</code> 就假了，取消选中自然不会发生。
+        </li>
+        <li>
+          手柄尺寸要跟相机距离走，否则拉远之后小到点不中。
+          <code>useFrame</code> 里按 <code>camera.position.distanceTo(handle)</code>
+          调 <code>scale</code>；正交相机下改用 <code>1 / camera.zoom</code>。
+        </li>
+      </ul>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>两个 scope 变体不能合并成一个带可选字段的 <code>dragging</code>。</strong>
+          它们的<em>提交内容</em>不同（一个写两个端点，一个写一个），
+          <em>吸附规则</em>也不同（整墙拖只吸网格，端点拖要吸已有端点）。
+          合并之后每个消费点都要 <code>if (handle)</code> 再分一次岔——
+          这正是 <code>interaction-scope.md</code> 记的那段历史的开头。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="step">
+    <div class="step-n">11</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">snap-2d.ts —— 吸附</h3><span class="tag core">core</span></div>
+<pre><code><span class="cm">// core/lib/snap-2d.ts</span>
+export const DEFAULT_GRID_STEP = 0.1
+export const ENDPOINT_SNAP_RADIUS = 0.35
+
+export function snapToGrid(p: Point2D, step?: number): Point2D
+
+<span class="cm">/** 半径内最近的已有端点；没有则 null。ignoreIds 排除正在拖的墙自己。 */</span>
+export function nearestEndpoint(
+  p: Point2D, walls: WallNode[],
+  opts?: { ignoreIds?: ReadonlySet&lt;AnyNodeId&gt;; radius?: number },
+): Point2D | null
+
+<span class="cm">/** 端点优先，退化到网格。这个组合顺序是唯一的公开入口。 */</span>
+export function snapPoint(
+  p: Point2D, walls: WallNode[],
+  opts?: { ignoreIds?: ReadonlySet&lt;AnyNodeId&gt; },
+): Point2D
+</code></pre>
+      <p><strong>hint：</strong></p>
+      <ul>
+        <li>
+          <strong>端点优先于网格，不能反过来。</strong>
+          先吸网格的话，一个落在 (1.03, 2.07) 的已有端点会被你先吸到 (1.0, 2.1)，
+          然后端点吸附发现「已经不在半径内 / 或吸到了错的点」。
+          结果是墙角差 3 厘米——肉眼看不见，但 <code>quantizeKey</code> 分进不同的桶，
+          <strong>斜接静默失效</strong>。这是 M2 那条「落点不吸附」缺陷真正的杀伤方式。
+        </li>
+        <li>
+          <code>ignoreIds</code> 是必须的。拖 A 墙的 start 时，
+          A 自己的 start 就在光标底下——不排除的话它吸住自己，端点永远拖不动。
+        </li>
+        <li>
+          纯函数、不 import three，写 <code>snap-2d.test.ts</code>（D11）。
+          至少测：<strong>端点优先于网格</strong>、<strong>半径外不吸</strong>、
+          <strong>ignoreIds 生效</strong>。
+        </li>
+      </ul>
+      <p>
+        接三个地方：<code>wall-tool.tsx</code> 的落点、<code>move-tool.tsx</code> 的整墙位移
+        （只吸网格）、<code>endpoint-handles.tsx</code> 的端点（走完整 <code>snapPoint</code>）。
+      </p>
+      <div class="note">
+        <p style="margin-bottom:0">
+          对照仓库还有中点吸附、交点吸附、垂足吸附
+          （<code>wall-snap-geometry.ts</code>，398 行，五个半径常量）。
+          <strong>M4 只做端点 + 网格。</strong>其余的等 M12 有了 UI 能开关吸附类型再说——
+          没有 UI 提示的吸附越多，用户越不知道自己吸到了什么，越难用。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div class="step">
+    <div class="step-n">12</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">橡皮筋改命令式</h3><span class="tag app">app</span></div>
+      <p>
+        <code>wall-tool.tsx</code> 现在是
+        <code>const [cursor, setCursor] = useState&lt;Point2D | null&gt;(null)</code>，
+        每次 <code>pointermove</code> 一次 setState。改成：
+      </p>
+      <ul>
+        <li><code>pointermove</code> 只写 <code>cursorRef.current = p</code>。</li>
+        <li>
+          <code>WallDraftPreview</code> 里 <code>useFrame</code>：
+          读 <code>cursorRef</code> 和 scope 的最后一点，
+          直接改 line 的 <code>geometry.attributes.position</code>
+          （或 drei <code>&lt;Line&gt;</code> 的 <code>ref.current.geometry.setPositions()</code>），
+          然后 <code>needsUpdate = true</code>。
+        </li>
+        <li>
+          <strong>「有没有草稿点」仍然走 state</strong>——那是每次点击才变一次的低频量，
+          而且决定了 line 挂不挂。只有<em>光标位置</em>下沉到 ref。
+        </li>
+      </ul>
+      <div class="trap">
+        <span class="trap-label">这一步排在最后，因为它是唯一一个「改对了看不出来」的</span>
+        <p style="margin-bottom:0">
+          画面完全一样。验证靠第 07 步埋的那个 <code>console.count()</code>：
+          <strong>改造前，移动鼠标不点击，计数一直涨；改造后，一次不涨。</strong>
+          没有这个计数器，你无法确认自己真的改对了——
+          这就是为什么量测放在第 07 步而不是这里。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 05 -->
+<section>
+  <h2><span class="num">05</span>验收</h2>
+  <p class="h2sub">前三条是 M4 的全部意义，其余是不许倒退</p>
+
+  <ul class="check">
+    <li><span><strong>画 20 堵墙，只移动鼠标不点击</strong> → <code>calculateLevelMiters</code> 的计数<strong>一次都不涨</strong>。</span></li>
+    <li><span><strong>100 堵墙里拖第 37 堵</strong> → 只有它和邻居重建几何。<code>buildWallGeometry</code> 里放计数器，一次拖拽结束后总数应该是「帧数 × (1 + 邻居数)」量级，不是「帧数 × 100」。</span></li>
+    <li><span><strong>拖一秒钟再松手，按一次 Ctrl+Z</strong> → 墙整个回到原位，不是回退一帧。</span></li>
+    <li><span>拖拽<strong>过程中</strong>墙角斜接实时跟随，不闪烁；松手瞬间画面不跳变（覆盖和提交的值必须一致）。</span></li>
+    <li><span>拖端点到另一堵墙的端点附近 → 吸住，松手后<strong>那个墙角自动斜接</strong>。</span></li>
+    <li><span>拖到一半按 Esc → 回原位，且<strong>此时按 Ctrl+Z 撤销的是上一个操作</strong>（被取消的拖拽没占历史）。</span></li>
+    <li><span>选中墙按 Delete → 消失；Ctrl+Z → 回来，<strong>并且斜接正确</strong>（撤销后脏集有被重新标记）。</span></li>
+    <li><span>连续拖同一堵墙五次，然后连按五次 Ctrl+Z → 一步一步退回最初，不多不少。</span></li>
+    <li><span>拖拽中切工具 / 切视图 / 组件卸载 → <code>getSceneHistoryPauseDepth() === 0</code>，历史没被永久暂停。</span></li>
+    <li><span><strong>M3 §05 第 6 条的迟到验收</strong>：选择工具下点墙 → 选中并高亮；点空地 → 取消选中。（第 00 步 ③ 修完才可能过）</span></li>
+    <li><span>画出来的墙是 <strong>0.1m 厚</strong>，不是 2.5m。（第 00 步 ②）</span></li>
+    <li><span><code>pnpm verify</code> 全绿，含 <code>geometry-2d</code> / <code>wall-mitering</code> / <code>scope</code> / <code>history-control</code> / <code>wall-adjacency</code> / <code>snap-2d</code> 六组。</span></li>
+  </ul>
+
+  <h3>提交回来的方式</h3>
+  <p class="prose">
+    贴四个文件：<code>core/store/history-control.ts</code>、
+    <code>core/systems/wall/wall-adjacency.ts</code>、
+    <code>app/tools/move-tool.tsx</code>、
+    <code>app/store/use-interaction-scope.ts</code>，
+    加 <code>pnpm test</code> 输出，加两个计数器的数字（前 / 后），
+    再加一段拖墙 + Ctrl+Z 的录屏。
+  </p>
+  <p class="prose">
+    我按四条 review：<strong>租约有没有泄漏路径</strong>（每条 return / throw / cleanup 都还了吗）、
+    <strong>提交是不是 resume 在前</strong>、
+    <strong>邻接的第 3 类（反向 T 接）有没有漏</strong>、
+    <strong>有没有在拖拽期偷偷写主 store</strong>。
+  </p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 06 -->
+<section>
+  <h2><span class="num">06</span>故意保留的缺陷</h2>
+  <p class="h2sub">M4 结束时这些必须还在</p>
+
+  <div class="defect"><span>交点检测仍是 O(交点×墙)，无空间网格　<em>（原定 M4，已改期，条件见 §02 B）</em></span><span class="defect-to">→ M8+</span></div>
+  <div class="defect"><span>没有 <code>GeometrySystem</code>，几何重建仍靠 React <code>useMemo</code> 的依赖数组</span><span class="defect-to">→ M5</span></div>
+  <div class="defect"><span>live 覆盖是 <code>Partial&lt;AnyNode&gt;</code>，没有 per-type 校验</span><span class="defect-to">→ M5</span></div>
+  <div class="defect"><span>删墙没有级联（还没有子节点可级联）</span><span class="defect-to">→ M7</span></div>
+  <div class="defect"><span>只吸端点和网格，没有中点 / 交点 / 垂足吸附</span><span class="defect-to">→ M12</span></div>
+  <div class="defect"><span>拖拽中没有尺寸标注，不知道自己拖了多远</span><span class="defect-to">→ M13</span></div>
+  <div class="defect"><span>不能多选拖拽、不能框选</span><span class="defect-to">→ M13</span></div>
+  <div class="defect"><span>撤销不跨刷新（<code>limit: 50</code> 的历史活在内存里）</span><span class="defect-to">→ M9</span></div>
+  <div class="defect"><span>拖动整墙不会自动插入桥接墙（对照仓库有，依赖 M6/M8）</span><span class="defect-to">→ M8 后重估</span></div>
+
+  <div class="note" style="margin-top:28px">
+    <p>
+      <strong>第二条值得多看一眼。</strong>M4 做完之后，脏集是<em>被正确维护</em>的，
+      但真正决定「哪堵墙重建几何」的仍然是 <code>wall-renderer.tsx</code> 里那个
+      <code>useMemo</code> 的依赖数组。脏集此刻只喂给 miter 缓存。
+    </p>
+    <p style="margin-bottom:0">
+      这不是浪费——<strong>M5 的 <code>GeometrySystem</code> 需要一个已经正确的脏集才能写</strong>，
+      而验证脏集正确的唯一办法是先让它驱动一个真实消费者（缓存）。
+      先建数据、后建消费者，是这一类「每帧驱动」机制唯一能分两步做的顺序。
+    </p>
+  </div>
+</section>
+
+
+<hr class="dim">
+
+<!-- ═══════════ 07 -->
+<section>
+  <h2><span class="num">07</span>全部代码</h2>
+  <p class="h2sub">新增 12 个，改写 11 个 · 顺序同 §04</p>
+
+  <div class="prose">
+    <p>
+      按 §04 的建造顺序排。<strong>逐项敲，别整段贴</strong> —— 到 M10 出跨模块 bug 时，
+      「我为什么这么写」是唯一能救你的东西。
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">这份 §07 相对 §03 / §04 有六处偏差，全部在下面标了出处</span>
+    <ul style="margin-bottom:0">
+      <li><code>snap-2d.ts</code> 落在 <code>core/schema/</code>（你建的空文件在那儿），§03 写的是 <code>core/lib/</code>。</li>
+      <li><code>history-control.ts</code> 的三个函数<strong>都带 store 参数</strong>，§04 第 02 步给的无参签名会循环导入。</li>
+      <li>多出两个 §03 没列的文件：<code>app/lib/interaction/drag-session.ts</code>、<code>app/lib/interaction/wall-linking.ts</code>。</li>
+      <li>多出六处 §03 没列的改动：<code>core/events/types.ts</code>、<code>core/systems/wall/wall-mitering.ts</code>、
+        <code>core/registry/scene-registry.ts</code>、<code>viewer/hooks/use-node-events.ts</code>、
+        <code>viewer/lib/pointer-plane.ts</code>、<code>viewer/store/use-viewer.ts</code>。</li>
+      <li><code>move-tool.tsx</code> 多了一个 §04 第 09 步没写的<strong>候选阶段</strong>；照 §04 敲会让「点墙选中」失效。</li>
+      <li><code>use-live-transforms.ts</code> 确认<strong>不建</strong>（§03 的脚注已经说明理由）。</li>
+    </ul>
+  </div>
+
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/lib/geometry-2d.ts</h3><span class="tag core">core</span><span class="tag debt">改</span></div>
+      <p><strong>你已经改完了</strong> —— 我扫代码时是错的，现在磁盘上是对的，<code>pnpm test</code> 31 绿。列在这里只为让文档和代码对得上。</p>
+<pre><code><span class="cw">-    const L2 = ab.x + ab.y * ab.y</span>
+<span style="color:var(--accent)">+    const L2 = ab.x * ab.x + ab.y * ab.y</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/schema/wall.ts</h3><span class="tag core">core</span><span class="tag debt">改</span></div>
+      <p>默认厚度写成了默认高度，于是 <code>WallTool</code> 建的每堵墙都是 2.5m 厚。</p>
+<pre><code><span class="cw">-export const getWallThickness = (wall: WallNode) =&gt; wall.thickness ?? DEFAULT_WALL_HEIGHT</span>
+<span style="color:var(--accent)">+export const getWallThickness = (wall: WallNode) =&gt; wall.thickness ?? DEFAULT_WALL_THICKNESS</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/schema/wall.test.ts</h3><span class="tag core">core</span><span class="tag core">新</span></div>
+      <p>专门覆盖<strong>默认分支</strong>。判据写在文件头的注释里：<em>生产代码会构造的输入，测试必须也构造一次。</em></p>
+<pre><code>import { describe, expect, it } from 'vitest'
+import {
+  DEFAULT_WALL_HEIGHT,
+  DEFAULT_WALL_THICKNESS,
+  getWallHeight,
+  getWallThickness,
+  WallNode,
+} from './wall'
+
+/**
+ * 这两条专门覆盖**默认分支**。
+ *
+ * wall-mitering.test.ts 的建墙工厂签名是 `wall(id, start, end, thickness = 0.2)`
+ * —— 测试永远显式传厚度，于是 `getWallThickness` 的 `??` 右边一次都没被执行过，
+ * 28 个绿测试抓不到「默认厚度写成了默认高度」。
+ *
+ * 判据：**生产代码会构造的输入，测试必须也构造一次。**
+ * WallTool 建墙时不传 thickness —— 那就是这里的输入。
+ */
+describe('墙的默认值', () =&gt; {
+  const bare = WallNode.parse({ type: 'wall', start: [0, 0], end: [4, 0] })
+
+  it('不传厚度时用 DEFAULT_WALL_THICKNESS，不是高度', () =&gt; {
+    expect(getWallThickness(bare)).toBe(DEFAULT_WALL_THICKNESS)
+    expect(getWallThickness(bare)).toBe(0.1)
+  })
+
+  it('不传高度时用 DEFAULT_WALL_HEIGHT', () =&gt; {
+    expect(getWallHeight(bare)).toBe(DEFAULT_WALL_HEIGHT)
+  })
+
+  it('显式值优先', () =&gt; {
+    const custom = WallNode.parse({
+      type: 'wall',
+      start: [0, 0],
+      end: [4, 0],
+      thickness: 0.3,
+      height: 3,
+    })
+    expect(getWallThickness(custom)).toBe(0.3)
+    expect(getWallHeight(custom)).toBe(3)
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/systems/wall/wall-mitering.ts</h3><span class="tag core">core</span><span class="tag debt">改</span></div>
+      <p>只是把常量导出，好让 <code>wall-adjacency.ts</code> 和 <code>wall-linking.ts</code> 共用同一个容差。两处各写一遍 <code>1e-3</code> 是「以后一定会漂移」的标准形态 —— 改了一处忘了另一处，症状是「邻接找得到、跟随却不动」。</p>
+<pre><code><span class="cw">-const JUNCTION_TOLERANCE = 1e-3</span>
+<span style="color:var(--accent)">+export const JUNCTION_TOLERANCE = 1e-3</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/registry/scene-registry.ts</h3><span class="tag core">core</span><span class="tag debt">改</span></div>
+      <p><code>byType</code> 从 M1 起就只在卸载时 <code>delete</code>，从来没 <code>add</code> 过，永远是空对象。M4 没有消费者，但 M5 的注册表要靠它做「按类型取全部节点」。补一行，不然那时候你会以为是注册表写错了。</p>
+<pre><code><span class="cm">     obj.userData.nodeId = id</span>
+<span class="cm">     sceneRegistry.nodes.set(id, obj)</span>
+<span style="color:var(--accent)">+    ;(sceneRegistry.byType[type] ??= new Set()).add(id)</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/hooks/use-pointer-gesture.ts</h3><span class="tag viewer">viewer</span><span class="tag debt">改</span></div>
+      <p><code>useEffect</code> 没有返回清理函数，捕获阶段的监听器每次 <code>gl</code> 变化都多挂一个。严格模式下开发环境立刻就是两个。</p>
+<pre><code><span class="cm">         el.addEventListener('pointerdown', onDown, { capture: true })</span>
+<span style="color:var(--accent)">+        return () =&gt; el.removeEventListener('pointerdown', onDown, { capture: true })</span>
+<span class="cm">     }, [gl])</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/components/wall-renderer.tsx</h3><span class="tag viewer">viewer</span><span class="tag debt">改</span></div>
+      <p>两件事：<strong>①</strong> 把 <code>{...events}</code> 接回 <code>useNodeEvents</code>（M3 的欠账，改完点墙才会选中）；<strong>②</strong> 读 effective 节点，拖拽期间 <code>documentNode</code> 一动不动，变的是覆盖。</p><p>注意文件里那条 <code>⚠</code> 注释 —— 它就是为了防止同一次自动导入再发生一遍。</p>
+<pre><code>import { useContext, useEffect, useMemo, useRef } from "react";
+import type { WallNode } from "../../core/schema/wall";
+import type * as THREE from 'three'
+import { useRegistry } from "../../core/registry/scene-registry";
+import { buildWallGeometry, wallTransform } from "../lib/wall-geometry";
+import { MiterContext, SelectionContext } from "./scene-context";
+import { useNodeEvents } from "../hooks/use-node-events";
+import { useEffectiveNode } from "../hooks/use-effective-node";
+
+
+const WALL_COLOR = '#e8e8e8'
+const WALL_SELECTED_COLOR = '#7dd3c0'
+
+export function WallRenderer({ node: documentNode }: { node: WallNode }) {
+    // 文档 ⊕ 覆盖。拖拽期间 documentNode 一动不动，变的是覆盖。
+    const node = useEffectiveNode(documentNode)
+
+    const ref = useRef&lt;THREE.Mesh&gt;(null)
+    useRegistry(node.id, 'wall', ref)
+
+    const miter = useContext(MiterContext)
+
+    const selectId = useContext(SelectionContext)
+    const isSelected = selectId === node.id
+
+    // ⚠ 这个 events 是 useNodeEvents 的返回值。
+    //   不要让 IDE 自动导入 @react-three/fiber 的同名导出 —— 那是
+    //   createPointerEvents 函数，展开得到零个属性，而且一处都不报错。
+    const events = useNodeEvents(node, 'wall')
+
+    const geometry = useMemo(
+        () =&gt; buildWallGeometry(node, miter),
+        [node.start[0], node.start[1], node.end[0], node.end[1], node.thickness, node.height, miter],
+    )
+
+    useEffect(() =&gt; () =&gt; geometry.dispose(), [geometry])
+
+    const { position, rotationY } = useMemo(
+        () =&gt; wallTransform(node),
+        [node.start[0], node.start[1], node.end[0], node.end[1]],
+    )
+
+    return (
+        &lt;mesh
+            ref={ref}
+            geometry={geometry}
+            position={position}
+            rotation-y={rotationY}
+            visible={node.visible !== false}
+            castShadow
+            receiveShadow
+            {...events}
+        &gt;
+            &lt;meshStandardMaterial
+                color={isSelected ? WALL_SELECTED_COLOR : WALL_COLOR}
+                roughness={0.9}
+                metalness={0}
+            /&gt;
+        &lt;/mesh&gt;
+    )
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/store/history-control.ts</h3><span class="tag core">core</span><span class="tag core">新</span></div>
+      <div class="trap"><span class="trap-label">这里改了 §04 第 02 步给的签名</span><p>§04 写的是 <code>acquireSceneHistoryPause(): () =&gt; void</code>，不带参数。<strong>那个签名行不通</strong>：不带参数就得在本文件里 <code>import { useScene }</code>，而 <code>use-scene.ts</code> 又要 import 这里的 <code>areSceneSnapshotsEqual</code> 当 <code>equality</code> —— 循环导入。</p><p style="margin-bottom:0">改成 store 由调用方传进来（对照仓库也是这么做的）。代价是每个调用点多打七个字符：<code>acquireSceneHistoryPause(useScene)</code>。</p></div><p>三块：语义相等、pause 租约、事务截断。三块互不依赖，但都必须在接 UI 之前测绿 —— 见下一项。</p>
+<pre><code>import type { AnyNode, AnyNodeId } from '../schema/types'
+
+/** 进历史的那一部分状态。zundo 的 `partialize` 返回它。 */
+export type SceneSnapshot = {
+  nodes: Record&lt;AnyNodeId, AnyNode&gt;
+  rootNodeIds: AnyNodeId[]
+}
+
+// ─────────────────────────────────────────────────────────────
+// 语义相等
+//
+// 为什么不是 Object.is：updateNode 每次都 { ...prev, ...patch } 造新对象，
+// 引用相等永远为假 —— 于是「把墙拖回原位」也会记一条历史。
+// ─────────────────────────────────────────────────────────────
+
+export function areSemanticValuesEqual(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true
+  if (typeof left !== typeof right || left === null || right === null) return false
+
+  if (Array.isArray(left) || Array.isArray(right)) {
+    if (!(Array.isArray(left) &amp;&amp; Array.isArray(right)) || left.length !== right.length) return false
+    return left.every((value, index) =&gt; areSemanticValuesEqual(value, right[index]))
+  }
+
+  if (typeof left !== 'object' || typeof right !== 'object') return false
+
+  const l = left as Record&lt;string, unknown&gt;
+  const r = right as Record&lt;string, unknown&gt;
+  const lKeys = Object.keys(l)
+  if (lKeys.length !== Object.keys(r).length) return false
+
+  for (const key of lKeys) {
+    if (!(key in r) || !areSemanticValuesEqual(l[key], r[key])) return false
+  }
+  return true
+}
+
+export function areSceneSnapshotsEqual(left: SceneSnapshot, right: SceneSnapshot): boolean {
+  return (
+    areSemanticValuesEqual(left.nodes, right.nodes) &amp;&amp;
+    areSemanticValuesEqual(left.rootNodeIds, right.rootNodeIds)
+  )
+}
+
+// ─────────────────────────────────────────────────────────────
+// 暂停租约
+//
+// 本文件不 import useScene —— use-scene.ts 要 import 上面那两个相等函数，
+// 反过来再 import 就成了循环。所以 store 由调用方传进来。
+// §04 第 02 步给的签名不带参数，那个签名行不通，这里是修正后的。
+// ─────────────────────────────────────────────────────────────
+
+type PausableStore = {
+  temporal: { getState(): { pause(): void; resume(): void } }
+}
+
+const pauseLeases = new Set&lt;symbol&gt;()
+
+/** 当前还有几张租约没还。测试用，也用于「拖拽结束必须归零」的断言。 */
+export function getSceneHistoryPauseDepth(): number {
+  return pauseLeases.size
+}
+
+/**
+ * 拿一张暂停租约，返回归还闭包。
+ *
+ * 用 Set&lt;symbol&gt; 而不是一个计数器：计数器泄漏之后你只知道「还差 2 张」，
+ * 不知道差的是谁；symbol 集合在开发时可以打印出未归还的租约。
+ */
+export function acquireSceneHistoryPause(store: PausableStore): () =&gt; void {
+  if (pauseLeases.size === 0) store.temporal.getState().pause()
+
+  const lease = Symbol('scene-history-pause')
+  pauseLeases.add(lease)
+
+  // React 严格模式的双次 effect 清理会 release 两次。没有这个守卫，
+  // 第二次 release 会在另一张租约还没还的时候提前 resume。
+  let released = false
+  return () =&gt; {
+    if (released) return
+    released = true
+    pauseLeases.delete(lease)
+    if (pauseLeases.size === 0) store.temporal.getState().resume()
+  }
+}
+
+/** 兜底：丢弃全部租约并恢复记录。只在测试与编辑器整体重置时调。 */
+export function resetSceneHistoryPause(store: PausableStore): void {
+  const hadLeases = pauseLeases.size &gt; 0
+  pauseLeases.clear()
+  if (hadLeases) store.temporal.getState().resume()
+}
+
+// ─────────────────────────────────────────────────────────────
+// 事务：把 N 条历史截成 1 条
+// ─────────────────────────────────────────────────────────────
+
+type HistoryStore&lt;TPast&gt; = {
+  temporal: {
+    getState(): { pastStates: TPast[] }
+    setState(partial: { pastStates: TPast[] }): void
+  }
+}
+
+/**
+ * `before` 里有多少条在 `after` 里原样保留了下来。
+ *
+ * 不能假设「新增的都在尾部」：`limit` 到顶时 zundo 会从**头部** shift 掉最老的一条，
+ * 于是 after 可能不比 before 长，却仍然是「多了一条」。
+ * 从前往后找最长的公共后缀才对。
+ */
+function retainedPastStateCount&lt;TPast&gt;(before: readonly TPast[], after: readonly TPast[]): number {
+  for (let start = 0; start &lt; before.length; start += 1) {
+    const retained = before.length - start
+    if (retained &gt; after.length) continue
+
+    let matches = true
+    for (let index = 0; index &lt; retained; index += 1) {
+      if (before[start + index] !== after[index]) {
+        matches = false
+        break
+      }
+    }
+    if (matches) return retained
+  }
+  return 0
+}
+
+/**
+ * 跑 `run()`，把它产生的 N 条历史截成 1 条（保留最早的那条 —— 它的 before 才是真起点）。
+ *
+ * N === 0 的情况不用管：zundo 的 `equality` 已经把语义空操作挡在门外了。
+ */
+export function runAsSingleSceneHistoryStep&lt;TPast, TResult&gt;(
+  store: HistoryStore&lt;TPast&gt;,
+  run: () =&gt; TResult,
+): TResult {
+  // 必须复制。zundo 的 _handleSet 在 limit 到顶时对同一个数组做 shift()，
+  // 直接持有引用的话，你「之前」的那份快照会被就地改掉。
+  const before = [...store.temporal.getState().pastStates]
+
+  const result = run()
+
+  const after = store.temporal.getState().pastStates
+  const retained = retainedPastStateCount(before, after)
+  const added = after.length - retained
+
+  if (added &gt; 1) {
+    const firstAdded = after[retained]
+    if (firstAdded !== undefined) {
+      store.temporal.setState({ pastStates: [...after.slice(0, retained), firstAdded] })
+    }
+  }
+
+  return result
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">09</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/store/history-control.test.ts</h3><span class="tag core">core</span><span class="tag core">新</span></div>
+      <p>12 条。最值得看的是最后那条 <code>limit 从头部截断</code>：</p><p>上限 4、已有 3 条，事务里推 3 条 —— 头部被 shift 掉两次，于是 <code>after.length - before.length === 1</code>。<strong>天真实现（假设新增的都在尾部）会以为「只加了一条」，原样放过，一次拖拽留下三条 undo。</strong>这个 bug 只在历史满了之后才出现，手工试的时候几乎撞不到 —— 你得先做满 50 次操作。</p>
+<pre><code>import { beforeEach, describe, expect, it } from 'vitest'
+import {
+  acquireSceneHistoryPause,
+  areSceneSnapshotsEqual,
+  getSceneHistoryPauseDepth,
+  resetSceneHistoryPause,
+  runAsSingleSceneHistoryStep,
+  type SceneSnapshot,
+} from './history-control'
+
+/** 最小的 temporal store 替身。不引 zundo —— 这一层测的是租约与截断逻辑。 */
+function fakeStore(initial: string[] = []) {
+  let tracking = true
+  let pastStates = [...initial]
+
+  return {
+    get tracking() {
+      return tracking
+    },
+    get pastStates() {
+      return pastStates
+    },
+    /** 模拟 zundo 记一条历史。limit 到顶时它 shift 掉最老的那条。 */
+    push(entry: string, limit?: number) {
+      if (!tracking) return
+      if (limit &amp;&amp; pastStates.length &gt;= limit) pastStates.shift()
+      pastStates = pastStates.concat(entry)
+    },
+    temporal: {
+      getState: () =&gt; ({
+        pause: () =&gt; {
+          tracking = false
+        },
+        resume: () =&gt; {
+          tracking = true
+        },
+        pastStates,
+      }),
+      setState: (partial: { pastStates: string[] }) =&gt; {
+        pastStates = partial.pastStates
+      },
+    },
+  }
+}
+
+describe('pause 租约', () =&gt; {
+  let store = fakeStore()
+
+  beforeEach(() =&gt; {
+    store = fakeStore()
+    resetSceneHistoryPause(store)
+  })
+
+  it('拿一张就暂停，还回去就恢复', () =&gt; {
+    const release = acquireSceneHistoryPause(store)
+    expect(store.tracking).toBe(false)
+    expect(getSceneHistoryPauseDepth()).toBe(1)
+
+    release()
+    expect(store.tracking).toBe(true)
+    expect(getSceneHistoryPauseDepth()).toBe(0)
+  })
+
+  it('重入：两张租约还一张，历史仍然是暂停的', () =&gt; {
+    const releaseA = acquireSceneHistoryPause(store)
+    const releaseB = acquireSceneHistoryPause(store)
+    expect(getSceneHistoryPauseDepth()).toBe(2)
+
+    releaseA()
+    expect(store.tracking).toBe(false) // ← B 还没还，不许恢复
+
+    releaseB()
+    expect(store.tracking).toBe(true)
+  })
+
+  it('幂等：同一张租约还两次，不会误伤别人', () =&gt; {
+    const releaseA = acquireSceneHistoryPause(store)
+    const releaseB = acquireSceneHistoryPause(store)
+
+    releaseA()
+    releaseA() // ← 严格模式的双次清理长这样
+    expect(getSceneHistoryPauseDepth()).toBe(1)
+    expect(store.tracking).toBe(false)
+
+    releaseB()
+    expect(getSceneHistoryPauseDepth()).toBe(0)
+    expect(store.tracking).toBe(true)
+  })
+
+  it('暂停期间的写入不进历史', () =&gt; {
+    const release = acquireSceneHistoryPause(store)
+    store.push('drag-frame-1')
+    store.push('drag-frame-2')
+    expect(store.pastStates).toEqual([])
+
+    release()
+    store.push('commit')
+    expect(store.pastStates).toEqual(['commit'])
+  })
+})
+
+describe('runAsSingleSceneHistoryStep', () =&gt; {
+  beforeEach(() =&gt; {
+    resetSceneHistoryPause(fakeStore())
+  })
+
+  it('N 条截成 1 条，保留最早的那条', () =&gt; {
+    const store = fakeStore(['a', 'b'])
+
+    runAsSingleSceneHistoryStep(store, () =&gt; {
+      store.push('c')
+      store.push('d')
+      store.push('e')
+    })
+
+    expect(store.pastStates).toEqual(['a', 'b', 'c'])
+  })
+
+  it('只产生 1 条时原样不动', () =&gt; {
+    const store = fakeStore(['a'])
+    runAsSingleSceneHistoryStep(store, () =&gt; store.push('b'))
+    expect(store.pastStates).toEqual(['a', 'b'])
+  })
+
+  it('一条都没产生时原样不动', () =&gt; {
+    const store = fakeStore(['a'])
+    runAsSingleSceneHistoryStep(store, () =&gt; {})
+    expect(store.pastStates).toEqual(['a'])
+  })
+
+  it('limit 从头部截断时，仍然只留下 1 条新的', () =&gt; {
+    // 上限 4，已有 3 条。run 里推三条 —— 头部会被 shift 两次，
+    // 于是 after.length - before.length === 1：天真实现会以为「只加了一条」，
+    // 原样放过 ['c','d','e','f']，一次拖拽留下三条 undo。
+    const store = fakeStore(['a', 'b', 'c'])
+
+    runAsSingleSceneHistoryStep(store, () =&gt; {
+      store.push('d', 4)
+      store.push('e', 4)
+      store.push('f', 4)
+    })
+
+    expect(store.pastStates).toEqual(['c', 'd'])
+  })
+
+  it('返回 run 的返回值', () =&gt; {
+    const store = fakeStore()
+    expect(runAsSingleSceneHistoryStep(store, () =&gt; 42)).toBe(42)
+  })
+})
+
+describe('areSceneSnapshotsEqual', () =&gt; {
+  const snapshot = (x: number): SceneSnapshot =&gt; ({
+    nodes: {
+      wall_a: {
+        object: 'node',
+        id: 'wall_a',
+        type: 'wall',
+        parentId: null,
+        visible: true,
+        metadata: {},
+        start: [0, 0],
+        end: [x, 0],
+      },
+    },
+    rootNodeIds: ['wall_a'],
+  })
+
+  it('值相同但引用不同 → 相等', () =&gt; {
+    expect(areSceneSnapshotsEqual(snapshot(4), snapshot(4))).toBe(true)
+  })
+
+  it('值不同 → 不相等', () =&gt; {
+    expect(areSceneSnapshotsEqual(snapshot(4), snapshot(5))).toBe(false)
+  })
+
+  it('rootNodeIds 顺序不同 → 不相等', () =&gt; {
+    const a: SceneSnapshot = { nodes: {}, rootNodeIds: ['wall_a', 'wall_b'] }
+    const b: SceneSnapshot = { nodes: {}, rootNodeIds: ['wall_b', 'wall_a'] }
+    expect(areSceneSnapshotsEqual(a, b)).toBe(false)
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">10</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/store/use-scene.ts</h3><span class="tag core">core</span><span class="tag debt">改</span></div>
+      <p>套上 <code>temporal</code>，加 <code>dirtyNodes</code> 三件套。</p><p>两处注释值得单独读：<strong>为什么 <code>create&lt;T&gt;()(...)</code> 的双层调用不能省</strong>，以及<strong>为什么 <code>dirtyNodes</code> 故意不走 <code>set()</code></strong> —— 后者和 <code>use-live-overrides.ts</code> 里「必须克隆 Map」正好相反，区别只在于有没有订阅者。</p>
+<pre><code>'use client'
+import { create } from 'zustand'
+import { temporal } from 'zundo'
+
+import { type AnyNodeId, AnyNode } from "../schema/types"
+import { areSceneSnapshotsEqual, type SceneSnapshot } from './history-control'
+
+type SceneState = {
+    nodes: Record&lt;AnyNodeId, AnyNode&gt;
+    rootNodeIds: AnyNodeId[]
+
+    /**
+     * 谁的几何需要重建。**故意是可变的 Set，不参与 set()。**
+     * 它每帧被填满又清空，走 zustand 通知等于每帧唤醒所有订阅者，
+     * 而它的消费者本来就是主动读（useMemo，M5 之后是 useFrame）。
+     */
+    dirtyNodes: Set&lt;AnyNodeId&gt;
+
+    addNode: (input: unknown) =&gt; AnyNodeId
+    updateNode: (id: AnyNodeId, patch:Partial&lt;AnyNode&gt;) =&gt; void
+    removeNode: (id: AnyNodeId) =&gt; void
+    getNode: (id: AnyNodeId) =&gt; AnyNode | undefined
+
+    markDirty: (id: AnyNodeId) =&gt; void
+    clearDirty: (id: AnyNodeId) =&gt; void
+    markAllDirty: () =&gt; void
+}
+
+// create&lt;T&gt;()(...) 的双层调用不能省：套上中间件之后必须用柯里化形式，
+// 否则 TS 推不出叠加后的 store 类型，useScene.temporal 会不存在。
+export const useScene = create&lt;SceneState&gt;()(
+  temporal(
+    (set, get) =&gt;({
+    nodes: {},
+    rootNodeIds: [],
+    dirtyNodes: new Set&lt;AnyNodeId&gt;(),
+
+    addNode: (input) =&gt; {
+        // parse 一次同时完成三件事：填 id，填默认值，挡住非法数据。
+        const node = AnyNode.parse(input)
+        set((s) =&gt; ({
+            nodes: { ...s.nodes, [node.id]: node },
+            rootNodeIds: [...s.rootNodeIds, node.id],
+        }))
+        get().markDirty(node.id)
+        return node.id
+    },
+
+    updateNode: (id, patch) =&gt; {
+        set((s) =&gt; {
+            const prev = s.nodes[id]
+            if (!prev) return s
+            return { nodes: { ...s.nodes, [id]: { ...prev, ...patch } as AnyNode } }
+        })
+        if (get().nodes[id]) get().markDirty(id)
+    },
+
+    removeNode: (id) =&gt; {
+        set((s) =&gt; {
+            if (!s.nodes[id]) return s
+            const nodes = { ...s.nodes }
+            delete nodes[id]
+            return { nodes, rootNodeIds: s.rootNodeIds.filter((n) =&gt; n !== id) }
+        })
+        get().clearDirty(id)
+    },
+
+    getNode: (id) =&gt; get().nodes[id],
+
+    markDirty: (id) =&gt; { get().dirtyNodes.add(id) },
+    clearDirty: (id) =&gt; { get().dirtyNodes.delete(id) },
+
+    // 撤销 / 重做之后调：文档整体跳变，谁变了无从增量推导。
+    markAllDirty: () =&gt; {
+        const dirty = get().dirtyNodes
+        for (const id of Object.keys(get().nodes) as AnyNodeId[]) dirty.add(id)
+    },
+    }),
+    {
+      // 只圈文档。把 dirtyNodes 圈进来的话，撤销会把脏集一起回滚 ——
+      // 你撤销完，几何不重建，画面停在撤销前。
+      partialize: (s): SceneSnapshot =&gt; ({ nodes: s.nodes, rootNodeIds: s.rootNodeIds }),
+      equality: (past, current) =&gt; areSceneSnapshotsEqual(past, current),
+      limit: 50,
+    },
+  ),
+)</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">11</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/hooks/use-history-shortcuts.ts</h3><span class="tag app">app</span><span class="tag app">新</span></div>
+      <p>排在拖拽之前，因为它能<strong>不含任何拖拽逻辑</strong>地验证撤销本身：画一堵 → Ctrl+Z → 墙消失 → Ctrl+Shift+Z → 墙回来。</p><p><code>getScope().kind !== 'idle'</code> 那道守卫和 <code>selectionEnabled</code> 同源：拖拽中按 Ctrl+Z 该做的是取消这次拖拽（drag-session 的 Esc 管），不是撤销上一步。</p>
+<pre><code>import { useEffect } from "react";
+
+import { runAsSingleSceneHistoryStep } from "../../core/store/history-control";
+import { useScene } from "../../core/store/use-scene";
+import { useEditor } from "../store/use-editor";
+import { getScope } from "../store/use-interaction-scope";
+
+export function useHistoryShortcuts(): void {
+    useEffect(() =&gt; {
+        const onKeyDown = (e: KeyboardEvent) =&gt; {
+            if (isTypingTarget(e.target)) return
+
+            // 交互进行中不响应 —— 和 selectionEnabled 同一条铁律。
+            // 拖拽中按 Ctrl+Z 该做的是取消拖拽（drag-session 的 Esc 管这个），
+            // 不是撤销上一步。
+            if (getScope().kind !== 'idle') return
+
+            const mod = e.ctrlKey || e.metaKey
+            const key = e.key.toLowerCase()
+
+            if (mod &amp;&amp; key === 'z' &amp;&amp; !e.shiftKey) {
+                e.preventDefault()
+                useScene.temporal.getState().undo()
+                afterHistoryJump()
+                return
+            }
+
+            if (mod &amp;&amp; ((key === 'z' &amp;&amp; e.shiftKey) || key === 'y')) {
+                e.preventDefault()
+                useScene.temporal.getState().redo()
+                afterHistoryJump()
+                return
+            }
+
+            if (key === 'delete' || key === 'backspace') {
+                const id = useEditor.getState().selectId
+                if (!id) return
+                e.preventDefault()
+
+                // 现在 removeNode 只有一次 set，包不包事务都是一条历史。
+                // 但 M7 的级联删除会变成 N 次 —— 那时候「删一堵带三个窗的墙
+                // 要按四次 Ctrl+Z」，而这里零改动。
+                runAsSingleSceneHistoryStep(useScene, () =&gt; {
+                    useScene.getState().removeNode(id)
+                })
+                useEditor.getState().select(null)
+            }
+        }
+
+        window.addEventListener('keydown', onKeyDown)
+        return () =&gt; window.removeEventListener('keydown', onKeyDown)
+    }, [])
+}
+
+/** 文档整体跳变之后：几何全部重标脏，指向已删节点的选中要清掉。 */
+function afterHistoryJump(): void {
+    useScene.getState().markAllDirty()
+
+    const id = useEditor.getState().selectId
+    if (id &amp;&amp; !useScene.getState().nodes[id]) useEditor.getState().select(null)
+}
+
+function isTypingTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false
+    if (target.isContentEditable) return true
+    return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT'
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">12</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/store/use-live-overrides.ts</h3><span class="tag core">core</span><span class="tag core">新</span></div>
+      <p><code>setMany</code> 不是可选优化，理由写在文件里。</p><p><code>getEffectiveNode</code> 用 <code>getState()</code> 读而不是做成 hook —— 它要能在 <code>useFrame</code> 和裸事件回调里调用。需要订阅的地方用下面的 <code>useEffectiveNode</code>。</p>
+<pre><code>'use client'
+import { create } from 'zustand'
+
+import type { AnyNode, AnyNodeId } from '../schema/types'
+
+/** 拖拽期间盖在文档之上的字段。只活在内存里，不进历史、不进存档。 */
+export type NodeOverride = Partial&lt;AnyNode&gt;
+
+type LiveOverrideState = {
+  overrides: Map&lt;AnyNodeId, NodeOverride&gt;
+  set: (id: AnyNodeId, values: NodeOverride) =&gt; void
+  setMany: (entries: ReadonlyArray&lt;readonly [AnyNodeId, NodeOverride]&gt;) =&gt; void
+  clear: (id: AnyNodeId) =&gt; void
+  clearAll: () =&gt; void
+}
+
+export const useLiveOverrides = create&lt;LiveOverrideState&gt;((set, get) =&gt; ({
+  overrides: new Map(),
+
+  // 每次都换 Map 引用。原地 .set 不换引用，zustand 的默认相等判断
+  // 会认为什么都没变，订阅者收不到通知。
+  set: (id, values) =&gt;
+    set((state) =&gt; {
+      const next = new Map(state.overrides)
+      next.set(id, { ...next.get(id), ...values })
+      return { overrides: next }
+    }),
+
+  // 不是可选优化。拖一堵墙会连带更新 2–4 堵邻墙；逐个 set 是 N 次 Map 克隆
+  // + N 次通知，useLevelMiters 会在一帧内重算 N 次斜接，而且中间那几次
+  // 算的是「主墙已移动、邻墙还没动」的自相矛盾状态。
+  setMany: (entries) =&gt;
+    set((state) =&gt; {
+      if (entries.length === 0) return state
+      const next = new Map(state.overrides)
+      for (const [id, values] of entries) next.set(id, { ...next.get(id), ...values })
+      return { overrides: next }
+    }),
+
+  clear: (id) =&gt;
+    set((state) =&gt; {
+      if (!state.overrides.has(id)) return state
+      const next = new Map(state.overrides)
+      next.delete(id)
+      return { overrides: next }
+    }),
+
+  clearAll: () =&gt; {
+    if (get().overrides.size === 0) return
+    set({ overrides: new Map() })
+  },
+}))
+
+/**
+ * 文档 ⊕ 覆盖。没有覆盖时原样返回入参，调用方不必再判一次。
+ *
+ * 用 getState() 读而不是做成 hook —— 它要能在 useFrame 和裸事件回调里调用。
+ * 需要订阅的地方用 viewer/hooks/use-effective-node.ts。
+ */
+export function getEffectiveNode&lt;T extends AnyNode&gt;(node: T): T {
+  const override = useLiveOverrides.getState().overrides.get(node.id)
+  if (!override) return node
+  return { ...node, ...override } as T
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">13</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/systems/wall/wall-adjacency.ts</h3><span class="tag core">core</span><span class="tag core">新</span></div>
+      <p>三类邻接。第 ③ 类（反向 T 接）是最容易漏的那条，注释里写了为什么：<strong>T 接是不对称的 —— 端点被切的是「撞人」的那一方，而你拖动的往往是「被撞」的那一方。</strong></p><p><code>wallEndsAt</code> 现在没人用，是给 M7 门窗跟随留的口子。如果你不喜欢未使用的导出，删掉它，M7 再加回来 —— 那时候会有第一个真用户。</p>
+<pre><code>import { pointOnSegment, quantizeKey } from '../../lib/geometry-2d'
+import type { AnyNodeId } from '../../schema/types'
+import { wallEnd, wallStart, type WallNode } from '../../schema/wall'
+import { JUNCTION_TOLERANCE } from './wall-mitering'
+
+/**
+ * 因为 `dirtyWallIds` 变了而必须跟着重建的墙（不含脏墙自身）。
+ *
+ * 三类邻接，漏一类就会看到「拖走主墙，撞上来的那堵墙留在原地不重算」，
+ * 然后你会去怀疑脏集写错了。
+ */
+export function getAdjacentWallIds(
+  walls: readonly WallNode[],
+  dirtyWallIds: ReadonlySet&lt;AnyNodeId&gt;,
+): Set&lt;AnyNodeId&gt; {
+  const adjacent = new Set&lt;AnyNodeId&gt;()
+  if (dirtyWallIds.size === 0) return adjacent
+
+  const byId = new Map(walls.map((w) =&gt; [w.id, w] as const))
+
+  for (const dirtyId of dirtyWallIds) {
+    const dirty = byId.get(dirtyId)
+    if (!dirty) continue
+
+    const dirtyStart = wallStart(dirty)
+    const dirtyEnd = wallEnd(dirty)
+    const dirtyStartKey = quantizeKey(dirtyStart, JUNCTION_TOLERANCE)
+    const dirtyEndKey = quantizeKey(dirtyEnd, JUNCTION_TOLERANCE)
+
+    for (const wall of walls) {
+      if (wall.id === dirtyId) continue
+      if (dirtyWallIds.has(wall.id)) continue
+      if (adjacent.has(wall.id)) continue
+
+      const start = wallStart(wall)
+      const end = wallEnd(wall)
+
+      // ① 共端点
+      const startKey = quantizeKey(start, JUNCTION_TOLERANCE)
+      const endKey = quantizeKey(end, JUNCTION_TOLERANCE)
+      if (
+        startKey === dirtyStartKey ||
+        startKey === dirtyEndKey ||
+        endKey === dirtyStartKey ||
+        endKey === dirtyEndKey
+      ) {
+        adjacent.add(wall.id)
+        continue
+      }
+
+      // ② T 接：脏墙的端点落在别人身上
+      if (
+        pointOnSegment(dirtyStart, start, end, JUNCTION_TOLERANCE) ||
+        pointOnSegment(dirtyEnd, start, end, JUNCTION_TOLERANCE)
+      ) {
+        adjacent.add(wall.id)
+        continue
+      }
+
+      // ③ 反向 T 接：别人的端点落在脏墙身上。
+      //    T 接是不对称的 —— 端点被切的是「撞人」的那一方，
+      //    而你拖动的往往是「被撞」的那一方。方向必须双查。
+      if (
+        pointOnSegment(start, dirtyStart, dirtyEnd, JUNCTION_TOLERANCE) ||
+        pointOnSegment(end, dirtyStart, dirtyEnd, JUNCTION_TOLERANCE)
+      ) {
+        adjacent.add(wall.id)
+      }
+    }
+  }
+
+  return adjacent
+}
+
+/** 脏墙 ∪ 邻墙 —— 「这一次改动必须重建几何的全集」。 */
+export function getWallRebuildSet(
+  walls: readonly WallNode[],
+  dirtyWallIds: ReadonlySet&lt;AnyNodeId&gt;,
+): Set&lt;AnyNodeId&gt; {
+  const all = getAdjacentWallIds(walls, dirtyWallIds)
+  for (const id of dirtyWallIds) all.add(id)
+  return all
+}
+
+/**
+ * 端点共享关系：`wall` 的哪一端贴在 `at` 这个点上。
+ *
+ * move-tool / endpoint-handles 用它决定邻墙的哪个端点要跟着走。
+ * 一堵墙的两端可能同时命中（退化成一个点的墙），所以返回的是两个布尔而不是枚举。
+ */
+export function wallEndsAt(
+  wall: WallNode,
+  keys: ReadonlySet&lt;string&gt;,
+): { start: boolean; end: boolean } {
+  return {
+    start: keys.has(quantizeKey(wallStart(wall), JUNCTION_TOLERANCE)),
+    end: keys.has(quantizeKey(wallEnd(wall), JUNCTION_TOLERANCE)),
+  }
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">14</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/systems/wall/wall-adjacency.test.ts</h3><span class="tag core">core</span><span class="tag core">新</span></div>
+      <p>9 条。<strong>最重要的是「不相邻的墙不在结果里」</strong>：邻接函数返回全集也能让画面完全正确，只是性能优化白做了 —— 而画面正确会让你以为它是对的。</p>
+<pre><code>import { describe, expect, it } from 'vitest'
+import { WallNode } from '../../schema/wall'
+import { getAdjacentWallIds, getWallRebuildSet } from './wall-adjacency'
+
+const wall = (id: string, start: [number, number], end: [number, number]) =&gt;
+  WallNode.parse({ id: `wall_${id}`, type: 'wall', start, end, thickness: 0.2, height: 2.5 })
+
+const ids = (set: Set&lt;string&gt;) =&gt; [...set].sort()
+
+describe('getAdjacentWallIds', () =&gt; {
+  it('共端点（L 型墙角）', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    const b = wall('b', [4, 0], [4, 3])
+    const c = wall('c', [10, 10], [12, 10]) // 远处，无关
+
+    expect(ids(getAdjacentWallIds([a, b, c], new Set([a.id])))).toEqual(['wall_b'])
+  })
+
+  it('四个端点组合都算共端点', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    const startStart = wall('ss', [0, 0], [0, -3])
+    const startEnd = wall('se', [0, -5], [0, 0])
+    const endStart = wall('es', [4, 0], [4, 3])
+    const endEnd = wall('ee', [4, 5], [4, 0])
+
+    const walls = [a, startStart, startEnd, endStart, endEnd]
+    expect(ids(getAdjacentWallIds(walls, new Set([a.id])))).toEqual([
+      'wall_ee',
+      'wall_es',
+      'wall_se',
+      'wall_ss',
+    ])
+  })
+
+  it('T 接正向：脏墙的端点落在别人身上', () =&gt; {
+    const main = wall('main', [0, 0], [8, 0])
+    const branch = wall('branch', [4, 0], [4, 3]) // 端点落在 main 中间
+
+    // branch 是脏的 → main 必须重建（它被 branch 切了一刀）
+    expect(ids(getAdjacentWallIds([main, branch], new Set([branch.id])))).toEqual(['wall_main'])
+  })
+
+  it('T 接反向：别人的端点落在脏墙身上 —— 最容易漏的一条', () =&gt; {
+    const main = wall('main', [0, 0], [8, 0])
+    const branch = wall('branch', [4, 0], [4, 3])
+
+    // main 是脏的（你拖的是被撞的那一方）→ branch 必须重建
+    expect(ids(getAdjacentWallIds([main, branch], new Set([main.id])))).toEqual(['wall_branch'])
+  })
+
+  it('不相邻的墙不在结果里', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    const far = wall('far', [100, 100], [104, 100])
+
+    expect(getAdjacentWallIds([a, far], new Set([a.id])).size).toBe(0)
+  })
+
+  it('脏墙自身不在结果里', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    const b = wall('b', [4, 0], [4, 3])
+
+    const adjacent = getAdjacentWallIds([a, b], new Set([a.id, b.id]))
+    expect(adjacent.size).toBe(0) // 两堵都脏，互为邻居但都已在脏集里
+  })
+
+  it('脏集为空时返回空集', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    expect(getAdjacentWallIds([a], new Set()).size).toBe(0)
+  })
+
+  it('脏 id 不在场景里时安全跳过', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    expect(getAdjacentWallIds([a], new Set(['wall_ghost'])).size).toBe(0)
+  })
+
+  it('getWallRebuildSet = 脏 ∪ 邻', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    const b = wall('b', [4, 0], [4, 3])
+    const far = wall('far', [100, 100], [104, 100])
+
+    expect(ids(getWallRebuildSet([a, b, far], new Set([a.id])))).toEqual(['wall_a', 'wall_b'])
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">15</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/lib/level-miter-cache.ts</h3><span class="tag viewer">viewer</span><span class="tag viewer">新</span></div>
+      <p>M4 只有一层，所以是<strong>一个槽位</strong>而不是 <code>Map&lt;levelId, …&gt;</code>。M8 加楼层时换成 Map。</p><p><code>sameMiterInputs</code> <strong>不比 <code>height</code></strong> —— 改层高不改平面斜接，比了会让 M8 的「改层高」触发全场重算。</p>
+<pre><code>import type { WallNode } from '../../core/schema/wall'
+import { calculateLevelMiters, type MiterData } from '../../core/systems/wall/wall-mitering'
+
+type CacheEntry = { walls: readonly WallNode[]; data: MiterData }
+
+// M4 只有一层，所以是一个槽位而不是 Map&lt;levelId, …&gt;。M8 加楼层时换成 Map。
+let cache: CacheEntry | null = null
+
+/**
+ * 逐字段精确比较，**不哈希、不比引用**。
+ *
+ * 陈旧命中会静默渲染出错误的墙角，而 4 个数值比较 × N 堵墙是微秒级 ——
+ * 比那个风险便宜得多。
+ *
+ * 只比影响斜接的字段。**不要把 height 加进来** —— 改层高不改平面斜接，
+ * 比了会让 M8 的「改层高」触发全场重算。
+ */
+export function sameMiterInputs(a: readonly WallNode[], b: readonly WallNode[]): boolean {
+  if (a.length !== b.length) return false
+
+  for (let i = 0; i &lt; a.length; i += 1) {
+    const x = a[i]
+    const y = b[i]
+    if (x === y) continue
+    if (!x || !y) return false
+    if (
+      x.id !== y.id ||
+      x.start[0] !== y.start[0] ||
+      x.start[1] !== y.start[1] ||
+      x.end[0] !== y.end[0] ||
+      x.end[1] !== y.end[1] ||
+      x.thickness !== y.thickness
+    ) {
+      return false
+    }
+  }
+
+  return true
+}
+
+export function getCachedLevelMiters(walls: readonly WallNode[]): MiterData {
+  if (cache &amp;&amp; sameMiterInputs(cache.walls, walls)) return cache.data
+
+  const data = calculateLevelMiters([...walls])
+  cache = { walls, data }
+  return data
+}
+
+/**
+ * 缓存是模块级的，比任何一次 mount 都活得久。
+ * M9 加载存档、以及测试之间，都必须调它。
+ */
+export function clearLevelMiterCache(): void {
+  cache = null
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">16</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/hooks/use-effective-node.ts</h3><span class="tag viewer">viewer</span><span class="tag viewer">新</span></div>
+      <p>11 行，但那条注释是本文件存在的全部理由：<strong>直接在选择器里 <code>{ ...node, ...override }</code> 会每次返回新对象，<code>useSyncExternalStore</code> 判定「变了」→ 无限重渲染。</strong>选择器只取那一个 override 条目（稳定引用），合并放进 <code>useMemo</code>。</p>
+<pre><code>import { useMemo } from 'react'
+import type { AnyNode } from '../../core/schema/types'
+import { useLiveOverrides } from '../../core/store/use-live-overrides'
+
+/**
+ * 订阅版的「文档 ⊕ 覆盖」。
+ *
+ * 选择器只取那一个 override 条目（一个稳定的对象引用），合并放进 useMemo。
+ * 直接在选择器里 `{ ...node, ...override }` 会每次返回新对象，
+ * useSyncExternalStore 判定「变了」→ 无限重渲染。
+ */
+export function useEffectiveNode&lt;T extends AnyNode&gt;(node: T): T {
+  const override = useLiveOverrides((s) =&gt; s.overrides.get(node.id))
+
+  return useMemo(() =&gt; (override ? ({ ...node, ...override } as T) : node), [node, override])
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">17</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/hooks/use-level-miters.ts</h3><span class="tag viewer">viewer</span><span class="tag debt">改</span></div>
+      <p>输入换成 effective 墙，出口换成缓存。<strong>两个 store 都要订阅</strong> —— 少订 overrides，拖拽时斜接不跟随；少订 nodes，画完的新墙不参与斜接。</p>
+<pre><code>import { useMemo } from "react";
+import { useScene } from "../../core/store/use-scene";
+import { useLiveOverrides } from "../../core/store/use-live-overrides";
+import type { MiterData } from "../../core/systems/wall/wall-mitering";
+import { WallNode } from "../../core/schema/wall";
+import { getCachedLevelMiters } from "../lib/level-miter-cache";
+
+export function useLevelMiters(): MiterData {
+    // 两个都要订阅。少订 overrides，拖拽时斜接不跟随；
+    // 少订 nodes，画完的新墙不参与斜接。
+    const nodes = useScene((s) =&gt; s.nodes)
+    const overrides = useLiveOverrides((s) =&gt; s.overrides)
+
+    return useMemo(() =&gt; {
+        const walls: WallNode[] = []
+        for (const node of Object.values(nodes)) {
+            if (node.type !== 'wall') continue
+            const override = overrides.get(node.id)
+            walls.push(override ? ({ ...node, ...override } as WallNode) : node)
+        }
+        // useMemo 只挡住「同一份 nodes 的重复渲染」；真正挡住
+        // 「换了 name 也重算斜接」的是 getCachedLevelMiters 里的逐字段比较。
+        return getCachedLevelMiters(walls)
+    }, [nodes, overrides])
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">18</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/schema/snap-2d.ts</h3><span class="tag core">core</span><span class="tag core">新</span></div>
+      <div class="note"><p style="margin-bottom:0">§03 的文件树把它放在 <code>core/lib/</code>，你建的空文件在 <code>core/schema/</code>。<strong>这份代码按你的位置写。</strong>个人建议是 <code>lib/</code>（它是纯几何，和 <code>geometry-2d.ts</code> 同类；<code>schema/</code> 现在全是 zod），但这是个两行 import 的事，你决定，我不擅自搬。</p></div><p><code>snapPoint</code> 里那条<strong>「端点优先于网格，不能反过来」</strong>是本文件唯一的陷阱，注释写了它怎么杀人：反过来会让墙角差 3 厘米，肉眼看不见，但 <code>quantizeKey</code> 分进不同的桶，斜接静默失效。</p>
+<pre><code>import { type Point2D } from '../lib/geometry-2d'
+import type { AnyNodeId } from './types'
+import { wallEnd, wallStart, type WallNode } from './wall'
+
+export const DEFAULT_GRID_STEP = 0.1
+export const ENDPOINT_SNAP_RADIUS = 0.35
+
+export type SnapOptions = {
+  /** 不参与吸附的墙。拖 A 的端点时必须排除 A 自己，否则它吸住自己拖不动。 */
+  ignoreIds?: ReadonlySet&lt;AnyNodeId&gt;
+  radius?: number
+  step?: number
+}
+
+export function snapToGrid(p: Point2D, step: number = DEFAULT_GRID_STEP): Point2D {
+  if (!(step &gt; 0)) return p
+  return { x: Math.round(p.x / step) * step, y: Math.round(p.y / step) * step }
+}
+
+/** 半径内最近的已有端点；没有则 null。 */
+export function nearestEndpoint(
+  p: Point2D,
+  walls: readonly WallNode[],
+  options?: SnapOptions,
+): Point2D | null {
+  const ignoreIds = options?.ignoreIds
+  const radius = options?.radius ?? ENDPOINT_SNAP_RADIUS
+  const radiusSquared = radius * radius
+
+  let best: Point2D | null = null
+  let bestDistanceSquared = Number.POSITIVE_INFINITY
+
+  for (const wall of walls) {
+    if (ignoreIds?.has(wall.id)) continue
+
+    for (const candidate of [wallStart(wall), wallEnd(wall)]) {
+      const dx = candidate.x - p.x
+      const dy = candidate.y - p.y
+      const distanceSquared = dx * dx + dy * dy
+      if (distanceSquared &gt; radiusSquared || distanceSquared &gt;= bestDistanceSquared) continue
+
+      best = candidate
+      bestDistanceSquared = distanceSquared
+    }
+  }
+
+  return best
+}
+
+/**
+ * 端点优先，退化到网格。**这个顺序是唯一的公开入口，不要在调用方自己组合。**
+ *
+ * 反过来（先吸网格）会这样出事：一个落在 (1.03, 2.07) 的已有端点先被吸到
+ * (1.0, 2.1)，端点吸附随后发现自己已经不在半径内 —— 于是墙角差 3 厘米。
+ * 肉眼看不见，但 quantizeKey 把两端分进不同的桶，**斜接静默失效**。
+ */
+export function snapPoint(
+  p: Point2D,
+  walls: readonly WallNode[],
+  options?: SnapOptions,
+): Point2D {
+  return nearestEndpoint(p, walls, options) ?? snapToGrid(p, options?.step)
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">19</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/schema/snap-2d.test.ts</h3><span class="tag core">core</span><span class="tag core">新</span></div>
+      <p>9 条。<code>端点优先于网格</code> 那条用的端点是 <code>(1.03, 2.07)</code> —— 故意不在网格上，顺序反了就会失败。</p>
+<pre><code>import { describe, expect, it } from 'vitest'
+import { WallNode } from './wall'
+import { nearestEndpoint, snapPoint, snapToGrid } from './snap-2d'
+
+const wall = (id: string, start: [number, number], end: [number, number]) =&gt;
+  WallNode.parse({ id: `wall_${id}`, type: 'wall', start, end, thickness: 0.2, height: 2.5 })
+
+describe('snapToGrid', () =&gt; {
+  it('默认 0.1 步长', () =&gt; {
+    const p = snapToGrid({ x: 1.03, y: 2.07 })
+    expect(p.x).toBeCloseTo(1.0, 9)
+    expect(p.y).toBeCloseTo(2.1, 9)
+  })
+
+  it('步长非正时原样返回（不许除以零）', () =&gt; {
+    expect(snapToGrid({ x: 1.03, y: 2.07 }, 0)).toEqual({ x: 1.03, y: 2.07 })
+  })
+})
+
+describe('nearestEndpoint', () =&gt; {
+  const a = wall('a', [0, 0], [4, 0])
+  const b = wall('b', [10, 0], [10, 3])
+
+  it('吸到半径内最近的端点', () =&gt; {
+    expect(nearestEndpoint({ x: 4.1, y: 0.1 }, [a, b])).toEqual({ x: 4, y: 0 })
+  })
+
+  it('半径外不吸', () =&gt; {
+    expect(nearestEndpoint({ x: 6, y: 0 }, [a, b])).toBeNull()
+  })
+
+  it('两个候选时取更近的那个', () =&gt; {
+    const c = wall('c', [4.3, 0], [4.3, 2])
+    expect(nearestEndpoint({ x: 4.2, y: 0 }, [a, c])).toEqual({ x: 4.3, y: 0 })
+  })
+
+  it('ignoreIds 生效 —— 否则拖 A 的端点时它吸住自己', () =&gt; {
+    expect(nearestEndpoint({ x: 4.05, y: 0 }, [a, b], { ignoreIds: new Set([a.id]) })).toBeNull()
+  })
+})
+
+describe('snapPoint', () =&gt; {
+  const a = wall('a', [1.03, 2.07], [5, 2.07])
+
+  it('端点优先于网格', () =&gt; {
+    // 端点在 (1.03, 2.07)，不在网格上。先吸网格会得到 (1.0, 2.1)。
+    expect(snapPoint({ x: 1.06, y: 2.05 }, [a])).toEqual({ x: 1.03, y: 2.07 })
+  })
+
+  it('没有端点可吸时退化到网格', () =&gt; {
+    const p = snapPoint({ x: 20.04, y: 30.06 }, [a])
+    expect(p.x).toBeCloseTo(20.0, 9)
+    expect(p.y).toBeCloseTo(30.1, 9)
+  })
+
+  it('排除自己之后退化到网格', () =&gt; {
+    const p = snapPoint({ x: 1.06, y: 2.05 }, [a], { ignoreIds: new Set([a.id]) })
+    expect(p.x).toBeCloseTo(1.1, 9)
+    expect(p.y).toBeCloseTo(2.0, 9)
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">20</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/events/types.ts</h3><span class="tag core">core</span><span class="tag debt">改</span></div>
+      <p>拖拽工具要把光标投到地平面上，需要原始的 <code>clientX/clientY</code>。<code>GridEvent</code> 从 M3 起就带着 <code>nativeEvent</code>，<code>NodeEvent</code> 当时没有消费者所以没带。</p>
+<pre><code><span class="cm"> export interface NodeEvent&lt;N extends AnyNode = AnyNode&gt; {</span>
+<span class="cm">     node: N</span>
+<span class="cm">     point: [number, number, number]</span>
+<span class="cm">     object: THREE.Object3D</span>
+<span class="cm">     stopPropagation: () =&gt; void</span>
+<span style="color:var(--accent)">+    nativeEvent: PointerEvent</span>
+<span class="cm"> }</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">21</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/hooks/use-node-events.ts</h3><span class="tag viewer">viewer</span><span class="tag debt">改</span></div>
+      <p>载荷里带上它。一行。</p>
+<pre><code><span class="cm">             stopPropagation: () =&gt; e.stopPropagation(),</span>
+<span style="color:var(--accent)">+            nativeEvent: e.nativeEvent,</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">22</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/lib/pointer-plane.ts</h3><span class="tag viewer">viewer</span><span class="tag debt">改</span></div>
+      <p>加 <code>eventToNdc</code> / <code>eventToGround</code>。「客户端坐标 → NDC → 地平面」这段在 <code>wall-tool</code>、<code>use-grid-events</code> 里已经各写了一遍，M4 还要再写两遍（move-tool、endpoint-handles）。四份同样的六行，其中一份写错就是「拖拽偏移半个屏幕」。</p><p><code>use-grid-events.ts</code> 我没动 —— 它还要那个 NDC 去打射线，改起来收益不大。你想顺手统一也可以。</p>
+<pre><code>import * as THREE from 'three'
+import type { Point2D } from '../../core/lib/geometry-2d'
+
+const raycaster = new THREE.Raycaster()
+const plane     = new THREE.Plane()
+const UP        = new THREE.Vector3(0, 1, 0)
+// 复用模块级 scratch 是安全的 —— 我们立刻读出 x/z 并返回一个新对象，
+// 从不把 scratch 本身交给调用方。这正是可以复用的判据。
+const scratch   = new THREE.Vector3()
+const ndc       = new THREE.Vector2()
+
+/** 屏幕 NDC 点 → 地平面上的世界点。
+ *  纯数学，不依赖任何实体 mesh，所以永不被遮挡，正交 / 透视都成立。 */
+export function screenToGround(
+  pointer: THREE.Vector2,   // NDC，[-1,1]。R3F 的 useThree().pointer 已经是这个
+  camera: THREE.Camera,
+  planeY = 0,
+): Point2D | null {
+  raycaster.setFromCamera(pointer, camera)
+  // ⚠ Plane 第二个参数是「有符号距离常数」，不是高度。
+  //   y = h 的平面 ⟹ constant = −h。写成 +h 时墙会画在镜像高度上。
+  plane.set(UP, -planeY)
+  const hit = raycaster.ray.intersectPlane(plane, scratch)
+  if (!hit) return null                // 射线与平面平行（相机水平看）
+  return { x: hit.x, y: hit.z }        // ← 世界 Z 落进 Point2D.y
+}
+
+/** 客户端坐标 → NDC。写进传入的 target 并返回它。 */
+export function eventToNdc(
+  event: { clientX: number; clientY: number },
+  element: HTMLElement,
+  target: THREE.Vector2,
+): THREE.Vector2 {
+  const rect = element.getBoundingClientRect()
+  return target.set(
+    ((event.clientX - rect.left) / rect.width) * 2 - 1,
+    -((event.clientY - rect.top) / rect.height) * 2 + 1,
+  )
+}
+
+/** 一步到位：原生指针事件 → 地平面世界点。三个工具都用它，别再各写一遍。 */
+export function eventToGround(
+  event: { clientX: number; clientY: number },
+  element: HTMLElement,
+  camera: THREE.Camera,
+  planeY = 0,
+): Point2D | null {
+  return screenToGround(eventToNdc(event, element, ndc), camera, planeY)
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">23</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/store/use-viewer.ts</h3><span class="tag viewer">viewer</span><span class="tag debt">改</span></div>
+      <p>加 <code>inputDragging</code>。</p><div class="trap"><span class="trap-label">没有它，拖墙的同时相机在转</span><p>3D 视角下 OrbitControls 的左键就是旋转。你拖墙，它转视角，两件事同时发生。</p><p style="margin-bottom:0">为什么一个「晚一拍」的 React 状态也够用：OrbitControls 的 <code>onPointerMove</code> 开头就是 <code>if (enabled === false) return</code>。<code>pointerdown</code> 那一拍它已经进了旋转态，但第一个 <code>pointermove</code> 会被挡下来 —— 而 React 的状态更新在两个事件之间早就刷完了。</p></div>
+<pre><code>import { create } from "zustand"
+
+type ViewerState = {
+    cameraDragging: boolean
+    setCameraDragging: (v: boolean) =&gt; void
+
+    /**
+     * 有一次非相机的指针交互正在进行（拖墙、拖手柄）。
+     * App 用它把 OrbitControls 关掉 —— OrbitControls 的 onPointerMove
+     * 开头就是 `if (enabled === false) return`，所以哪怕晚一个事件设上也来得及。
+     */
+    inputDragging: boolean
+    setInputDragging: (v: boolean) =&gt; void
+}
+
+export const useViewer = create&lt;ViewerState&gt;((set) =&gt; (
+    {
+        cameraDragging: false,
+        setCameraDragging: (cameraDragging) =&gt; set({ cameraDragging }),
+
+        inputDragging: false,
+        setInputDragging: (inputDragging) =&gt; set({ inputDragging }),
+    }
+))</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">24</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/lib/interaction/scope.ts</h3><span class="tag app">app</span><span class="tag debt">改</span></div>
+      <p>加两个变体。<strong><code>selectionEnabled</code> 一个字都不用改</strong> —— 它判的是 <code>kind === 'idle'</code>，加多少变体都还是那句话。这就是当初选判别联合而不是布尔标志的全部回报。</p>
+<pre><code>import type { Point2D } from "../../../core/lib/geometry-2d";
+import type { AnyNodeId } from "../../../core/schema/types";
+
+export type WallHandle = 'start' | 'end'
+
+export type InteractionScope =
+    | { kind: 'idle' }
+    | { kind: 'drafting'; tool: 'wall'; points: Point2D[] }
+    | { kind: 'moving'; nodeId: AnyNodeId; origin: Point2D }
+    | { kind: 'handle-drag'; nodeId: AnyNodeId; handle: WallHandle }
+
+
+export type InteractionScopeKind = InteractionScope['kind']
+export type ActiveInteractionScope = Exclude&lt;InteractionScope, { kind: 'idle' }&gt;
+export type ScopeOfKind&lt;K extends InteractionScopeKind&gt; = Extract&lt;InteractionScope, { kind: K }&gt;
+
+export const IDLE_SCOPE: InteractionScope = { kind: 'idle' }
+
+const NO_POINTS: readonly Point2D[] = Object.freeze([])
+
+export function isIdle(s: InteractionScope): s is ScopeOfKind&lt;'idle'&gt; {
+    return s.kind === 'idle'
+}
+
+export function isActive(s: InteractionScope): s is ActiveInteractionScope {
+    return s.kind !== 'idle'
+}
+
+// 铁律。加了两个变体之后一个字都不用改 —— 这就是当初选判别联合
+// 而不是布尔标志的全部回报。
+export function selectionEnabled(s: InteractionScope): boolean {
+    return s.kind === 'idle'
+}
+
+export function draftPoints(s: InteractionScope): readonly Point2D[] {
+    return s.kind === 'drafting' ? s.points : NO_POINTS
+}
+
+export function lastDraftPoint(s: InteractionScope): Point2D | null {
+    const pts = draftPoints(s)
+    return pts.length &gt; 0 ? pts[pts.length - 1]! : null
+}
+
+/** 正在被这次交互拖动的节点；idle / drafting 时为 null。 */
+export function draggingNodeId(s: InteractionScope): AnyNodeId | null {
+    return s.kind === 'moving' || s.kind === 'handle-drag' ? s.nodeId : null
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">25</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/store/use-interaction-scope.ts</h3><span class="tag app">app</span><span class="tag debt">改</span></div>
+      <p><code>update</code> 的 kind 提成必填的第一个参数。为什么见文件里的长注释，以及 §04 第 08 步。调用点只有三处，全在 <code>wall-tool.tsx</code> 里。</p>
+<pre><code>import { create } from "zustand"
+import {
+    IDLE_SCOPE,
+    selectionEnabled,
+    type ActiveInteractionScope,
+    type InteractionScope,
+    type ScopeOfKind,
+} from "../lib/interaction/scope"
+
+type ActiveKind = ActiveInteractionScope['kind']
+
+type InteractionScopeState = {
+    scope: InteractionScope
+    begin: (scope: ActiveInteractionScope) =&gt; void
+    /**
+     * kind 是**必填的第一个参数**，不是 patch 里的可选字段。
+     *
+     * M3 的写法是 `update(patch: Partial&lt;ActiveInteractionScope&gt;)`。只有一个活跃
+     * 变体时它是安全的；加到三个之后 `Partial&lt;A|B|C&gt;` 分配成三个 Partial，
+     * 于是在 drafting 里调 `update({ nodeId })` 完全合法 —— 你会得到一个
+     * `{ kind:'drafting', points:[…], nodeId:… }`，判别联合里不存在的形状，
+     * 而末尾那句 `as InteractionScope` 正好把它盖住。
+     */
+    update: &lt;K extends ActiveKind&gt;(kind: K, patch: Partial&lt;ScopeOfKind&lt;K&gt;&gt;) =&gt; void
+    end: () =&gt; void
+    endIf: (match: (s: ActiveInteractionScope) =&gt; boolean) =&gt; void
+}
+
+export const useInteractionScope = create&lt;InteractionScopeState&gt;((set, get) =&gt; ({
+    scope: IDLE_SCOPE,
+
+    begin: (scope) =&gt; set({ scope }),
+
+    update: (kind, patch) =&gt;
+        set((state) =&gt; {
+            // kind 不匹配 = 这次更新属于另一场交互，丢掉。
+            if (state.scope.kind !== kind) return state
+            return { scope: { ...state.scope, ...patch } as InteractionScope }
+        }),
+
+    end: () =&gt; {
+        if (get().scope.kind === 'idle') return
+        set({ scope: IDLE_SCOPE })
+    },
+
+    endIf: (match) =&gt; {
+        const scope = get().scope
+        if (scope.kind === 'idle') return
+        if (match(scope)) set({ scope: IDLE_SCOPE })
+    },
+}))
+
+export const getScope = (): InteractionScope =&gt; useInteractionScope.getState().scope
+
+export const isSelectionEnabled = (): boolean =&gt; selectionEnabled(getScope())</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">26</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/lib/interaction/drag-session.ts</h3><span class="tag app">app</span><span class="tag app">新</span></div>
+      <div class="note"><p style="margin-bottom:0">§03 的文件树里没有这个文件。写 move-tool 和 endpoint-handles 时发现它俩的收尾逻辑一字不差，抽出来了。</p></div><p>一次指针拖拽的骨架：租约、五个全局监听、四条收尾路径（<code>pointerup</code> / <code>pointercancel</code> / <code>Esc</code> / <code>blur</code>）。</p><p>抽出来的真正理由不是省行数，是<strong>让租约泄漏在结构上不可能发生</strong>。泄漏一次，历史就永久暂停，之后所有编辑都撤不回来 —— 而症状（Ctrl+Z 没反应）离病因（某个 return 分支忘了 release）非常远。</p><p>注意 <code>finish</code> 里那三行的顺序：<code>releaseHistory()</code> → <code>setInputDragging(false)</code> → <code>onCommit()</code>。<strong>先 resume 再写</strong>，反了就丢一步撤销。</p>
+<pre><code>import { acquireSceneHistoryPause } from "../../../core/store/history-control";
+import { useScene } from "../../../core/store/use-scene";
+import { useViewer } from "../../../viewer/store/use-viewer";
+
+export type DragSession = {
+    /** 结束这次拖拽。幂等 —— 重复调用什么都不做。 */
+    end: (mode: 'commit' | 'cancel') =&gt; void
+}
+
+type DragSessionHandlers = {
+    onMove: (event: PointerEvent) =&gt; void
+    onCommit: () =&gt; void
+    onCancel: () =&gt; void
+}
+
+/**
+ * 一次指针拖拽的骨架：租约、全局监听、四种收尾路径。
+ *
+ * 两个工具共用它，是为了让「租约泄漏」在结构上不可能发生 ——
+ * 泄漏一次，历史就永久暂停，之后所有编辑都撤不回来，
+ * 而症状（Ctrl+Z 没反应）离病因（某个 return 分支忘了 release）非常远。
+ *
+ * 监听器挂 window 而不是 canvas：拖到画布外再松手时 canvas 收不到
+ * pointerup，你会得到一堵永远粘着光标的墙。
+ */
+export function startDragSession({ onMove, onCommit, onCancel }: DragSessionHandlers): DragSession {
+    useViewer.getState().setInputDragging(true)
+    const releaseHistory = acquireSceneHistoryPause(useScene)
+
+    let finished = false
+
+    const finish = (mode: 'commit' | 'cancel') =&gt; {
+        if (finished) return
+        finished = true
+
+        window.removeEventListener('pointermove', handleMove)
+        window.removeEventListener('pointerup', handleUp)
+        window.removeEventListener('pointercancel', handleCancel)
+        window.removeEventListener('keydown', handleKey)
+        window.removeEventListener('blur', handleBlur)
+
+        // ⚠ 顺序：先 resume，再让 onCommit 写 store。
+        //   反过来的话，暂停期间的写入根本不产生 pastState，
+        //   那条改动永远撤不回来。
+        releaseHistory()
+        useViewer.getState().setInputDragging(false)
+
+        if (mode === 'commit') onCommit()
+        else onCancel()
+    }
+
+    const handleMove = (event: PointerEvent) =&gt; onMove(event)
+    const handleUp = (event: PointerEvent) =&gt; { if (event.button === 0) finish('commit') }
+    const handleCancel = () =&gt; finish('cancel')
+    const handleKey = (event: KeyboardEvent) =&gt; { if (event.key === 'Escape') finish('cancel') }
+    const handleBlur = () =&gt; finish('cancel')
+
+    window.addEventListener('pointermove', handleMove)
+    window.addEventListener('pointerup', handleUp)
+    window.addEventListener('pointercancel', handleCancel)
+    window.addEventListener('keydown', handleKey)
+    window.addEventListener('blur', handleBlur)
+
+    return { end: finish }
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">27</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/lib/interaction/wall-linking.ts</h3><span class="tag app">app</span><span class="tag app">新</span></div>
+      <div class="note"><p style="margin-bottom:0">§03 的文件树里也没有这个。整墙拖和端点拖的邻墙跟随是同一个操作，只是「点位移」的条数不同（整墙两条，端点一条），所以归一成 <code>PointMove[]</code>。</p></div><p>没有它，<code>calculateLevelMiters</code> 在拖拽期间看到的是「主墙已移动、邻墙还在原处」—— 共端点断开，斜接消失，<strong>墙角在拖动全程闪烁，松手才复原</strong>。</p>
+<pre><code>import { quantizeKey, type Point2D } from "../../../core/lib/geometry-2d";
+import type { AnyNodeId } from "../../../core/schema/types";
+import { wallEnd, wallStart, type WallNode } from "../../../core/schema/wall";
+import type { NodeOverride } from "../../../core/store/use-live-overrides";
+import { useScene } from "../../../core/store/use-scene";
+import { JUNCTION_TOLERANCE } from "../../../core/systems/wall/wall-mitering";
+
+export type OverrideEntry = readonly [AnyNodeId, NodeOverride]
+
+/** 一个端点从哪儿搬到哪儿。整墙拖是两条，端点拖是一条。 */
+export type PointMove = { from: Point2D; to: Point2D }
+
+/** 当前文档里的墙（不含 live 覆盖 —— 拖拽期间要的正是没被覆盖的原始值）。 */
+export function documentWalls(): WallNode[] {
+    return Object.values(useScene.getState().nodes).filter(
+        (n): n is WallNode =&gt; n.type === 'wall',
+    )
+}
+
+/**
+ * 邻墙跟随：任何贴在 `moves[i].from` 上的端点，改到对应的 `to`。
+ *
+ * 只覆盖被拖的那堵墙的话，calculateLevelMiters 看到的是「主墙已移动、
+ * 邻墙还在原处」—— 共端点断开，斜接消失，墙角在拖动全程闪烁，松手才复原。
+ */
+export function linkedWallOverrides(
+    walls: readonly WallNode[],
+    moves: readonly PointMove[],
+    excludeIds: ReadonlySet&lt;AnyNodeId&gt;,
+): OverrideEntry[] {
+    const targetByKey = new Map&lt;string, Point2D&gt;()
+    for (const move of moves) {
+        targetByKey.set(quantizeKey(move.from, JUNCTION_TOLERANCE), move.to)
+    }
+
+    const entries: OverrideEntry[] = []
+
+    for (const wall of walls) {
+        if (excludeIds.has(wall.id)) continue
+
+        const nextStart = targetByKey.get(quantizeKey(wallStart(wall), JUNCTION_TOLERANCE))
+        const nextEnd = targetByKey.get(quantizeKey(wallEnd(wall), JUNCTION_TOLERANCE))
+        if (!nextStart &amp;&amp; !nextEnd) continue
+
+        const patch: NodeOverride = {}
+        if (nextStart) patch.start = [nextStart.x, nextStart.y]
+        if (nextEnd) patch.end = [nextEnd.x, nextEnd.y]
+        entries.push([wall.id, patch])
+    }
+
+    return entries
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">28</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/tools/move-tool.tsx</h3><span class="tag app">app</span><span class="tag app">新</span></div>
+      <div class="trap"><span class="trap-label">候选阶段 —— 这一段是 §04 第 09 步没写到的</span><p>§04 的生命周期图写的是 <code>pointerdown on wall → begin({kind:'moving'})</code>。<strong>照着敲会立刻发现点墙再也选不中了</strong>：<code>begin</code> 一执行，<code>selectionEnabled</code> 变假，SelectionManager 就不再理会那次 <code>wall:click</code>。</p><p style="margin-bottom:0">修法是加一个<strong>候选阶段</strong>：按下只记候选，等指针真的超过 4px 才升格成 <code>moving</code>。这正好复用 M3 的 <code>isClickGesture</code> —— 「点击还是拖拽」这个判断 M3 已经做过一次，M4 只是在另一个位置再问一遍。</p></div><p>另一处值得看的是吸网格的写法：吸的是<strong>墙心的绝对坐标</strong>，不是位移。只吸位移的话，墙永远停在「原位 ± k·step」，落不到网格线上。</p>
+<pre><code>import { useThree } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
+
+import { emitter } from "../../core/events/bus";
+import type { NodeEvent } from "../../core/events/types";
+import { midpoint, type Point2D } from "../../core/lib/geometry-2d";
+import { snapToGrid } from "../../core/schema/snap-2d";
+import { wallEnd, wallStart, type WallNode } from "../../core/schema/wall";
+import { useLiveOverrides } from "../../core/store/use-live-overrides";
+import { runAsSingleSceneHistoryStep } from "../../core/store/history-control";
+import { useScene } from "../../core/store/use-scene";
+import { isClickGesture } from "../../viewer/lib/pointer-gesture";
+import { eventToGround } from "../../viewer/lib/pointer-plane";
+import { useViewer } from "../../viewer/store/use-viewer";
+import { startDragSession, type DragSession } from "../lib/interaction/drag-session";
+import {
+  documentWalls,
+  linkedWallOverrides,
+  type OverrideEntry,
+} from "../lib/interaction/wall-linking";
+import { useEditor } from "../store/use-editor";
+import { getScope, useInteractionScope } from "../store/use-interaction-scope";
+
+type Candidate = {
+  wall: WallNode
+  anchor: Point2D
+  center: Point2D
+  walls: WallNode[]
+}
+
+export function MoveTool(): null {
+  const activeTool = useEditor((s) =&gt; s.activeTool)
+  const { gl, camera } = useThree()
+
+  const candidateRef = useRef&lt;Candidate | null&gt;(null)
+  const sessionRef = useRef&lt;DragSession | null&gt;(null)
+  const entriesRef = useRef&lt;OverrideEntry[]&gt;([])
+
+  useEffect(() =&gt; {
+    if (activeTool !== 'select') return
+    const el = gl.domElement
+
+    // ── 提交 / 取消 ──────────────────────────────────────────
+    const commit = () =&gt; {
+      const entries = entriesRef.current
+      // 历史已经在 drag-session 里 resume 过了，这里写的才进得了 undo。
+      runAsSingleSceneHistoryStep(useScene, () =&gt; {
+        const { updateNode } = useScene.getState()
+        for (const [id, patch] of entries) updateNode(id, patch)
+      })
+      teardown()
+    }
+
+    const cancel = () =&gt; {
+      // 拖拽全程没写过主 store，清掉覆盖就等于回到原位。
+      teardown()
+    }
+
+    const teardown = () =&gt; {
+      entriesRef.current = []
+      candidateRef.current = null
+      sessionRef.current = null
+      useLiveOverrides.getState().clearAll()
+      useInteractionScope.getState().end()
+    }
+
+    // ── 拖拽中 ───────────────────────────────────────────────
+    const onDragMove = (event: PointerEvent) =&gt; {
+      const candidate = candidateRef.current
+      if (!candidate) return
+
+      const cursor = eventToGround(event, el, camera)
+      if (!cursor) return
+
+      const rawDelta = {
+        x: cursor.x - candidate.anchor.x,
+        y: cursor.y - candidate.anchor.y,
+      }
+
+      // 整墙拖只吸网格（端点吸附留给手柄）。吸的是**墙心的绝对坐标**，
+      // 不是位移 —— 只吸位移的话，墙永远停在 原位 ± k·step，落不到网格线上。
+      const target = snapToGrid({
+        x: candidate.center.x + rawDelta.x,
+        y: candidate.center.y + rawDelta.y,
+      })
+      const delta = { x: target.x - candidate.center.x, y: target.y - candidate.center.y }
+
+      const originalStart = wallStart(candidate.wall)
+      const originalEnd = wallEnd(candidate.wall)
+      const nextStart = { x: originalStart.x + delta.x, y: originalStart.y + delta.y }
+      const nextEnd = { x: originalEnd.x + delta.x, y: originalEnd.y + delta.y }
+
+      const self: OverrideEntry = [
+        candidate.wall.id,
+        { start: [nextStart.x, nextStart.y], end: [nextEnd.x, nextEnd.y] },
+      ]
+      const linked = linkedWallOverrides(
+        candidate.walls,
+        [
+          { from: originalStart, to: nextStart },
+          { from: originalEnd, to: nextEnd },
+        ],
+        new Set([candidate.wall.id]),
+      )
+
+      entriesRef.current = [self, ...linked]
+      // 一次 setMany，不是 N 次 set —— 见 use-live-overrides.ts 的注释。
+      useLiveOverrides.getState().setMany(entriesRef.current)
+    }
+
+    // ── 候选阶段：按下先不占 scope ──────────────────────────
+    //
+    // 在 pointerdown 就 begin('moving') 会让 selectionEnabled 立刻变假，
+    // 于是「点一堵墙选中它」永远不再发生。所以等指针真的超过 4px 阈值
+    // 才把候选升格成拖拽 —— 这正好复用 M3 的 isClickGesture。
+    const promote = (event: PointerEvent) =&gt; {
+      const candidate = candidateRef.current
+      if (!candidate) return
+
+      window.removeEventListener('pointermove', onCandidateMove)
+      window.removeEventListener('pointerup', onCandidateUp)
+
+      useInteractionScope.getState().begin({
+        kind: 'moving',
+        nodeId: candidate.wall.id,
+        origin: candidate.anchor,
+      })
+      sessionRef.current = startDragSession({ onMove: onDragMove, onCommit: commit, onCancel: cancel })
+      onDragMove(event)
+    }
+
+    const onCandidateMove = (event: PointerEvent) =&gt; {
+      if (isClickGesture(event)) return   // 还在阈值内，仍可能是一次点击
+      promote(event)
+    }
+
+    const onCandidateUp = () =&gt; {
+      window.removeEventListener('pointermove', onCandidateMove)
+      window.removeEventListener('pointerup', onCandidateUp)
+      candidateRef.current = null
+      useViewer.getState().setInputDragging(false)
+    }
+
+    const onWallPointerDown = (e: NodeEvent) =&gt; {
+      if (getScope().kind !== 'idle') return
+      const wall = e.node
+      if (wall.type !== 'wall') return
+
+      const anchor = eventToGround(e.nativeEvent, el, camera)
+      if (!anchor) return
+
+      candidateRef.current = {
+        wall,
+        anchor,
+        center: midpoint(wallStart(wall), wallEnd(wall)),
+        walls: documentWalls(),
+      }
+
+      // 立刻掐掉相机 —— 等阈值到了再关，前 4px 已经把视角转走了。
+      // 纯点击时 onCandidateUp 会把它放回来，用户看不出差别。
+      useViewer.getState().setInputDragging(true)
+
+      window.addEventListener('pointermove', onCandidateMove)
+      window.addEventListener('pointerup', onCandidateUp)
+    }
+
+    emitter.on('wall:pointerdown', onWallPointerDown)
+
+    return () =&gt; {
+      emitter.off('wall:pointerdown', onWallPointerDown)
+      window.removeEventListener('pointermove', onCandidateMove)
+      window.removeEventListener('pointerup', onCandidateUp)
+      // 卸载时必须收尾，否则租约泄漏 ⟹ 历史永久暂停。
+      sessionRef.current?.end('cancel')
+      candidateRef.current = null
+      useViewer.getState().setInputDragging(false)
+    }
+  }, [activeTool, gl, camera])
+
+  return null
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">29</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/tools/endpoint-handles.tsx</h3><span class="tag app">app</span><span class="tag app">新</span></div>
+      <p>和 move-tool 同构，但<strong>没有候选阶段</strong> —— 手柄没有「点击」语义，按下即占 scope 是正确的，而且正好顺手解决了「点手柄会被判成点空地并取消选中」：<code>begin</code> 之后 <code>selectionEnabled</code> 已经是假的。</p><p><code>handleScale</code> 让球在屏幕上看起来大小恒定：正交靠 <code>zoom</code>，透视靠距离。不做的话拉远之后小到点不中。</p>
+<pre><code>import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
+import * as THREE from 'three'
+
+import { snapPoint } from "../../core/schema/snap-2d";
+import { wallEnd, wallStart, type WallNode } from "../../core/schema/wall";
+import { runAsSingleSceneHistoryStep } from "../../core/store/history-control";
+import { useLiveOverrides } from "../../core/store/use-live-overrides";
+import { useScene } from "../../core/store/use-scene";
+import { useEffectiveNode } from "../../viewer/hooks/use-effective-node";
+import { eventToGround } from "../../viewer/lib/pointer-plane";
+import { startDragSession, type DragSession } from "../lib/interaction/drag-session";
+import type { WallHandle } from "../lib/interaction/scope";
+import {
+  documentWalls,
+  linkedWallOverrides,
+  type OverrideEntry,
+} from "../lib/interaction/wall-linking";
+import { useEditor } from "../store/use-editor";
+import { getScope, useInteractionScope } from "../store/use-interaction-scope";
+
+const HANDLE_RADIUS = 0.06
+const HANDLE_Y = 0.02
+const HANDLE_COLOR = '#0b6e5f'
+const HANDLE_ACTIVE_COLOR = '#f0b429'
+
+export function EndpointHandles() {
+  const activeTool = useEditor((s) =&gt; s.activeTool)
+  const selectId = useEditor((s) =&gt; s.selectId)
+  const node = useScene((s) =&gt; (selectId ? s.nodes[selectId] : undefined))
+
+  if (activeTool !== 'select') return null
+  if (!node || node.type !== 'wall') return null
+
+  return (
+    &lt;&gt;
+      &lt;EndpointHandle wall={node} handle="start" /&gt;
+      &lt;EndpointHandle wall={node} handle="end" /&gt;
+    &lt;/&gt;
+  )
+}
+
+function EndpointHandle({ wall: documentWall, handle }: { wall: WallNode; handle: WallHandle }) {
+  // 拖拽期间手柄自己也要跟着覆盖走，否则球停在原处、墙已经动了。
+  const wall = useEffectiveNode(documentWall)
+  const { gl, camera } = useThree()
+
+  const meshRef = useRef&lt;THREE.Mesh&gt;(null)
+  const sessionRef = useRef&lt;DragSession | null&gt;(null)
+  const entriesRef = useRef&lt;OverrideEntry[]&gt;([])
+
+  const scope = useInteractionScope((s) =&gt; s.scope)
+  const isDragging =
+    scope.kind === 'handle-drag' &amp;&amp; scope.nodeId === wall.id &amp;&amp; scope.handle === handle
+
+  const point = handle === 'start' ? wallStart(wall) : wallEnd(wall)
+
+  // 卸载时收尾 —— 和 move-tool 同一个理由：租约不能泄漏。
+  useEffect(() =&gt; () =&gt; sessionRef.current?.end('cancel'), [])
+
+  // 手柄尺寸跟相机走，否则拉远之后小到点不中。
+  useFrame(({ camera: activeCamera }) =&gt; {
+    const mesh = meshRef.current
+    if (!mesh) return
+    mesh.scale.setScalar(handleScale(activeCamera, mesh.position))
+  })
+
+  const onPointerDown = (event: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+    if (event.button !== 0) return
+    // 手柄不在 sceneRegistry 里，use-grid-events 的射线看不见它 ——
+    // 点手柄会被判成「点空地」并取消选中。但下面 begin() 一执行，
+    // selectionEnabled 就假了，SelectionManager 会忽略那次 grid:click。
+    event.stopPropagation()
+    if (getScope().kind !== 'idle') return
+
+    const el = gl.domElement
+    const walls = documentWalls()
+    const origin = handle === 'start' ? wallStart(documentWall) : wallEnd(documentWall)
+    const ignoreIds = new Set([documentWall.id])
+
+    const teardown = () =&gt; {
+      entriesRef.current = []
+      sessionRef.current = null
+      useLiveOverrides.getState().clearAll()
+      useInteractionScope.getState().end()
+    }
+
+    const onMove = (moveEvent: PointerEvent) =&gt; {
+      const cursor = eventToGround(moveEvent, el, camera)
+      if (!cursor) return
+
+      // 端点拖走完整的 snapPoint：先试已有端点，没有才落网格。
+      const snapped = snapPoint(cursor, walls, { ignoreIds })
+
+      const self: OverrideEntry = [
+        documentWall.id,
+        handle === 'start'
+          ? { start: [snapped.x, snapped.y] }
+          : { end: [snapped.x, snapped.y] },
+      ]
+      const linked = linkedWallOverrides(walls, [{ from: origin, to: snapped }], ignoreIds)
+
+      entriesRef.current = [self, ...linked]
+      useLiveOverrides.getState().setMany(entriesRef.current)
+    }
+
+    // 手柄没有「点击」语义，所以不需要 move-tool 那套候选阶段：
+    // 按下即占 scope 是正确的。
+    useInteractionScope.getState().begin({
+      kind: 'handle-drag',
+      nodeId: documentWall.id,
+      handle,
+    })
+
+    sessionRef.current = startDragSession({
+      onMove,
+      onCommit: () =&gt; {
+        const entries = entriesRef.current
+        runAsSingleSceneHistoryStep(useScene, () =&gt; {
+          const { updateNode } = useScene.getState()
+          for (const [id, patch] of entries) updateNode(id, patch)
+        })
+        teardown()
+      },
+      onCancel: teardown,
+    })
+  }
+
+  return (
+    &lt;mesh
+      ref={meshRef}
+      position={[point.x, HANDLE_Y, point.y]}
+      renderOrder={999}
+      onPointerDown={onPointerDown}
+    &gt;
+      &lt;sphereGeometry args={[HANDLE_RADIUS, 16, 12]} /&gt;
+      &lt;meshBasicMaterial
+        color={isDragging ? HANDLE_ACTIVE_COLOR : HANDLE_COLOR}
+        depthTest={false}
+        toneMapped={false}
+      /&gt;
+    &lt;/mesh&gt;
+  )
+}
+
+/** 屏幕上看起来大小恒定。正交靠 zoom，透视靠距离。 */
+function handleScale(camera: THREE.Camera, at: THREE.Vector3): number {
+  const ortho = camera as THREE.OrthographicCamera
+  if (ortho.isOrthographicCamera) return 40 / ortho.zoom
+  return camera.position.distanceTo(at) / 10
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">30</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/tools/wall-tool.tsx</h3><span class="tag app">app</span><span class="tag debt">改</span></div>
+      <p>三件事：<code>update</code> 换新签名、落点走 <code>snapPoint</code>、橡皮筋改命令式。</p><p>橡皮筋那段：line <strong>一直挂着</strong>，靠 <code>visible</code> 开关，<code>useFrame</code> 每帧直接改顶点。「有没有草稿点」仍然走 scope（每次点击才变一次的低频量），下沉到 ref 的只有光标位置。</p><div class="trap"><span class="trap-label">这是唯一一处「改对了看不出来」的</span><p style="margin-bottom:0">画面完全一样。验证靠 §04 第 07 步埋的那个计数器：<strong>改造前，移动鼠标不点击，<code>calculateLevelMiters</code> 的计数一直涨；改造后，一次不涨。</strong></p></div>
+<pre><code>import { useFrame, useThree } from "@react-three/fiber";
+import { useEditor } from "../store/use-editor";
+import { useEffect, useRef, type ComponentRef } from "react";
+import type { Point2D } from "../../core/lib/geometry-2d";
+import { getScope, useInteractionScope } from "../store/use-interaction-scope";
+import { eventToGround } from "../../viewer/lib/pointer-plane";
+import { isClickGesture } from "../../viewer/lib/pointer-gesture";
+import { lastDraftPoint } from "../lib/interaction/scope";
+import { useScene } from "../../core/store/use-scene";
+import { snapPoint } from "../../core/schema/snap-2d";
+import { documentWalls } from "../lib/interaction/wall-linking";
+import { Line } from "@react-three/drei";
+
+const PREVIEW_Y = 0.01
+
+export function WallTool() {
+  const activeTool = useEditor((s) =&gt; s.activeTool)
+  const { gl, camera } = useThree()
+
+  // 橡皮筋的光标端点。**故意是 ref 不是 state** —— 没有第二个读者，
+  // 进 store 只会换来每次鼠标移动一次订阅通知。
+  const cursorRef = useRef&lt;Point2D | null&gt;(null)
+
+  useEffect(() =&gt; {
+    if (activeTool !== 'wall') return
+    useInteractionScope.getState().begin({ kind: 'drafting', tool: 'wall', points: [] })
+    return () =&gt; {
+      useInteractionScope.getState().endIf((s) =&gt; s.kind === 'drafting')
+      cursorRef.current = null
+    }
+  }, [activeTool])
+
+  useEffect(() =&gt; {
+    if (activeTool !== 'wall') return
+    const el = gl.domElement
+
+    const onPointerUp = (e: PointerEvent) =&gt; {
+      if (e.button !== 0) return
+      if (!isClickGesture(e)) return
+
+      const raw = eventToGround(e, el, camera)
+      if (!raw) return
+
+      const scope = getScope()
+      if (scope.kind !== 'drafting') return
+
+      // 落点吸附：先试已有端点，没有才落网格。这一条关掉了 M2 留下的
+      // 「画墙落点不吸附」缺陷 —— 没有它，两堵墙的端点差 3 厘米，
+      // quantizeKey 分进不同的桶，斜接静默失效。
+      const point = snapPoint(raw, documentWalls())
+
+      const last = lastDraftPoint(scope)
+      if (last) {
+        useScene.getState().addNode({
+          type: 'wall',
+          start: [last.x, last.y],
+          end: [point.x, point.y],
+        })
+      }
+      useInteractionScope.getState().update('drafting', { points: [point] })
+    }
+
+    const onPointerMove = (e: PointerEvent) =&gt; {
+      cursorRef.current = eventToGround(e, el, camera)
+    }
+
+    const onKeyDown = (e: KeyboardEvent) =&gt; {
+      if (e.key === 'Escape') {
+        useInteractionScope.getState().update('drafting', { points: [] })
+        cursorRef.current = null
+      }
+    }
+
+    el.addEventListener('pointerup', onPointerUp)
+    el.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('keydown', onKeyDown)
+
+    return () =&gt; {
+      el.removeEventListener('pointerup', onPointerUp)
+      el.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [activeTool, gl, camera])
+
+  if (activeTool !== 'wall') return null
+  return &lt;WallDraftPreview cursorRef={cursorRef} /&gt;
+}
+
+/**
+ * 命令式橡皮筋：line 一直挂着，每帧直接改它的顶点，React 全程不知道光标动过。
+ *
+ * 「有没有草稿点」仍然走 scope（每次点击才变一次的低频量）；
+ * 下沉到 ref 的只有光标位置。
+ */
+function WallDraftPreview({ cursorRef }: { cursorRef: React.RefObject&lt;Point2D | null&gt; }) {
+  const lineRef = useRef&lt;ComponentRef&lt;typeof Line&gt;&gt;(null)
+
+  useFrame(() =&gt; {
+    const line = lineRef.current
+    if (!line) return
+
+    const last = lastDraftPoint(getScope())
+    const cursor = cursorRef.current
+
+    if (!last || !cursor) {
+      line.visible = false
+      return
+    }
+
+    line.visible = true
+    line.geometry.setPositions([last.x, PREVIEW_Y, last.y, cursor.x, PREVIEW_Y, cursor.y])
+    line.computeLineDistances()
+  })
+
+  return (
+    &lt;Line
+      ref={lineRef}
+      points={[
+        [0, PREVIEW_Y, 0],
+        [0, PREVIEW_Y, 0],
+      ]}
+      visible={false}
+      color="#0b6e5f"
+      lineWidth={2}
+      dashed
+      dashScale={20}
+    /&gt;
+  )
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">31</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/app.tsx</h3><span class="tag app">app</span><span class="tag debt">改</span></div>
+      <p>挂 <code>MoveTool</code> / <code>EndpointHandles</code> / <code>useHistoryShortcuts</code>，OrbitControls 加 <code>enabled={!inputDragging}</code>，HUD 补一行提示。</p>
+<pre><code>import { OrbitControls } from "@react-three/drei";
+import { Viewer } from "../viewer/components/viewer";
+import { useEditor } from "./store/use-editor";
+import { WallTool } from "./tools/wall-tool";
+import { useEffect } from "react";
+import { MOUSE } from "three";
+import { useViewer } from "../viewer/store/use-viewer";
+import { SelectionManager } from "./components/selection-manager";
+import { MoveTool } from "./tools/move-tool";
+import { EndpointHandles } from "./tools/endpoint-handles";
+import { useHistoryShortcuts } from "./hooks/use-history-shortcuts";
+
+const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN}
+
+export function App() {
+    const viewMode = useEditor((s) =&gt; s.viewMode)
+    const activeTool = useEditor((s) =&gt; s.activeTool)
+    const selectId = useEditor((s) =&gt; s.selectId)
+
+    // 拖墙 / 拖手柄期间必须掐掉相机，否则左键同时在转视角。
+    const inputDragging = useViewer((s) =&gt; s.inputDragging)
+
+    useHistoryShortcuts()
+
+    useEffect(() =&gt; {
+        const onKey = (e: KeyboardEvent) =&gt; {
+            if (e.key === 'Tab') {
+                e.preventDefault()
+                useEditor.getState().toggleViewMode()
+            }
+            if (e.key.toLowerCase() === 'w') useEditor.getState().setActiveTool('wall')
+            if (e.key.toLowerCase() === 'v') useEditor.getState().setActiveTool('select')
+        }
+        window.addEventListener('keydown', onKey)
+        return () =&gt; window.removeEventListener('keydown', onKey)
+    }, [])
+
+
+    const isPlan = viewMode === 'plan'
+
+    return (
+        &lt;div style={{ position: 'fixed', inset: 0 }}&gt;
+            &lt;Viewer mode={viewMode} selectId={selectId}&gt;
+                &lt;OrbitControls
+                makeDefault
+                enabled={!inputDragging}
+                enableRotate={!isPlan}
+                mouseButtons={isPlan ? PLAN_MOUSE_BUTTONS : undefined}
+                onStart={() =&gt; useViewer.getState().setCameraDragging(true)}
+                onEnd={() =&gt; useViewer.getState().setCameraDragging(false)}
+                /&gt;
+                &lt;SelectionManager /&gt;
+                &lt;WallTool /&gt;
+                &lt;MoveTool /&gt;
+                &lt;EndpointHandles /&gt;
+            &lt;/Viewer&gt;
+
+            &lt;div style={{
+                position: 'absolute', left: 12, bottom: 12, padding: '6px 10px',
+                font:'12px ui-monospace, monospace', background: 'rgba(255,255,255,.85)',
+                borderRadius:3, pointerEvents: 'none',
+            }}&gt;
+                {activeTool} · {viewMode} · sel={selectId ?? '—'}
+                &amp;nbsp;|&amp;nbsp; W 墙 · V 选 · Tab 视图 · Esc 断链/取消
+                &amp;nbsp;|&amp;nbsp; 拖墙移动 · 拖端点球 · Del 删 · Ctrl+Z 撤销
+            &lt;/div&gt;
+        &lt;/div&gt;
+    )
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:32px">
+    <p>
+      <strong>这份代码在一份干净的副本上验证过。</strong>
+      <code>tsc --build --force --noEmit</code>、<code>eslint src</code>、
+      <code>vitest run</code>（<strong>6 个文件 / 64 个用例</strong>，其中 33 个是 M4 新增的）、
+      <code>vite build</code>（689 modules，0 error）全部通过。
+    </p>
+    <p style="margin-bottom:0">
+      但它<strong>没有在真实浏览器里跑过</strong> —— §05 那十二条肉眼验收还是要你自己走一遍。
+      尤其是前三条（两个计数器 + 一次 Ctrl+Z），它们才是 M4 的全部意义，
+      而恰恰是编译器和单测都够不到的地方。
+    </p>
+  </div>
+</section>
+
+
+<hr class="dim">
+
+<!-- ═══════════ 08 -->
+<section>
+  <h2><span class="num">08</span>收尾清单</h2>
+  <p class="h2sub">2026-08-26 · 对着你磁盘上的代码逐行核过 · 14 处编辑 + 4 个测试文件</p>
+
+  <div class="prose">
+    <p>
+      <strong>这一节不是重发 §07。</strong>它是把你已经敲进 <code>src/</code> 的 M4 代码
+      和 §07 逐行比对之后，剩下的差集 —— 只列该改的地方，不列已经对的地方。
+    </p>
+    <p>
+      当前 <code>pnpm verify</code> 停在 <code>check-types</code>，9 个错，
+      <code>lint</code> 和 <code>test</code> 根本没跑到。
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">这份清单是验证过的，不是推测</span>
+    <p style="margin-bottom:0">
+      在一份你 <code>src/</code> 的完整拷贝上把下面 14 处全部应用、把四个测试文件补回去之后：
+      <code>tsc --build --force --noEmit</code> ✅ · <code>eslint src</code> ✅ ·
+      <code>vitest run</code> ✅ <strong>6 文件 / 64 用例</strong>。
+      <strong>不多不少，这些就是从红到绿的全部。</strong>
+    </p>
+  </div>
+
+  <h3 style="margin-top:40px">A 组 · 让 check-types 变绿</h3>
+  <p class="prose" style="color:var(--ink-2)">七处编辑，修掉全部 9 个编译错。做完这一组 lint 和 test 才跑得起来。</p>
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">retainedPastStateCount 的函数体是空的</h3><span class="tag debt">core/store/history-control.ts:75</span></div>
+      <p>三个错都出自这一行签名：<code>before</code> 未用、<code>after</code> 未用、「声明了返回 number 却不返回」。补上循环体。</p><p>注意<strong>不能</strong>简化成 <code>after.length - before.length</code> —— §07 第 09 项那条 <code>limit 从头部截断</code> 的测试就是专门打这个近路的。</p>
+<pre><code><span class="cw">-function retainedPastStateCount&lt;TPast&gt;(before: readonly TPast[], after: readonly TPast[]): number {</span>
+<span class="cw">-</span>
+<span class="cw">-}</span>
+<span style="color:var(--accent)">+function retainedPastStateCount&lt;TPast&gt;(before: readonly TPast[], after: readonly TPast[]): number {</span>
+<span style="color:var(--accent)">+    for (let start = 0; start &lt; before.length; start += 1) {</span>
+<span style="color:var(--accent)">+        const retained = before.length - start</span>
+<span style="color:var(--accent)">+        if (retained &gt; after.length) continue</span>
+<span style="color:var(--accent)">+</span>
+<span style="color:var(--accent)">+        let matches = true</span>
+<span style="color:var(--accent)">+        for (let index = 0; index &lt; retained; index += 1) {</span>
+<span style="color:var(--accent)">+            if (before[start + index] !== after[index]) {</span>
+<span style="color:var(--accent)">+                matches = false</span>
+<span style="color:var(--accent)">+                break</span>
+<span style="color:var(--accent)">+            }</span>
+<span style="color:var(--accent)">+        }</span>
+<span style="color:var(--accent)">+        if (matches) return retained</span>
+<span style="color:var(--accent)">+    }</span>
+<span style="color:var(--accent)">+    return 0</span>
+<span style="color:var(--accent)">+}</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">多余的 use 导入</h3><span class="tag debt">app/hooks/use-history-shortcuts.ts:1</span></div>
+      <p>React 19 的 <code>use</code>，自动导入塞的。</p>
+<pre><code><span class="cw">-import { use, useEffect } from "react";</span>
+<span style="color:var(--accent)">+import { useEffect } from "react";</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">afterHistoryJump 定义了但没接上</h3><span class="tag debt">app/hooks/use-history-shortcuts.ts:20, 27</span></div>
+      <p>undo 和 redo 后面各留了一个空行。函数没人调 → TS6133。</p>
+<pre><code><span class="cm">                 e.preventDefault()</span>
+<span class="cm">                 useScene.temporal.getState().undo()</span>
+<span style="color:var(--accent)">+                afterHistoryJump()</span>
+<span class="cm">                 return</span>
+<span class="cm"> </span>
+<span class="cm">                 e.preventDefault()</span>
+<span class="cm">                 useScene.temporal.getState().redo()</span>
+<span style="color:var(--accent)">+                afterHistoryJump()</span>
+<span class="cm">                 return</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">第三次撞上同一个自动导入幽灵</h3><span class="tag debt">app/lib/interaction/drag-session.ts:1</span></div>
+      <p>M3 是 <code>wall-renderer.tsx</code> 的 <code>{...events}</code>，M4 §07 第 01 项刚写过它，这次它连用都没用上 —— 纯粹是 IDE 在你敲 <code>events</code> 这个词的时候塞进来的。</p><div class="trap"><span class="trap-label">这个坑值得配一条 lint 规则</span><p style="margin-bottom:0"><code>@react-three/fiber</code> 的 <code>events</code> 导出在这个项目里<strong>一次都不该被 import</strong>（它只在 <code>&lt;Canvas events=…&gt;</code> 上用，而我们不传）。在 <code>eslint.config.js</code> 里加一条 <code>no-restricted-imports</code>，把 <code>@react-three/fiber</code> 的 <code>events</code> 列成 <code>importNames</code> 禁项，这个幽灵就再也不会出现第四次。</p></div>
+<pre><code><span class="cw">-import { events } from "@react-three/fiber"</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">未使用的 THREE 导入</h3><span class="tag debt">app/tools/move-tool.tsx:6</span></div>
+      <p>move-tool 全程走 <code>Point2D</code>，一个 three 的符号都不碰。</p>
+<pre><code><span class="cw">-import * as THREE from 'three'</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">update 的守卫写回了 M3 的版本</h3><span class="tag debt">app/store/use-interaction-scope.ts:21</span></div>
+      <p>这一处最要紧 —— 它把 §04 第 08 步那处修正整个撤销了，而症状只是一个「<code>kind</code> 参数未使用」的编译错，看上去像是签名多写了个参数。</p><p>守卫判的必须是「<strong>这次更新是不是发给我这场交互的</strong>」。判 <code>=== 'idle'</code> 只挡住了 idle，于是在 <code>moving</code> 里调 <code>update('drafting', { points })</code> 会照样合并进去，得到<code>{ kind:'moving', nodeId, origin, points }</code> —— 判别联合里不存在的形状，末尾那句 <code>as InteractionScope</code> 正好把它盖住。</p>
+<pre><code><span class="cm">         set((state) =&gt; {</span>
+<span class="cw">-            if (state.scope.kind === 'idle') return state</span>
+<span style="color:var(--accent)">+            if (state.scope.kind !== kind) return state</span>
+<span class="cm">             return { scope: { ...state.scope, ...patch } as InteractionScope }</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">OrbitControls 少了 enabled</h3><span class="tag debt">app/app.tsx:45</span></div>
+      <p><code>inputDragging</code> 读出来了但没用上（TS6133）。真正的后果是 3D 视角下<strong>拖墙的同时相机在转</strong>。</p>
+<pre><code><span class="cm">                 &lt;OrbitControls</span>
+<span class="cm">                 makeDefault</span>
+<span style="color:var(--accent)">+                enabled={!inputDragging}</span>
+<span class="cm">                 enableRotate={!isPlan}</span></code></pre>
+    </div>
+  </div>
+
+  <h3 style="margin-top:40px">B 组 · 编译器看不见的</h3>
+  <p class="prose" style="color:var(--ink-2)">这一组全都能编译。前两条会让 M4 的两个头号目标静默失效，第四条会静默吃掉 undo 历史。</p>
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">缓存整个没接上 —— M4 头号验收在这里失败</h3><span class="tag debt">viewer/hooks/use-level-miters.ts:3, 17</span></div>
+      <p><code>level-miter-cache.ts</code>（40 行）目前<strong>零调用点，整个文件是死的</strong>。</p><p>§05 第一条验收是「画 20 堵墙，只移动鼠标不点击 → <code>calculateLevelMiters</code> 的计数一次不涨」。直接调它，这条必然失败 —— 而且失败方式是<em>看不出来的</em>：画面完全正确，只是每次鼠标移动都在重算全场斜接。</p>
+<pre><code><span class="cw">-import { calculateLevelMiters, type MiterData } from "../../core/systems/wall/wall-mitering";</span>
+<span style="color:var(--accent)">+import type { MiterData } from "../../core/systems/wall/wall-mitering";</span>
+<span style="color:var(--accent)">+import { getCachedLevelMiters } from "../lib/level-miter-cache";</span>
+<span class="cm"> </span>
+<span class="cw">-        return calculateLevelMiters(walls)</span>
+<span style="color:var(--accent)">+        return getCachedLevelMiters(walls)</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">09</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">updateNode / removeNode 退回了 M3 的箭头体，脏标记没接上</h3><span class="tag debt">core/store/use-scene.ts:42, 48</span></div>
+      <p>现在只有 <code>addNode</code> 调 <code>makeDirty</code>；<code>clearDirty</code> 声明了、实现了、<strong>零调用</strong>。脏集只增不减，而且改墙根本不进脏集。</p><div class="note"><p style="margin-bottom:0"><strong>这一条是 M5 的地基。</strong>M5 的 <code>GeometrySystem</code> 每帧读 <code>dirtyNodes</code> 决定重建谁 —— 脏集是错的，M5 第一天就会看到「拖了墙但几何不更新」，而你会去查 <code>GeometrySystem</code>，因为它才是新写的那个。</p></div><p>改回带花括号的函数体（<code>set</code> 之后再标脏）：</p>
+<pre><code><span class="cw">-        updateNode: (id, patch) =&gt; set((s) =&gt; {</span>
+<span class="cw">-            const prev = s.nodes[id]</span>
+<span class="cw">-            if (!prev) return s</span>
+<span class="cw">-            return { nodes: { ...s.nodes, [id]: { ...prev, ...patch } as AnyNode } }</span>
+<span class="cw">-        }),</span>
+<span style="color:var(--accent)">+        updateNode: (id, patch) =&gt; {</span>
+<span style="color:var(--accent)">+            set((s) =&gt; {</span>
+<span style="color:var(--accent)">+                const prev = s.nodes[id]</span>
+<span style="color:var(--accent)">+                if (!prev) return s</span>
+<span style="color:var(--accent)">+                return { nodes: { ...s.nodes, [id]: { ...prev, ...patch } as AnyNode } }</span>
+<span style="color:var(--accent)">+            })</span>
+<span style="color:var(--accent)">+            if (get().nodes[id]) get().makeDirty(id)</span>
+<span style="color:var(--accent)">+        },</span>
+<span class="cm"> </span>
+<span class="cw">-        removeNode: (id) =&gt; set((s) =&gt; {</span>
+<span class="cw">-            ...</span>
+<span class="cw">-        }),</span>
+<span style="color:var(--accent)">+        removeNode: (id) =&gt; {</span>
+<span style="color:var(--accent)">+            set((s) =&gt; {</span>
+<span style="color:var(--accent)">+                ...</span>
+<span style="color:var(--accent)">+            })</span>
+<span style="color:var(--accent)">+            get().clearDirty(id)</span>
+<span style="color:var(--accent)">+        },</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">10</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">共端点四项里第一项写重了</h3><span class="tag debt">core/systems/wall/wall-adjacency.ts:35</span></div>
+      <p>第 1 项和第 2 项现在是同一个判断，<code>startKey === dirtyStartKey</code>（<strong>起点撞起点</strong>）丢了。两堵从同一个墙角向外画的墙检测不到相邻。</p><p>目前潜伏 —— <code>getAdjacentWallIds</code> 还没有消费者（<code>wall-linking.ts</code> 自己算 key）。<strong>M5 的 GeometrySystem 一接上就会现形</strong>，症状是「拖 L 型的一条边，另一条边不重建」。§07 第 14 项那个测试文件的第二条用例正好覆盖它。</p>
+<pre><code><span class="cm">             if (</span>
+<span class="cw">-                startKey === dirtyEndKey ||</span>
+<span style="color:var(--accent)">+                startKey === dirtyStartKey ||</span>
+<span class="cm">                 startKey === dirtyEndKey ||</span>
+<span class="cm">                 endKey === dirtyStartKey ||</span>
+<span class="cm">                 endKey === dirtyEndKey</span>
+<span class="cm">             ) {</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">11</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">花括号展开数组 —— 本项目第四个「类型系统看不见」的 bug</h3><span class="tag debt">core/store/history-control.ts:84</span></div>
+      <p>我专门验了一下：<strong>TS 完全不报错</strong>，它把数组的对象展开推成数组类型，赋给 <code>readonly TPast[]</code> 一路绿灯。</p><p>运行时是 <code>{0:…, 1:…}</code>，<strong>没有 <code>.length</code></strong>。于是 <code>retainedPastStateCount</code> 里 <code>start &lt; undefined</code> 恒假，循环一次不进，恒返回 0 ⟹ <code>added = after.length</code> ⟹ <strong>每次事务都把整个历史截成一条</strong>。拖第二堵墙，第一堵的 undo 就没了。</p><p>前三个同族：M2 的算术（<code>ab.x</code> 少个平方）、M2 的常量选错（<code>DEFAULT_WALL_HEIGHT</code>）、M3 的同名导入遮蔽（<code>events</code>）。四个的共同点：<strong>写出来都像对的，而且 verify 全绿</strong>。</p>
+<pre><code><span class="cw">-    const before = {...store.temporal.getState().pastStates}</span>
+<span style="color:var(--accent)">+    const before = [...store.temporal.getState().pastStates]</span>
+<span class="cm"> </span>
+<span class="cw">-    const after =store.temporal.getState().pastStates</span>
+<span style="color:var(--accent)">+    const after = store.temporal.getState().pastStates</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">12</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">useEffect 少了依赖数组</h3><span class="tag debt">app/hooks/use-history-shortcuts.ts:45</span></div>
+      <p>每次渲染都在拆装 keydown 监听器。不出错，但白烧。</p>
+<pre><code><span class="cm">         return () =&gt; window.removeEventListener('keydown', onKeyDown)</span>
+<span class="cw">-    })</span>
+<span style="color:var(--accent)">+    }, [])</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">13</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title" style="text-decoration:line-through;opacity:.6">Line 少了 visible={false}</h3><span class="tag debt">已作废 · 见下方更正</span><span class="tag debt">app/tools/wall-tool.tsx:112</span></div>
+      <p>纯外观：橡皮筋挂载的第一帧会在原点闪一个退化的两点重合线段，<code>useFrame</code> 跑完才藏起来。</p>
+<pre><code><span class="cm">       ]}</span>
+<span style="color:var(--accent)">+      visible={false}</span>
+<span class="cm">       color="#0b6e5f"</span></code></pre>
+      <div class="trap">
+        <span class="trap-label">2026-09-02 更正 —— 这一条是错的，别敲</span>
+        <p>
+          <strong>原方案「加 <code>visible={false}</code>」行不通。</strong>
+          <code>@react-three/drei</code> 的 <code>core/Line.js</code> 只解构了
+          <code>points / color / vertexColors / linewidth / lineWidth / segments / dashed</code>，
+          <strong><code>visible</code> 落进 <code>...rest</code></strong>，而 <code>rest</code> 被<em>同时</em>铺到
+          <code>&lt;primitive object={line2}&gt;</code> 和
+          <code>&lt;primitive object={lineMaterial}&gt;</code> 上。
+        </p>
+        <p>
+          <code>WebGLRenderer</code> 判的是 <code>material.visible</code>，
+          而 <code>useFrame</code> 里那句 <code>line.visible = true</code> 只翻 Object3D ——
+          <strong>材质那半永远关着，橡皮筋预览一个像素都不会画。</strong>
+          （<code>grep -n visible Line.js</code> 结果为空，静态可证。）
+        </p>
+        <p>
+          <strong>而且这一条针对的"病"本身也没被观察过。</strong>
+          「挂载第一帧会在原点闪一下」是推断：按 R3F 的循环顺序
+          （<code>useFrame</code> 订阅者 → <code>gl.render</code>），
+          挂载后第一帧在绘制之前就已经跑过一次 <code>useFrame</code> 并设了
+          <code>line.visible = false</code>，<strong>很可能根本不闪</strong>。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>改成 Z</strong>：先<em>只删掉</em>这一行（如果已经敲了），跑起来看。
+          真的闪，再用 ref 设、不要用 prop —— 只碰 Object3D，绕开 drei 的转发：
+        </p>
+<pre style="margin-top:12px"><code><span style="color:var(--warn)">-import { useEffect, useRef, type ComponentRef } from "react";</span>
+<span style="color:var(--accent)">+import { useEffect, useLayoutEffect, useRef, type ComponentRef } from "react";</span>
+
+ function WallDraftPreview({ cursorRef }) {
+   const lineRef = useRef&lt;ComponentRef&lt;typeof Line&gt;&gt;(null)
+<span style="color:var(--accent)">+  useLayoutEffect(() =&gt; {</span>
+<span style="color:var(--accent)">+    if (lineRef.current) lineRef.current.visible = false</span>
+<span style="color:var(--accent)">+  }, [])</span></code></pre>
+        <p style="margin:12px 0 0">
+          事故全过程见 <code>STATE.md</code> 的「事故记录 · 2026-09-02」，
+          由此产生的三条规则是 <code>DECISIONS.md</code> 的 <strong>D16 / D17 / D18</strong>。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">14</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">effect 清理里少了一行</h3><span class="tag debt">app/tools/move-tool.tsx:154</span></div>
+      <p><code>teardown()</code> 里有，但组件卸载走的是 <code>sessionRef.current?.end('cancel')</code> —— 如果卸载时正停在<em>候选阶段</em>（按下了但还没超过 4px），<code>sessionRef</code> 是空的，<code>teardown</code> 不会跑，候选就留着了。</p>
+<pre><code><span class="cm">             sessionRef.current?.end('cancel')</span>
+<span style="color:var(--accent)">+            candidateRef.current = null</span>
+<span class="cm">             useViewer.getState().setInputDragging(false)</span></code></pre>
+    </div>
+  </div>
+
+  <h3 style="margin-top:40px">C 组 · 四个测试文件</h3>
+  <p class="prose" style="color:var(--ink-2)">§07 的第 03 / 09 / 14 / 19 项，一个都没敲。全码在那儿，直接抄。</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>文件</th><th>§07 项</th><th>用例</th><th>它挡住的是</th></tr></thead>
+    <tbody>
+      <tr><td><code>core/schema/wall.test.ts</code></td><td>03</td><td>3</td><td>默认厚度写成默认高度（生产代码走的分支，旧测试从不构造）</td></tr>
+      <tr><td><code>core/store/history-control.test.ts</code></td><td>09</td><td>12</td><td>租约重入 / 幂等 / N 条截成 1 条 / <strong>limit 从头部截断</strong></td></tr>
+      <tr><td><code>core/systems/wall/wall-adjacency.test.ts</code></td><td>14</td><td>9</td><td><strong>B 组第 10 条那个共端点 bug</strong> / 反向 T 接 / 不相邻的不许混进来</td></tr>
+      <tr><td><code>core/schema/snap-2d.test.ts</code></td><td>19</td><td>9</td><td>端点优先于网格 / 半径外不吸 / ignoreIds 生效</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>先补 <code>wall-adjacency.test.ts</code>。</strong>
+      它的第二条用例（四个端点组合都算共端点）会当场把 B 组第 10 条那个 bug 抓出来 ——
+      让你亲眼看到「测试先红后绿」，比照着我的 diff 改一行有用得多。
+    </p>
+  </div>
+
+  <h3 style="margin-top:40px">另外 · 三处命名漂移，需要你定</h3>
+  <p class="prose">不影响运行，但 M5 的 <code>GeometrySystem</code> 每帧要调第一个，我得知道写哪个名字。</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>§07 里是</th><th>你敲成</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>markDirty</code></td><td><code>makeDirty</code></td><td>对照仓库用 <code>markDirty</code>，和 <code>markAllDirty</code> 也押韵；但 <code>makeDirty</code> 没有歧义。<strong>你说了算，M5 跟你的。</strong></td></tr>
+      <tr><td><code>ScopeOfKind</code></td><td><code>scopeOfKind</code></td><td>类型名首字母小写和文件里其它类型（<code>InteractionScope</code> / <code>NodeOverride</code>）不一致</td></tr>
+      <tr><td><code>draggingNodeId</code></td><td><code>draggingNodeIds</code></td><td>复数名返回单个 <code>AnyNodeId | null</code>。M13 做多选时会真的变复数 —— 现在就叫复数的话，那天你分不清哪个是哪个</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:40px">做完这一节，回 §05 走一遍</h3>
+  <ul class="check">
+    <li><span><code>pnpm verify</code> 全绿 —— <strong>6 文件 / 64 用例</strong>。</span></li>
+    <li><span>画 20 堵墙，只移动鼠标不点击 → <code>calculateLevelMiters</code> 的计数<strong>一次不涨</strong>（A 组做完 + B 组第 08 条做完才可能过）。</span></li>
+    <li><span>3D 视角下拖墙 → <strong>相机不转</strong>（A 组第 07 条）。</span></li>
+    <li><span>拖一秒松手，按一次 <code>Ctrl+Z</code> → 整个回原位；<strong>再拖一堵、再撤销，第一堵的历史还在</strong>（B 组第 11 条）。</span></li>
+    <li><span>§05 剩下的八条照走。</span></li>
+  </ul>
+
+  <div class="note" style="margin-top:28px">
+    <p style="margin-bottom:0">
+      <strong>verify 绿了再开 M5。</strong>M5 的 <code>GeometrySystem</code> 建在脏集之上，
+      而脏集现在是错的（B 组第 09 条）。带着一个坏地基去写新机制，
+      M5 第一天出的每一个 bug 你都会先怀疑 M5。
+    </p>
+  </div>
+</section>
+
+
+<hr class="dim">
+
+<!-- ═══════════ 09 -->
+<section>
+  <h2><span class="num">09</span>真实功能操作的测试</h2>
+  <p class="h2sub">2026-08-26 · 七个新文件 · 85 个用例 · 一个浏览器都不需要</p>
+
+  <div class="prose">
+    <p>
+      <strong>你问对了。</strong>§07 给的那四个测试文件（含 M2 的两个，一共六个）
+      全是<em>纯函数</em>测试：给定两条线段交点在哪、给定一个点吸到哪。
+      它们<strong>测不了</strong>「画墙 → 拖 → 撤销 → 墙回原位」。
+    </p>
+    <p>
+      但那不是因为「功能操作测不了」，是因为当初只测了最容易测的那一层。
+      真正的分界线<strong>不在「单元 vs 集成」，在「有没有 DOM / GPU」</strong>——
+      而 M4 的机制里，需要 DOM 的部分比想象中少得多。
+    </p>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>这一层</th><th>能不能自动化</th><th>为什么</th></tr></thead>
+    <tbody>
+      <tr><td>纯几何（交点 / 斜接 / 吸附 / 邻接）</td><td>✅</td><td>本来就是 D11 说的那类。已有 <strong>31 + 18</strong> 个用例</td></tr>
+      <tr><td>zustand store + zundo（建墙 / 改墙 / 删墙 / 撤销 / 重做 / 脏集）</td><td>✅</td><td>纯 JS，Node 里裸跑，<strong>不需要 React</strong></td></tr>
+      <tr><td>租约 + 事务（拖拽 = 一条历史）</td><td>✅</td><td>同上。60 帧用 for 循环跑</td></tr>
+      <tr><td>邻墙跟随 / miter 缓存命中</td><td>✅</td><td>纯函数 + 模块级缓存</td></tr>
+      <tr><td><code>drag-session</code> 的四条收尾路径</td><td>✅</td><td>只用到 <code>window.addEventListener</code>，12 行替身够了</td></tr>
+      <tr><td>屏幕坐标 → 地平面（<code>eventToGround</code>）</td><td>❌</td><td>要真相机矩阵 + <code>getBoundingClientRect</code></td></tr>
+      <tr><td>R3F 组件、射线拾取、<code>useFrame</code></td><td>❌</td><td>要 <code>jsdom</code> + <code>@react-three/test-renderer</code>，都没装</td></tr>
+      <tr><td>OrbitControls 与拖拽互相让位</td><td>❌</td><td>要真 DOM 事件顺序</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">§05 的三条头号验收，两条可以自动化</span>
+    <ul style="margin-bottom:0">
+      <li><strong>「拖一秒松手，一次 Ctrl+Z 整个回原位」</strong> → <code>scene-history.test.ts</code> 里跑 60 帧，断言 <code>pastStates.length === 1</code>。✅</li>
+      <li><strong>「只移动鼠标，斜接一次不重算」</strong> → <code>level-miter-cache.test.ts</code> 断言两次调用返回<em>同一个对象引用</em>。✅</li>
+      <li><strong>「100 堵墙里拖第 37 堵，只有它和邻居重建几何」</strong> → 这条真的要眼睛，因为「重建几何」发生在 <code>useMemo</code> 里。<strong>M5 把它挪进 <code>GeometrySystem</code> 之后就能测了</strong>。❌（暂时）</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      加上这七个文件之后：<strong>13 个测试文件 / 149 个用例</strong>，
+      <code>tsc --build --force --noEmit</code> ✅ · <code>eslint src</code> ✅ · <code>vitest run</code> ✅。
+      全部在一份你 <code>src/</code> 的拷贝上跑过（先应用 §08 的 14 处修复）。
+    </p>
+  </div>
+
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/store/use-scene.test.ts</h3><span class="tag core">core</span><span class="tag core">新 · 13 例</span></div>
+      <p>store 本身，<strong>用真的 zundo，不是替身</strong>。<code>history-control.test.ts</code> 测的是截断算法（替身足够）；这一份测的是「addNode 会不会标脏」「undo 会不会把脏集也回滚」这类<em>只有接上真中间件才暴露</em>的问题。</p><p>两条最值钱的：<strong>「改成同样的值不产生历史」</strong>（锁住 <code>equality</code> 必须是语义比较，不能是 <code>Object.is</code>）、<strong>「撤销不回滚脏集」</strong>（锁住 <code>partialize</code> 不许圈进 <code>dirtyNodes</code>）。这两条都是「写反了画面照样对，只是慢/停在撤销前」的类型。</p>
+<pre><code>import { beforeEach, describe, expect, it } from 'vitest'
+import type { AnyNodeId } from '../schema/types'
+import type { WallNode } from '../schema/wall'
+import { useScene } from './use-scene'
+
+/**
+ * 这一份测的是 store 本身，**用真的 zundo**，不是替身。
+ *
+ * history-control.test.ts 测的是截断算法（替身足够）；
+ * 这一份测的是「addNode 会不会标脏」「undo 会不会把脏集也回滚」这类
+ * 只有接上真中间件才暴露的问题。
+ */
+
+function resetScene(): void {
+  useScene.setState({ nodes: {}, rootNodeIds: [] })
+  useScene.getState().dirtyNodes.clear()
+  useScene.temporal.getState().resume()
+  useScene.temporal.getState().clear()
+}
+
+function addWall(start: [number, number], end: [number, number]): AnyNodeId {
+  return useScene.getState().addNode({ type: 'wall', start, end })
+}
+
+function wall(id: AnyNodeId): WallNode {
+  const node = useScene.getState().nodes[id]
+  if (!node || node.type !== 'wall') throw new Error(`no wall ${id}`)
+  return node
+}
+
+const past = () =&gt; useScene.temporal.getState().pastStates.length
+const dirty = () =&gt; [...useScene.getState().dirtyNodes].sort()
+
+beforeEach(resetScene)
+
+describe('addNode', () =&gt; {
+  it('填 id、填默认值、进 rootNodeIds', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+
+    expect(id).toMatch(/^wall_/)
+    expect(useScene.getState().rootNodeIds).toEqual([id])
+    expect(wall(id).parentId).toBeNull()
+    expect(wall(id).visible).toBe(true)
+  })
+
+  it('挡住非法数据', () =&gt; {
+    expect(() =&gt; useScene.getState().addNode({ type: 'wall', start: [0, 0] })).toThrow()
+    expect(() =&gt; useScene.getState().addNode({ type: 'ghost' })).toThrow()
+    expect(useScene.getState().rootNodeIds).toEqual([])
+  })
+
+  it('标脏', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    expect(dirty()).toEqual([id])
+  })
+})
+
+describe('updateNode', () =&gt; {
+  it('改字段并标脏', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.getState().dirtyNodes.clear()
+
+    useScene.getState().updateNode(id, { end: [8, 0] })
+
+    expect(wall(id).end).toEqual([8, 0])
+    expect(dirty()).toEqual([id])
+  })
+
+  it('id 不存在时什么都不做，也不标脏', () =&gt; {
+    useScene.getState().updateNode('wall_nope' as AnyNodeId, { end: [1, 1] })
+
+    expect(useScene.getState().rootNodeIds).toEqual([])
+    expect(dirty()).toEqual([])
+  })
+
+  it('改成同样的值不产生历史（equality 生效）', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.temporal.getState().clear()
+
+    useScene.getState().updateNode(id, { end: [4, 0] })
+
+    // updateNode 每次都 { ...prev, ...patch } 造新对象，引用永远不同 ——
+    // 挡住这一条的是 equality 里的语义比较，不是 Object.is。
+    expect(past()).toBe(0)
+  })
+})
+
+describe('removeNode', () =&gt; {
+  it('出 nodes、出 rootNodeIds、清脏', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+
+    useScene.getState().removeNode(id)
+
+    expect(useScene.getState().nodes[id]).toBeUndefined()
+    expect(useScene.getState().rootNodeIds).toEqual([])
+    expect(dirty()).toEqual([])
+  })
+
+  it('id 不存在时不产生历史', () =&gt; {
+    useScene.temporal.getState().clear()
+    useScene.getState().removeNode('wall_nope' as AnyNodeId)
+    expect(past()).toBe(0)
+  })
+})
+
+describe('撤销 / 重做', () =&gt; {
+  it('撤销把节点变回去', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.getState().updateNode(id, { end: [8, 0] })
+
+    useScene.temporal.getState().undo()
+
+    expect(wall(id).end).toEqual([4, 0])
+  })
+
+  it('撤销建墙 → 墙消失；重做 → 墙回来', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+
+    useScene.temporal.getState().undo()
+    expect(useScene.getState().nodes[id]).toBeUndefined()
+    expect(useScene.getState().rootNodeIds).toEqual([])
+
+    useScene.temporal.getState().redo()
+    expect(wall(id).end).toEqual([4, 0])
+    expect(useScene.getState().rootNodeIds).toEqual([id])
+  })
+
+  it('撤销不回滚脏集 —— partialize 只圈文档', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.getState().updateNode(id, { end: [8, 0] })
+
+    useScene.temporal.getState().undo()
+
+    // 脏集是「谁需要重算」的当下事实，不是文档的一部分。
+    // 把它圈进 partialize 的话，撤销之后几何不重建，画面停在撤销前。
+    expect(useScene.getState().dirtyNodes.has(id)).toBe(true)
+  })
+
+  it('markAllDirty 覆盖当前全部节点', () =&gt; {
+    const a = addWall([0, 0], [4, 0])
+    const b = addWall([4, 0], [4, 3])
+    useScene.getState().dirtyNodes.clear()
+
+    useScene.getState().markAllDirty()
+
+    expect(dirty()).toEqual([a, b].sort())
+  })
+})
+
+describe('暂停期间的写入', () =&gt; {
+  it('pause 之后写不进历史，resume 之后又能进', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.temporal.getState().clear()
+
+    useScene.temporal.getState().pause()
+    useScene.getState().updateNode(id, { end: [5, 0] })
+    useScene.getState().updateNode(id, { end: [6, 0] })
+    expect(past()).toBe(0)
+
+    useScene.temporal.getState().resume()
+    useScene.getState().updateNode(id, { end: [7, 0] })
+    expect(past()).toBe(1)
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/store/scene-history.test.ts</h3><span class="tag core">core</span><span class="tag core">新 · 10 例</span></div>
+      <div class="trap"><span class="trap-label">这一份直接顶掉 §05 的三条肉眼验收</span><p style="margin-bottom:0">「拖一秒按一次 Ctrl+Z 整个回原位」「Esc 取消不占历史」「连拖五次按五次退回最初」—— 它们本来只能靠人眼。但把拖拽的 DOM 部分剥掉之后，剩下的<strong>覆盖 → 租约 → 事务</strong>全是纯 JS，一个 <code>dragWallBy()</code> 辅助函数就能跑 60 帧。</p></div><p>末尾那一组叫「暂停期间写主 store —— 这样写会丢掉这一步撤销」。它把 <code>drag-session.ts</code> 里「先 <code>releaseHistory()</code> 再 <code>onCommit()</code>」那三行的<strong>理由</strong>变成了一条可执行断言：租约在手时的写入不产生 <code>pastState</code>，于是那次改动永远撤不回来。</p>
+<pre><code>import { beforeEach, describe, expect, it } from 'vitest'
+import type { AnyNodeId } from '../schema/types'
+import type { WallNode } from '../schema/wall'
+import {
+  acquireSceneHistoryPause,
+  getSceneHistoryPauseDepth,
+  resetSceneHistoryPause,
+  runAsSingleSceneHistoryStep,
+} from './history-control'
+import { useLiveOverrides } from './use-live-overrides'
+import { useScene } from './use-scene'
+
+/**
+ * 端到端：真 store + 真 zundo + 真租约 + 真事务。
+ *
+ * 这一份直接对应 m4-drag.html §05 里那三条肉眼验收
+ * （「拖一秒按一次 Ctrl+Z 整个回原位」「Esc 取消不占历史」
+ * 「连拖五次按五次退回最初」）—— 它们本来只能靠人眼，
+ * 但拖拽的 DOM 部分剥掉之后，剩下的「覆盖 → 租约 → 事务」全是纯 JS。
+ */
+
+function resetAll(): void {
+  useScene.setState({ nodes: {}, rootNodeIds: [] })
+  useScene.getState().dirtyNodes.clear()
+  useScene.temporal.getState().resume()
+  useScene.temporal.getState().clear()
+  useLiveOverrides.getState().clearAll()
+  resetSceneHistoryPause(useScene)
+}
+
+function addWall(start: [number, number], end: [number, number]): AnyNodeId {
+  return useScene.getState().addNode({ type: 'wall', start, end })
+}
+
+function wall(id: AnyNodeId): WallNode {
+  const node = useScene.getState().nodes[id]
+  if (!node || node.type !== 'wall') throw new Error(`no wall ${id}`)
+  return node
+}
+
+const past = () =&gt; useScene.temporal.getState().pastStates.length
+
+/** 一次完整拖拽：60 帧只写覆盖，松手时 resume → 事务提交。 */
+function dragWallBy(id: AnyNodeId, dx: number, dy: number, frames = 60): void {
+  const original = wall(id)
+  const release = acquireSceneHistoryPause(useScene)
+
+  let last = { start: original.start, end: original.end }
+  for (let f = 1; f &lt;= frames; f += 1) {
+    const t = f / frames
+    last = {
+      start: [original.start[0] + dx * t, original.start[1] + dy * t],
+      end: [original.end[0] + dx * t, original.end[1] + dy * t],
+    }
+    useLiveOverrides.getState().setMany([[id, last]])
+  }
+
+  // 顺序：先 resume，再写。
+  release()
+  runAsSingleSceneHistoryStep(useScene, () =&gt; {
+    useScene.getState().updateNode(id, last)
+  })
+  useLiveOverrides.getState().clearAll()
+}
+
+beforeEach(resetAll)
+
+describe('拖拽期间', () =&gt; {
+  it('60 帧一条历史都不产生', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.temporal.getState().clear()
+
+    const release = acquireSceneHistoryPause(useScene)
+    for (let f = 0; f &lt; 60; f += 1) {
+      useLiveOverrides.getState().setMany([[id, { start: [f, 0], end: [f + 4, 0] }]])
+    }
+
+    expect(past()).toBe(0)
+    // 主 store 一个字没动 —— 画面上墙在动，靠的是覆盖。
+    expect(wall(id).start).toEqual([0, 0])
+    release()
+  })
+
+  it('覆盖不进主 store，清掉就等于回原位', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+
+    const release = acquireSceneHistoryPause(useScene)
+    useLiveOverrides.getState().setMany([[id, { start: [9, 9], end: [13, 9] }]])
+    release()
+    useLiveOverrides.getState().clearAll()
+
+    expect(wall(id).start).toEqual([0, 0])
+  })
+})
+
+describe('提交', () =&gt; {
+  it('一次拖拽 = 一条历史，一次 Ctrl+Z 整个回原位', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.temporal.getState().clear()
+
+    dragWallBy(id, 3, 2)
+
+    expect(past()).toBe(1)
+    expect(wall(id).start).toEqual([3, 2])
+
+    useScene.temporal.getState().undo()
+    expect(wall(id).start).toEqual([0, 0])
+    expect(wall(id).end).toEqual([4, 0])
+  })
+
+  it('带邻墙的提交（3 次 updateNode）仍然只占一条历史', () =&gt; {
+    const a = addWall([0, 0], [4, 0])
+    const b = addWall([4, 0], [4, 3])
+    const c = addWall([4, 3], [0, 3])
+    useScene.temporal.getState().clear()
+
+    const release = acquireSceneHistoryPause(useScene)
+    release()
+    runAsSingleSceneHistoryStep(useScene, () =&gt; {
+      const { updateNode } = useScene.getState()
+      updateNode(a, { start: [0, 1], end: [4, 1] })
+      updateNode(b, { start: [4, 1] })
+      updateNode(c, { end: [0, 3] })
+    })
+
+    expect(past()).toBe(1)
+
+    useScene.temporal.getState().undo()
+    expect(wall(a).start).toEqual([0, 0])
+    expect(wall(b).start).toEqual([4, 0])
+  })
+
+  it('连拖五次 → 五条历史 → 按五次退回最初', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.temporal.getState().clear()
+
+    for (let i = 0; i &lt; 5; i += 1) dragWallBy(id, 1, 0, 10)
+
+    expect(past()).toBe(5)
+    expect(wall(id).start[0]).toBeCloseTo(5, 9)
+
+    const undo = useScene.temporal.getState().undo
+    for (let i = 0; i &lt; 5; i += 1) undo()
+
+    expect(wall(id).start).toEqual([0, 0])
+  })
+})
+
+describe('取消', () =&gt; {
+  it('Esc 取消不占历史，Ctrl+Z 撤的还是上一个操作', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.getState().updateNode(id, { end: [9, 0] }) // 上一个操作
+    useScene.temporal.getState().clear()
+
+    // 拖到一半按 Esc：只清覆盖，主 store 从未被写过。
+    const release = acquireSceneHistoryPause(useScene)
+    useLiveOverrides.getState().setMany([[id, { start: [5, 5], end: [9, 5] }]])
+    useLiveOverrides.getState().clearAll()
+    release()
+
+    expect(past()).toBe(0)
+    expect(wall(id).end).toEqual([9, 0])
+  })
+})
+
+describe('租约', () =&gt; {
+  it('拖拽结束后深度必须归零', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    dragWallBy(id, 1, 1, 5)
+    expect(getSceneHistoryPauseDepth()).toBe(0)
+  })
+
+  it('两场交互重叠时，先结束的那场不许恢复历史', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.temporal.getState().clear()
+
+    const releaseA = acquireSceneHistoryPause(useScene)
+    const releaseB = acquireSceneHistoryPause(useScene)
+
+    releaseA()
+    useScene.getState().updateNode(id, { end: [5, 0] })
+    expect(past()).toBe(0) // B 还没还，历史仍然停着
+
+    releaseB()
+    useScene.getState().updateNode(id, { end: [6, 0] })
+    expect(past()).toBe(1)
+  })
+})
+
+describe('删除', () =&gt; {
+  it('删一个节点 = 一条历史，撤销后连 rootNodeIds 一起回来', () =&gt; {
+    const a = addWall([0, 0], [4, 0])
+    const b = addWall([4, 0], [4, 3])
+    useScene.temporal.getState().clear()
+
+    runAsSingleSceneHistoryStep(useScene, () =&gt; {
+      useScene.getState().removeNode(a)
+    })
+
+    expect(past()).toBe(1)
+    expect(useScene.getState().rootNodeIds).toEqual([b])
+
+    useScene.temporal.getState().undo()
+    expect(useScene.getState().rootNodeIds).toEqual([a, b])
+    expect(wall(a).end).toEqual([4, 0])
+  })
+})
+
+describe('暂停期间写主 store —— 这样写会丢掉这一步撤销', () =&gt; {
+  it('租约在手时的写入不产生 pastState', () =&gt; {
+    const id = addWall([0, 0], [4, 0])
+    useScene.temporal.getState().clear()
+
+    const release = acquireSceneHistoryPause(useScene)
+    useScene.getState().updateNode(id, { end: [9, 0] }) // ← 顺序反了
+    release()
+
+    expect(past()).toBe(0)
+
+    // 于是这次改动永远撤不回来 —— 这就是 drag-session 里
+    // 「先 releaseHistory() 再 onCommit()」那三行的全部理由。
+    useScene.temporal.getState().undo()
+    expect(wall(id).end).toEqual([9, 0])
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">core/store/use-live-overrides.test.ts</h3><span class="tag core">core</span><span class="tag core">新 · 11 例</span></div>
+      <p>核心是 <code>countNotifications()</code> 那个辅助函数 —— 数一次操作让订阅者被唤醒几次。</p><p><strong>「setMany 写 N 个节点只唤醒一次」+「逐个 set 唤醒 N 次」这一对</strong>，就是 §02 A 那句「setMany 不是可选优化」的可执行版本。逐个 set 会让 <code>useLevelMiters</code> 在一帧内重算 N 次斜接，而中间那几次算的是「主墙已移动、邻墙还没动」的自相矛盾状态。</p><p>最后一条锁住 <code>useEffectiveNode</code> 的前提：未被改动的条目必须保持同一个引用，否则那个 <code>useMemo</code> 每次都失效。</p>
+<pre><code>import { beforeEach, describe, expect, it } from 'vitest'
+import type { AnyNodeId } from '../schema/types'
+import { WallNode } from '../schema/wall'
+import { getEffectiveNode, useLiveOverrides } from './use-live-overrides'
+
+const wall = (id: string, start: [number, number], end: [number, number]) =&gt;
+  WallNode.parse({ id: `wall_${id}`, type: 'wall', start, end })
+
+const A = wall('a', [0, 0], [4, 0])
+const B = wall('b', [4, 0], [4, 3])
+
+/** 数一次操作让订阅者被唤醒几次。 */
+function countNotifications(run: () =&gt; void): number {
+  let n = 0
+  const unsubscribe = useLiveOverrides.subscribe(() =&gt; {
+    n += 1
+  })
+  run()
+  unsubscribe()
+  return n
+}
+
+beforeEach(() =&gt; useLiveOverrides.getState().clearAll())
+
+describe('getEffectiveNode', () =&gt; {
+  it('没有覆盖时原样返回入参（同一个引用）', () =&gt; {
+    expect(getEffectiveNode(A)).toBe(A)
+  })
+
+  it('有覆盖时合并，且不改动原对象', () =&gt; {
+    useLiveOverrides.getState().set(A.id, { start: [1, 1] })
+
+    const effective = getEffectiveNode(A)
+    expect(effective.start).toEqual([1, 1])
+    expect(effective.end).toEqual([4, 0]) // 未覆盖的字段保留
+    expect(A.start).toEqual([0, 0]) // 文档没被动过
+  })
+
+  it('同一个 id 二次 set 是合并不是替换', () =&gt; {
+    useLiveOverrides.getState().set(A.id, { start: [1, 1] })
+    useLiveOverrides.getState().set(A.id, { end: [5, 1] })
+
+    const effective = getEffectiveNode(A)
+    expect(effective.start).toEqual([1, 1])
+    expect(effective.end).toEqual([5, 1])
+  })
+
+  it('clear 之后回到文档值', () =&gt; {
+    useLiveOverrides.getState().set(A.id, { start: [1, 1] })
+    useLiveOverrides.getState().clear(A.id)
+    expect(getEffectiveNode(A)).toBe(A)
+  })
+})
+
+describe('通知次数', () =&gt; {
+  it('setMany 写 N 个节点只唤醒订阅者一次', () =&gt; {
+    const n = countNotifications(() =&gt; {
+      useLiveOverrides.getState().setMany([
+        [A.id, { start: [1, 1] }],
+        [B.id, { start: [1, 1] }],
+      ])
+    })
+
+    // 这一条就是「setMany 不是可选优化」的可执行版本：
+    // 逐个 set 会让 useLevelMiters 在一帧内重算 N 次斜接，
+    // 而中间那几次算的是「主墙已移动、邻墙还没动」的自相矛盾状态。
+    expect(n).toBe(1)
+  })
+
+  it('逐个 set 会唤醒 N 次 —— 对照组', () =&gt; {
+    const n = countNotifications(() =&gt; {
+      useLiveOverrides.getState().set(A.id, { start: [1, 1] })
+      useLiveOverrides.getState().set(B.id, { start: [1, 1] })
+    })
+    expect(n).toBe(2)
+  })
+
+  it('setMany 传空数组不唤醒', () =&gt; {
+    expect(countNotifications(() =&gt; useLiveOverrides.getState().setMany([]))).toBe(0)
+  })
+
+  it('已经空了再 clearAll 不唤醒', () =&gt; {
+    expect(countNotifications(() =&gt; useLiveOverrides.getState().clearAll())).toBe(0)
+  })
+
+  it('clear 一个不存在的 id 不唤醒', () =&gt; {
+    expect(
+      countNotifications(() =&gt; useLiveOverrides.getState().clear('wall_nope' as AnyNodeId)),
+    ).toBe(0)
+  })
+})
+
+describe('Map 引用', () =&gt; {
+  it('每次写都换 Map 引用 —— 原地 set 的话订阅者收不到通知', () =&gt; {
+    const before = useLiveOverrides.getState().overrides
+    useLiveOverrides.getState().set(A.id, { start: [1, 1] })
+    expect(useLiveOverrides.getState().overrides).not.toBe(before)
+  })
+
+  it('同一条目未被改动时保持引用不变 —— useEffectiveNode 的 useMemo 靠它', () =&gt; {
+    useLiveOverrides.getState().set(A.id, { start: [1, 1] })
+    const entryA = useLiveOverrides.getState().overrides.get(A.id)
+
+    useLiveOverrides.getState().set(B.id, { start: [2, 2] })
+
+    expect(useLiveOverrides.getState().overrides.get(A.id)).toBe(entryA)
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/store/use-interaction-scope.test.ts</h3><span class="tag app">app</span><span class="tag app">新 · 12 例</span></div>
+      <p><code>interaction-scope.md</code> 末尾 <code>## Rules</code> 的四条不变量，一条一组。<strong>M3 §07 第 18 项本来就有这一份，一直没敲</strong>；这里补上，并按 §04 第 08 步换成了带 kind 的两参 <code>update</code>。</p><p>第 ③ 组第二条（<code>kind 对不上时整条丢掉</code>）就是 §08 B 组第 06 条那个 bug 的锁：守卫写成 <code>=== 'idle'</code> 的话，这条会当场变红。</p>
+<pre><code>import { beforeEach, describe, expect, it } from 'vitest'
+import type { AnyNodeId } from '../../core/schema/types'
+import {
+  draftPoints,
+  lastDraftPoint,
+  selectionEnabled,
+  type ActiveInteractionScope,
+} from '../lib/interaction/scope'
+import { getScope, isSelectionEnabled, useInteractionScope } from './use-interaction-scope'
+
+/**
+ * `interaction-scope.md` 末尾那节 `## Rules` 的四条不变量，一条一组。
+ *
+ * M3 §07 第 18 项本来就有这一份（8 个用例），一直没敲；这里补上，
+ * 并按 M4 §04 第 08 步把 `update` 换成了带 kind 的两参签名。
+ */
+
+const WALL_A = 'wall_a' as AnyNodeId
+const WALL_B = 'wall_b' as AnyNodeId
+
+beforeEach(() =&gt; useInteractionScope.getState().end())
+
+describe('④ selectionEnabled(scope) === (kind === idle)', () =&gt; {
+  it('idle 时允许选择', () =&gt; {
+    expect(isSelectionEnabled()).toBe(true)
+  })
+
+  it('任何一种活跃交互都掐断选择', () =&gt; {
+    const actives: ActiveInteractionScope[] = [
+      { kind: 'drafting', tool: 'wall', points: [] },
+      { kind: 'moving', nodeId: WALL_A, origin: { x: 0, y: 0 } },
+      { kind: 'handle-drag', nodeId: WALL_A, handle: 'start' },
+    ]
+
+    for (const scope of actives) {
+      useInteractionScope.getState().begin(scope)
+      expect(isSelectionEnabled()).toBe(false)
+      expect(selectionEnabled(getScope())).toBe(false)
+      useInteractionScope.getState().end()
+    }
+  })
+})
+
+describe('③ update 不能改变 kind', () =&gt; {
+  it('kind 对得上才合并', () =&gt; {
+    useInteractionScope.getState().begin({ kind: 'drafting', tool: 'wall', points: [] })
+    useInteractionScope.getState().update('drafting', { points: [{ x: 1, y: 2 }] })
+
+    expect(lastDraftPoint(getScope())).toEqual({ x: 1, y: 2 })
+  })
+
+  it('kind 对不上时整条丢掉 —— 不是合并进去', () =&gt; {
+    useInteractionScope.getState().begin({ kind: 'moving', nodeId: WALL_A, origin: { x: 0, y: 0 } })
+
+    useInteractionScope.getState().update('drafting', { points: [{ x: 1, y: 2 }] })
+
+    const scope = getScope()
+    expect(scope.kind).toBe('moving')
+    // 守卫写成 `kind === 'idle'` 的话，这里会变成
+    // { kind:'moving', nodeId, origin, points } —— 判别联合里不存在的形状，
+    // 而末尾那句 `as InteractionScope` 正好把它盖住。
+    expect('points' in scope).toBe(false)
+  })
+
+  it('idle 时 update 被忽略', () =&gt; {
+    useInteractionScope.getState().update('drafting', { points: [{ x: 1, y: 2 }] })
+    expect(getScope().kind).toBe('idle')
+  })
+
+  it('换交互靠 begin，不靠 update', () =&gt; {
+    useInteractionScope.getState().begin({ kind: 'drafting', tool: 'wall', points: [{ x: 1, y: 1 }] })
+    useInteractionScope
+      .getState()
+      .begin({ kind: 'handle-drag', nodeId: WALL_B, handle: 'end' })
+
+    const scope = getScope()
+    expect(scope.kind).toBe('handle-drag')
+    expect(draftPoints(scope)).toEqual([])
+  })
+})
+
+describe('② end 是原子的：没有载荷能活过它', () =&gt; {
+  it('end 之后 scope 里只剩 kind', () =&gt; {
+    useInteractionScope.getState().begin({ kind: 'moving', nodeId: WALL_A, origin: { x: 3, y: 4 } })
+    useInteractionScope.getState().end()
+
+    expect(getScope()).toEqual({ kind: 'idle' })
+    expect('nodeId' in getScope()).toBe(false)
+  })
+
+  it('idle 上再 end 不改变引用', () =&gt; {
+    const before = getScope()
+    useInteractionScope.getState().end()
+    expect(getScope()).toBe(before)
+  })
+
+  it('drafting 的点不会漏进下一场交互', () =&gt; {
+    useInteractionScope.getState().begin({ kind: 'drafting', tool: 'wall', points: [{ x: 9, y: 9 }] })
+    useInteractionScope.getState().end()
+    useInteractionScope.getState().begin({ kind: 'drafting', tool: 'wall', points: [] })
+
+    expect(draftPoints(getScope())).toEqual([])
+  })
+})
+
+describe('① 单一所有者：endIf 只掐匹配的那一场', () =&gt; {
+  it('匹配时结束', () =&gt; {
+    useInteractionScope.getState().begin({ kind: 'drafting', tool: 'wall', points: [] })
+    useInteractionScope.getState().endIf((s) =&gt; s.kind === 'drafting')
+    expect(getScope().kind).toBe('idle')
+  })
+
+  it('不匹配时留着 —— 切工具不许掐掉别人的拖拽', () =&gt; {
+    useInteractionScope.getState().begin({ kind: 'moving', nodeId: WALL_A, origin: { x: 0, y: 0 } })
+    useInteractionScope.getState().endIf((s) =&gt; s.kind === 'drafting')
+    expect(getScope().kind).toBe('moving')
+  })
+
+  it('idle 时 endIf 不调用判定函数', () =&gt; {
+    let called = false
+    useInteractionScope.getState().endIf(() =&gt; {
+      called = true
+      return true
+    })
+    expect(called).toBe(false)
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/lib/interaction/wall-linking.test.ts</h3><span class="tag app">app</span><span class="tag app">新 · 11 例</span></div>
+      <p>邻墙跟随。两条容差用例值得一起读：<strong>2 毫米内算共点，3 厘米不算。</strong></p><p>后一条把「落点必须吸附」的理由钉死了 —— 差 3 厘米肉眼看不见，但 <code>quantizeKey</code> 把两端分进不同的桶，<strong>邻墙不跟随、斜接也静默失效</strong>。</p>
+<pre><code>import { beforeEach, describe, expect, it } from 'vitest'
+import type { AnyNodeId } from '../../../core/schema/types'
+import { WallNode } from '../../../core/schema/wall'
+import { useScene } from '../../../core/store/use-scene'
+import { documentWalls, linkedWallOverrides, type OverrideEntry } from './wall-linking'
+
+const wall = (id: string, start: [number, number], end: [number, number]) =&gt;
+  WallNode.parse({ id: `wall_${id}`, type: 'wall', start, end })
+
+const byId = (entries: OverrideEntry[]) =&gt; Object.fromEntries(entries)
+const ids = (entries: OverrideEntry[]) =&gt; entries.map(([id]) =&gt; id).sort()
+
+describe('linkedWallOverrides', () =&gt; {
+  // ┌──── b ────┐
+  // a           c      —— a.end / b.start 共点 (4,0)，b.end / c.start 共点 (4,3)
+  const a = wall('a', [0, 0], [4, 0])
+  const b = wall('b', [4, 0], [4, 3])
+  const c = wall('c', [4, 3], [8, 3])
+  const far = wall('far', [100, 100], [104, 100])
+  const walls = [a, b, c, far]
+
+  it('整墙位移：两端各带走一个邻居', () =&gt; {
+    // a 整体挪 (0,1)：start (0,0)→(0,1)，end (4,0)→(4,1)
+    const entries = linkedWallOverrides(
+      walls,
+      [
+        { from: { x: 0, y: 0 }, to: { x: 0, y: 1 } },
+        { from: { x: 4, y: 0 }, to: { x: 4, y: 1 } },
+      ],
+      new Set([a.id]),
+    )
+
+    expect(ids(entries)).toEqual(['wall_b'])
+    expect(byId(entries)['wall_b']).toEqual({ start: [4, 1] })
+  })
+
+  it('端点位移：只有贴在 from 上的那一端变', () =&gt; {
+    // 拖 b 的 end，(4,3) → (6,5)
+    const entries = linkedWallOverrides(
+      walls,
+      [{ from: { x: 4, y: 3 }, to: { x: 6, y: 5 } }],
+      new Set([b.id]),
+    )
+
+    expect(ids(entries)).toEqual(['wall_c'])
+    // c 的 start 在 (4,3)，end 在 (8,3) —— 只有 start 该动
+    expect(byId(entries)['wall_c']).toEqual({ start: [6, 5] })
+  })
+
+  it('一堵墙两端同时命中时两端都改', () =&gt; {
+    const bridge = wall('bridge', [0, 0], [4, 0])
+    const entries = linkedWallOverrides(
+      [bridge],
+      [
+        { from: { x: 0, y: 0 }, to: { x: 0, y: 5 } },
+        { from: { x: 4, y: 0 }, to: { x: 4, y: 5 } },
+      ],
+      new Set(),
+    )
+
+    expect(byId(entries)['wall_bridge']).toEqual({ start: [0, 5], end: [4, 5] })
+  })
+
+  it('excludeIds 里的墙不产生条目 —— 被拖的那堵自己写自己', () =&gt; {
+    const entries = linkedWallOverrides(
+      walls,
+      [{ from: { x: 4, y: 0 }, to: { x: 4, y: 1 } }],
+      new Set([a.id, b.id]),
+    )
+    expect(entries).toEqual([])
+  })
+
+  it('不相邻的墙不产生条目', () =&gt; {
+    const entries = linkedWallOverrides(
+      walls,
+      [{ from: { x: 0, y: 0 }, to: { x: 0, y: 1 } }],
+      new Set([a.id]),
+    )
+    expect(ids(entries)).not.toContain('wall_far')
+  })
+
+  it('容差内的浮点漂移仍然算共点', () =&gt; {
+    // quantizeKey 的容差是 1e-3；差 2e-4 应该还在同一个桶里。
+    const entries = linkedWallOverrides(
+      walls,
+      [{ from: { x: 4.0002, y: 0.0001 }, to: { x: 4, y: 1 } }],
+      new Set([a.id]),
+    )
+    expect(ids(entries)).toEqual(['wall_b'])
+  })
+
+  it('容差外就不算 —— 3 厘米的缝隙检测不到', () =&gt; {
+    const entries = linkedWallOverrides(
+      walls,
+      [{ from: { x: 4.03, y: 0 }, to: { x: 4, y: 1 } }],
+      new Set([a.id]),
+    )
+    // 这就是「落点必须吸附」的理由：差 3 厘米肉眼看不见，
+    // 但共点关系断了，邻墙不跟随、斜接也静默失效。
+    expect(entries).toEqual([])
+  })
+
+  it('moves 为空时返回空', () =&gt; {
+    expect(linkedWallOverrides(walls, [], new Set())).toEqual([])
+  })
+})
+
+describe('documentWalls', () =&gt; {
+  beforeEach(() =&gt; {
+    useScene.setState({ nodes: {}, rootNodeIds: [] })
+    useScene.temporal.getState().clear()
+  })
+
+  it('读的是主 store 的原始值，不含 live 覆盖', () =&gt; {
+    const id = useScene.getState().addNode({ type: 'wall', start: [0, 0], end: [4, 0] })
+    const walls = documentWalls()
+
+    expect(walls.map((w) =&gt; w.id)).toEqual([id])
+    expect(walls[0]?.start).toEqual([0, 0])
+  })
+
+  it('场景为空时返回空数组', () =&gt; {
+    expect(documentWalls()).toEqual([])
+  })
+})
+
+describe('AnyNodeId 类型出口', () =&gt; {
+  it('返回的 id 能直接喂回 store', () =&gt; {
+    const id: AnyNodeId = wall('x', [0, 0], [1, 0]).id
+    expect(id).toMatch(/^wall_/)
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">viewer/lib/level-miter-cache.test.ts</h3><span class="tag viewer">viewer</span><span class="tag viewer">新 · 14 例</span></div>
+      <p>命中与否靠<strong>返回对象的引用</strong>判定：同一个引用 = 没重算。不去 spy <code>calculateLevelMiters</code>，因为 ESM 的实时绑定 spy 起来很脆，而引用相等是这里唯一真正要保证的事。</p><p>三条「仍然命中」的用例各锁一个决定：<strong>换了数组但字段一样</strong>（不能用引用比较）、<strong>改 name</strong>（同上，且这是最容易触发的场景）、<strong>改 height</strong>（不许把 height 加进 <code>sameMiterInputs</code>，否则 M8 的「改层高」会全场重算）。</p>
+<pre><code>import { beforeEach, describe, expect, it } from 'vitest'
+import { WallNode } from '../../core/schema/wall'
+import { clearLevelMiterCache, getCachedLevelMiters, sameMiterInputs } from './level-miter-cache'
+
+const wall = (id: string, start: [number, number], end: [number, number], patch = {}) =&gt;
+  WallNode.parse({ id: `wall_${id}`, type: 'wall', start, end, thickness: 0.2, height: 2.5, ...patch })
+
+/**
+ * 缓存命中与否，靠**返回对象的引用**判定：同一个引用 = 没重算。
+ * 不去 spy `calculateLevelMiters`，因为 ESM 的实时绑定 spy 起来很脆，
+ * 而引用相等是这里唯一真正要保证的事。
+ */
+beforeEach(clearLevelMiterCache)
+
+describe('缓存命中', () =&gt; {
+  it('同一份输入第二次不重算', () =&gt; {
+    const walls = [wall('a', [0, 0], [4, 0]), wall('b', [4, 0], [4, 3])]
+
+    const first = getCachedLevelMiters(walls)
+    const second = getCachedLevelMiters(walls)
+
+    expect(second).toBe(first)
+  })
+
+  it('换了数组但字段一样，仍然命中', () =&gt; {
+    const first = getCachedLevelMiters([wall('a', [0, 0], [4, 0])])
+    const second = getCachedLevelMiters([wall('a', [0, 0], [4, 0])])
+
+    // 这一条锁住「不能用引用比较」：updateNode 每次都造新对象，
+    // 引用比较会让「改一次名字」重算全场斜接。
+    expect(second).toBe(first)
+  })
+
+  it('改 name 仍然命中 —— 它不影响斜接', () =&gt; {
+    const first = getCachedLevelMiters([wall('a', [0, 0], [4, 0])])
+    const second = getCachedLevelMiters([wall('a', [0, 0], [4, 0], { name: '客厅北墙' })])
+
+    expect(second).toBe(first)
+  })
+
+  it('改 height 仍然命中 —— 改层高不改平面斜接', () =&gt; {
+    const first = getCachedLevelMiters([wall('a', [0, 0], [4, 0])])
+    const second = getCachedLevelMiters([wall('a', [0, 0], [4, 0], { height: 3.2 })])
+
+    // 把 height 加进 sameMiterInputs 的话，M8 的「改层高」会触发全场重算。
+    expect(second).toBe(first)
+  })
+})
+
+describe('缓存失效', () =&gt; {
+  it('挪端点 → 重算', () =&gt; {
+    const first = getCachedLevelMiters([wall('a', [0, 0], [4, 0])])
+    const second = getCachedLevelMiters([wall('a', [0, 0], [5, 0])])
+    expect(second).not.toBe(first)
+  })
+
+  it('改厚度 → 重算', () =&gt; {
+    const first = getCachedLevelMiters([wall('a', [0, 0], [4, 0])])
+    const second = getCachedLevelMiters([wall('a', [0, 0], [4, 0], { thickness: 0.3 })])
+    expect(second).not.toBe(first)
+  })
+
+  it('加一堵墙 → 重算', () =&gt; {
+    const first = getCachedLevelMiters([wall('a', [0, 0], [4, 0])])
+    const second = getCachedLevelMiters([wall('a', [0, 0], [4, 0]), wall('b', [4, 0], [4, 3])])
+    expect(second).not.toBe(first)
+  })
+
+  it('顺序变了 → 重算（逐位比较，不是集合比较）', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    const b = wall('b', [4, 0], [4, 3])
+    const first = getCachedLevelMiters([a, b])
+    const second = getCachedLevelMiters([b, a])
+    expect(second).not.toBe(first)
+  })
+
+  it('clearLevelMiterCache 之后必然重算', () =&gt; {
+    const walls = [wall('a', [0, 0], [4, 0])]
+    const first = getCachedLevelMiters(walls)
+    clearLevelMiterCache()
+    expect(getCachedLevelMiters(walls)).not.toBe(first)
+  })
+})
+
+describe('缓存正确性', () =&gt; {
+  it('命中路径返回的结果和重算一致', () =&gt; {
+    const walls = [wall('a', [0, 0], [4, 0]), wall('b', [4, 0], [4, 3])]
+
+    const cached = getCachedLevelMiters(walls)
+    clearLevelMiterCache()
+    const fresh = getCachedLevelMiters(walls)
+
+    expect(cached.junctionData.size).toBe(fresh.junctionData.size)
+    for (const [key, corners] of fresh.junctionData) {
+      expect(cached.junctionData.get(key)).toEqual(corners)
+    }
+  })
+
+  it('空场景也能缓存', () =&gt; {
+    expect(getCachedLevelMiters([])).toBe(getCachedLevelMiters([]))
+  })
+})
+
+describe('sameMiterInputs', () =&gt; {
+  it('长度不同直接假', () =&gt; {
+    expect(sameMiterInputs([wall('a', [0, 0], [4, 0])], [])).toBe(false)
+  })
+
+  it('同一个对象引用直接跳过逐字段比较', () =&gt; {
+    const a = wall('a', [0, 0], [4, 0])
+    expect(sameMiterInputs([a], [a])).toBe(true)
+  })
+
+  it('id 变了就是不同的墙', () =&gt; {
+    expect(
+      sameMiterInputs([wall('a', [0, 0], [4, 0])], [wall('z', [0, 0], [4, 0])]),
+    ).toBe(false)
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">app/lib/interaction/drag-session.test.ts</h3><span class="tag app">app</span><span class="tag app">新 · 14 例</span></div>
+      <div class="trap"><span class="trap-label">项目里没装 jsdom —— 手搓一个 12 行的 window 就够了</span><p><code>startDragSession</code> 只用到 <code>window</code> 的 <code>addEventListener</code> / <code>removeEventListener</code>。一个 <code>Map&lt;string, Set&lt;fn&gt;&gt;</code> 加三个方法，用 <code>Reflect.set(globalThis, 'window', fake)</code> 装上去。不装 jsdom（+80MB 依赖、拖慢每次 <code>pnpm test</code>），也不改任何生产代码。</p><p style="margin-bottom:0"><strong>判据：需要的是 DOM 的<em>接口</em>还是 DOM 的<em>行为</em>。</strong>只用 addEventListener 的话是前者，替身就够；要布局、要冒泡、要 getBoundingClientRect 的话是后者，那才必须上 jsdom。</p></div><p>测的是<strong>四条收尾路径</strong>（pointerup / Esc / pointercancel / blur）和<strong>租约不泄漏</strong>。租约泄漏一次，历史就永久暂停，之后所有编辑都撤不回来，而症状（Ctrl+Z 没反应）离病因（某个分支忘了 release）非常远 —— 正是最该上测试的地方。</p><p><code>onCommit</code> 里把 <code>getSceneHistoryPauseDepth()</code> 打进日志，于是断言 <code>commit(depth=0)</code> 就等于断言<strong>「resume 在 write 之前跑完了」</strong>。</p>
+<pre><code>import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import {
+  getSceneHistoryPauseDepth,
+  resetSceneHistoryPause,
+} from '../../../core/store/history-control'
+import { useScene } from '../../../core/store/use-scene'
+import { useViewer } from '../../../viewer/store/use-viewer'
+import { startDragSession } from './drag-session'
+
+/**
+ * 项目里没装 jsdom，但 startDragSession 只用到 window 的
+ * addEventListener / removeEventListener —— 手搓一个 12 行的替身就够了。
+ *
+ * 这一份测的是**四条收尾路径**和**租约不泄漏**。租约泄漏一次，
+ * 历史就永久暂停，之后所有编辑都撤不回来，而症状（Ctrl+Z 没反应）
+ * 离病因（某个分支忘了 release）非常远 —— 正是最该上测试的地方。
+ */
+
+type Listener = (event: unknown) =&gt; void
+
+function installFakeWindow() {
+  const listeners = new Map&lt;string, Set&lt;Listener&gt;&gt;()
+
+  const fake = {
+    addEventListener(type: string, fn: Listener) {
+      let set = listeners.get(type)
+      if (!set) {
+        set = new Set()
+        listeners.set(type, set)
+      }
+      set.add(fn)
+    },
+    removeEventListener(type: string, fn: Listener) {
+      listeners.get(type)?.delete(fn)
+    },
+    dispatch(type: string, event: unknown = {}) {
+      for (const fn of [...(listeners.get(type) ?? [])]) fn(event)
+    },
+    total() {
+      let n = 0
+      for (const set of listeners.values()) n += set.size
+      return n
+    },
+  }
+
+  Reflect.set(globalThis, 'window', fake)
+  return fake
+}
+
+let fakeWindow: ReturnType&lt;typeof installFakeWindow&gt;
+let log: string[]
+
+function session() {
+  return startDragSession({
+    onMove: () =&gt; log.push('move'),
+    onCommit: () =&gt; log.push(`commit(depth=${getSceneHistoryPauseDepth()})`),
+    onCancel: () =&gt; log.push(`cancel(depth=${getSceneHistoryPauseDepth()})`),
+  })
+}
+
+beforeEach(() =&gt; {
+  fakeWindow = installFakeWindow()
+  log = []
+  resetSceneHistoryPause(useScene)
+  useViewer.getState().setInputDragging(false)
+  useScene.temporal.getState().resume()
+})
+
+afterEach(() =&gt; {
+  Reflect.deleteProperty(globalThis, 'window')
+})
+
+describe('开始', () =&gt; {
+  it('拿租约、掐相机、挂上五个监听器', () =&gt; {
+    session()
+
+    expect(getSceneHistoryPauseDepth()).toBe(1)
+    expect(useViewer.getState().inputDragging).toBe(true)
+    expect(useScene.temporal.getState().isTracking).toBe(false)
+    expect(fakeWindow.total()).toBe(5) // move / up / cancel / keydown / blur
+  })
+})
+
+describe('四条收尾路径', () =&gt; {
+  it('pointerup（左键）→ commit', () =&gt; {
+    session()
+    fakeWindow.dispatch('pointerup', { button: 0 })
+    expect(log).toEqual(['commit(depth=0)'])
+  })
+
+  it('pointerup（右键）不结束 —— 右键属于相机', () =&gt; {
+    session()
+    fakeWindow.dispatch('pointerup', { button: 2 })
+    expect(log).toEqual([])
+    expect(getSceneHistoryPauseDepth()).toBe(1)
+  })
+
+  it('Esc → cancel', () =&gt; {
+    session()
+    fakeWindow.dispatch('keydown', { key: 'Escape' })
+    expect(log).toEqual(['cancel(depth=0)'])
+  })
+
+  it('别的键不结束', () =&gt; {
+    session()
+    fakeWindow.dispatch('keydown', { key: 'a' })
+    expect(log).toEqual([])
+  })
+
+  it('pointercancel → cancel（触屏被系统抢走）', () =&gt; {
+    session()
+    fakeWindow.dispatch('pointercancel')
+    expect(log).toEqual(['cancel(depth=0)'])
+  })
+
+  it('blur → cancel（Alt+Tab 切走）', () =&gt; {
+    session()
+    fakeWindow.dispatch('blur')
+    expect(log).toEqual(['cancel(depth=0)'])
+  })
+
+  it('组件卸载：手动 end(cancel)', () =&gt; {
+    const drag = session()
+    drag.end('cancel')
+    expect(log).toEqual(['cancel(depth=0)'])
+  })
+})
+
+describe('租约与清理', () =&gt; {
+  it('每条路径都还清租约、放开相机、摘干净监听器', () =&gt; {
+    const paths: Array&lt;[string, () =&gt; void]&gt; = [
+      ['pointerup', () =&gt; fakeWindow.dispatch('pointerup', { button: 0 })],
+      ['escape', () =&gt; fakeWindow.dispatch('keydown', { key: 'Escape' })],
+      ['pointercancel', () =&gt; fakeWindow.dispatch('pointercancel')],
+      ['blur', () =&gt; fakeWindow.dispatch('blur')],
+    ]
+
+    for (const [name, trigger] of paths) {
+      fakeWindow = installFakeWindow()
+      resetSceneHistoryPause(useScene)
+      useScene.temporal.getState().resume()
+      log = []
+
+      session()
+      trigger()
+
+      expect(getSceneHistoryPauseDepth(), name).toBe(0)
+      expect(useViewer.getState().inputDragging, name).toBe(false)
+      expect(fakeWindow.total(), name).toBe(0)
+      expect(useScene.temporal.getState().isTracking, name).toBe(true)
+    }
+  })
+
+  it('commit 跑的时候历史已经恢复了 —— 顺序反了就丢一步撤销', () =&gt; {
+    session()
+    fakeWindow.dispatch('pointerup', { button: 0 })
+
+    // depth=0 表示 releaseHistory() 在 onCommit() 之前跑完了。
+    expect(log).toEqual(['commit(depth=0)'])
+  })
+
+  it('end 是幂等的：重复收尾不会多还一次租约', () =&gt; {
+    const drag = session()
+
+    drag.end('commit')
+    drag.end('cancel')
+    fakeWindow.dispatch('pointerup', { button: 0 })
+
+    expect(log).toEqual(['commit(depth=0)'])
+    expect(getSceneHistoryPauseDepth()).toBe(0)
+  })
+
+  it('两场拖拽重叠时先结束的那场不恢复历史', () =&gt; {
+    const first = session()
+    const second = session()
+    expect(getSceneHistoryPauseDepth()).toBe(2)
+
+    first.end('commit')
+    expect(useScene.temporal.getState().isTracking).toBe(false)
+
+    second.end('commit')
+    expect(useScene.temporal.getState().isTracking).toBe(true)
+  })
+})
+
+describe('拖拽中', () =&gt; {
+  it('pointermove 转发给 onMove', () =&gt; {
+    session()
+    fakeWindow.dispatch('pointermove', { clientX: 1, clientY: 2 })
+    fakeWindow.dispatch('pointermove', { clientX: 3, clientY: 4 })
+    expect(log).toEqual(['move', 'move'])
+  })
+
+  it('收尾之后 pointermove 不再转发', () =&gt; {
+    const drag = session()
+    drag.end('cancel')
+    fakeWindow.dispatch('pointermove', { clientX: 1, clientY: 2 })
+    expect(log).toEqual(['cancel(depth=0)'])
+  })
+})</code></pre>
+    </div>
+  </div>
+
+  <h3 style="margin-top:40px">还剩什么只能靠眼睛</h3>
+  <p class="prose">这几条我不建议硬测 —— 装 <code>jsdom</code> + <code>@react-three/test-renderer</code> 之后它们会变成「测渲染器有没有 bug」，而不是「测我的逻辑对不对」。D11 当初写「React/渲染层不测，靠跑起来看」就是这个意思。</p>
+  <ul class="check">
+    <li><span>3D 视角下拖墙，<strong>相机不转</strong>（§08 A 组第 07 条）。</span></li>
+    <li><span>墙工具下点在已有墙上 → <strong>只落点，不选中</strong>。</span></li>
+    <li><span>选择工具下点墙 → 选中并高亮（<strong>M3 §05 第 6 条的迟到验收</strong>）。</span></li>
+    <li><span>拖拽<strong>过程中</strong>墙角斜接实时跟随、不闪烁；松手瞬间画面不跳变。</span></li>
+    <li><span>端点手柄拉远之后<strong>还点得中</strong>（<code>handleScale</code>）。</span></li>
+    <li><span>橡皮筋跟手，且移动鼠标时 React DevTools 不显示重渲染。</span></li>
+    <li><span>100 堵墙拖一堵，帧率不掉（这条 M5 之后可以自动化）。</span></li>
+  </ul>
+
+  <div class="note" style="margin-top:28px">
+    <p>
+      <strong>要不要装 jsdom？我的意见是暂时不装。</strong>
+      它能多买到的是「键盘快捷键」和「R3F 组件挂载」两块，
+      而前者的逻辑（哪个键做什么）已经在 <code>use-history-shortcuts.ts</code> 里是纯分支了，
+      后者测出来的多半是 R3F 自己的行为。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>真正值得装的时机是 M12</strong> —— 那时候有了 Radix 的弹出层、焦点陷阱、
+      键盘导航，那些是真·DOM 行为，且是自己写的代码。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<footer style="color:var(--ink-3);font-family:var(--mono);font-size:12px;letter-spacing:.04em">
+  <p style="margin:0">
+    对照源码：<code>core/src/store/history-control.ts</code>（278 行，取其 90–123 / 192–234 / 236–278）·
+    <code>core/src/store/use-live-node-overrides.ts</code>（76 行）·
+    <code>core/src/systems/wall/wall-mitering.ts:487</code>（getAdjacentWallIds）·
+    <code>viewer/src/systems/wall/level-miter-cache.ts</code>（52 行，几乎可直抄）·
+    <code>nodes/src/wall/move-tool.tsx</code>（719 行，只读生命周期骨架）·
+    <code>editor/src/components/editor/handles/handle-drag-history.ts</code>（14 行）
+  </p>
+  <p style="margin:8px 0 0">
+    §07 全码已补（2026-08-22）。<strong>§08 收尾清单已补（2026-08-26）</strong>—— 14 处编辑 + 4 个测试文件，验证过能从红修到全绿。<strong>§09 补了真实功能操作的测试（2026-08-26）</strong>—— 七个新文件 85 个用例，合计 13 文件 / 149 例全绿。
+  </p>
+  <p style="margin:8px 0 0">上一站 · M3 一次点击只干一件事　　下一站 · M5 节点注册表</p>
+</footer>
+
+</div>

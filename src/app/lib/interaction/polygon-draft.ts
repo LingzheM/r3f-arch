@@ -9,7 +9,7 @@ export function isClosingClick(points: readonly Point2D[], p: Point2D): boolean 
   if (points.length < 3) return false
   const first = points[0]!
 
-  return Math.hypot(p.x - first.x, p.y - first.y) < CLOSE_RADIUS
+  return Math.hypot(p.x - first.x, p.y - first.y) <= CLOSE_RADIUS
 }
 
 export function isCommittablePolygon(points: readonly Point2D[]): boolean {

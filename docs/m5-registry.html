@@ -1,0 +1,984 @@
+<title>M5 节点注册表</title>
+<style>
+:root {
+  --paper:#EDF1EF; --card:#F8FAF9; --code-bg:#E4EBE8;
+  --ink:#131B19; --ink-2:#4A5754; --ink-3:#74827E;
+  --rule:#C4CFCB; --rule-soft:#D7E0DC;
+  --accent:#0B6E5F; --accent-bg:#DBE9E5;
+  --warn:#9E4520; --warn-bg:#F1E2D9;
+  --core:#0B6E5F;  --core-bg:#DBE9E5;
+  --viewer:#2A5A79; --viewer-bg:#DBE5EC;
+  --app:#6A5843;   --app-bg:#ECE5DB;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --body: Georgia, "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+    --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+    --rule:#2A3733; --rule-soft:#1E2926;
+    --accent:#4FC3AA; --accent-bg:#12312B;
+    --warn:#E2916A; --warn-bg:#32211A;
+    --core:#4FC3AA;  --core-bg:#12312B;
+    --viewer:#79B4DA; --viewer-bg:#14262F;
+    --app:#C9AC85;   --app-bg:#2A2318;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+  --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+  --rule:#2A3733; --rule-soft:#1E2926;
+  --accent:#4FC3AA; --accent-bg:#12312B;
+  --warn:#E2916A; --warn-bg:#32211A;
+  --core:#4FC3AA;  --core-bg:#12312B;
+  --viewer:#79B4DA; --viewer-bg:#14262F;
+  --app:#C9AC85;   --app-bg:#2A2318;
+}
+* { box-sizing:border-box; }
+body {
+  background:var(--paper); color:var(--ink); font-family:var(--body);
+  font-size:17px; line-height:1.72; margin:0; padding:0 24px 120px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:940px; margin:0 auto; }
+.prose { max-width:68ch; }
+.masthead { padding:72px 0 0; }
+.eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 20px; display:flex; gap:14px; flex-wrap:wrap;
+}
+.eyebrow b { color:var(--accent); font-weight:600; }
+h1 {
+  font-family:var(--mono); font-size:clamp(32px,5.5vw,50px); line-height:1.08;
+  letter-spacing:-.02em; font-weight:600; margin:0 0 18px; text-wrap:balance;
+}
+.standfirst { font-size:19px; color:var(--ink-2); max-width:60ch; margin:0 0 8px; }
+.dim { position:relative; height:1px; background:var(--rule); border:0; margin:56px 0 40px; }
+.dim::before,.dim::after { content:""; position:absolute; top:-4px; width:1px; height:9px; background:var(--rule); }
+.dim::before{left:0} .dim::after{right:0}
+h2 {
+  font-family:var(--mono); font-size:13px; letter-spacing:.16em; text-transform:uppercase;
+  font-weight:600; color:var(--accent); margin:0 0 6px;
+}
+h2 .num { color:var(--ink-3); margin-right:12px; }
+.h2sub { font-family:var(--mono); font-size:22px; font-weight:600; margin:0 0 24px; letter-spacing:-.01em; }
+h3 { font-family:var(--mono); font-size:16px; font-weight:600; margin:34px 0 10px; }
+h4 { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--accent); margin:24px 0 6px; }
+p { margin:0 0 16px; }
+ul,ol { margin:0 0 16px; padding-left:22px; }
+li { margin-bottom:7px; }
+strong { font-weight:700; color:var(--ink); }
+em { font-style:italic; color:var(--ink-2); }
+code { font-family:var(--mono); font-size:.86em; background:var(--code-bg); padding:1px 5px; border-radius:2px; }
+pre {
+  background:var(--code-bg); border:1px solid var(--rule-soft); border-radius:3px;
+  padding:16px 18px; overflow-x:auto; margin:14px 0 18px; line-height:1.62;
+}
+pre code { background:none; padding:0; font-size:13px; white-space:pre; }
+.cm { color:var(--ink-3); }
+.cw { color:var(--warn); }
+.step {
+  display:grid; grid-template-columns:52px 1fr; gap:0 20px;
+  padding:26px 0; border-top:1px solid var(--rule-soft);
+}
+.step:first-of-type { border-top:1px solid var(--rule); }
+.step-n { font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink-3); padding-top:4px; font-variant-numeric:tabular-nums; }
+.step-body { min-width:0; }
+.step-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.step-title { font-family:var(--mono); font-size:17px; font-weight:600; margin:0; }
+.step-body > p { max-width:64ch; }
+.tag {
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  font-weight:600; padding:3px 8px; border-radius:2px; white-space:nowrap;
+}
+.tag.core{color:var(--core);background:var(--core-bg)}
+.tag.viewer{color:var(--viewer);background:var(--viewer-bg)}
+.tag.app{color:var(--app);background:var(--app-bg)}
+.tag.debt{color:var(--warn);background:var(--warn-bg)}
+.trap {
+  background: repeating-linear-gradient(-45deg, transparent 0 6px,
+    color-mix(in srgb, var(--warn) 7%, transparent) 6px 7px), var(--warn-bg);
+  border-left:3px solid var(--warn); padding:14px 18px; margin:18px 0; border-radius:0 3px 3px 0;
+}
+.trap-label {
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  font-weight:600; color:var(--warn); display:block; margin-bottom:6px;
+}
+.trap p:last-child,.trap ul:last-child { margin-bottom:0; }
+.note { border-left:3px solid var(--rule); padding:2px 0 2px 18px; margin:18px 0; color:var(--ink-2); font-size:16px; }
+.note p:last-child { margin-bottom:0; }
+.tablewrap { overflow-x:auto; margin:18px 0 24px; }
+table { border-collapse:collapse; width:100%; font-family:var(--mono); font-size:13px; min-width:560px; }
+th {
+  text-align:left; font-weight:600; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule); padding:0 14px 8px 0;
+}
+td { padding:9px 14px 9px 0; border-bottom:1px solid var(--rule-soft); vertical-align:top; line-height:1.55; }
+td:last-child,th:last-child { padding-right:0; }
+.check { list-style:none; padding:0; margin:0; }
+.check li {
+  display:grid; grid-template-columns:26px 1fr; gap:10px; padding:11px 0;
+  border-bottom:1px solid var(--rule-soft); margin:0;
+}
+.check li::before { content:""; width:14px; height:14px; border:1.5px solid var(--accent); border-radius:2px; margin-top:6px; }
+.defect { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--rule-soft); }
+.defect-to { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--accent); white-space:nowrap; }
+a { color:var(--accent); }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media (max-width:620px) {
+  body { font-size:16px; padding:0 18px 80px; }
+  .step { grid-template-columns:1fr; }
+  .step-n { padding-top:0; margin-bottom:4px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">
+    <span>r3f-arch</span><span>里程碑 <b>05</b> / 14</span><span>机制型</span>
+    <span style="color:var(--warn)"><b>本文档只含 §00 + §03</b></span>
+  </p>
+  <h1>M5 节点注册表</h1>
+  <p class="standfirst">
+    <code>switch (node.type)</code> 换成一张表。加第三种节点类型的成本，
+    应该等于加第二种——而这一条本身就是 M6 对 M5 的检验。
+  </p>
+
+  <div class="trap" style="margin-top:28px">
+    <span class="trap-label">这份文档的分工</span>
+    <p>
+      <strong>我写 §00（推导过程）和 §03（文件树增量）。</strong>
+      <strong>§01 / §02 / §04 / §05 / §06 由你写</strong>，我只挑毛病不给答案——
+      这是 <code>m3-spine.html</code> §00 末尾那句约定的兑现。
+    </p>
+    <p style="margin-bottom:0">
+      §00 给的是<em>原材料和方法</em>：读了什么、量到多少行、规格书自己抽好的不变量、
+      以及你代码里的病灶在哪。<strong>结论我没写</strong>——凡是需要判断的地方，
+      我都标成了「这一条你来定」。文档末尾有你那五节的写作提示和我 review 时的判据。
+    </p>
+  </div>
+</header>
+
+<hr class="dim">
+
+<!-- ═══════════ 00 -->
+<section>
+  <h2><span class="num">00</span>这个设计是怎么推出来的</h2>
+  <p class="h2sub">七步 + 一步原型。这一节是过程，不是结论</p>
+
+  <!-- ① -->
+  <div class="step">
+    <div class="step-n">①</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">找规格书，读全文</h3></div>
+      <p>M5 的规格书是三页 wiki，一共 539 行。严格按这个顺序读：</p>
+<pre><code><span class="cm">1.</span> wiki/architecture/node-definitions.md   353 行  <span class="cm">← 主规格书，读两遍</span>
+<span class="cm">2.</span> wiki/architecture/systems.md            116 行  <span class="cm">← 什么时候「还」需要 per-kind system</span>
+<span class="cm">3.</span> wiki/architecture/renderers.md           70 行  <span class="cm">← 什么时候「还」需要 per-kind renderer</span>
+   <span class="cm">—— 到这里为止都还没看一行实现 ——</span>
+<span class="cm">4.</span> core/src/registry/registry.ts           328 行  <span class="cm">← 注册表本体，比你想的短</span>
+<span class="cm">5.</span> viewer/.../parametric-node-renderer.tsx  98 行  <span class="cm">← 通用渲染器，全项目最值钱的 98 行</span>
+<span class="cm">6.</span> viewer/.../node-renderer.tsx             56 行  <span class="cm">← 分发点，两条 if</span>
+<span class="cm">7.</span> viewer/systems/geometry/geometry-system.tsx  441 行  <span class="cm">← 只读它的 useFrame 主循环</span>
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">这一次的「最常见错误做法」和 M3 不一样</span>
+        <p>
+          M3 那次是「跳过 wiki 直接读源码」。M5 有一个更具体的坑：
+          <strong><code>core/src/registry/types.ts</code> 是 2329 行</strong>，
+          而你要的东西在第 930 行开始的 100 行里。
+        </p>
+        <p style="margin-bottom:0">
+          从头读会让你以为「注册表 = 一个有 40 个字段的巨型接口」。
+          正确做法：<code>grep -n "export type NodeDefinition" types.ts</code>，
+          从那一行往下读 100 行，<strong>然后立刻停</strong>。
+          后面的 <code>capabilities</code> / <code>relations</code> / <code>parametrics</code>
+          服务的全是我们范围外的功能。
+        </p>
+      </div>
+      <p>
+        另外两页在读完主规格书之后再看，它们回答的是同一个问题的反面：
+        <em>什么时候三复选框不够用</em>。<code>systems.md</code> 开头那句话是整页的结论：
+      </p>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <em>"<strong>For registry-driven kinds, prefer no per-kind system.</strong>
+          If your kind's only job is 'rebuild geometry on dirty', set <code>def.geometry</code>
+          and let the framework's <code>&lt;GeometrySystem&gt;</code> handle the rebuild loop.
+          Per-kind systems remain for <strong>extra</strong> responsibilities."</em>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② -->
+  <div class="step">
+    <div class="step-n">②</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">找「之前是怎么错的」</h3></div>
+      <p>
+        <strong>这一步这次要换个找法。</strong>M3 的规格书开头有一整段
+        <em>"Before this, … was re-derived from 7+ independent flags …"</em>——
+        白送的。<code>node-definitions.md</code> <strong>没有这么一段</strong>。
+      </p>
+      <p>
+        但证据到处都是，只是形态不同：<strong>整页文档的形状本身就是证据。</strong>
+        一份规格书如果花大量篇幅教你「怎么从旧写法迁移过来」，
+        那旧写法就是它要取代的东西。数一数：
+      </p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>规格书里的原话</th><th>反推出的 before 状态</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><em>"Migrating from custom renderer+system files to <code>def.geometry</code>"</em>
+              ——整整一节，四步，末尾是 <em>"Delete <code>renderer.tsx</code> and <code>system.tsx</code>"</em></td>
+            <td>每种类型两个文件，各自重写一遍注册 / 事件 / dispose 样板</td>
+          </tr>
+          <tr>
+            <td><code>capabilities.paint</code>：<em>"instead of adding an
+              <code>if (node.type === '&lt;kind&gt;')</code> arm for every paintable kind"</em></td>
+            <td>上色逻辑里一条按类型分叉的长链</td>
+          </tr>
+          <tr>
+            <td><code>keyboardActions</code>：<em>"instead of extending the hand-written
+              <code>if/else</code> chain in <code>use-keyboard.ts</code>"</em></td>
+            <td>快捷键处理里另一条</td>
+          </tr>
+          <tr>
+            <td><code>getSelectableKinds()</code>：<em>"Callers that maintain hardcoded
+              'selectable kinds' lists (SelectionManager, FloatingActionMenu)…
+              Phase 6 deletes the hardcoded lists entirely"</em></td>
+            <td>还有两份手写的类型白名单</td>
+          </tr>
+          <tr>
+            <td><code>renderers.md</code> 的 Dispatch Chain：
+              <em>"<code>&lt;NodeRenderer&gt;</code> — switches on <code>node.type</code>"</em></td>
+            <td>一个随类型数线性增长的 switch</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p>还有一个可以直接量的数字。在对照仓库根目录跑：</p>
+<pre><code>$ grep -rn "node\.type === '" packages --include=*.ts --include=*.tsx | wc -l
+<span class="cw">509</span>
+
+$ ls packages/nodes/src | wc -l          <span class="cm"># 注册了多少种类型</span>
+48
+$ ls packages/nodes/src/*/renderer.tsx | wc -l   <span class="cm"># 还剩多少个自定义渲染器</span>
+30
+$ ls packages/nodes/src/*/system.tsx | wc -l     <span class="cm"># 还剩多少个 per-kind system</span>
+16
+$ ls packages/nodes/src/*/geometry.ts | wc -l    <span class="cm"># 已经迁成纯 builder 的</span>
+25
+</code></pre>
+      <p>
+        <strong>48 种类型，509 处按类型分叉，迁移到今天只走完一半。</strong>
+        这就是不用注册表的账单——而且它是<em>持续</em>产生的：
+        每加一种类型，509 就往上涨。
+      </p>
+
+      <h4>可迁移的判据</h4>
+      <p>M3 §00 ② 那张表还能用，但第一行的答案变了：</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>问题</th><th>M3 的答案</th><th>M5 的答案</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>这个设计排除了哪些错误？</td>
+            <td><strong>非法状态</strong>（7 个标志漂移成不可能的组合）</td>
+            <td><strong>遗漏</strong>（加类型时忘了改其中一处）</td>
+          </tr>
+          <tr>
+            <td>不用它会怎么错？</td>
+            <td>点一下同时触发两件事</td>
+            <td>新类型能画出来但选不中 / 不能上色 / 快捷键没反应</td>
+          </tr>
+          <tr>
+            <td>它是设计出来的还是重构出来的？</td>
+            <td>重构（文档明说 <em>"Before this…"</em>）</td>
+            <td>重构（有 Phase 1–6 的迁移计划，且<strong>还没走完</strong>）</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>「非法状态」和「遗漏」的区别决定了验收方式。</strong>
+          非法状态可以用类型和测试锁死——M3 的 8 个 scope 用例就是。
+          <em>遗漏</em>锁不住：编译器不会告诉你「你忘了给 slab 加上色分支」。
+          能锁住它的只有一件事：<strong>把「加一种类型」变成一个只有一处要改的动作。</strong>
+          你写 §05 验收清单时，这一条应该是压轴。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ -->
+  <div class="step">
+    <div class="step-n">③</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">量成本</h3></div>
+      <p><code>wc -l</code>。这次的数字比 M3 那次夸张得多。</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>原项目文件</th><th>行数</th><th>建议处置</th></tr></thead>
+        <tbody>
+          <tr><td><code>core/registry/types.ts</code></td><td>2329</td>
+            <td>取 <code>NodeDefinition</code> 的 <code>kind</code>/<code>schema</code> + 三复选框，<strong>~15 行</strong></td></tr>
+          <tr><td><code>core/registry/registry.ts</code></td><td>328</td>
+            <td>取 Map + register + get，<strong>~30 行</strong>。HMR 重复注册、插件 id、启用开关全跳过</td></tr>
+          <tr><td><code>core/registry/handles.ts</code></td><td>468</td>
+            <td><strong>整个跳过</strong>（手柄进注册表 → M13）</td></tr>
+          <tr><td><code>core/registry/subtree.ts</code></td><td>197</td>
+            <td><strong>整个跳过</strong>（级联删除 → M7）</td></tr>
+          <tr><td><code>core/registry/relations-resolver.ts</code></td><td>124</td>
+            <td><strong>整个跳过</strong>（宿主关系 → M7）</td></tr>
+          <tr><td><code>core/registry/scene-api.ts</code></td><td>141</td>
+            <td><strong>整个跳过</strong>（给插件 / MCP 用，我们没有）</td></tr>
+          <tr><td><code>viewer/.../parametric-node-renderer.tsx</code></td><td>98</td>
+            <td>抄结构，砍掉 liveTransform / bake / 递归子节点，<strong>~35 行</strong></td></tr>
+          <tr><td><code>viewer/.../node-renderer.tsx</code></td><td>56</td>
+            <td>抄两条 <code>if</code>，砍掉 lazy / Suspense / 插件开关，<strong>~15 行</strong></td></tr>
+          <tr><td><code>viewer/systems/geometry/geometry-system.tsx</code></td><td>441</td>
+            <td>取 <code>useFrame</code> 主循环，<strong>~50 行</strong>。见下方拆解</td></tr>
+          <tr><td><code>viewer/.../registered-systems.tsx</code></td><td>66</td>
+            <td><strong>暂时跳过</strong>——M5 只有 wall 一个 kind，<code>def.system</code> 零用户</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>
+        <strong>4248 行里真正需要的大约 145 行。</strong>
+        和 M3 那次（509 行取 60 行）是同一个比例。
+      </p>
+
+      <h4><code>geometry-system.tsx</code> 的 441 行里有什么</h4>
+      <p>这是唯一一个需要拆开看的文件，因为它的「核心 50 行」被埋在很深的地方：</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>它做的事</th><th>M5 要不要</th><th>为什么</th></tr></thead>
+        <tbody>
+          <tr><td>读 <code>dirtyNodes</code> → 查 <code>def.geometry</code> → 换子节点 → <code>clearDirty</code></td>
+            <td><strong>要</strong></td><td>这就是 M5 的全部</td></tr>
+          <tr><td><code>disposeChildren</code> + <code>userData.__fromGeometry</code> 标记</td>
+            <td><strong>要</strong></td><td>见 ④ 的第 2 条不变量。现在不做，M7 门窗挂到墙上时会消失</td></tr>
+          <tr><td><code>computeLevelData</code> 批处理（每层每帧算一次）</td>
+            <td><strong>大概率要</strong></td><td>它就是你 M4 写的 <code>level-miter-cache</code> 的注册表版本。<em>这一条你来定</em></td></tr>
+          <tr><td><code>geometryKey</code> 跳过重建</td><td>不要</td>
+            <td>它解决的是「宿主被子节点弄脏但自身没变」，M7 才有宿主</td></tr>
+          <tr><td><code>surfaceRole</code> 主题着色</td><td>不要</td><td>→ M14</td></tr>
+          <tr><td>appearance 值变化时全量重标脏（4 个 <code>useEffect</code>）</td><td>不要</td><td>→ M14</td></tr>
+          <tr><td>场景材质库 <code>scene:&lt;id&gt;</code> 引用</td><td>不要</td><td>→ M14</td></tr>
+          <tr><td>缓存材质的 <code>isCachedMaterial</code> 判定</td><td>不要</td><td>我们还没有共享材质</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ -->
+  <div class="step">
+    <div class="step-n">④</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">抽不变量</h3></div>
+      <p>
+        <code>node-definitions.md</code> 末尾有一节叫 <code>## Rules</code>，
+        规格书自己抽好了六条；后面还有一节 <code>## Pitfalls</code>，
+        四条各配一段「症状」。<strong>照抄，然后砍掉依赖我们范围外功能的。</strong>
+      </p>
+
+      <h4>留下的（M5 范围内）</h4>
+<pre><code><span class="cm">① Builders must be pure.</span>
+   def.geometry 里不许 import useScene。要读别的节点，走 ctx。
+
+<span class="cm">② Builders emit local-space children.</span>
+   渲染器拥有 transform，builder 产出的顶点当作父节点在原点。
+   永远不许把世界坐标烘进顶点。
+
+<span class="cm">③ One mesh registered per node ID.</span>
+   通用渲染器每个节点注册一个 &lt;group&gt;。
+
+<span class="cm">④ Custom systems 是叠加，不是替代。</span>
+   def.geometry + def.system 同时存在时两个都跑。
+
+<span class="cm">⑤ Dispose on rebuild.</span>
+   换子节点前必须 dispose 上一批的 geometry 和 material。
+
+<span class="cm">⑥ def.renderer 覆盖通用渲染器。</span>
+   设了它就自己拥有挂载；但 def.geometry 仍然会跑
+   —— 自定义渲染器可以注册一个空 group 让系统来填。
+</code></pre>
+
+      <h4>两条 Pitfall 直接变成验收项</h4>
+      <div class="trap">
+        <span class="trap-label">Pitfall 1 —— 系统不许 mutate group.position / rotation</span>
+        <p>
+          <code>ParametricNodeRenderer</code> 用 JSX 绑定
+          <code>&lt;group position={…}&gt;</code>。React 只在底层值变化时才重新应用这个 prop。
+          如果几何系统在重建之后<em>命令式</em>地把 <code>group.position</code> 归零，
+          R3F 没有理由在下一帧重新渲染，group 就永远停在原点了。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>症状：节点每次几何重建就跳回 (0,0,0)。</strong>
+          规格书说这正是旧的 per-kind 系统干过的事。
+        </p>
+      </div>
+      <div class="trap">
+        <span class="trap-label">Pitfall 2 —— builder 产出的子节点必须打 <code>userData.__fromGeometry</code></span>
+        <p>
+          一个注册的 <code>&lt;group&gt;</code> 会同时挂两种子节点：
+          builder 造的网格，和 React 渲染的<em>宿主子节点</em>。
+          重建时只许 dispose 前者。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>症状：把一个物件拖到宿主上，物件消失且再也不回来。</strong>
+          M5 还没有宿主（M7 才有门窗），但<strong>这一条现在做只要三行，M7 补做要重新理解整个 dispose 路径</strong>。
+        </p>
+      </div>
+
+      <h4>不变量 ① 是本次最大的测试红利</h4>
+      <p>
+        D11 说「React/渲染层不测，靠跑起来看」。
+        <strong>而不变量 ① 把几何生成从渲染层里挖了出来</strong>——
+        <code>buildWallGeometry(node, ctx)</code> 是个纯函数，
+        输入是数据、输出是 <code>Object3D</code>，
+        <em>不需要 React、不需要画布、不需要 GPU</em>。
+      </p>
+      <p style="margin-bottom:0">
+        它 import 了 three，所以跑不了 D11 说的「Node 里裸跑」——但 three 在 Node 里
+        <strong>能构造几何，只是不能渲染</strong>。
+        <code>new THREE.ExtrudeGeometry(...).attributes.position.count</code> 在 vitest 里是可以断言的。
+        <strong>你写 §05 时值得考虑把这条算进去。</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- ⑤ -->
+  <div class="step">
+    <div class="step-n">⑤</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">切最薄的垂直片</h3></div>
+      <p>
+        <code>ROADMAP.md</code> 给的切法是「<strong>把 wall 迁进注册表（第一个用户），
+        <code>wall-renderer.tsx</code> 删除</strong>」。
+      </p>
+      <div class="trap">
+        <span class="trap-label">这里有一个真实的张力，你写 §01 时必须正面回答</span>
+        <p>
+          <strong><code>DECISIONS.md</code> D10 写着：「M1–M4 硬编码
+          <code>switch (node.type)</code>，M5 加<em>第三种</em>类型时才抽 <code>nodeRegistry</code>。
+          rule of three。」</strong>
+        </p>
+        <p>
+          而 M5 结束时你只有<strong>一种</strong>类型（wall）。第二、三种（slab / ceiling / column）
+          在 M6。也就是说 —— <em>按 D10 的字面意思，M5 现在做注册表是早了两个类型。</em>
+        </p>
+        <p style="margin-bottom:0">
+          <strong>我不替你回答。</strong>但可以给你三个可查证的事实：
+          ① M6 的验收原文是「加第三种类型的工作量 ≈ 加第二种，<em>这一条本身就是对 M5 的检验</em>」——
+          说明 ROADMAP 早就知道 M5 先于用户出现；
+          ② 对照仓库的迁移是 Phase 1–6，第一批迁的也只有一种类型（shelf）；
+          ③ M4 的 <code>dirtyNodes</code> 现在<strong>零消费者</strong>，
+          它是为 <code>GeometrySystem</code> 建的。
+        </p>
+      </div>
+
+      <h4>怎么判断一个切法够不够薄</h4>
+      <p>M3 那次用的判据，这次仍然适用：</p>
+      <ul>
+        <li><strong>切完之后能跑起来看见东西吗？</strong>不能的话，切太薄了（只建了类型没建实现）。</li>
+        <li><strong>切完之后有东西被删掉吗？</strong>没有的话，切太厚了或者方向错了——
+          注册表的价值是<em>消除</em>代码，不是增加一层。M5 必须让
+          <code>wall-renderer.tsx</code> 和 <code>node-renderer.tsx</code> 里的 switch 死掉。</li>
+        <li><strong>下一个里程碑能不能零改动接上？</strong>M6 加三种类型时，
+          如果还要动 M5 建的任何一个框架文件，说明抽象抽错了位置。</li>
+      </ul>
+      <p style="margin-bottom:0">
+        <strong>第二条是这次的关键。</strong>M5 是十四个里程碑里唯一一个
+        <em>净删除行数可能为正</em>的。如果你算完发现新增远多于删除，
+        大概率是把 M6/M7 的东西提前做了。
+      </p>
+    </div>
+  </div>
+
+  <!-- ⑥ -->
+  <div class="step">
+    <div class="step-n">⑥</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">去你的代码里找病灶</h3></div>
+      <p>
+        <strong>动机必须先于机制。</strong>在写任何注册表代码之前，
+        先量一次「今天加第二种节点类型要改几处」。我替你跑了：
+      </p>
+<pre><code>$ grep -rn "'wall'\|node.type ===\|type !== 'wall'\|case 'wall'" src \
+    --include=*.ts --include=*.tsx | grep -v "\.test\."
+<span class="cw">18 处，分布在 11 个文件</span>
+</code></pre>
+      <p>但这 18 处不是一回事。分成三类才有意义：</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>类</th><th>位置</th><th>M5 该不该消灭</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>A · 分发点</strong><br><span style="color:var(--ink-3)">按类型选组件 / 选行为</span></td>
+            <td><code>viewer/components/node-renderer.tsx:26</code> — <code>case 'wall':</code></td>
+            <td><strong>必须</strong>。这就是 M5 的靶心</td>
+          </tr>
+          <tr>
+            <td><strong>B · 样板</strong><br><span style="color:var(--ink-3)">每个类型都要重写一遍的同样几行</span></td>
+            <td><code>wall-renderer.tsx</code> 全部 55 行：<code>useRegistry</code> /
+              <code>useNodeEvents</code> / <code>useEffectiveNode</code> /
+              <code>useMemo</code> 建几何 / <code>useEffect</code> dispose /
+              <code>&lt;mesh&gt;</code> + transform</td>
+            <td><strong>必须</strong>。55 行里真正 wall-specific 的只有
+              <code>buildWallGeometry(node, miter)</code> 那一行和两个颜色常量</td>
+          </tr>
+          <tr>
+            <td rowspan="3"><strong>C · 真·类型特有</strong><br><span style="color:var(--ink-3)">本来就该按类型分</span></td>
+            <td><code>wall-linking.ts:14</code> — 筛出墙来算邻接</td>
+            <td>不该。它是墙的领域逻辑</td>
+          </tr>
+          <tr>
+            <td><code>use-level-miters.ts:13</code> — 筛出墙来算斜接</td>
+            <td><strong>可能该</strong>——如果你决定用 <code>computeLevelData</code>。<em>你定</em></td>
+          </tr>
+          <tr>
+            <td><code>use-editor.ts:4</code> — <code>Tool = 'select' | 'wall'</code><br>
+              <code>scope.ts:8</code> — <code>tool: 'wall'</code></td>
+            <td><strong>可能该</strong>——ROADMAP 写了「工具也进注册表：<code>def.tool</code>」。<em>你定</em></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="note">
+        <p>
+          <strong>把 A 和 B 分开是这一步的全部意义。</strong>
+          A 是<em>一处</em>代码随类型数线性增长；B 是<em>每个类型</em>都付一次固定成本。
+          两者都靠注册表解决，但解决方式不同：A 靠查表，B 靠通用渲染器。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>规格书把这两件事分给了两个组件</strong>——
+          <code>&lt;NodeRenderer&gt;</code> 治 A，<code>&lt;ParametricNodeRenderer&gt;</code> 治 B。
+          你读源码时如果觉得「为什么要两个渲染器组件」，答案在这里。
+        </p>
+      </div>
+
+      <h4>还有两处「已经建好但没人用」的</h4>
+      <ul>
+        <li>
+          <code>useScene.dirtyNodes</code> —— M4 建的，<strong>目前零消费者</strong>。
+          <code>GeometrySystem</code> 就是它的第一个用户。
+          （注意：<code>m4-drag.html</code> §08 B 组第 09 条修完，脏集才是对的。<strong>先修再动 M5。</strong>）
+        </li>
+        <li>
+          <code>sceneRegistry.byType</code> —— M4 §08 A 组第 05 条补上了写入，
+          <strong>目前零读者</strong>。按类型批量取节点的地方会用到它。
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ⑦ -->
+  <div class="step">
+    <div class="step-n">⑦</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">列故意缺陷并标到期</h3><span class="tag debt">§06 是你写</span></div>
+      <p>方法照旧，三个来源：</p>
+      <ol>
+        <li><strong>③ 里标了「不要」的每一项</strong>，都是一条故意缺陷，
+          到期日就是那一行写的里程碑。</li>
+        <li><strong>规格书里你读懂了但决定不做的机制</strong>——
+          <code>capabilities</code> / <code>relations</code> / <code>parametrics</code> /
+          <code>toolHints</code> / <code>keyboardActions</code> / <code>dirtyTracking</code>，
+          每一个都值一行。</li>
+        <li><strong>M5 自己引入的新债</strong>。这一类最容易漏，因为它还没发生。
+          提示：注册表是模块级单例，<em>什么时候注册</em>？import 副作用？显式 <code>registerAllNodes()</code>？
+          这个决定会在 M9（加载存档）和测试里都咬你一口。</li>
+      </ol>
+      <p style="margin-bottom:0">
+        <strong>到期日必须是具体的 M 编号，不许写「以后」。</strong>
+        <code>STATE.md</code> 的缺陷表按到期日跟踪，写「以后」等于从跟踪里消失。
+      </p>
+    </div>
+  </div>
+
+  <!-- ⑧ -->
+  <div class="step">
+    <div class="step-n">⑧</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">先跑原型的那一个问题</h3></div>
+      <p>
+        M5 有一个<strong>纸上推不出来</strong>的时序问题，值得先花二十行验一下再动手：
+      </p>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <code>ParametricNodeRenderer</code> 在 <code>useLayoutEffect</code> 里
+          <code>markDirty(node.id)</code>；<code>GeometrySystem</code> 在
+          <code>useFrame</code> 里读 <code>dirtyNodes</code>、查 <code>sceneRegistry</code>
+          拿那个 group。<br>
+          <strong>问题：新挂载的节点，第一帧的时候 group 已经进 registry 了吗？
+          <code>useFrame</code> 跑在这一帧的 layout effect 之前还是之后？</strong>
+        </p>
+      </div>
+      <p>
+        推错的后果是「新画的墙第一帧是空的，动一下鼠标才出现」——
+        这种 bug 在开发时几乎看不见（你总在动鼠标），
+        但在 M9 加载存档时会变成「读档后整个场景空白直到你点一下」。
+      </p>
+      <p style="margin-bottom:0">
+        <strong>原型：</strong>一个 <code>&lt;group&gt;</code> + <code>useRegistry</code> +
+        <code>useLayoutEffect</code> 打点，配一个 <code>useFrame</code> 打点，
+        看两行 <code>console.log</code> 的顺序。
+        <em>五分钟，省掉后面一整天的怀疑人生。</em>
+        （顺带把 <code>useFrame</code> 的 <code>priority</code> 参数也试出来——
+        对照仓库把几何重建放在 priority 2–3，那个数字是有理由的。）
+      </p>
+    </div>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 03 -->
+<section>
+  <h2><span class="num">03</span>文件树增量</h2>
+  <p class="h2sub">新增 5 个，改写 4 个，<strong>删 1 个</strong>。外加一处结构分叉要你定</p>
+
+  <div class="trap">
+    <span class="trap-label">先解决这个，否则文件树画不出来</span>
+    <p>
+      <code>def.geometry</code> 的签名是 <code>(node, ctx) =&gt; Object3D</code>。
+      <strong><code>Object3D</code> 是 three 的类型，而 D4 规定 core 不许依赖 three。</strong>
+    </p>
+    <p>
+      对照仓库怎么解的，两件事分开看：
+    </p>
+    <ul>
+      <li>
+        <strong>类型那一半没问题。</strong><code>core/src/registry/types.ts:2</code> 写的是
+        <code>import type { AnimationClip, BufferGeometry, Object3D, Ray } from 'three'</code>
+        —— <em>type-only 导入，编译后整行消失</em>。
+        这正是 D4 已经记录在案的例外（<code>scene-registry.ts</code> 用的同一招），
+        你的 <code>eslint.config.js</code> 里 <code>allowTypeImports: true</code> 已经放行。
+      </li>
+      <li>
+        <strong>实现那一半有问题。</strong><code>buildWallGeometry</code> 要
+        <code>new THREE.Shape()</code> / <code>new THREE.ExtrudeGeometry()</code> ——
+        <em>运行时</em>依赖。对照仓库把它放进了<strong>第四个包</strong>
+        <code>packages/nodes</code>（<code>three</code> 是它的 peerDependency，
+        而 <code>packages/core</code> 的 dependencies 里确实没有 three）。
+      </li>
+    </ul>
+    <p style="margin-bottom:0">
+      <strong>你只有三层，没有 <code>nodes</code> 包。所以这一处必须做个决定，
+      而它决定了下面整张表的形状。</strong>三个候选：
+    </p>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>候选</th><th><code>wallDefinition</code> 放哪</th><th>代价</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>甲 · 定义住 viewer</strong></td>
+        <td><code>viewer/nodes/wall/definition.ts</code></td>
+        <td>改动最小。但 <code>schema</code> 在 core、<code>definition</code> 在 viewer，
+          一种类型被劈成两半；M7 加门窗时你要在两个层各建一个目录</td>
+      </tr>
+      <tr>
+        <td><strong>乙 · 加第四层 <code>nodes/</code></strong></td>
+        <td><code>src/nodes/wall/definition.ts</code></td>
+        <td>和对照仓库同构，一种类型一个目录。
+          但要动 <code>eslint.config.js</code> 加一条新的层边界规则，
+          而 D4 的「三层」是写进 DECISIONS 的</td>
+      </tr>
+      <tr>
+        <td><strong>丙 · 定义留 core，几何注入</strong></td>
+        <td><code>core/nodes/wall/definition.ts</code>，<br>
+          <code>geometry</code> 字段由 viewer 在启动时补上</td>
+        <td>core 完全干净。但「定义是分两次拼起来的」很难讲清楚，
+          而且注册顺序变成隐式依赖</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>这一条写进你的 §02，连同理由。</strong>
+      如果选乙（新层），记得同时改 <code>DECISIONS.md</code> D4 ——
+      推翻旧决策时<strong>保留原条目并标注被哪条取代</strong>（DECISIONS 开头的规矩）。
+      下面的文件树按<strong>候选甲</strong>画，因为它改动最小；选乙或丙的话把
+      <code>viewer/nodes/</code> 整个挪走即可，其余不变。
+    </p>
+  </div>
+
+<pre><code>src/
+  core/
+    registry/
+      node-definition.ts       <span class="cm">新  NodeDefinition 类型（三复选框）+ GeometryContext</span>
+                               <span class="cm">    用 `import type { Object3D } from 'three'` —— D4 的例外</span>
+      node-registry.ts         <span class="cm">新  Map + registerNode + nodeRegistry，~30 行</span>
+      scene-registry.ts        <span class="cw">改</span>  <span class="cm">byType 终于有读者了（M4 §08 已补上写入）</span>
+    store/
+      use-scene.ts             <span class="cw">改</span>  <span class="cm">?? 见下方「悬而未决的三处」</span>
+    schema/
+      types.ts                 <span class="cw">改</span>  <span class="cm">?? AnyNode 还手写 discriminatedUnion 吗</span>
+
+  viewer/
+    nodes/                     <span class="cm">新目录（候选甲）</span>
+      wall/
+        definition.ts          <span class="cm">新  wallDefinition —— M5 唯一的注册表用户</span>
+        geometry.ts            <span class="cm">改  从 viewer/lib/wall-geometry.ts 搬过来</span>
+                               <span class="cm">    签名从 (wall, miter) 变成 (node, ctx)</span>
+    components/
+      node-renderer.tsx        <span class="cw">改</span>  <span class="cm">switch 死掉，换成两条 if（~15 行）</span>
+      parametric-node-renderer.tsx  <span class="cm">新  空 group + 注册 + 事件 + 标脏（~35 行）</span>
+      wall-renderer.tsx        <span class="cw">删</span>  <span class="cm">55 行整个消失 —— 这是 M5 成立的证据</span>
+    systems/
+      geometry-system.tsx      <span class="cm">新  每帧：dirtyNodes → def.geometry → 换子节点 → clearDirty</span>
+    hooks/
+      use-level-miters.ts      <span class="cw">改?</span> <span class="cm">?? 被 def.computeLevelData 取代还是保留</span>
+    lib/
+      wall-geometry.ts         <span class="cw">删?</span> <span class="cm">?? 内容搬进 nodes/wall/geometry.ts 之后</span>
+</code></pre>
+
+  <h3>悬而未决的三处 —— 这三个是 §02 的主要内容</h3>
+
+  <div class="step">
+    <div class="step-n">?1</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title"><code>AnyNode</code> 还手写 <code>discriminatedUnion</code> 吗</h3></div>
+      <p>你现在是：</p>
+<pre><code><span class="cm">// core/schema/types.ts</span>
+export const AnyNode = z.discriminatedUnion('type', [WallNode])
+</code></pre>
+      <p>
+        加一种类型要改这一行。注册表的诱惑是让 <code>AnyNode</code> 从
+        <code>nodeRegistry.schemas()</code> 推出来（对照仓库有这个方法）。
+      </p>
+      <p style="margin-bottom:0">
+        <strong>但那是运行时的值，而 <code>AnyNode</code> 是编译期的类型。</strong>
+        <code>useScene.getState().nodes[id]</code> 要能收窄成 <code>WallNode</code>，
+        靠的是静态联合，不是 Map 里有什么。
+        对照仓库 <code>schemas()</code> 的返回类型是 <code>ZodObject&lt;any&gt;[]</code> ——
+        <em>any</em>，它放弃了这条路。<strong>你怎么处理，写进 §02。</strong>
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">?2</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">斜接走 <code>ctx</code> 还是 <code>computeLevelData</code></h3></div>
+      <p>
+        墙的几何依赖<strong>邻墙</strong>。M4 里你的解法是
+        <code>MiterContext</code>（React context）+ <code>level-miter-cache</code>。
+        注册表模型下有两条路：
+      </p>
+      <ul>
+        <li>
+          <code>ctx.siblings</code> —— 规格书原文说 <em>"Wall — <code>ctx.siblings</code>
+          for corner mitering with adjacent walls"</em>。每个墙自己算一遍。
+          <strong>O(N²)</strong>，但简单。
+        </li>
+        <li>
+          <code>def.computeLevelData</code> —— <em>"Called once per level per frame,
+          before the per-node <code>def.geometry</code> calls… wall:
+          <code>calculateLevelMiters(walls)</code> — every wall's mesh reads its junctions
+          from the level-wide miter graph."</em>
+          <strong>这就是你 <code>level-miter-cache.ts</code> 的注册表版本，一比一对应。</strong>
+        </li>
+      </ul>
+      <p style="margin-bottom:0">
+        规格书里还有一句直接相关的：<em>"For level-scoped batch data (wall mitering across
+        an entire level), <code>ctx</code> can be extended with <code>ctx.levelData?.miters</code>
+        in a future revision — decided alongside the wall migration."</em>
+        <strong>它们也是在迁 wall 的时候才决定的。</strong>
+      </p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">?3</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">什么时候注册</h3></div>
+      <p>
+        <code>nodeRegistry</code> 是模块级单例。<code>wallDefinition</code> 什么时候进去？
+      </p>
+      <ul>
+        <li><strong>import 副作用</strong>：<code>definition.ts</code> 末尾直接
+          <code>registerNode(wallDefinition)</code>。省事，但谁 import 它？
+          没人 import 就没注册，而 tree-shaking 会帮倒忙。</li>
+        <li><strong>显式 <code>registerAllNodes()</code></strong>：在 <code>main.tsx</code> 调一次。
+          清楚，但每个测试文件也得调，忘了就是「注册表是空的」。</li>
+      </ul>
+      <p style="margin-bottom:0">
+        对照仓库两条都用了（<code>_register</code> 私有 + <code>registerNode</code> 公开 +
+        <code>_reset</code> 测试专用）。注意它有个
+        <strong><code>_reset()</code>「Test-only — 不从包的 barrel 导出」</strong> ——
+        那是为了让测试之间不互相污染。<strong>你的 §04 建造顺序里要给它留位置。</strong>
+      </p>
+    </div>
+  </div>
+
+  <h3>净增删账</h3>
+  <p class="prose">
+    §00 ⑤ 说过：M5 是十四个里程碑里唯一一个净增删可能为正的。粗算一下（按候选甲）：
+  </p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th></th><th>行数</th></tr></thead>
+    <tbody>
+      <tr><td><code>node-definition.ts</code> + <code>node-registry.ts</code></td><td>+45</td></tr>
+      <tr><td><code>parametric-node-renderer.tsx</code></td><td>+35</td></tr>
+      <tr><td><code>geometry-system.tsx</code></td><td>+50</td></tr>
+      <tr><td><code>nodes/wall/definition.ts</code></td><td>+15</td></tr>
+      <tr><td><code>node-renderer.tsx</code> 改写</td><td>−14（29 → 15）</td></tr>
+      <tr><td><code>wall-renderer.tsx</code> 删除</td><td><strong>−55</strong></td></tr>
+      <tr><td><code>wall-geometry.ts</code> 搬家（净）</td><td>±0</td></tr>
+      <tr><td><strong>合计</strong></td><td><strong>约 +76 行</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>+76 行换来的是：第二种类型的成本从 55 行降到 15 行。</strong>
+      也就是说 —— <strong>M6 加三种类型时就回本了</strong>（3 × 40 = 120 &gt; 76）。
+      如果你算出来的数字和这个差很远，回 §00 ⑤ 的第二条判据再看一遍切法。
+      <em>这笔账值得抄进你的 §01，它是「为什么现在做」最硬的论据。</em>
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 轮到你了 -->
+<section>
+  <h2><span class="num">↓</span>轮到你了</h2>
+  <p class="h2sub">§01 / §02 / §04 / §05 / §06 —— 提示与我 review 的判据</p>
+
+  <div class="prose">
+    <p>
+      下面每一节给三样东西：<strong>要回答的问题</strong>、<strong>已经在上面给过的原材料在哪</strong>、
+      <strong>我 review 时会怎么挑</strong>。<em>不给答案。</em>
+    </p>
+  </div>
+
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">这一步解决什么问题</h3><span class="tag app">你写</span></div>
+      <p><strong>要回答：</strong>为什么是<em>现在</em>做，而不是 M6 加完三种类型之后？</p>
+      <p><strong>原材料：</strong>§00 ② 的 509 / 48 / 30 / 16 四个数字；
+        §00 ⑥ 那张 A/B/C 三类表；§03 末尾的净增删账；D10 的 rule of three。</p>
+      <p style="margin-bottom:0"><strong>我会挑：</strong>
+        ① 有没有正面回答 D10 的张力，还是绕过去了；
+        ② 有没有把「分发点」和「样板」分开讲——混在一起说明还没想清楚为什么要两个渲染器组件；
+        ③ 有没有一个能在<em>你自己的代码里</em>指出来的具体病灶，而不是复述原项目的问题。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">机制说明</h3><span class="tag app">你写</span></div>
+      <p><strong>要回答：</strong>三复选框各是什么、为什么<strong>没有判别标签</strong>
+        （规格书原话：<em>"presence is participation"</em>）、
+        <code>&lt;NodeRenderer&gt;</code> 和 <code>&lt;GeometrySystem&gt;</code> 各管什么、
+        以及 §03 里那三个「悬而未决」你怎么定。</p>
+      <p><strong>原材料：</strong><code>node-definitions.md</code> 的
+        <em>"Runtime: how the three fields are wired"</em> 一节；§00 ④ 的六条不变量；
+        §03 的三处分叉。</p>
+      <p style="margin-bottom:0"><strong>我会挑：</strong>
+        ① 三个字段的<strong>独立性</strong>讲清楚了没有——能不能举出四种组合各自的例子；
+        ② 「builder 必须纯」这一条有没有连到<strong>可测性</strong>上（§00 ④ 末尾那段）；
+        ③ 三处分叉是不是每一处都写了「选了什么 + 为什么 + 放弃的那条会怎样」。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">建造顺序</h3><span class="tag app">你写</span></div>
+      <p><strong>要回答：</strong>方法签名 + hint，<strong>不含实现体</strong>（工作约定 #4）。</p>
+      <p><strong>原材料：</strong>§03 的文件树就是骨架；§00 ⑧ 的原型应该是第 00 或 01 步；
+        §00 ③ 那张「要 / 不要」表告诉你每个文件该写多少。</p>
+      <p style="margin-bottom:0"><strong>我会挑：</strong>
+        ① 第一步是不是「先修 M4 §08 B 组第 09 条」——脏集不对，<code>GeometrySystem</code>
+        第一天就会骗你（详见 §00 ⑥ 末尾）；
+        ② 有没有一步是「跑起来看见墙还在」——注册表迁移最怕的是中间态跑不了，
+        一口气改完再调，出了问题分不清是哪一层；
+        ③ <code>wall-renderer.tsx</code> 的删除排在第几步——它应该<strong>很靠后</strong>，
+        因为在它删掉之前你随时可以退回去对比。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">验收</h3><span class="tag app">你写</span></div>
+      <p><strong>要回答：</strong>怎么证明注册表真的成立了。</p>
+      <p><strong>原材料：</strong>§00 ② 末尾那段（「遗漏」锁不住，只能靠把加类型变成一处改动）；
+        §00 ④ 的两条 Pitfall 直接就是验收项；
+        §00 ④ 末尾关于 <code>buildWallGeometry</code> 可裸测的那段。</p>
+      <p style="margin-bottom:0"><strong>我会挑：</strong>
+        ① 有没有一条是「<strong>数一数加第二种类型要改几处</strong>」——
+        §00 ⑥ 我给你量了改造前是 18 处 / 11 个文件，改造后应该是几处？<em>写个数字进去</em>；
+        ② 两条 Pitfall（跳回原点、<code>__fromGeometry</code>）在不在清单里；
+        ③ 有没有一条自动化测试——M4 §09 证明了「纯函数」这一层能测多深，
+        而不变量 ① 刚把几何生成变成纯函数。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">故意保留的缺陷</h3><span class="tag app">你写</span></div>
+      <p><strong>要回答：</strong>M5 结束时哪些东西必须还是缺的，各自到期哪个 M。</p>
+      <p><strong>原材料：</strong>§00 ⑦ 的三个来源。</p>
+      <p style="margin-bottom:0"><strong>我会挑：</strong>
+        ① 每条有没有具体的 M 编号；
+        ② §00 ③ 那张表里标「不要」的七项，有没有全部出现；
+        ③ 有没有至少一条是<strong>M5 自己新引入</strong>的债——
+        只列「继承下来的」说明还没意识到注册表本身也有代价。</p>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:32px">
+    <p>
+      <strong>交回来的方式：</strong>把 §01 / §02 / §04 / §05 / §06 写进这份
+      <code>docs/m5-registry.html</code>（§00 和 §03 已经在里面了，按编号插进去），
+      或者先写成 Markdown 贴给我也行。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>写不出来的地方直接标 <code>[卡住]</code> 加一句为什么。</strong>
+      卡住的位置比写出来的内容信息量大——它精确指出了规格书里哪一段你读过但没吃透，
+      而那正是我该展开讲的地方。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<footer style="color:var(--ink-3);font-family:var(--mono);font-size:12px;letter-spacing:.04em">
+  <p style="margin:0">
+    对照源码：<code>wiki/architecture/node-definitions.md</code>（353 行，必读全文）·
+    <code>systems.md</code>（116）· <code>renderers.md</code>（70）·
+    <code>core/src/registry/registry.ts</code>（328）·
+    <code>core/src/registry/types.ts:930</code>（NodeDefinition，只读 100 行）·
+    <code>viewer/.../parametric-node-renderer.tsx</code>（98）·
+    <code>viewer/.../node-renderer.tsx</code>（56）·
+    <code>viewer/systems/geometry/geometry-system.tsx</code>（441，只读 useFrame 主循环）
+  </p>
+  <p style="margin:8px 0 0">
+    本文档只含 <strong>§00 推导过程</strong>与 <strong>§03 文件树增量</strong>。
+    §01 / §02 / §04 / §05 / §06 由用户产出，助手只 review。
+    §07 全码在 §01–§06 定稿之后再议。
+  </p>
+  <p style="margin:8px 0 0">上一站 · M4 拖动、撤销、脏传播　　下一站 · M6 楼板、天花、柱</p>
+</footer>
+
+</div>
