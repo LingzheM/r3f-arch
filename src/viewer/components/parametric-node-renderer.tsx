@@ -1,24 +1,21 @@
 import type * as THREE from 'three'
 import { useContext, useLayoutEffect, useRef } from "react";
-import type { AnyNode } from "../../core/schema/types";
+import { asNodeId, type AnyNode } from "../../core/schema/types";
 import { useRegistry } from '../../core/registry/scene-registry';
 import { useNodeEvents } from '../hooks/use-node-events';
 import { useLiveOverrides, type NodeOverride } from '../../core/store/use-live-overrides';
 import { SelectionContext } from './scene-context';
 import { useScene } from '../../core/store/use-scene';
-
-const ORIGIN: [number, number, number] = [0, 0, 0]
-
-function positionOf(
-    source: AnyNode | NodeOverride | undefined,
-): [number, number, number] | undefined {
-    if (!source) return undefined
-    return 'position' in source ? source.position : undefined
-}
+import { useEffectiveNode } from '../hooks/use-effective-node';
+import { nodeRegistry } from '../nodes/register';
+import { IDENTITY_FRAME } from '../../core/registry/node-definition';
+import { NodeRenderer } from './node-renderer';
 
 export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
     const ref = useRef<THREE.Group>(null)
     useRegistry(node.id, node.type, ref)
+
+    const effective = useEffectiveNode(node)
 
     const events = useNodeEvents(node, node.type)
 
@@ -26,7 +23,9 @@ export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
 
     const isSelected = useContext(SelectionContext) === node.id
 
-    const position = positionOf(override) ?? positionOf(node) ?? ORIGIN
+    const def = nodeRegistry.get(node.type)
+
+    const frame = def?.frame?.(effective) ?? IDENTITY_FRAME
 
     useLayoutEffect(() => {
         useScene.getState().makeDirty(node.id)
@@ -35,9 +34,13 @@ export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
     return (
         <group
             ref={ref}
-            position={position}
+            position={frame.position}
             visible={node.visible !== false}
             {...events}
-        />
+        >
+            {node.children.map((childId) => (
+                <NodeRenderer key={childId} nodeId={asNodeId(childId)} />
+            ))}
+        </group>
     )
 }
