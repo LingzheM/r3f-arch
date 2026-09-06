@@ -4,6 +4,7 @@ import { SlabNode } from './slab'
 import { CeilingNode } from './ceiling'
 import { ColumnNode } from './column'
 import { DoorNode } from './door'
+import { WindowNode } from './window'
 
 export const AnyNode = z.discriminatedUnion('type', [
   WallNode,
