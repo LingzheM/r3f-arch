@@ -2,7 +2,7 @@
 import { create } from 'zustand'
 import { temporal } from 'zundo'
 
-import { type AnyNodeId, AnyNode } from "../schema/types"
+import { type AnyNodeId, AnyNode, asNodeId } from "../schema/types"
 import { areSceneSnapshotsEqual, type SceneSnapshot } from './history-control'
 
 type SceneState = {
@@ -21,6 +21,30 @@ type SceneState = {
     markAllDirty: () => void
 }
 
+export function collectSubtree(
+    nodes: Record<AnyNodeId, AnyNode>,
+    rootId: AnyNodeId,
+): AnyNodeId[] {
+    const out: AnyNodeId[] = []
+    const seen = new Set<AnyNodeId>()
+    const stack: AnyNodeId[] = [rootId]
+
+    while (stack.length > 0) {
+        const id = stack.pop()!
+        if (seen.has(id)) continue
+
+        const node = nodes[id]
+        if (!node) continue
+
+        seen.add(id)
+        out.push(id)
+
+        for (const child of node.children) stack.push(asNodeId(child))
+    }
+
+    return out
+}
+
 export const useScene = create<SceneState>()(
     temporal(
         (set, get) => ({
@@ -31,11 +55,26 @@ export const useScene = create<SceneState>()(
             addNode: (input) => {
                 // parse 一次同时完成三件事：填 id，填默认值，挡住非法数据。
                 const node = AnyNode.parse(input)
-                set((s) => ({
-                    nodes: { ...s.nodes, [node.id]: node },
-                    rootNodeIds: [...s.rootNodeIds, node.id],
-                }))
+                const parentId = node.parentId === null ? null : asNodeId(node.parentId)
+
+                if (parentId !== null && !get().nodes[parentId]) {
+                    throw new Error(`[scene] addNode: 宿主 "${parentId}" 不存在`)
+                }
+
+                set((s) => {
+                    const nodes: Record<AnyNodeId, AnyNode> = { ...s.nodes, [node.id]: node }
+
+                    if (parentId === null) {
+                        return { nodes, rootNodeIds: [...s.rootNodeIds, node.id] }
+                    }
+
+                    const parent = s.nodes[parentId]!
+                    nodes[parentId] = { ...parent, children: [...parent.children, node.id] }
+                    return { nodes, rootNodeIds: s.rootNodeIds }
+                })
+
                 get().makeDirty(node.id)
+                if (parentId !== null) get().makeDirty(parentId)
                 return node.id
             },
 
@@ -45,17 +84,42 @@ export const useScene = create<SceneState>()(
                     if (!prev) return s
                     return { nodes: { ...s.nodes, [id]: { ...prev, ...patch } as AnyNode } }
                 })
-                if (get().nodes[id]) get().makeDirty(id)
+
+                const next = get().nodes[id]
+                if (!next) return
+
+                get().makeDirty(id)
+
+                const parentId = next.parentId === null ? null : asNodeId(next.parentId)
+                if (parentId !== null && get().nodes[parentId]) get().makeDirty(parentId)
             },
 
             removeNode: (id) => {
+                const target = get().nodes[id]
+                if (!target) return
+
+                const doomed = collectSubtree(get().nodes, id)
+                const removed = new Set<AnyNodeId>(doomed)
+                const parentId = target.parentId === null ? null : asNodeId(target.parentId)
+
                 set((s) => {
-                    if (!s.nodes[id]) return s
                     const nodes = { ...s.nodes }
-                    delete nodes[id]
-                    return { nodes, rootNodeIds: s.rootNodeIds.filter((n) => n !== id) }
+                    for (const doomedId of doomed) delete nodes[doomedId]
+
+                    if (parentId !== null) {
+                        const parent = nodes[parentId]
+                        if (parent) {
+                            nodes[parentId] = {
+                                ...parent,
+                                children: parent.children.filter((c) => c !== id),
+                            }
+                        }
+                    }
+                    return { nodes, rootNodeIds: s.rootNodeIds.filter((n) => !removed.has(n)) }
                 })
-                get().clearDirty(id)
+
+                for (const doomedId of doomed) get().clearDirty(doomedId)
+                if (parentId !== null && get().nodes[parentId]) get().makeDirty(parentId)
             },
 
             getNode: (id) => get().nodes[id],
