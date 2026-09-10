@@ -8,6 +8,11 @@ export type NodeEventSuffix =
 export interface NodeEvent<N extends AnyNode = AnyNode> {
     node: N
     point: [number, number, number]
+
+    localPoint: [number, number, number]
+
+    normal: [number, number, number] | undefined
+
     object: THREE.Object3D
     stopPropagation: () => void
     nativeEvent: PointerEvent

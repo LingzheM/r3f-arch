@@ -3,12 +3,13 @@ import type { AnyNodeId } from "../../../core/schema/types";
 
 export type WallHandle = 'start' | 'end'
 export type PolygonToolKind = 'slab' | 'ceiling'
+export type PlacingToolKind = 'column' | 'door' | 'window'
 export type DraftToolKind = 'wall' | PolygonToolKind
 
 export type InteractionScope =
     | { kind: 'idle' }
     | { kind: 'drafting'; tool: DraftToolKind; points: Point2D[] }
-    | { kind: 'placing'; tool: 'column' }
+    | { kind: 'placing'; tool: PlacingToolKind }
     | { kind: 'moving'; nodeId: AnyNodeId; origin: Point2D }
     | { kind: 'handle-drag'; nodeId: AnyNodeId; handle: WallHandle }
 

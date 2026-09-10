@@ -4,15 +4,21 @@ import type { AnyNode, AnyNodeType } from "../../core/schema/types";
 import { emitter } from "../../core/events/bus";
 import { useViewer } from "../store/use-viewer";
 import { isClickGesture } from "../lib/pointer-gesture";
+import * as THREE from 'three'
 
 type NodeByKind<K extends AnyNodeType> = Extract<AnyNode, { type: K }>
 
+const localScratch = new THREE.Vector3()
 
 export function useNodeEvents<K extends AnyNodeType>(node: NodeByKind<K>, type: K) {
     const emit = (suffix: NodeEventSuffix, e: ThreeEvent<PointerEvent>) => {
+        const local = e.object.worldToLocal(localScratch.copy(e.point))
+
         const payload: NodeEvent<NodeByKind<K>> = {
             node,
             point: [e.point.x, e.point.y, e.point.z],
+            localPoint: [local.x, local.y, local.z],
+            normal: e.face ? [e.face.normal.x, e.face.normal.y, e.face.normal.z] : undefined,
             object: e.object,
             stopPropagation: () => e.stopPropagation(),
             nativeEvent: e.nativeEvent,
@@ -33,7 +39,7 @@ export function useNodeEvents<K extends AnyNodeType>(node: NodeByKind<K>, type: 
             emit('pointerup', e)
             if (isClickGesture(e.nativeEvent)) emit('click', e)
         },
-        onClick: (_e: ThreeEvent<MouseEvent>) => {},
+        onClick: (_e: ThreeEvent<MouseEvent>) => { },
         onPointerEnter: (e: ThreeEvent<PointerEvent>) => {
             if (!hoverSuppressed()) emit('enter', e)
         },

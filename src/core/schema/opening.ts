@@ -2,7 +2,7 @@ import z from "zod"
 
 export const DEFAULT_DOOR_WIDTH = 0.9
 export const DEFAULT_DOOR_HEIGHT = 2.1
-export const DEFAULT_WINDOW_WIDHT = 1.2
+export const DEFAULT_WINDOW_WIDTH = 1.2
 export const DEFAULT_WINDOW_HEIGHT = 1.2
 export const DEFAULT_WINDOW_SILL = 0.9
 
@@ -30,4 +30,20 @@ export function openingSpan(o: OpeningLike): OpengingSpan {
     bottom: o.position[1] - halfHeight,
     top: o.position[1] + halfHeight,
   }
+}
+
+export function clampOpeningToWall(
+  placement: readonly [number, number, number],
+  size: { width: number; height: number },
+  wall: { length: number; height: number },
+): [number, number, number] | null {
+  const halfWidth = size.width / 2
+  const halfHeight = size.height / 2
+
+  if (size.width > wall.length || size.height > wall.height) return null
+
+  const u = Math.min(Math.max(placement[0], halfWidth), wall.length - halfWidth)
+  const v = Math.min(Math.max(placement[1], halfHeight), wall.height - halfHeight)
+
+  return [u, v, placement[2]]
 }
