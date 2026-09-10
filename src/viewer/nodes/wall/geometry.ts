@@ -8,8 +8,10 @@ import type {
 import { getWallHeight, type WallNode } from '../../../core/schema/wall'
 import { calculateLevelMiters, type MiterData } from '../../../core/systems/wall/wall-mitering'
 import { getWallPlanFootprint } from '../../../core/systems/wall/wall-footprint'
-import { openingSpan, type OpengingSpan } from '../../../core/schema/opening'
+import { openingSpan, type OpeningSpan } from '../../../core/schema/opening'
 import { asNodeId } from '../../../core/schema/types'
+import { splitWallByOpenings } from '../../../core/systems/wall/wall-openings'
+import { buildPrismGeometry } from '../shared/polygon-prism'
 
 const WALL_COLOR = '#e8e8e8'
 const WALL_SELECTED_COLOR = '#7dd3c0'
@@ -43,8 +45,8 @@ export function computeWallLevelMiters(walls: readonly WallNode[]): MiterData {
     return calculateLevelMiters([...walls])
 }
 
-function collectOpeningSpans(node: WallNode, ctx: GeometryContext<MiterData>): OpengingSpan[] {
-    const spans: OpengingSpan[] = []
+function collectOpeningSpans(node: WallNode, ctx: GeometryContext<MiterData>): OpeningSpan[] {
+    const spans: OpeningSpan[] = []
 
     for (const childId of node.children) {
         const child = ctx.resolve(asNodeId(childId))
@@ -70,17 +72,8 @@ export function buildWallGeometry(
     const { position, rotationY } = wallTransform(node)
     const local = worldFootprint.map((p) => worldToLocalXZ(p, position, rotationY))
 
-
-    const shape = new THREE.Shape()
-    shape.moveTo(local[0]!.x, -local[0]!.y)
-    for (let i = 1; i < local.length; i++) shape.lineTo(local[i]!.x, -local[i]!.y)
-    shape.closePath()
-
-    const geometry = new THREE.ExtrudeGeometry(shape, {
-        depth: getWallHeight(node),
-        bevelEnabled: false,
-    })
-    geometry.rotateX(-Math.PI / 2)
+    const bands = splitWallByOpenings(local, getWallHeight(node), collectOpeningSpans(node, ctx))
+    if (bands.length === 0) return root
 
     const material = new THREE.MeshStandardMaterial({
         color: appearance.selected ? WALL_SELECTED_COLOR : WALL_COLOR,
@@ -88,16 +81,16 @@ export function buildWallGeometry(
         metalness: 0,
     })
 
-    const mesh = new THREE.Mesh(geometry, material)
-    mesh.name = 'wall-body'
-    mesh.castShadow = true
-    mesh.receiveShadow = true
+    for (const band of bands) {
+        const geometry = buildPrismGeometry(band.polygon, band.bottomY, band.topY)
+        if (!geometry) continue
 
-    const body = new THREE.Group()
-    body.position.set(position[0], position[1], position[2])
-    body.rotation.y = rotationY
-    body.add(mesh)
+        const mesh = new THREE.Mesh(geometry, material)
+        mesh.name = 'wall-body'
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+        root.add(mesh)
+    }
 
-    root.add(body)
     return root
 }

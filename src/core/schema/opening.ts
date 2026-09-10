@@ -18,9 +18,9 @@ export type OpeningLike = {
   height: number
 }
 
-export type OpengingSpan = { left: number; right: number; bottom: number; top: number }
+export type OpeningSpan = { left: number; right: number; bottom: number; top: number }
 
-export function openingSpan(o: OpeningLike): OpengingSpan {
+export function openingSpan(o: OpeningLike): OpeningSpan {
   const halfWidth = o.width / 2
   const halfHeight = o.height / 2
 

@@ -4,5 +4,6 @@ import { buildColumnGeometry } from "./geometry";
 
 export const columnDefinition: NodeDefinition<ColumnNode> = {
   kind: 'column',
+  frame: (c) => ({ position: c.position, rotationY: 0 }),
   geometry: buildColumnGeometry,
 }

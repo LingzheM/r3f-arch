@@ -3,7 +3,6 @@ import { useContext, useLayoutEffect, useRef } from "react";
 import { asNodeId, type AnyNode } from "../../core/schema/types";
 import { useRegistry } from '../../core/registry/scene-registry';
 import { useNodeEvents } from '../hooks/use-node-events';
-import { useLiveOverrides, type NodeOverride } from '../../core/store/use-live-overrides';
 import { SelectionContext } from './scene-context';
 import { useScene } from '../../core/store/use-scene';
 import { useEffectiveNode } from '../hooks/use-effective-node';
@@ -19,8 +18,6 @@ export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
 
     const events = useNodeEvents(node, node.type)
 
-    const override = useLiveOverrides((s) => s.overrides.get(node.id))
-
     const isSelected = useContext(SelectionContext) === node.id
 
     const def = nodeRegistry.get(node.type)
@@ -29,12 +26,13 @@ export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
 
     useLayoutEffect(() => {
         useScene.getState().makeDirty(node.id)
-    }, [node, override, isSelected])
+    }, [node.id, effective, isSelected])
 
     return (
         <group
             ref={ref}
             position={frame.position}
+            rotation-y={frame.rotationY}
             visible={node.visible !== false}
             {...events}
         >

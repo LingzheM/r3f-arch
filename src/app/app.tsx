@@ -11,6 +11,7 @@ import { MoveTool } from "./tools/move-tool";
 import { EndpointHandles } from "./tools/endpoint-handles";
 import { PolygonTool } from "./tools/polygon-tool";
 import { ColumnTool } from "./tools/column-tool";
+import { OpeningTool } from "./tools/opening-tool";
 
 const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
 
@@ -34,6 +35,8 @@ export function App() {
             if (e.key.toLowerCase() === 'f') useEditor.getState().setActiveTool('slab')
             if (e.key.toLowerCase() === 'g') useEditor.getState().setActiveTool('ceiling')
             if (e.key.toLowerCase() === 'c') useEditor.getState().setActiveTool('column')
+            if (e.key.toLowerCase() === 'd') useEditor.getState().setActiveTool('door')
+            if (e.key.toLowerCase() === 'n') useEditor.getState().setActiveTool('window')
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
@@ -58,6 +61,8 @@ export function App() {
                 <PolygonTool tool="slab" />
                 <PolygonTool tool="ceiling" />
                 <ColumnTool />
+                <OpeningTool kind="door" />
+                <OpeningTool kind="window" />
                 <MoveTool />
                 <EndpointHandles />
             </Viewer>

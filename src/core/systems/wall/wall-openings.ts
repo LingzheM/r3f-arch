@@ -1,6 +1,6 @@
 import type { Point2D } from "../../lib/geometry-2d"
 import { polygonArea } from "../../lib/polygon-2d"
-import type { OpengingSpan } from "../../schema/opening"
+import type { OpeningSpan } from "../../schema/opening"
 
 export const BAND_EPISON = 1e-6
 
@@ -67,7 +67,7 @@ function samePoint(a: Point2D, b: Point2D): boolean {
 export function splitWallByOpenings(
   footprint: readonly Point2D[],
   wallHeight: number,
-  openings: readonly OpengingSpan[],
+  openings: readonly OpeningSpan[],
 ): WallBand[] {
   if (footprint.length < 3 || wallHeight <= BAND_EPISON) return []
 
@@ -103,13 +103,13 @@ function pushBand(
   bands.push({ polygon, bottomY, topY })
 }
 
-function mergeOpeningSpans(openings: readonly OpengingSpan[]): OpengingSpan[] {
+function mergeOpeningSpans(openings: readonly OpeningSpan[]): OpeningSpan[] {
   const sorted = openings
     .filter((o) => o.right - o.left > BAND_EPISON && o.top - o.bottom > BAND_EPISON)
     .slice()
     .sort((a, b) => a.left - b.left)
 
-  const merged: OpengingSpan[] = []
+  const merged: OpeningSpan[] = []
 
   for (const span of sorted) {
     const last = merged[merged.length - 1]

@@ -1,5 +1,5 @@
 import { len, sub } from "../../../core/lib/geometry-2d"
-import { clampOpeningToWall, openingSpan, type OpengingSpan, type OpeningSide } from "../../../core/schema/opening"
+import { clampOpeningToWall, openingSpan, type OpeningSpan, type OpeningSide } from "../../../core/schema/opening"
 import { snapToGrid } from "../../../core/schema/snap-2d"
 import type { AnyNode, AnyNodeId } from "../../../core/schema/types"
 import { getWallHeight, wallEnd, WallNode, wallStart } from "../../../core/schema/wall"
@@ -23,7 +23,7 @@ export function sideFromNormal(normal: readonly [number, number, number] | undef
 }
 
 export function overlapsExistingOpening(
-  span: OpengingSpan,
+  span: OpeningSpan,
   siblings: readonly AnyNode[],
   selfId?: AnyNodeId,
 ): boolean {
