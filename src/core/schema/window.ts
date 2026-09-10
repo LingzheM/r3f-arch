@@ -6,7 +6,7 @@ export const WindowNode = BaseNode.extend({
   id: objectId('window'),
   type: nodeType('window'),
 
-  parent: z.string(),
+  parentId: z.string(),
 
   position: OpeningPlacement.default([
     0,
