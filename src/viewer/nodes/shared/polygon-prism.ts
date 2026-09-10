@@ -1,4 +1,27 @@
 import * as THREE from 'three'
+import type { Point2D } from '../../../core/lib/geometry-2d'
+
+export function buildPrismGeometry(
+  polygon: readonly Point2D[],
+  bottomY: number,
+  topY: number,
+): THREE.BufferGeometry | null {
+  const height = topY - bottomY
+  if (polygon.length < 3 || height <= 0) return null
+
+  const shape = new THREE.Shape()
+  shape.moveTo(polygon[0]!.x, -polygon[0]!.y)
+  for (let i = 1; i < polygon.length; i += 1) {
+    shape.lineTo(polygon[i]!.x, -polygon[i]!.y)
+  }
+  shape.closePath()
+
+  const geometry = new THREE.ExtrudeGeometry(shape, { depth: height, bevelEnabled: false })
+  geometry.rotateX(-Math.PI / 2)
+  geometry.translate(0, bottomY, 0)
+
+  return geometry
+}
 
 export function buildPolygonPrism({
   polygon,
@@ -15,20 +38,13 @@ export function buildPolygonPrism({
 }): THREE.Object3D {
   const root = new THREE.Group()
 
-  const height = topY - bottomY
+  const geometry = buildPrismGeometry(
+    polygon.map((p) => ({ x: p[0], y: p[1] })),
+    bottomY,
+    topY,
+  )
 
-  if (polygon.length < 3 || height <= 0) return root
-
-  const shape = new THREE.Shape()
-  shape.moveTo(polygon[0]![0], -polygon[0]![1])
-  for (let i = 1; i < polygon.length; i += 1) {
-    shape.lineTo(polygon[i]![0], -polygon[i]![1])
-  }
-  shape.closePath()
-
-  const geometry = new THREE.ExtrudeGeometry(shape, { depth: height, bevelEnabled: false })
-  geometry.rotateX(-Math.PI / 2)
-  geometry.translate(0, bottomY, 0)
+  if (!geometry) return root
 
   const material = new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0 })
 
