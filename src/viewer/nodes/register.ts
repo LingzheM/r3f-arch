@@ -1,6 +1,7 @@
 import { nodeRegistry, registerNode } from "../../core/registry/node-registry"
 import { ceilingDefinition } from "./ceiling/definition"
 import { columnDefinition } from "./column/definition"
+import { doorDefinition, windowDefinition } from "./opening/definition"
 import { slabDefinition } from "./slab/definition"
 import { wallDefinition } from "./wall/definition"
 
@@ -13,6 +14,8 @@ export function registerAllNodes(): void {
     registerNode(slabDefinition)
     registerNode(ceilingDefinition)
     registerNode(columnDefinition)
+    registerNode(doorDefinition)
+    registerNode(windowDefinition)
 }
 
 export { nodeRegistry }
