@@ -138,3 +138,98 @@ describe('updateNode', () => {
     expect(wall.type === 'wall' && wall.end).toEqual([6, 0])
   })
 })
+
+describe('字段的缺席（M8 批 C）', () => {
+  beforeEach(reset)
+
+  const addWallWithHeight = (height: number, parentId?: AnyNodeId) =>
+    useScene.getState().addNode(
+      parentId === undefined
+        ? { type: 'wall', start: [0, 0], end: [4, 0], height }
+        : { type: 'wall', parentId, start: [0, 0], end: [4, 0], height },
+    )
+
+  it('patch 里显式 undefined → key 被【删掉】，不是存一个 undefined', () => {
+    const wallId = addWallWithHeight(1.0)
+    expect('height' in nodeAt(wallId)!).toBe(true)
+
+    useScene.getState().updateNode(wallId, { height: undefined })
+
+    // 判据是 key 在不在。写成 toBeUndefined() 的话，
+    // 「留下一个值为 undefined 的 key」这个 bug 会照样绿。
+    expect('height' in nodeAt(wallId)!).toBe(false)
+  })
+
+  it('patch 里给了值 → key 在，值对', () => {
+    const wallId = addWall()
+    expect('height' in nodeAt(wallId)!).toBe(false)
+
+    useScene.getState().updateNode(wallId, { height: 1.0 })
+
+    const wall = nodeAt(wallId)!
+    expect('height' in wall).toBe(true)
+    expect(wall.type === 'wall' && wall.height).toBe(1.0)
+  })
+
+  it('删 key 不误伤同一个 patch 里的其它字段', () => {
+    const wallId = addWallWithHeight(1.0)
+
+    useScene.getState().updateNode(wallId, { height: undefined, thickness: 0.2 })
+
+    const wall = nodeAt(wallId)!
+    expect('height' in wall).toBe(false)
+    expect(wall.type === 'wall' && wall.thickness).toBe(0.2)
+    expect(wall.type === 'wall' && wall.start).toEqual([0, 0])
+  })
+
+  it('撤销一次，被删掉的 key 回来', () => {
+    const wallId = addWallWithHeight(1.0)
+    useScene.temporal.getState().clear()
+
+    useScene.getState().updateNode(wallId, { height: undefined })
+    expect('height' in nodeAt(wallId)!).toBe(false)
+
+    useScene.temporal.getState().undo()
+
+    const wall = nodeAt(wallId)!
+    expect('height' in wall).toBe(true)
+    expect(wall.type === 'wall' && wall.height).toBe(1.0)
+  })
+})
+
+describe('脏传播到孩子（M8 批 C）', () => {
+  beforeEach(reset)
+
+  const addLevel = (height = 2.5) =>
+    useScene.getState().addNode({ type: 'level', level: 0, height })
+
+  const addWallOn = (parentId: AnyNodeId) =>
+    useScene.getState().addNode({ type: 'wall', parentId, start: [0, 0], end: [4, 0] })
+
+  it('改层高 → 该层每一个孩子都进脏集', () => {
+    const levelId = addLevel()
+    const wallA = addWallOn(levelId)
+    const wallB = addWallOn(levelId)
+    useScene.getState().clearDirty(wallA)
+    useScene.getState().clearDirty(wallB)
+
+    useScene.getState().updateNode(levelId, { height: 3.0 })
+
+    expect(useScene.getState().dirtyNodes.has(wallA)).toBe(true)
+    expect(useScene.getState().dirtyNodes.has(wallB)).toBe(true)
+  })
+
+  it('只脏一层：改层高不会脏化墙的孩子（门）', () => {
+    const levelId = addLevel()
+    const wallId = addWallOn(levelId)
+    const doorId = addDoor(wallId)
+    useScene.getState().clearDirty(wallId)
+    useScene.getState().clearDirty(doorId)
+
+    useScene.getState().updateNode(levelId, { height: 3.0 })
+
+    expect(useScene.getState().dirtyNodes.has(wallId)).toBe(true)
+    // 门不读层高，读的是墙 —— 墙重建时它自己会被带上，不该在这里连坐。
+    expect(useScene.getState().dirtyNodes.has(doorId)).toBe(false)
+  })
+})

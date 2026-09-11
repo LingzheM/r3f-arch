@@ -45,6 +45,14 @@ export function collectSubtree(
     return out
 }
 
+function mergeNodePath(prev: AnyNode, patch: Partial<AnyNode>): AnyNode {
+    const merged: Record<string, unknown> = { ...prev, ...patch }
+    for (const key of Object.keys(patch)) {
+        if ((patch as Record<string, unknown>)[key] === undefined) delete merged[key]
+    }
+    return merged as AnyNode
+}
+
 export const useScene = create<SceneState>()(
     temporal(
         (set, get) => ({
@@ -85,7 +93,7 @@ export const useScene = create<SceneState>()(
                 set((s) => {
                     const prev = s.nodes[id]
                     if (!prev) return s
-                    return { nodes: { ...s.nodes, [id]: { ...prev, ...patch } as AnyNode } }
+                    return { nodes: { ...s.nodes, [id]: mergeNodePath(prev, patch) } }
                 })
 
                 const next = get().nodes[id]
@@ -95,6 +103,10 @@ export const useScene = create<SceneState>()(
 
                 const parentId = next.parentId === null ? null : asNodeId(next.parentId)
                 if (parentId !== null && get().nodes[parentId]) get().makeDirty(parentId)
+                for (const childId of next.children) {
+                    const child = asNodeId(childId)
+                    if (get().nodes[child]) get().makeDirty(child)
+                }
             },
 
             removeNode: (id) => {
