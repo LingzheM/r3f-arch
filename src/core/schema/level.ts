@@ -15,3 +15,5 @@ export const LevelNode = BaseNode.extend({
 })
 
 export type LevelNode = z.infer<typeof LevelNode>
+
+export const getStoredLevelHeight = (level: Pick<LevelNode, 'height'>): number => level.height ?? DEFAULT_LEVEL_HEIGHT

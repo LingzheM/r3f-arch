@@ -5,6 +5,9 @@ import { CeilingNode } from './ceiling'
 import { ColumnNode } from './column'
 import { DoorNode } from './door'
 import { WindowNode } from './window'
+import { SiteNode } from './site'
+import { BuildingNode } from './building'
+import { LevelNode } from './level'
 
 export const AnyNode = z.discriminatedUnion('type', [
   WallNode,
@@ -13,6 +16,9 @@ export const AnyNode = z.discriminatedUnion('type', [
   ColumnNode,
   DoorNode,
   WindowNode,
+  SiteNode,
+  BuildingNode,
+  LevelNode,
 ])
 
 export type AnyNode = z.infer<typeof AnyNode>
