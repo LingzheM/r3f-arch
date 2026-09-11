@@ -9,6 +9,7 @@ import { eventToGround } from "../../viewer/lib/pointer-plane"
 import { snapToGrid } from "../../core/schema/snap-2d"
 import { useScene } from "../../core/store/use-scene"
 import { DEFAULT_COLUMN_HEIGHT, DEFAULT_COLUMN_RADIUS } from '../../core/schema/column'
+import { readCurrentLevel } from '../lib/level/level-actions'
 
 const NEVER_RAYCAST = () => null
 
@@ -36,19 +37,21 @@ export function ColumnTool() {
       if (e.button !== 0) return
       if (!isClickGesture(e)) return
 
-      const raw = eventToGround(e, el, camera)
+      const level = readCurrentLevel()
+      const raw = eventToGround(e, el, camera, level.baseY)
       if (!raw) return
       const p = snapToGrid(raw)
 
       useScene.getState().addNode({
         type: 'column',
+        parentId: level.id,
         position: [p.x, 0, p.y],
         crossSection: e.shiftKey ? 'square' : 'round',
       })
     }
 
     const onPointerMove = (e: PointerEvent) => {
-      const raw = eventToGround(e, el, camera)
+      const raw = eventToGround(e, el, camera, readCurrentLevel().baseY)
       cursorRef.current = raw ? snapToGrid(raw) : null
     }
 

@@ -9,9 +9,9 @@ export type OverrideEntry = readonly [AnyNodeId, NodeOverride]
 
 export type PointMove = { from: Point2D; to: Point2D }
 
-export function documentWalls(): WallNode[] {
+export function levelWalls(levelId: string | null): WallNode[] {
     return Object.values(useScene.getState().nodes).filter(
-        (n): n is WallNode => n.type === 'wall',
+        (n): n is WallNode => n.type === 'wall' && n.parentId === levelId,
     )
 }
 

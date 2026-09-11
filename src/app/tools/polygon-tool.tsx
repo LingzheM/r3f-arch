@@ -10,6 +10,7 @@ import { isClickGesture } from "../../viewer/lib/pointer-gesture"
 import { eventToGround } from "../../viewer/lib/pointer-plane"
 import { snapToGrid } from "../../core/schema/snap-2d"
 import { Line } from "@react-three/drei"
+import { readCurrentLevel } from "../lib/level/level-actions"
 
 const PREVIEW_Y = 0.02
 
@@ -53,7 +54,11 @@ export function PolygonTool({ tool }: { tool: PolygonToolKind }) {
       const points = currentPoints()
       if (!isCommittablePolygon(points)) return
 
-      useScene.getState().addNode({ type: tool, polygon: toPolygonTuples(points) })
+      useScene.getState().addNode({
+        type: tool,
+        parentId: readCurrentLevel().id,
+        polygon: toPolygonTuples(points)
+      })
       reset()
     }
 
@@ -61,7 +66,7 @@ export function PolygonTool({ tool }: { tool: PolygonToolKind }) {
       if (e.button !== 0) return
       if (!isClickGesture(e)) return
 
-      const raw = eventToGround(e, el, camera)
+      const raw = eventToGround(e, el, camera, readCurrentLevel().baseY)
       if (!raw) return
       const point = snapToGrid(raw)
 
@@ -75,7 +80,7 @@ export function PolygonTool({ tool }: { tool: PolygonToolKind }) {
     }
 
     const onPointerMove = (e: PointerEvent) => {
-      cursorRef.current = eventToGround(e, el, camera)
+      cursorRef.current = eventToGround(e, el, camera, readCurrentLevel().baseY)
     }
 
     const onKeyDown = (e: KeyboardEvent) => {

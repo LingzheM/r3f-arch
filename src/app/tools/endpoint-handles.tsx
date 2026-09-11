@@ -7,12 +7,14 @@ import { useEditor } from "../store/use-editor"
 import { useEffect, useRef } from "react"
 import * as THREE from 'three'
 import { startDragSession, type DragSession } from "../lib/interaction/drag-session"
-import { documentWalls, linkedWallOverrides, type OverrideEntry } from "../lib/interaction/wall-linking"
+import { levelWalls, linkedWallOverrides, type OverrideEntry } from "../lib/interaction/wall-linking"
 import { getScope, useInteractionScope } from "../store/use-interaction-scope"
 import { runAsSingleSceneHistoryStep } from "../../core/store/history-control"
 import { snapPoint } from "../../core/schema/snap-2d"
 import { eventToGround } from "../../viewer/lib/pointer-plane"
 import { useLiveOverrides } from "../../core/store/use-live-overrides"
+import { LevelFrame } from "../components/level-frame"
+import { levelBaseY } from "../../core/services/storey"
 
 const HANDLE_RADIUS = 0.06
 const HANDLE_Y = 0.02
@@ -20,45 +22,45 @@ const HANDLE_COLOR = '#0b6e5f'
 const HANDLE_ACTIVE_COLOR = '#f0b429'
 
 export function EndpointHandles() {
-    const activeTool = useEditor((s) => s.activeTool)
-    const selectId = useEditor((s) => s.selectId)
-    const node = useScene((s) => (selectId ? s.nodes[selectId] : undefined))
+  const activeTool = useEditor((s) => s.activeTool)
+  const selectId = useEditor((s) => s.selectId)
+  const node = useScene((s) => (selectId ? s.nodes[selectId] : undefined))
 
-    if (activeTool !== 'select') return null
-    if (!node || node.type !== 'wall') return null
+  if (activeTool !== 'select') return null
+  if (!node || node.type !== 'wall') return null
 
-    return (
-        <>
-            <EndpointHandle wall={node} handle="start" />
-            <EndpointHandle wall={node} handle="end" />
-        </>
-    )
+  return (
+    <LevelFrame levelId={node.parentId}>
+      <EndpointHandle wall={node} handle="start" />
+      <EndpointHandle wall={node} handle="end" />
+    </LevelFrame>
+  )
 }
 
 
 function EndpointHandle({ wall: documentWall, handle }: { wall: WallNode; handle: WallHandle }) {
-    const wall = useEffectiveNode(documentWall)
-    const { gl, camera } = useThree()
+  const wall = useEffectiveNode(documentWall)
+  const { gl, camera } = useThree()
 
-    const meshRef = useRef<THREE.Mesh>(null)
-    const sessionRef = useRef<DragSession | null>(null)
-    const entriesRef = useRef<OverrideEntry[]>([])
+  const meshRef = useRef<THREE.Mesh>(null)
+  const sessionRef = useRef<DragSession | null>(null)
+  const entriesRef = useRef<OverrideEntry[]>([])
 
-    const scope = useInteractionScope((s) => s.scope)
-    const isDragging =
-        scope.kind === 'handle-drag' && scope.nodeId === wall.id && scope.handle === handle
+  const scope = useInteractionScope((s) => s.scope)
+  const isDragging =
+    scope.kind === 'handle-drag' && scope.nodeId === wall.id && scope.handle === handle
 
-    const point = handle === 'start' ? wallStart(wall) : wallEnd(wall)
+  const point = handle === 'start' ? wallStart(wall) : wallEnd(wall)
 
-    useEffect(() => () => sessionRef.current?.end('cancel'), [])
+  useEffect(() => () => sessionRef.current?.end('cancel'), [])
 
-    useFrame(({ camera: activeCamera }) => {
-        const mesh = meshRef.current
-        if (!mesh) return
-        mesh.scale.setScalar(handleScale(activeCamera, mesh.position))
-    })
+  useFrame(({ camera: activeCamera }) => {
+    const mesh = meshRef.current
+    if (!mesh) return
+    mesh.scale.setScalar(handleScale(activeCamera, mesh.position))
+  })
 
-    const onPointerDown = (event: ThreeEvent<PointerEvent>) => {
+  const onPointerDown = (event: ThreeEvent<PointerEvent>) => {
     if (event.button !== 0) return
     // 手柄不在 sceneRegistry 里，use-grid-events 的射线看不见它 ——
     // 点手柄会被判成「点空地」并取消选中。但下面 begin() 一执行，
@@ -67,7 +69,8 @@ function EndpointHandle({ wall: documentWall, handle }: { wall: WallNode; handle
     if (getScope().kind !== 'idle') return
 
     const el = gl.domElement
-    const walls = documentWalls()
+    const walls = levelWalls(documentWall.parentId)
+    const planeY = levelBaseY(documentWall.parentId, useScene.getState().nodes)
     const origin = handle === 'start' ? wallStart(documentWall) : wallEnd(documentWall)
     const ignoreIds = new Set([documentWall.id])
 
@@ -79,7 +82,7 @@ function EndpointHandle({ wall: documentWall, handle }: { wall: WallNode; handle
     }
 
     const onMove = (moveEvent: PointerEvent) => {
-      const cursor = eventToGround(moveEvent, el, camera)
+      const cursor = eventToGround(moveEvent, el, camera, planeY)
       if (!cursor) return
 
       // 端点拖走完整的 snapPoint：先试已有端点，没有才落网格。
@@ -137,7 +140,7 @@ function EndpointHandle({ wall: documentWall, handle }: { wall: WallNode; handle
 }
 
 function handleScale(camera: THREE.Camera, at: THREE.Vector3): number {
-    const ortho = camera as THREE.OrthographicCamera
-    if (ortho.isOrthographicCamera) return 40 / ortho.zoom
-    return camera.position.distanceTo(at) / 10
+  const ortho = camera as THREE.OrthographicCamera
+  if (ortho.isOrthographicCamera) return 40 / ortho.zoom
+  return camera.position.distanceTo(at) / 10
 }

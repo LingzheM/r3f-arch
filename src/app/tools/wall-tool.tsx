@@ -9,7 +9,8 @@ import { useScene } from "../../core/store/use-scene";
 import { Line } from "@react-three/drei";
 import { eventToGround } from "../../viewer/lib/pointer-plane";
 import { snapPoint } from "../../core/schema/snap-2d";
-import { documentWalls } from "../lib/interaction/wall-linking";
+import { levelWalls } from "../lib/interaction/wall-linking";
+import { readCurrentLevel } from "../lib/level/level-actions";
 
 const PREVIEW_Y = 0.01
 
@@ -37,18 +38,21 @@ export function WallTool() {
       if (e.button !== 0) return
       if (!isClickGesture(e)) return
 
-      const raw = eventToGround(e, el, camera)
+      const level = readCurrentLevel()
+
+      const raw = eventToGround(e, el, camera, level.baseY)
       if (!raw) return
 
       const scope = getScope()
       if (scope.kind !== 'drafting') return
 
-      const point = snapPoint(raw, documentWalls())
+      const point = snapPoint(raw, levelWalls(level.id))
 
       const last = lastDraftPoint(scope)
       if (last) {
         useScene.getState().addNode({
           type: 'wall',
+          parentId: level.id,
           start: [last.x, last.y],
           end: [point.x, point.y],
         })

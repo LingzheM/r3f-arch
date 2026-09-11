@@ -4,7 +4,7 @@ import { wallEnd, wallStart, type WallNode } from "../../core/schema/wall"
 import { useEditor } from "../store/use-editor"
 import { useEffect, useRef } from "react"
 import { startDragSession, type DragSession } from "../lib/interaction/drag-session"
-import { documentWalls, linkedWallOverrides, type OverrideEntry } from "../lib/interaction/wall-linking"
+import { levelWalls, linkedWallOverrides, type OverrideEntry } from "../lib/interaction/wall-linking"
 import { runAsSingleSceneHistoryStep } from "../../core/store/history-control"
 import { useScene } from "../../core/store/use-scene"
 import { useLiveOverrides } from "../../core/store/use-live-overrides"
@@ -15,6 +15,7 @@ import { isClickGesture } from "../../viewer/lib/pointer-gesture"
 import { useViewer } from "../../viewer/store/use-viewer"
 import type { NodeEvent } from "../../core/events/types"
 import { emitter } from "../../core/events/bus"
+import { levelBaseY } from "../../core/services/storey"
 
 
 type Candidate = {
@@ -22,6 +23,7 @@ type Candidate = {
     anchor: Point2D
     center: Point2D
     walls: WallNode[]
+    planeY: number
 }
 
 export function MoveTool(): null {
@@ -61,7 +63,7 @@ export function MoveTool(): null {
             const candidate = candidateRef.current
             if (!candidate) return
 
-            const cursor = eventToGround(event, el, camera)
+            const cursor = eventToGround(event, el, camera, candidate.planeY)
             if (!cursor) return
 
             const rawDelta = {
@@ -132,14 +134,16 @@ export function MoveTool(): null {
             const wall = e.node
             if (wall.type !== 'wall') return
 
-            const anchor = eventToGround(e.nativeEvent, el, camera)
+            const planeY = levelBaseY(wall.parentId, useScene.getState().nodes)
+            const anchor = eventToGround(e.nativeEvent, el, camera, planeY)
             if (!anchor) return
 
             candidateRef.current = {
                 wall,
                 anchor,
                 center: midpoint(wallStart(wall), wallEnd(wall)),
-                walls: documentWalls(),
+                walls: levelWalls(wall.parentId),
+                planeY,
             }
 
             useViewer.getState().setInputDragging(true)

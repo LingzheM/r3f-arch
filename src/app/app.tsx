@@ -12,6 +12,10 @@ import { EndpointHandles } from "./tools/endpoint-handles";
 import { PolygonTool } from "./tools/polygon-tool";
 import { ColumnTool } from "./tools/column-tool";
 import { OpeningTool } from "./tools/opening-tool";
+import { useScene } from "../core/store/use-scene";
+import { resolveCurrentLevelId } from "./lib/level/current-level";
+import { addLevelOnTop, switchLevel } from "./lib/level/level-actions";
+import { LevelFrame } from "./components/level-frame";
 
 const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
 
@@ -19,6 +23,13 @@ export function App() {
     const viewMode = useEditor((s) => s.viewMode)
     const activeTool = useEditor((s) => s.activeTool)
     const selectId = useEditor((s) => s.selectId)
+    const preferredLevelId = useEditor((s) => s.currentLevelId)
+
+    const levelOrdinal = useScene((s) => {
+        const id = resolveCurrentLevelId(preferredLevelId, s.nodes)
+        const level = id === null ? undefined : s.nodes[id]
+        return level?.type === 'level' ? level.level : null
+    })
 
     const inputDragging = useViewer((s) => s.inputDragging)
 
@@ -37,6 +48,9 @@ export function App() {
             if (e.key.toLowerCase() === 'c') useEditor.getState().setActiveTool('column')
             if (e.key.toLowerCase() === 'd') useEditor.getState().setActiveTool('door')
             if (e.key.toLowerCase() === 'n') useEditor.getState().setActiveTool('window')
+            if (e.key === '[') switchLevel(-1)
+            if (e.key === ']') switchLevel(1)
+            if (e.key.toLowerCase() === 'l') addLevelOnTop()
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
@@ -57,10 +71,12 @@ export function App() {
                     onEnd={() => useViewer.getState().setCameraDragging(false)}
                 />
                 <SelectionManager />
-                <WallTool />
-                <PolygonTool tool="slab" />
-                <PolygonTool tool="ceiling" />
-                <ColumnTool />
+                <LevelFrame>
+                    <WallTool />
+                    <PolygonTool tool="slab" />
+                    <PolygonTool tool="ceiling" />
+                    <ColumnTool />
+                </LevelFrame>
                 <OpeningTool kind="door" />
                 <OpeningTool kind="window" />
                 <MoveTool />
@@ -72,10 +88,11 @@ export function App() {
                 font: '12px ui-monospace, monospace', background: 'rgba(255,255,255,.85)',
                 borderRadius: 3, pointerEvents: 'none',
             }}>
-                {activeTool} · {viewMode} · sel={selectId ?? '—'}
+                {activeTool} · {viewMode} · 层 {levelOrdinal ?? '—'} · sel={selectId ?? '—'}
                 &nbsp;|&nbsp; W 墙 · F 楼板 · G 天花 · C 柱（Shift=方） · V 选 · Tab 视图
                 &nbsp;|&nbsp; 多边形：点回起点 或 Enter 闭合 · Esc 取消
                 &nbsp;|&nbsp; 拖墙移动 · 拖端点球 · Del 删 · Ctrl+Z 撤销
+                &nbsp;|&nbsp; [ ] 切层 · L 顶上加一层
             </div>
         </div>
     )
