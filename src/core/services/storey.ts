@@ -1,6 +1,9 @@
+import type { CeilingNode } from "../schema/ceiling"
 import { DEFAULT_LEVEL_HEIGHT, getStoredLevelHeight, type LevelNode } from "../schema/level"
-import type { AnyNode, AnyNodeId } from "../schema/types"
+import { asNodeId, type AnyNode, type AnyNodeId } from "../schema/types"
 import type { WallNode } from "../schema/wall"
+
+export const CEILING_CLAMP_MARGIN = 0.01
 
 export type LevelElevation = {
   /** */
@@ -82,4 +85,20 @@ export function resolveWallTop(
   storeyHeight: number,
 ): number {
   return wall.height ?? storeyHeight
+}
+
+export function hostStoreyHeight(
+  parentId: string | null,
+  resolve: (id: AnyNodeId) => AnyNode | undefined,
+): number {
+  if (parentId === null) return DEFAULT_LEVEL_HEIGHT
+  const host = resolve(asNodeId(parentId))
+  return host?.type === 'level' ? getStoredLevelHeight(host) : DEFAULT_LEVEL_HEIGHT
+}
+
+export function resolveCeilingHeight(
+  ceiling: Pick<CeilingNode, 'height'>,
+  storeyHeight: number,
+): number {
+  return ceiling.height ?? storeyHeight - CEILING_CLAMP_MARGIN
 }

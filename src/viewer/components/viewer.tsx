@@ -30,8 +30,8 @@ export function Viewer({
             <CameraRig mode={mode} />
             <ViewInput />
 
-            <ambientLight />
-            <directionalLight />
+            <ambientLight intensity={0.6} />
+            <directionalLight position={[10, 10, 5]} intensity={1.2} castShadow />
 
             <Ground />
 

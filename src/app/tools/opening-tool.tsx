@@ -11,6 +11,7 @@ import { emitter } from "../../core/events/bus";
 import * as THREE from 'three'
 import { useFrame } from "@react-three/fiber";
 import { sceneRegistry } from "../../core/registry/scene-registry";
+import { hostStoreyHeight, resolveWallTop } from "../../core/services/storey";
 
 const NEVER_RAYCAST = () => null
 
@@ -38,6 +39,10 @@ function openingsOn(wall: WallNode): AnyNode[] {
   return out
 }
 
+function wallTopOf(wall: WallNode): number {
+  const { nodes } = useScene.getState()
+  return resolveWallTop(wall, hostStoreyHeight(wall.parentId, (id) => nodes[id]))
+}
 
 export function OpeningTool({ kind }: { kind: OpeningKind }) {
   const activeTool = useEditor((s) => s.activeTool)
@@ -75,6 +80,7 @@ export function OpeningTool({ kind }: { kind: OpeningKind }) {
       const { position, valid } = resolveOpeningPlacement({
         hit,
         wall,
+        wallHeight: wallTopOf(wall),
         size,
         sill: size.sill,
         siblings: openingsOn(wall),

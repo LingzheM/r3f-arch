@@ -3,7 +3,7 @@ import { BaseNode, nodeType, objectId } from './base'
 
 export const DEFAULT_SLAB_THICKNESS = 0.12
 
-export const DEFAULT_SLAB_ELEVATION = 0.05
+export const DEFAULT_SLAB_ELEVATION = 0
 
 export const SlabNode = BaseNode.extend({
   id: objectId('slab'),

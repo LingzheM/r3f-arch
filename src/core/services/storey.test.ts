@@ -3,7 +3,7 @@ import { BuildingNode } from '../schema/building'
 import { DEFAULT_LEVEL_HEIGHT, LevelNode } from '../schema/level'
 import { WallNode } from '../schema/wall'
 import type { AnyNode, AnyNodeId } from '../schema/types'
-import { getLevelElevations, levelBaseY, resolveLevelHeight, resolveWallTop } from './storey'
+import { CEILING_CLAMP_MARGIN, getLevelElevations, hostStoreyHeight, levelBaseY, resolveCeilingHeight, resolveLevelHeight, resolveWallTop } from './storey'
 
 type LevelSpec = {
   id: string
@@ -223,5 +223,56 @@ describe('记忆化', () => {
 
     expect(getLevelElevations(after)).not.toBe(getLevelElevations(before))
     expect(baseYOf(after, 'level_1')).toBe(3.0)
+  })
+})
+
+describe('hostStoreyHeight（M8 批 F）', () => {
+  const nodes = scene({
+    buildings: ['building_a'],
+    levels: [
+      { id: 'level_0', ordinal: 0, height: 3.0, building: 'building_a' },
+      { id: 'level_noheight', ordinal: 1, building: 'building_a' },
+    ],
+  })
+  const resolve = (id: AnyNodeId) => nodes[id]
+
+  it('宿主是层 → 层高', () => {
+    expect(hostStoreyHeight('level_0', resolve)).toBe(3.0)
+  })
+
+  it('宿主是没写 height 的层 → 常量兜底', () => {
+    expect(hostStoreyHeight('level_noheight', resolve)).toBe(DEFAULT_LEVEL_HEIGHT)
+  })
+
+  it('没有宿主（批 H 之前所有墙都是这种）→ 常量兜底', () => {
+    expect(hostStoreyHeight(null, resolve)).toBe(DEFAULT_LEVEL_HEIGHT)
+  })
+
+  it('宿主不是层（挂错了）→ 常量兜底，不抛错', () => {
+    expect(hostStoreyHeight('building_a', resolve)).toBe(DEFAULT_LEVEL_HEIGHT)
+  })
+
+  it('宿主 id 找不到 → 常量兜底', () => {
+    expect(hostStoreyHeight('level_nope', resolve)).toBe(DEFAULT_LEVEL_HEIGHT)
+  })
+})
+
+describe('resolveCeilingHeight（M8 批 F）', () => {
+  const ceiling = (height?: number) =>
+    height === undefined ? {} : { height }
+
+  it('height 缺席 → 跟层顶，减一个防 z-fighting 的缝', () => {
+    expect(resolveCeilingHeight(ceiling(), 3.0)).toBeCloseTo(3.0 - CEILING_CLAMP_MARGIN, 10)
+  })
+
+  it('height 在 → 用它自己，改层高不动', () => {
+    expect(resolveCeilingHeight(ceiling(2.2), 3.0)).toBe(2.2)
+    expect(resolveCeilingHeight(ceiling(2.2), 2.5)).toBe(2.2)
+  })
+
+  it('改层高 → 缺席的跟着变', () => {
+    const c = ceiling()
+    expect(resolveCeilingHeight(c, 2.5)).toBeCloseTo(2.49, 10)
+    expect(resolveCeilingHeight(c, 3.0)).toBeCloseTo(2.99, 10)
   })
 })

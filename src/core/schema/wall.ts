@@ -4,9 +4,8 @@ import type { Point2D } from '../lib/geometry-2d'
 
 export const DEFAULT_WALL_THICKNESS = 0.1
 
-export const DEFAULT_WALL_HEIGHT = 2.5
 
-export const WallNode = BaseNode.extend({ 
+export const WallNode = BaseNode.extend({
     id: objectId('wall'),
     type: nodeType('wall'),
     start: z.tuple([z.number(), z.number()]),
@@ -16,7 +15,6 @@ export const WallNode = BaseNode.extend({
 })
 
 export const getWallThickness = (wall: WallNode) => wall.thickness ?? DEFAULT_WALL_THICKNESS
-export const getWallHeight = (wall: WallNode) => wall.height ?? DEFAULT_WALL_HEIGHT
 
 export type WallNode = z.infer<typeof WallNode>
 

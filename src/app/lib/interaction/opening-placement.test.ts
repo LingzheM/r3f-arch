@@ -52,6 +52,7 @@ describe('overlapsExistingOpening', () => {
 describe('resolveOpeningPlacement', () => {
   const base = {
     wall,
+    wallHeight: 2.5,
     size: DOOR_SIZE,
     sill: 0,
     siblings: [] as AnyNode[],
@@ -125,6 +126,7 @@ describe('slideOpeningAlongWall', () => {
     const r = slideOpeningAlongWall({
       u: 3,
       wall,
+      wallHeight: 2.5,
       opening: { position: [1.5, 1.05, 0], width: 0.9, height: 2.1 },
       siblings: [],
       selfId: 'door_a' as AnyNodeId,
@@ -136,6 +138,7 @@ describe('slideOpeningAlongWall', () => {
     const r = slideOpeningAlongWall({
       u: 99,
       wall,
+      wallHeight: 2.5,
       opening: { position: [1.5, 1.05, 0], width: 0.9, height: 2.1 },
       siblings: [],
       selfId: 'door_a' as AnyNodeId,
