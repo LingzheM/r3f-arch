@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { AnyNode, AnyNodeType } from '../schema/types'
 import type { NodeDefinition } from './node-definition'
-import { nodeRegistry, registerNode, resetNodeRegistry } from './node-registry'
+import { nodeRegistry, registerNode, resetNodeRegistry, selectableKinds } from './node-registry'
 
 // 只有 kind 的桩定义。geometry 在前置 C · A8 之后是可选的，
 // 所以 core 的测试不需要 import three —— D4 的边界不用破例。
@@ -42,5 +42,29 @@ describe('nodeRegistry', () => {
     resetNodeRegistry()
     expect(nodeRegistry.size).toBe(0)
     expect(nodeRegistry.has('wall')).toBe(false)
+  })
+})
+describe('selectableKinds（M8 批 D）', () => {
+  beforeEach(() => resetNodeRegistry())
+
+  it('不声明 selectable 的 kind 默认可选中', () => {
+    registerNode(stub('wall'))
+    registerNode(stub('slab'))
+
+    expect(selectableKinds().sort()).toEqual(['slab', 'wall'])
+  })
+
+  it('selectable: false 的 kind 被排除', () => {
+    registerNode(stub('wall'))
+    registerNode({ ...stub('level'), selectable: false })
+    registerNode({ ...stub('building'), selectable: false })
+
+    expect(selectableKinds()).toEqual(['wall'])
+  })
+
+  it('显式 selectable: true 仍然在列表里', () => {
+    registerNode({ ...stub('column'), selectable: true })
+
+    expect(selectableKinds()).toEqual(['column'])
   })
 })

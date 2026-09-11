@@ -7,10 +7,16 @@ import { SelectionContext } from './scene-context';
 import { useScene } from '../../core/store/use-scene';
 import { useEffectiveNode } from '../hooks/use-effective-node';
 import { nodeRegistry } from '../nodes/register';
-import { IDENTITY_FRAME } from '../../core/registry/node-definition';
+import { IDENTITY_FRAME, type NodeFrame } from '../../core/registry/node-definition';
 import { NodeRenderer } from './node-renderer';
 
-export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
+export function ParametricNodeRenderer({
+    node,
+    frame,
+}: {
+    node: AnyNode;
+    frame?: NodeFrame
+}) {
     const ref = useRef<THREE.Group>(null)
     useRegistry(node.id, node.type, ref)
 
@@ -22,7 +28,8 @@ export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
 
     const def = nodeRegistry.get(node.type)
 
-    const frame = def?.frame?.(effective) ?? IDENTITY_FRAME
+    const appliedFrame = frame ?? def?.frame?.(effective) ?? IDENTITY_FRAME
+    const interactive = def?.selectable !== false
 
     useLayoutEffect(() => {
         useScene.getState().makeDirty(node.id)
@@ -31,10 +38,10 @@ export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
     return (
         <group
             ref={ref}
-            position={frame.position}
-            rotation-y={frame.rotationY}
+            position={appliedFrame.position}
+            rotation-y={appliedFrame.rotationY}
             visible={node.visible !== false}
-            {...events}
+            {...(interactive ? events : [])}
         >
             {node.children.map((childId) => (
                 <NodeRenderer key={childId} nodeId={asNodeId(childId)} />

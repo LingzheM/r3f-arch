@@ -21,6 +21,7 @@ export type NodeAppearance = { selected: boolean }
 
 export type NodeDefinition<N extends AnyNode = AnyNode, L = unknown> = {
     kind: N['type']
+    selectable?: boolean
 
     /**  */
     frame?: (node: N) => NodeFrame

@@ -8,7 +8,7 @@ export const SceneRenderer = () => {
 
     return (
         <group name="scene-renderer">
-            {rootNodeIds.map((nodeId) => <NodeRenderer key={nodeId} nodeId={nodeId}/>)}
+            {rootNodeIds.map((nodeId) => <NodeRenderer key={nodeId} nodeId={nodeId} />)}
         </group>
     )
 }
@@ -24,8 +24,6 @@ export const NodeRenderer = ({ nodeId }: { nodeId: AnyNodeId }) => {
         const Renderer = def.renderer
         return <Renderer node={node} />
     }
-    
-    if (def.geometry) return <ParametricNodeRenderer node={node} />
 
-    return null
+    return <ParametricNodeRenderer node={node} />
 }

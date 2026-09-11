@@ -3,7 +3,7 @@ import type { GridEvent, NodeEvent, NodeEventKey } from "../../core/events/types
 import { isSelectionEnabled } from "../store/use-interaction-scope";
 import { useEditor } from "../store/use-editor";
 import { emitter } from "../../core/events/bus";
-import { nodeRegistry } from "../../core/registry/node-registry";
+import { selectableKinds } from "../../core/registry/node-registry";
 
 export function SelectionManager(): null {
     useEffect(() => {
@@ -18,7 +18,7 @@ export function SelectionManager(): null {
             useEditor.getState().select(null)
         }
 
-        const clickKeys = [...nodeRegistry.entries()].map(
+        const clickKeys = selectableKinds().map(
             ([kind]) => `${kind}:click` as NodeEventKey,
         )
 

@@ -28,3 +28,9 @@ export const nodeRegistry = {
 export function resetNodeRegistry(): void {
     definitions.clear()
 }
+
+export function selectableKinds(): AnyNodeType[] {
+    return [...definitions.entries()]
+        .filter(([, def]) => def.selectable !== false)
+        .map(([kind]) => kind)
+}
