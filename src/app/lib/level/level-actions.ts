@@ -1,12 +1,12 @@
 import { DEFAULT_LEVEL_HEIGHT } from "../../../core/schema/level";
 import type { AnyNodeId } from "../../../core/schema/types";
-import { levelBaseY, resolveLevelHeight } from "../../../core/services/storey";
+import { levelBaseY } from "../../../core/services/storey";
 import { acquireSceneHistoryPause } from "../../../core/store/history-control";
 import { useScene } from "../../../core/store/use-scene";
 import { useEditor } from "../../store/use-editor";
 import { adjacentLevelId, nextLevelOrdinal, resolveCurrentLevelId } from "./current-level";
 
-export function ensureScaffhold(): AnyNodeId {
+export function ensureScaffold(): AnyNodeId {
   const { nodes, addNode } = useScene.getState()
   const existing = resolveCurrentLevelId(useEditor.getState().currentLevelId, nodes)
   if (existing !== null) {

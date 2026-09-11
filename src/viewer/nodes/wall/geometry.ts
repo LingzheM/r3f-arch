@@ -5,13 +5,14 @@ import type {
     NodeAppearance,
     NodeFrame,
 } from '../../../core/registry/node-definition'
-import { getWallHeight, type WallNode } from '../../../core/schema/wall'
+import { type WallNode } from '../../../core/schema/wall'
 import { calculateLevelMiters, type MiterData } from '../../../core/systems/wall/wall-mitering'
 import { getWallPlanFootprint } from '../../../core/systems/wall/wall-footprint'
 import { openingSpan, type OpeningSpan } from '../../../core/schema/opening'
 import { asNodeId } from '../../../core/schema/types'
 import { splitWallByOpenings } from '../../../core/systems/wall/wall-openings'
 import { buildPrismGeometry } from '../shared/polygon-prism'
+import { hostStoreyHeight, resolveWallTop } from '../../../core/services/storey'
 
 const WALL_COLOR = '#e8e8e8'
 const WALL_SELECTED_COLOR = '#7dd3c0'
@@ -72,7 +73,11 @@ export function buildWallGeometry(
     const { position, rotationY } = wallTransform(node)
     const local = worldFootprint.map((p) => worldToLocalXZ(p, position, rotationY))
 
-    const bands = splitWallByOpenings(local, getWallHeight(node), collectOpeningSpans(node, ctx))
+    const storeyHeight = hostStoreyHeight(node.parentId, ctx.resolve)
+    const bands = splitWallByOpenings(
+        local,
+        resolveWallTop(node, storeyHeight),
+        collectOpeningSpans(node, ctx))
     if (bands.length === 0) return root
 
     const material = new THREE.MeshStandardMaterial({

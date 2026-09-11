@@ -3,11 +3,12 @@ import { useContext, useRef } from "react";
 import { useScene } from "../../core/store/use-scene";
 import { SelectionContext } from "../components/scene-context";
 import { useFrame } from "@react-three/fiber";
-import type { AnyNode, AnyNodeId, AnyNodeType } from "../../core/schema/types";
+import type { AnyNodeId } from "../../core/schema/types";
 import { nodeRegistry } from "../../core/registry/node-registry";
 import { getEffectiveNode } from "../../core/store/use-live-overrides";
 import { sceneRegistry } from '../../core/registry/scene-registry';
 import type { GeometryContext } from '../../core/registry/node-definition';
+import { computeSiblingGroups, siblingGroupKey } from './sibling-groups';
 
 export function GeometrySystem(): null {
     const dirtyNodes = useScene((s) => s.dirtyNodes)
@@ -22,21 +23,12 @@ export function GeometrySystem(): null {
         const { nodes, clearDirty } = useScene.getState()
         const dirtyIds = [...dirtyNodes] as AnyNodeId[]
 
-        const levelDataBykind = new Map<AnyNodeType, unknown>()
-        const effectiveBykind = new Map<AnyNodeType, AnyNode[]>()
-
-        for (const id of dirtyIds) {
-            const node = nodes[id]
-            if (!node) continue
-            const def = nodeRegistry.get(node.type)
-            if (!def?.computeLevelData || levelDataBykind.has(node.type)) continue
-
-            const siblings = Object.values(nodes)
-                .filter((n) => n.type === node.type)
-                .map((n) => getEffectiveNode(n))
-            effectiveBykind.set(node.type, siblings)
-            levelDataBykind.set(node.type, def.computeLevelData(siblings))
-        }
+        const groups = computeSiblingGroups(
+            dirtyIds,
+            nodes,
+            (kind) => nodeRegistry.get(kind),
+            getEffectiveNode,
+        )
 
         for (const id of dirtyIds) {
             const documentNode = nodes[id]
@@ -57,16 +49,12 @@ export function GeometrySystem(): null {
             }
 
             const node = getEffectiveNode(documentNode)
-            const siblings =
-                effectiveBykind.get(node.type) ??
-                Object.values(nodes)
-                    .filter((n) => n.type === node.type)
-                    .map((n) => getEffectiveNode(n))
+            const key = siblingGroupKey(node)
 
             const ctx: GeometryContext = {
                 resolve: (target) => nodes[target],
-                siblings,
-                levelData: levelDataBykind.get(node.type),
+                siblings: groups.siblings.get(key) ?? [],
+                levelData: groups.levelData.get(key),
             }
 
             const built = def.geometry(node, ctx, { selected: selectIdRef.current === id })

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { AnyNode, AnyNodeId } from "../../core/schema/types";
+import type { AnyNodeId } from "../../core/schema/types";
 
 export type Tool = 'select' | 'wall' | 'slab' | 'ceiling' | 'column' | 'door' | 'window'
 export type ViewMode = '3d' | 'plan'

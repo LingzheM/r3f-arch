@@ -1,7 +1,8 @@
 import type * as THREE from 'three'
-import { getCeilingHeight, getCeilingThickness, type CeilingNode } from '../../../core/schema/ceiling'
+import { getCeilingThickness, type CeilingNode } from '../../../core/schema/ceiling'
 import type { GeometryContext, NodeAppearance } from '../../../core/registry/node-definition'
 import { buildPolygonPrism } from '../shared/polygon-prism'
+import { hostStoreyHeight, resolveCeilingHeight } from '../../../core/services/storey'
 
 const CEILING_COLOR = '#e6e9e7'
 const CEILING_SELECTED_COLOR = '#7dd3c0'
@@ -11,7 +12,7 @@ export function buildCeilingGeometry(
   _ctx: GeometryContext,
   appearance: NodeAppearance,
 ): THREE.Object3D {
-  const bottomY = getCeilingHeight(node)
+  const bottomY = resolveCeilingHeight(node, hostStoreyHeight(node.parentId, _ctx.resolve))
 
   return buildPolygonPrism({
     polygon: node.polygon,
