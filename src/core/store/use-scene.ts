@@ -79,6 +79,9 @@ export const useScene = create<SceneState>()(
             },
 
             updateNode: (id, patch) => {
+                if ('parentId' in patch || 'children' in patch) {
+                    throw new Error('[scene] updateNode: parentId / children 不可 patch')
+                }
                 set((s) => {
                     const prev = s.nodes[id]
                     if (!prev) return s

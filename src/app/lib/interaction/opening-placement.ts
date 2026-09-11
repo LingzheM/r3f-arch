@@ -32,7 +32,7 @@ export function overlapsExistingOpening(
     if (sibling.type !== 'door' && sibling.type !== 'window') continue
 
     const other = openingSpan(sibling)
-    if (span.right > other.right && other.right > span.left) return true
+    if (span.right > other.left && other.right > span.left) return true
   }
   return false
 }
@@ -63,4 +63,26 @@ export function resolveOpeningPlacement(args: {
   const valid = !overlapsExistingOpening(span, siblings, selfId)
 
   return { position: clamped, valid }
+}
+
+export function slideOpeningAlongWall(args: {
+  u: number
+  wall: WallNode
+  opening: { position: readonly [number, number, number]; width: number; height: number }
+  siblings: readonly AnyNode[]
+  selfId: AnyNodeId
+}): OpeningPlacementResult {
+  const { u, wall, opening, siblings, selfId } = args
+
+  const snappedU = snapToGrid({ x: u, y: 0 }).x
+  const clamped = clampOpeningToWall(
+    [snappedU, opening.position[1], opening.position[2]],
+    opening,
+    { length: wallLength(wall), height: getWallHeight(wall) },
+  )
+
+  if (!clamped) return { position: [...opening.position] as [number, number, number], valid: false }
+
+  const span = openingSpan({ position: clamped, width: opening.width, height: opening.height })
+  return { position: clamped, valid: !overlapsExistingOpening(span, siblings, selfId) }
 }
