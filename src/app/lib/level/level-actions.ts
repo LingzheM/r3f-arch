@@ -2,12 +2,13 @@ import { DEFAULT_LEVEL_HEIGHT } from "../../../core/schema/level";
 import type { AnyNodeId } from "../../../core/schema/types";
 import { levelBaseY } from "../../../core/services/storey";
 import { acquireSceneHistoryPause } from "../../../core/store/history-control";
+import { migrateToLevels } from "../../../core/store/migrate-to-levels";
 import { useScene } from "../../../core/store/use-scene";
 import { useEditor } from "../../store/use-editor";
 import { adjacentLevelId, nextLevelOrdinal, resolveCurrentLevelId } from "./current-level";
 
 export function ensureScaffold(): AnyNodeId {
-  const { nodes, addNode } = useScene.getState()
+  const { nodes } = useScene.getState()
   const existing = resolveCurrentLevelId(useEditor.getState().currentLevelId, nodes)
   if (existing !== null) {
     useEditor.getState().setCurrentLevel(existing)
@@ -17,10 +18,14 @@ export function ensureScaffold(): AnyNodeId {
   const release = acquireSceneHistoryPause(useScene)
   let levelId: AnyNodeId
   try {
-    const siteId = addNode({ type: 'site' })
-    const buildingId = addNode({ type: 'building', parentId: siteId })
+    const { rootNodeIds } = useScene.getState()
+    const migrated = migrateToLevels({ nodes, rootNodeIds })
+    useScene.setState({ nodes: migrated.nodes, rootNodeIds: migrated.rootNodeIds })
+    useScene.getState().markAllDirty()
 
-    levelId = addNode({ type: 'level', parentId: buildingId, level: 0, height: DEFAULT_LEVEL_HEIGHT })
+    const created = resolveCurrentLevelId(null, migrated.nodes)
+    if (created === null) throw new Error('[level] ensureScaffold')
+    levelId = created
   } finally {
     release()
   }
