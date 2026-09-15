@@ -1,0 +1,4168 @@
+<title>M7 门窗与开洞</title>
+<style>
+:root {
+  --paper:#EDF1EF; --card:#F8FAF9; --code-bg:#E4EBE8;
+  --ink:#131B19; --ink-2:#4A5754; --ink-3:#74827E;
+  --rule:#C4CFCB; --rule-soft:#D7E0DC;
+  --accent:#0B6E5F; --accent-bg:#DBE9E5;
+  --warn:#9E4520; --warn-bg:#F1E2D9;
+  --core:#0B6E5F;  --core-bg:#DBE9E5;
+  --viewer:#2A5A79; --viewer-bg:#DBE5EC;
+  --app:#6A5843;   --app-bg:#ECE5DB;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --body: Georgia, "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+    --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+    --rule:#2A3733; --rule-soft:#1E2926;
+    --accent:#4FC3AA; --accent-bg:#12312B;
+    --warn:#E2916A; --warn-bg:#32211A;
+    --core:#4FC3AA;  --core-bg:#12312B;
+    --viewer:#79B4DA; --viewer-bg:#14262F;
+    --app:#C9AC85;   --app-bg:#2A2318;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+  --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+  --rule:#2A3733; --rule-soft:#1E2926;
+  --accent:#4FC3AA; --accent-bg:#12312B;
+  --warn:#E2916A; --warn-bg:#32211A;
+  --core:#4FC3AA;  --core-bg:#12312B;
+  --viewer:#79B4DA; --viewer-bg:#14262F;
+  --app:#C9AC85;   --app-bg:#2A2318;
+}
+* { box-sizing:border-box; }
+body {
+  background:var(--paper); color:var(--ink); font-family:var(--body);
+  font-size:17px; line-height:1.72; margin:0; padding:0 24px 120px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:940px; margin:0 auto; }
+.prose { max-width:68ch; }
+.masthead { padding:72px 0 0; }
+.eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 20px; display:flex; gap:14px; flex-wrap:wrap;
+}
+.eyebrow b { color:var(--accent); font-weight:600; }
+h1 {
+  font-family:var(--mono); font-size:clamp(32px,5.5vw,50px); line-height:1.08;
+  letter-spacing:-.02em; font-weight:600; margin:0 0 18px; text-wrap:balance;
+}
+.standfirst { font-size:19px; color:var(--ink-2); max-width:60ch; margin:0 0 8px; }
+.dim { position:relative; height:1px; background:var(--rule); border:0; margin:56px 0 40px; }
+.dim::before,.dim::after { content:""; position:absolute; top:-4px; width:1px; height:9px; background:var(--rule); }
+.dim::before{left:0} .dim::after{right:0}
+h2 {
+  font-family:var(--mono); font-size:13px; letter-spacing:.16em; text-transform:uppercase;
+  font-weight:600; color:var(--accent); margin:0 0 6px;
+}
+h2 .num { color:var(--ink-3); margin-right:12px; }
+.h2sub { font-family:var(--mono); font-size:22px; font-weight:600; margin:0 0 24px; letter-spacing:-.01em; }
+h3 { font-family:var(--mono); font-size:16px; font-weight:600; margin:34px 0 10px; }
+h4 { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--accent); margin:24px 0 6px; }
+p { margin:0 0 16px; }
+ul,ol { margin:0 0 16px; padding-left:22px; }
+li { margin-bottom:7px; }
+strong { font-weight:700; color:var(--ink); }
+em { font-style:italic; color:var(--ink-2); }
+code { font-family:var(--mono); font-size:.86em; background:var(--code-bg); padding:1px 5px; border-radius:2px; }
+pre {
+  background:var(--code-bg); border:1px solid var(--rule-soft); border-radius:3px;
+  padding:16px 18px; overflow-x:auto; margin:14px 0 18px; line-height:1.62;
+}
+pre code { background:none; padding:0; font-size:13px; white-space:pre; }
+.cm { color:var(--ink-3); }
+.cw { color:var(--warn); }
+.ok { color:var(--accent); }
+.step {
+  display:grid; grid-template-columns:52px 1fr; gap:0 20px;
+  padding:26px 0; border-top:1px solid var(--rule-soft);
+}
+.step:first-of-type { border-top:1px solid var(--rule); }
+.step-n { font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink-3); padding-top:4px; font-variant-numeric:tabular-nums; }
+.step-body { min-width:0; }
+.step-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.step-title { font-family:var(--mono); font-size:17px; font-weight:600; margin:0; }
+.step-body > p { max-width:64ch; }
+.tag {
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  font-weight:600; padding:3px 8px; border-radius:2px; white-space:nowrap;
+}
+.tag.core{color:var(--core);background:var(--core-bg)}
+.tag.viewer{color:var(--viewer);background:var(--viewer-bg)}
+.tag.app{color:var(--app);background:var(--app-bg)}
+.tag.debt{color:var(--warn);background:var(--warn-bg)}
+.trap {
+  background: repeating-linear-gradient(-45deg, transparent 0 6px,
+    color-mix(in srgb, var(--warn) 7%, transparent) 6px 7px), var(--warn-bg);
+  border-left:3px solid var(--warn); padding:14px 18px; margin:18px 0; border-radius:0 3px 3px 0;
+}
+.trap-label {
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  font-weight:600; color:var(--warn); display:block; margin-bottom:6px;
+}
+.trap p:last-child,.trap ul:last-child { margin-bottom:0; }
+.note { border-left:3px solid var(--rule); padding:2px 0 2px 18px; margin:18px 0; color:var(--ink-2); font-size:16px; }
+.note p:last-child { margin-bottom:0; }
+.tablewrap { overflow-x:auto; margin:18px 0 24px; }
+table { border-collapse:collapse; width:100%; font-family:var(--mono); font-size:13px; min-width:560px; }
+th {
+  text-align:left; font-weight:600; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule); padding:0 14px 8px 0;
+}
+td { padding:9px 14px 9px 0; border-bottom:1px solid var(--rule-soft); vertical-align:top; line-height:1.55; }
+td:last-child,th:last-child { padding-right:0; }
+.check { list-style:none; padding:0; margin:0; }
+.check li {
+  display:grid; grid-template-columns:26px 1fr; gap:10px; padding:11px 0;
+  border-bottom:1px solid var(--rule-soft); margin:0;
+}
+.check li::before { content:""; width:14px; height:14px; border:1.5px solid var(--accent); border-radius:2px; margin-top:6px; }
+.defect { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--rule-soft); }
+.defect-to { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--accent); white-space:nowrap; }
+.figure { margin:24px 0 28px; }
+.figure svg { display:block; width:100%; height:auto; max-width:760px; }
+.filelines { font-family:var(--mono); font-size:11px; font-weight:400; color:var(--ink-3); }
+h3.batch { font-size:20px; margin-top:52px; padding-top:18px; border-top:2px solid var(--rule); }
+.figcap { font-family:var(--mono); font-size:12px; color:var(--ink-3); margin-top:8px; max-width:64ch; line-height:1.6; }
+.road { display:grid; grid-template-columns:1fr 1fr; gap:0 26px; margin:20px 0 8px; }
+.road > div { border-top:2px solid var(--rule); padding-top:14px; min-width:0; }
+.road h4 { margin-top:0; }
+@media (max-width:760px) { .road { grid-template-columns:1fr; gap:24px 0; } }
+a { color:var(--accent); }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media (max-width:620px) {
+  body { font-size:16px; padding:0 18px 80px; }
+  .step { grid-template-columns:1fr; }
+  .step-n { padding-top:0; margin-bottom:4px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">
+    <span>r3f-arch</span><span>里程碑 <b>07</b> / 14</span><span>机制型</span>
+    <span>D13 · §01–§07 全</span><span>2026-09-04 → 09-05</span>
+  </p>
+  <h1>M7 门窗与开洞</h1>
+  <p class="standfirst">
+    这个项目的<strong>第一个父子关系</strong>。门窗本身不难，
+    难的是它逼你回答一个 M1 起就欠着的问题——
+    <strong>一个节点的坐标，到底是相对谁的。</strong>
+  </p>
+
+  <div class="note" style="margin-top:28px">
+    <p><strong>验证声明（D16）</strong></p>
+    <p>
+      已验：<code>pnpm verify</code> 在<em>当前</em> <code>src/</code> 上跑过 —
+      <code>check-types</code> ✅ · <code>eslint</code> ✅ · <code>vitest</code> ✅ <strong>5 文件 / 51 用例</strong>。<br>
+      已验：§02 里所有带「<span class="ok">实测</span>」标记的几何结论，都是在
+      <code>node_modules/three</code>（<strong>r185</strong>，就是你项目里那一份）上跑独立探针得到的，
+      探针源码不在本文档的交付范围内，结论在 §02 逐条标注。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>未验：浏览器里的实际渲染与交互，一帧都没有。</strong>
+      §07 的代码在 <code>src/</code> 的一份完整拷贝上跑过
+      （<code>tsc</code> / <code>eslint</code> / <code>vitest</code> <strong>8 文件 95 用例</strong> / <code>tsc --build</code>
+      + 8 条端到端几何探针，全绿），<strong>但那四样结构上都看不见渲染</strong>。
+      具体没验哪些轴，§05 末尾和 §07 开头各列了一份。
+    </p>
+  </div>
+
+  <div class="trap" style="margin-top:24px">
+    <span class="trap-label">这份文档和 M6 的形态不同</span>
+    <p style="margin-bottom:0">
+      M6 是 <code>[模式]</code> 型，一次交完 §00–§07 全码。
+      M7 是 <code>[机制]</code> 型 —— 按 D13 先只交了 §01–§06
+      （设计、判断、文件树、方法签名 + hint）。
+      <strong>2026-09-05 你要了代码，§07 已补</strong>：24 个文件的完整实现体，
+      从跑绿过的拷贝直接导出。<br>
+      <strong>建议仍然按 §04 的批次敲，不要直接抄 §07。</strong>
+      §04 里那些陷阱框是 §07 每一行为什么长这样的原因 ——
+      跳过它们你会得到能跑的代码和一片空白的理解。
+    </p>
+  </div>
+</header>
+
+<hr class="dim">
+
+<!-- ═══════════ 前置 A -->
+<section>
+  <h2><span class="num">前置 A</span>实际代码与计划的偏差</h2>
+  <p class="h2sub">2026-09-04 实测 · 逐文件核过 <code>src/</code>，不是照抄 handoff</p>
+
+  <h3>pnpm verify 的颜色</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>阶段</th><th>结果</th><th>细节</th></tr></thead>
+    <tbody>
+      <tr><td><code>check-types</code></td><td class="ok"><strong>绿</strong></td><td><code>tsc --build --noEmit</code>，0 错</td></tr>
+      <tr><td><code>lint</code></td><td class="ok"><strong>绿</strong></td><td><code>eslint src</code>，0 错</td></tr>
+      <tr><td><code>test</code></td><td class="ok"><strong>绿</strong></td><td>vitest 4.1.11 · <strong>5 文件 / 51 用例</strong> · 561 ms</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>
+    <strong>整体绿，和 <code>STATE.md</code> / <code>handoff-m7.md</code> 记的完全一致。</strong>
+    开工闸门是空的，M7 不欠 M6 任何编译修复。
+  </p>
+
+  <h3>六处偏差</h3>
+  <p>下面每一条都是「文档说的」和「<code>src/</code> 里真的是什么」之间的差，全部影响 M7 的做法。</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>#</th><th>文档说</th><th>实际代码</th><th>对 M7 的影响</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><code>handoff-m7</code> ④：<em>「<code>ParametricNodeRenderer</code> 的 <code>position</code> 绑定 —— 第一条路已通」</em></td>
+        <td>绑的是 <code>&lt;group position&gt;</code>，<strong>没有 <code>rotation</code></strong>；
+            而且<strong>不渲染子节点</strong>（<code>node-renderer.tsx:11</code> 只遍历 <code>rootNodeIds</code>）</td>
+        <td>「真父子」这条路<strong>一行都还没铺</strong>，不是「已通」。见 §02 A</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>—</td>
+        <td><code>buildWallGeometry</code> 把世界 transform 烤在<strong>返回值内部的 <code>body</code> 子 group</strong> 上
+            （<code>wall/geometry.ts:77-80</code>）。
+            注册进 <code>sceneRegistry</code> 的那个 group <strong>永远在原点</strong></td>
+        <td><strong>这是 M7 最贵的一条。</strong>门就算 React 挂进墙的 group，
+            拿到的也是世界坐标系，不是墙的坐标系。见 §02 A</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><code>ROADMAP</code> M7：<em>「参数 <code>t</code> ∈ [0,1]」</em></td>
+        <td>对照仓库是<strong>绝对局部米</strong>（<code>spatial-queries.md:49</code>
+            <code>localX: distance along wall from start</code>）</td>
+        <td>本文档<strong>改用绝对米</strong>，理由和代价见 §02 E。按工作约定第 6 条显式记录</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>D6：<em>「M7 用 <code>THREE.Shape</code> 带 <code>holes</code> 挤出」</em></td>
+        <td>墙是<strong>把平面轮廓沿高度挤出</strong>的。
+            在这个轴上开一个 <code>hole</code> 得到的是<strong>贯通楼层的竖井</strong>，不是门</td>
+        <td><strong>D6 的字面做法在 M7 物理上不成立。</strong>
+            改用「段切」，理由和实测见 §02 C</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><code>handoff-m7</code> ④：<em>「挖洞时洞必须和外轮廓反向 ⟹ <code>signedArea</code> 终于有消费者」</em></td>
+        <td><strong>不成立。</strong><code>ExtrudeGeometry</code> 自己会把外轮廓强制成 CW、
+            每个洞强制成 CCW（<code>three.core.js:36317</code> 与 <code>:36327</code>，r185）</td>
+        <td><code>signedArea</code> 在 M7 <strong>仍然没有消费者</strong>。
+            这条债不是「到期」，是「本来就不存在」。见 §02 C 末</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td><code>handoff-m7</code> ②：<em>「得改成对 <code>sceneRegistry</code> 射线求交、命中墙之后反算墙上的参数」</em></td>
+        <td>不需要。R3F 的指针事件已经带着命中对象，
+            <code>e.object.worldToLocal(e.point)</code> 一行就是墙局部坐标 —— 对照仓库正是这么做的
+            （<code>use-node-events.ts:21</code>）</td>
+        <td>省掉一整套自建射线。副作用：<code>sceneRegistry.byType</code>
+            <strong>在 M7 依然是零读者</strong>。见 §02 D</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      第 5、6 条是<strong>推翻交接文档的结论</strong>，不是补充。
+      <code>handoff-m7.md</code> 那两条都写得很具体、很像跑过 —— 但一条被 three 的源码证伪，
+      一条被对照仓库自己的做法绕过了。<strong>这正是 D16 存在的理由：
+      交接文档也是「声称验证过」的一种。</strong>
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 01 -->
+<section>
+  <h2><span class="num">01</span>这一步解决什么问题</h2>
+  <p class="h2sub">不是「加两种节点」。是「一个节点可以住在另一个节点身上」</p>
+
+  <p class="prose">
+    M6 加了三种类型，证明了注册表通用。<strong>但那三种全是平级的</strong> ——
+    slab、ceiling、column 各自独立，删掉任何一个，其它两个毫发无损。
+    门窗是第一个<strong>不能独立存在</strong>的东西：
+  </p>
+
+  <ul class="prose">
+    <li>门的位置<strong>只在某堵墙上才有意义</strong>。墙没了，门的坐标是一串没有参照物的数字。</li>
+    <li>门<strong>会改写宿主的几何</strong>。这是第一次「A 节点的存在改变 B 节点的形状」。</li>
+    <li>墙动，门必须跟着动。这是第一次<strong>非对称</strong>的联动
+        （M4 的墙↔墙联动是对称的：谁动都一样）。</li>
+  </ul>
+
+  <p class="prose">
+    所以 M7 真正要建的东西只有一个：<strong>宿主关系</strong>。
+    门窗是它的第一个用户，M8 的 <code>Site → Building → Level</code> 是第二个，
+    M10 的屋顶面宿主是第三个。<strong>M7 定错了，M8 和 M10 就是在歪地基上砌墙。</strong>
+  </p>
+
+  <h3>本 M 的四个不变量</h3>
+  <p class="prose">这四条就是测试用例，也是 §05 验收的骨架：</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>#</th><th>不变量</th><th>怎么会挂</th></tr></thead>
+    <tbody>
+      <tr><td>I1</td><td>门的世界位姿 = 宿主墙的位姿 ∘ 门的局部位姿。<strong>只有一个地方做这个复合。</strong></td><td>有两个地方做 ⟹ 一个改了另一个没改 ⟹ 拖墙时门漂移</td></tr>
+      <tr><td>I2</td><td>洞的体积 = 门的体积。<strong>墙实体 = 原墙 − 洞</strong>，一立方米不多不少</td><td>段切少切一段 ⟹ 门框里露出一块墙；多切 ⟹ 墙上多个缺口</td></tr>
+      <tr><td>I3</td><td>删墙 ⟹ 门窗一起消失，且<strong>一次撤销全回来</strong></td><td><code>removeNode</code> 无级联 ⟹ 门变成孤儿，坐标指向不存在的墙</td></tr>
+      <tr><td>I4</td><td>门的洞口<strong>整段落在墙内</strong>：<code>0 ≤ u−w/2</code> 且 <code>u+w/2 ≤ L</code>；<code>0 ≤ v−h/2</code> 且 <code>v+h/2 ≤ H</code></td><td>不夹紧 ⟹ 段切产生负长度的段 ⟹ <code>ExtrudeGeometry</code> 吐出退化几何，静默</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>该读对照仓库的哪几行</h3>
+  <p class="prose">
+    <code>handoff-m7.md</code> ③ 第 1 条那份阅读清单我核过了，是对的，
+    这里只补三条它没给的<strong>行号</strong> —— 这三行是本 M 的全部关键：
+  </p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>文件:行</th><th>是什么</th></tr></thead>
+    <tbody>
+      <tr><td><code>schema/nodes/door.ts:155</code></td><td><code>.describe()</code> 里的一句原文：<em>「position: center of the door in <strong>wall-local</strong> coordinate system (Y = height/2, always at floor)」</em>。比 handoff 引的 <code>roofSegmentId</code> 那段更直接</td></tr>
+      <tr><td><code>viewer/systems/wall/wall-system.tsx:794-796</code></td><td>墙 mesh 的位姿：<code>position = (start.x, slabElevation, start.y)</code>，<code>rotation.y = −angle</code>。<strong>原点在 <code>start</code>，不在中点</strong></td></tr>
+      <tr><td><code>viewer/hooks/use-node-events.ts:21</code></td><td><code>const localPoint = e.object.worldToLocal(e.point.clone())</code> —— 拾取墙面的全部机制，一行</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      要跳过的和 handoff 说的一样：<code>door/tool.tsx</code>（770 行）+
+      <code>window/tool.tsx</code>（842 行）全是铰链方向 / 开启动画 / 双开 / 推拉 / 车库门，
+      D2 明确排除。<code>DoorType</code> 那个 10 项枚举出现时就该停 ——
+      和 M6 读到 <code>ColumnCapitalStyle</code> 就停是同一个动作。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 02 -->
+<section>
+  <h2><span class="num">02</span>机制说明</h2>
+  <p class="h2sub">五个判断。A 是地基，其余四个都长在 A 上面</p>
+
+  <!-- ─── A ─── -->
+  <h3>A · 门窗的 position 到底在谁的坐标系里</h3>
+
+  <p class="prose">
+    先把事实摆清楚，再选路。
+  </p>
+
+  <p class="prose">
+    <strong>事实 1 —— 对照仓库的答案是「墙的局部坐标系」，而且不止说说。</strong>
+    <code>door.ts:155</code> 写着 <em>position: center of the door in wall-local coordinate system</em>；
+    <code>door-math.ts:22</code> 的 <code>wallLocalToWorld(wall, localX, localY)</code> 做的正是
+    <code>start + localX·(cos a, sin a)</code>；
+    <code>wall/renderer.tsx:121</code> 把 <code>node.children</code> 递归渲染在墙 mesh <strong>内部</strong>；
+    <code>wall-system.tsx:794</code> 给那个 mesh 设了 <code>position = start</code> / <code>rotation.y = −angle</code>。
+    <strong>四处互相印证，是一套完整的机制，不是一句注释。</strong>
+  </p>
+
+  <p class="prose">
+    <strong>事实 2 —— 我们这边这条路一行都没铺，而且比 handoff 说的更远。</strong>
+    <code>handoff-m7.md</code> ④ 写「<code>ParametricNodeRenderer</code> 的 <code>position</code> 绑定（第一条路已通）」。
+    实际读代码：
+  </p>
+
+<pre><code><span class="cm">// viewer/components/parametric-node-renderer.tsx:35-42 —— 现状</span>
+&lt;group ref={ref} position={position} visible={...} {...events} /&gt;
+<span class="cw">//          ^ 没有 rotation        ^ 自闭合：没有 children</span>
+
+<span class="cm">// viewer/nodes/wall/geometry.ts:77-82 —— 世界 transform 在这里</span>
+const body = new THREE.Group()
+body.position.set(position[0], position[1], position[2])
+body.rotation.y = rotationY
+body.add(mesh)
+root.add(body)          <span class="cw">// ← root 才是被 GeometrySystem 塞进注册 group 的</span>
+</code></pre>
+
+  <div class="trap">
+    <span class="trap-label">这一条比什么都重要</span>
+    <p style="margin-bottom:0">
+      <code>sceneRegistry.nodes.get(wallId)</code> 拿到的 group <strong>永远在世界原点</strong>。
+      墙的位姿住在它<em>孙子</em>那一层，而且那一层<strong>每次重建几何都会被
+      <code>disposeGeometryChildren</code> 删掉重造</strong>（<code>geometry-system.tsx:86-93</code>）。<br>
+      所以「把门 React 挂进墙的 group」这个直觉动作，
+      <strong>今天做的结果是门落在世界坐标系里</strong>，而且你会觉得它「挂上去了」——
+      因为它确实是那个 group 的子节点，只是那个 group 是单位矩阵。
+      <em>又一个编译器看不见的 bug。</em>
+    </p>
+  </div>
+
+  <p class="prose"><strong>事实 3 —— 墙的局部坐标系长什么样，我实测过。</strong>
+  用你 <code>src/</code> 里 <code>buildWallGeometry</code> 的原样管线跑探针（three r185）：</p>
+
+  <div class="figure">
+  <svg viewBox="0 0 760 250" role="img" aria-label="墙的局部坐标系：X 沿墙、Y 向上、Z 沿左法线">
+    <defs>
+      <marker id="ah" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+        <path d="M0,0 L9,4.5 L0,9 z" fill="currentColor"/>
+      </marker>
+    </defs>
+    <g fill="none" stroke="var(--rule)" stroke-width="1">
+      <rect x="60" y="120" width="360" height="70" fill="var(--code-bg)" stroke="var(--rule)"/>
+    </g>
+    <g font-family="ui-monospace, monospace" font-size="12" fill="var(--ink-3)">
+      <text x="60" y="212">start</text>
+      <text x="392" y="212">end</text>
+      <text x="196" y="212">midpoint</text>
+      <text x="430" y="160">L = 墙长</text>
+      <text x="60" y="112">平面图（俯视）</text>
+      <text x="470" y="112">立面（沿 −Z 看）</text>
+    </g>
+    <g stroke="var(--accent)" stroke-width="1.6" fill="none" color="var(--accent)">
+      <line x1="60" y1="155" x2="180" y2="155" marker-end="url(#ah)"/>
+      <line x1="60" y1="155" x2="60" y2="105" marker-end="url(#ah)"/>
+    </g>
+    <circle cx="60" cy="155" r="3.5" fill="var(--accent)"/>
+    <g font-family="ui-monospace, monospace" font-size="12" font-weight="600" fill="var(--accent)">
+      <text x="186" y="159">+X 沿墙</text>
+      <text x="70" y="100">+Z = leftNormal</text>
+    </g>
+    <g fill="none" stroke="var(--rule)" stroke-width="1">
+      <rect x="470" y="60" width="240" height="130" fill="var(--code-bg)"/>
+      <rect x="545" y="120" width="60" height="70" fill="var(--paper)" stroke="var(--warn)" stroke-width="1.6"/>
+    </g>
+    <g stroke="var(--accent)" stroke-width="1.6" fill="none" color="var(--accent)">
+      <line x1="470" y1="190" x2="470" y2="140" marker-end="url(#ah)"/>
+    </g>
+    <circle cx="470" cy="190" r="3.5" fill="var(--accent)"/>
+    <g font-family="ui-monospace, monospace" font-size="12" fill="var(--ink-3)">
+      <text x="480" y="136" font-weight="600" fill="var(--accent)">+Y 向上</text>
+      <text x="546" y="112" fill="var(--warn)">洞 u±w/2</text>
+      <text x="616" y="160" fill="var(--warn)">v±h/2</text>
+      <text x="470" y="52">y=0 在墙底（D3）</text>
+    </g>
+  </svg>
+  <p class="figcap">
+    墙的局部坐标系。<span class="ok">实测</span>：直墙 (0,0)→(4,0)、厚 0.1、高 2.5，
+    body-local 包围盒 <code>min [−2, 0, −0.05]</code> / <code>max [2, 2.5, 0.05]</code>；
+    斜墙 (1,1)→(4,5)，local +X 的世界方向 = <code>(0.6, 0, 0.8)</code> = 墙方向，
+    local +Z 的世界方向 = <code>(−0.8, 0, 0.6)</code> = <code>leftNormal</code>。
+    <strong>+Z 就是 D3 定死的「左」，门窗的 interior/exterior 语义直接落在这个轴上。</strong>
+    注意原点<strong>现在</strong>在中点（图里画的是改完之后的 start，见路 1 第 3 步）。
+  </p>
+  </div>
+
+  <h4>两条路</h4>
+
+  <div class="road">
+    <div>
+      <h4>路 1 · 真父子</h4>
+      <p><strong>门的 group 挂进墙的 group，transform 由 three 复合。</strong></p>
+      <p><code>door.parentId = wall.id</code>；<code>NodeRenderer</code> 递归渲染
+      <code>node.children</code>；门的 <code>position</code> 就是 <code>&lt;group position&gt;</code>，
+      不做任何换算。</p>
+      <p><strong>前提</strong>：墙的位姿必须搬到<em>注册的那个 group</em> 上。
+      即 <code>buildWallGeometry</code> 不再返回带世界 transform 的信封，
+      改成「纯局部几何」＋ 渲染器绑位姿。</p>
+    </div>
+    <div>
+      <h4>路 2 · 信封</h4>
+      <p><strong>门平挂在场景根下，builder 自己把墙的 transform 复合进几何。</strong></p>
+      <p><code>door.wallId</code> 只是一个引用；<code>buildDoorGeometry</code> 里
+      <code>ctx.resolve(node.wallId)</code> 拿到墙，算出世界位姿，
+      烤进返回的 Object3D —— 和今天 <code>buildWallGeometry</code> 干的事一模一样。</p>
+      <p><strong>前提</strong>：无。今天就能写。</p>
+    </div>
+  </div>
+
+  <h4>两条路各自的代价</h4>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>轴</th><th>路 1 · 真父子</th><th>路 2 · 信封</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>框架改动</td>
+        <td><strong>贵。</strong><code>node-definition</code> +1 字段、
+            <code>parametric-node-renderer</code> 重写（绑 rotation + 渲染 children）、
+            <code>wall/geometry</code> 拆掉 <code>body</code> 层、
+            <code>wall/column definition</code> 各 +3 行。<strong>约 5 个文件</strong></td>
+        <td class="ok"><strong>零。</strong>只新增 <code>door/window</code> 那 5 处，
+            和 M6 加 column 的形状完全一样</td>
+      </tr>
+      <tr>
+        <td>墙动时门跟不跟</td>
+        <td class="ok"><strong>免费。</strong>门是墙的子节点，
+            墙 group 的 transform 一变，门自动跟。<strong>门的几何一帧都不用重算</strong></td>
+        <td><strong>要写。</strong>门必须进脏集，
+            <code>buildDoorGeometry</code> 每帧从被 live-override 覆盖过的墙重算世界位姿。
+            M4 的脏传播<strong>没有父→子这条边</strong>（<code>wall-adjacency</code> 只管墙↔墙），要新加</td>
+      </tr>
+      <tr>
+        <td>拖拽期的手感</td>
+        <td class="ok">墙的 live override 改的是墙 group 的 transform，
+            门跟着走，<strong>零额外代码</strong></td>
+        <td>门的重建走 <code>GeometrySystem</code>，
+            <strong>每帧 dispose + 重造门的几何</strong>。M4 花大力气消掉的「移动鼠标就重算」在这里回来一半</td>
+      </tr>
+      <tr>
+        <td>谁需要知道复合公式</td>
+        <td class="ok"><strong>一处</strong>（渲染器）。I1 由 three 的场景图强制</td>
+        <td><strong>每一个消费者。</strong>门的 builder、沿墙拖动工具、选中包围盒、
+            M13 属性面板显示「离墙起点多远」…… 各写一遍 <code>wallLocalToWorld</code>。
+            <strong>I1 变成靠自觉</strong></td>
+      </tr>
+      <tr>
+        <td>M6 那条债（「有 position 就绑」无强制）</td>
+        <td class="ok"><strong>顺手还清</strong> —— 见下面「第三种模式」</td>
+        <td><strong>立刻变成活 bug。</strong>见下面的陷阱框</td>
+      </tr>
+      <tr>
+        <td>M8 多楼层</td>
+        <td class="ok"><code>Level</code> 就是又一层 children，同一套机制。
+            层高偏移落在 Level 的 group 上，墙和门都<strong>自动</strong>跟着抬</td>
+        <td>再加一层复合：<code>level ∘ wall ∘ door</code>。
+            每个消费者的公式从两项变三项</td>
+      </tr>
+      <tr>
+        <td>M10 屋顶裁墙 / 屋顶面宿主</td>
+        <td class="ok">对照仓库的 <code>RoofFaceHostFrame</code> 就是「换一个宿主 frame」，
+            <strong>门的 <code>position</code> 语义一个字不改</strong>（<code>door.ts:62-68</code> 的原文）</td>
+        <td>第四层复合</td>
+      </tr>
+      <tr>
+        <td>撤销 / 存档</td>
+        <td><code>children</code> 是<strong>反规范化</strong>字段，
+            <code>addNode</code>/<code>removeNode</code> 必须成对维护，写歪了会和 <code>parentId</code> 打架</td>
+        <td class="ok"><code>wallId</code> 是单向引用，不会不一致（只会指向已删除的墙 —— 但那正是 I3 要处理的）</td>
+      </tr>
+      <tr>
+        <td>今天能不能开始写门</td>
+        <td>要先做 3 步框架改动</td>
+        <td class="ok">立刻</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">路 2 会当场引爆 M6 记的那条债</span>
+    <p>
+      M6 §06「来源三」记的原话：<em>「有 <code>position</code> 就绑，没有就信封」这条判据
+      没有任何机制强制。有人给 <code>SlabNode</code> 加一个 <code>position</code> 字段，
+      楼板会立刻被平移两次，而且不报错。</em>
+    </p>
+    <p>
+      现在看代码为什么会这样：
+    </p>
+<pre><code><span class="cm">// parametric-node-renderer.tsx:12-17 —— 判据是【结构性】的，不是声明性的</span>
+function positionOf(source) {
+  return 'position' in source ? source.position : undefined
+}                <span class="cw">// ^^^^^^^^^^^^^^^^^ 谁有这个字段名，谁就被绑</span>
+</code></pre>
+    <p style="margin-bottom:0">
+      <strong>门恰好有一个叫 <code>position</code> 的字段，而它是墙局部坐标。</strong>
+      走路 2 的话，这个字段会被渲染器当成世界坐标绑到 <code>&lt;group&gt;</code> 上，
+      同时 builder 又把墙的 transform 烤进几何 —— <strong>正好平移两次</strong>，
+      M6 预言的那个 bug 一字不差地发生。<br>
+      所以路 2 <strong>也</strong>必须把这条判据改成有强制力的东西。
+      <em>这笔框架开销两条路都躲不掉，只有路 1 能把它变成收益。</em>
+    </p>
+  </div>
+
+  <h4>「第三种模式」不是第三条路，是让路 1 成立的那把锁</h4>
+
+  <p class="prose">
+    <code>handoff-m7.md</code> 说的第三条路是给渲染器加
+    <code>space: 'world' | 'local' | 'host'</code>。
+    <strong>建议不要做成枚举，做成一个函数。</strong>枚举回答「在哪个空间」，
+    但真正缺的信息是「<em>那个空间的位姿是多少</em>」—— 墙的位姿不在 <code>node</code> 里，
+    是从 <code>start</code>/<code>end</code> 算出来的：
+  </p>
+
+<pre><code><span class="cm">// core/registry/node-definition.ts —— 新增一个可选字段</span>
+export type NodeFrame = {
+  position: [number, number, number]
+  rotationY: number
+}
+
+export type NodeDefinition&lt;N, L&gt; = {
+  kind: N['type']
+  <span class="ok">frame?: (node: N, ctx: GeometryContext&lt;L&gt;) =&gt; NodeFrame</span>
+  geometry?: ...
+  computeLevelData?: ...
+  renderer?: ...
+  system?: ...
+}
+</code></pre>
+
+  <p class="prose">于是三种类型的答案变成一张表，而且是<strong>声明</strong>的，不是结构猜的：</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>kind</th><th><code>def.frame</code></th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td><code>wall</code></td><td>从 <code>start</code>/<code>end</code> 算</td><td>group 站在 <code>start</code>，朝墙的方向</td></tr>
+      <tr><td><code>column</code></td><td><code>node.position</code>，<code>rotationY: 0</code></td><td>和今天完全一样</td></tr>
+      <tr><td><code>door</code> / <code>window</code></td><td><code>node.position</code>，<code>rotationY: 0</code></td><td>因为它挂在墙下，<strong>这就是墙局部坐标</strong></td></tr>
+      <tr><td><code>slab</code> / <code>ceiling</code></td><td><strong>不声明</strong></td><td>单位矩阵。builder 继续烤世界坐标（信封）</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose">
+    <strong>锁在哪：渲染器不再按名字找 <code>position</code>。</strong>
+    没声明 <code>frame</code> 的类型，就算加一百个叫 <code>position</code> 的字段，
+    渲染器<strong>看都不看</strong>。M6 那条「加错字段会静默平移两次」的债
+    <strong>从此在类型层面不可能发生</strong> —— 这才叫还清，
+    而不是「写进文档提醒下一个人」。
+  </p>
+
+  <h4>结论 —— 已定：路 1</h4>
+
+  <div class="note" style="border-left-color:var(--accent)">
+    <p style="margin-bottom:0">
+      <strong>2026-09-05 拍板：走路 1（真父子），机制用 <code>def.frame</code>。</strong>
+      已追进 <code>DECISIONS.md</code> <strong>D19</strong>。
+      本文档 §03 的文件树和 §04 的全部十四步都是按这条路写的。
+    </p>
+  </div>
+
+  <p class="prose">
+    三条理由，按份量排：
+  </p>
+  <ol class="prose">
+    <li><strong>I1 的强制方式不同。</strong>路 1 把「世界位姿 = 宿主 ∘ 局部」交给 three 的场景图 ——
+        它<em>不可能</em>算错。路 2 把它变成一条要靠每个消费者记住的公式，
+        而这个项目已经有七个「写出来像对的、<code>verify</code> 全绿、功能静默死掉」的案例了。</li>
+    <li><strong>成本差没有看上去大。</strong>路 2 的「零框架改动」是假的 ——
+        上面那个陷阱框说明它<em>也</em>得改 <code>positionOf</code>。
+        真实差额是「渲染 children + 绑 rotation」约 15 行，
+        外加把墙的 <code>body</code> group 摊平（净 −6 行）。
+        换来的是脏传播、拖拽手感、M8 层偏移三处<strong>各省一套代码</strong>。</li>
+    <li><strong>对照仓库在两个不同的宿主上用了同一套机制。</strong>
+        墙宿主（<code>wall/renderer.tsx:121</code>）和屋顶面宿主
+        （<code>door/renderer.tsx:41</code> 的 <code>RoofFaceHostFrame</code>）
+        用的是同一个「挂进宿主 frame」的动作，<strong>门的 <code>position</code> 语义在两种宿主下完全相同</strong>。
+        这是 M10 会不会推翻 M7 的直接证据 —— 它不会。</li>
+  </ol>
+
+  <div class="note">
+    <p><strong>反对意见也写下来，别只写支持的。</strong></p>
+    <p style="margin-bottom:0">
+      路 1 唯一的真代价是 <code>children</code> 这个反规范化字段 ——
+      它和 <code>parentId</code> 表达同一件事，两边写歪就会不一致，
+      而且撤销/重做会整个替换 <code>nodes</code>，任何在 store 之外维护的索引都会失效。<br>
+      <strong>缓解</strong>：只在 <code>addNode</code>/<code>removeNode</code> 两个函数里维护，
+      并且配一条测试断言「<code>parentId</code> 与 <code>children</code> 互为逆」（§04 第 06 步）。
+      <strong>不缓解的部分</strong>：如果 M9 的存档导入直接 <code>setScene</code>，
+      这条不变量要在导入时重建 —— 记进 §06。
+    </p>
+  </div>
+
+  <!-- ─── B ─── -->
+  <h3>B · 墙的坐标原点：中点 → start</h3>
+
+  <p class="prose">
+    选了路 1 之后有一个连带决定：<strong>墙局部坐标的原点放哪。</strong>
+    今天 <code>wallTransform</code> 用的是中点（<code>wall/geometry.ts:31</code>），
+    对照仓库用的是 <code>start</code>（<code>wall-system.tsx:794</code>）。
+  </p>
+
+  <p class="prose">
+    <strong>建议改成 <code>start</code>。</strong>不是为了和对照仓库一致（那不是理由），
+    是因为门的 <code>position[0]</code> 要存「离墙起点多远」（见 E）。
+    原点在中点的话，存的数和挂的数差一个 <code>L/2</code>，
+    于是 <code>def.frame</code> 必须知道墙长 —— 多一次 <code>ctx.resolve</code>，
+    而且<strong>墙一变长，所有门的挂载位置全变</strong>，尽管它们的 <code>position</code> 一个字没改。
+    <em>那正是「同一个量有两个表示」的经典形态。</em>
+  </p>
+
+  <p class="prose">
+    改动范围<strong>实测是封闭的</strong>：<code>wallTransform</code> 和
+    <code>worldToLocalXZ</code> 在整个 <code>src/</code> 里只有
+    <code>wall/geometry.ts</code> 自己用（<code>grep</code> 结果 4 处，全在同一文件）。
+    <code>move-tool.tsx:141</code> 那个 <code>midpoint</code> 是拖拽锚点，另一回事，不受影响。
+  </p>
+
+  <!-- ─── C ─── -->
+  <h3>C · 开洞：D6 的 Shape+holes 在这个轴上不成立</h3>
+
+  <p class="prose">
+    <code>handoff-m7.md</code> ③ 第 3 条要求 §02「写清 Shape+holes 的天花板在哪」。
+    <strong>答案比「天花板」更硬：在 M7 这个场景里它压根到不了地板。</strong>
+  </p>
+
+  <p class="prose">墙是这样造出来的（<code>wall/geometry.ts:55-64</code>）：</p>
+
+<pre><code>Shape( <span class="cm">平面轮廓</span> )  →  ExtrudeGeometry({ depth: <span class="cm">墙高</span> })  →  rotateX(−π/2)
+<span class="cm">        (u, −perp)                      沿 shape 的 z 挤出                 z → y</span>
+</code></pre>
+
+  <p class="prose">
+    <strong>挤出方向是「高度」。</strong>所以往这个 <code>Shape</code> 里加一个 <code>hole</code>，
+    挖掉的是「平面上的一块」沿高度贯通 —— 一根<strong>从地板通到天花板的竖井</strong>，
+    像烟囱，不像门。
+  </p>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      <span class="ok">实测</span>（three r185，你项目里那一份）：直墙 4×0.1×2.5，
+      在平面 <code>Shape</code> 上开一个 <code>u ∈ [−0.45, 0.45]</code> 的洞，
+      洞壁顶点的 y 值集合是 <strong><code>{0, 2.5}</code></strong> —— 洞从墙底一路通到墙顶。
+      包围盒不变，顶点数 36 → 72。<strong>这不是门，是竖井。</strong>
+    </p>
+  </div>
+
+  <p class="prose">
+    <strong>「门想沿厚度切，斜接想沿高度挤 —— 一个 <code>ExtrudeGeometry</code> 只给你一个轴。」</strong>
+    这句话就是 Shape+holes 的天花板，也是对照仓库
+    <code>wall-system.tsx</code> 那 1281 行和一个 <code>three-bvh-csg</code> 依赖存在的理由
+    （<code>:1144-1157</code>，逐个洞做 <code>SUBTRACTION</code>）。
+  </p>
+
+  <h4>那怎么办：三个选项，选第三个</h4>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>选项</th><th>做法</th><th>为什么不 / 为什么</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>换轴</strong></td>
+        <td>改成「立面 Shape（u, v）带 holes，沿厚度挤出」</td>
+        <td class="cw"><strong>否。</strong>立面挤出得到的平面必然是等厚矩形，
+            <strong>斜接直接没了</strong> —— M2 整个作废。要补回来得给端面按 z 做剪切，
+            而 <code>getWallPlanFootprint</code> 在接头处会多推一个中心线端点
+            （<code>wall-footprint.ts:14,18</code>），端面是个 V 形，一次线性剪切补不出来</td>
+      </tr>
+      <tr>
+        <td><strong>上 CSG</strong></td>
+        <td>照抄对照仓库，引 <code>three-bvh-csg</code></td>
+        <td class="cw"><strong>否 —— 现在还不到时候。</strong>D6 的原话是
+            「先撞到 Shape+holes 的天花板，才能理解那 1281 行为什么存在」。
+            我们刚撞到，而且这一撞的收获正是上面那句话。
+            立刻上 CSG 等于把这个收获换成一个依赖。<strong>CSG 留在 M10</strong>，
+            那时候是屋顶斜切墙 —— 真的没有解析解</td>
+      </tr>
+      <tr>
+        <td class="ok"><strong>段切</strong></td>
+        <td>不挖洞，把墙<strong>切成几段实心棱柱</strong>：
+            洞左边一段（满高）、洞右边一段（满高）、洞上方过梁、洞下方窗台。
+            每段 = 平面轮廓按 u 裁剪后，在一段 y 区间里挤出</td>
+        <td class="ok"><strong>是。</strong>精确、无依赖、保住斜接、
+            复用 <code>buildPolygonPrism</code> 已有的管线</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="figure">
+  <svg viewBox="0 0 760 200" role="img" aria-label="段切：一堵带门和窗的墙被切成五段实心棱柱">
+    <g font-family="ui-monospace, monospace" font-size="11" fill="var(--ink-3)">
+      <text x="0" y="14">立面（沿 −Z 看）· 一门一窗 · 五段</text>
+    </g>
+    <g stroke="var(--rule)" stroke-width="1">
+      <rect x="0" y="30" width="120" height="140" fill="var(--accent-bg)"/>
+      <rect x="120" y="30" width="110" height="34" fill="var(--accent-bg)"/>
+      <rect x="230" y="30" width="150" height="140" fill="var(--accent-bg)"/>
+      <rect x="380" y="30" width="130" height="42" fill="var(--accent-bg)"/>
+      <rect x="380" y="128" width="130" height="42" fill="var(--accent-bg)"/>
+      <rect x="510" y="30" width="120" height="140" fill="var(--accent-bg)"/>
+    </g>
+    <g fill="none" stroke="var(--warn)" stroke-width="1.6" stroke-dasharray="4 3">
+      <rect x="120" y="64" width="110" height="106"/>
+      <rect x="380" y="72" width="130" height="56"/>
+    </g>
+    <g font-family="ui-monospace, monospace" font-size="11" fill="var(--ink-2)" text-anchor="middle">
+      <text x="60" y="105">① 左段</text><text x="60" y="119">满高</text>
+      <text x="175" y="50">② 过梁</text>
+      <text x="305" y="105">③ 中段</text><text x="305" y="119">满高</text>
+      <text x="445" y="56">④ 过梁</text>
+      <text x="445" y="154">⑤ 窗台</text>
+      <text x="570" y="105">⑥ 右段</text><text x="570" y="119">满高</text>
+    </g>
+    <g font-family="ui-monospace, monospace" font-size="11" fill="var(--warn)" text-anchor="middle">
+      <text x="175" y="122">门</text>
+      <text x="445" y="104">窗</text>
+    </g>
+    <g stroke="var(--rule)" stroke-width="1"><line x1="0" y1="170" x2="630" y2="170"/></g>
+    <g font-family="ui-monospace, monospace" font-size="11" fill="var(--ink-3)">
+      <text x="640" y="46">满高段保留</text><text x="640" y="60">斜接端点</text>
+      <text x="640" y="140">门框内壁 =</text><text x="640" y="154">相邻段的端面</text>
+    </g>
+  </svg>
+  <p class="figcap">
+    段切。门只有过梁没有窗台（<code>sill = 0</code> 时那一段长度为 0，直接不发）；
+    窗上下都有。每段的平面轮廓是<strong>原轮廓按 u 区间裁剪</strong>的结果，
+    所以最左和最右两段<strong>原样保留斜接产生的那些多余顶点</strong>。
+  </p>
+  </div>
+
+  <p class="prose"><strong>为什么段切是精确的，不是近似</strong>（两条都<span class="ok">实测</span>过）：</p>
+  <ul class="prose">
+    <li><strong>体积对得上。</strong>4 m 墙、0.1 厚、2.5 高、门 0.9×2.1：
+        三段体积和 = <code>0.811</code>，<code>墙体积 − 洞体积</code> = <code>0.811</code>。
+        把轮廓换成一个带接头顶点的 5 点斜接轮廓，两边仍然都是 <code>0.811</code>，
+        裁出来的段是 5/4/4 个顶点。<strong>斜接没丢。</strong></li>
+    <li><strong>门框内壁是真面。</strong>左段在 <code>u = u₀</code> 处那个端面有 6 个顶点
+        （2 个三角形），法线全部 <code>+X</code> —— <strong>朝着洞口</strong>。
+        它是一个封闭棱柱的普通外表面，不是 <code>ExtrudeGeometry</code> 的洞壁。</li>
+  </ul>
+
+  <div class="trap">
+    <span class="trap-label">顺手更正 M6 和 handoff 的两条</span>
+    <p>
+      <strong>① 「洞的内壁是单面的，从洞里看会看穿」在我们这条管线上不成立。</strong>
+      <span class="ok">实测</span>：走 <code>buildPolygonPrism</code> 那条
+      <code>(x, −y) → extrude → rotateX(−π/2)</code> 管线，
+      墙 <code>+Z</code> 外表面法线 6/6 朝外（<strong>那个 <code>−y</code> 取反正是为了保住手性</strong>），
+      洞壁法线 24/24 <strong>朝向洞内</strong> —— 站在洞里看得见。
+      对照仓库 <code>slab-system.tsx:85</code> 那段注释<em>确实存在</em>、说的也是真事，
+      但那是他们自己那条管线的问题，<strong>照搬到我们这里是错的</strong>。
+      走段切之后这个问题连提都不用提。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>② 「挖洞时洞必须和外轮廓反向 ⟹ <code>signedArea</code> 终于有消费者」不成立。</strong>
+      <code>ExtrudeGeometry</code> 自己就归一化绕向：外轮廓不是 CW 就 <code>reverse()</code>，
+      每个洞是 CW 就 <code>reverse()</code>（<code>three.core.js:36317</code> / <code>:36327</code>，r185）。
+      <span class="ok">实测</span>：洞与外轮廓同向 / 反向两种输入，
+      产出的洞壁法线分布<strong>完全一样</strong>（24 朝内 / 0 朝外）。<br>
+      <strong>所以 <code>signedArea</code> 在 M7 依然是零消费者。</strong>
+      段切也不需要它 —— 半平面裁剪保持绕向。这条债应该从 <code>STATE.md</code> 里
+      <em>撤销</em>，不是<em>关闭</em>。
+    </p>
+  </div>
+
+  <h4>段切的天花板（写进 §06，别等它咬人）</h4>
+  <ul class="prose">
+    <li>洞必须是<strong>沿 u/v 轴对齐的矩形</strong>。拱形、圆角（对照仓库
+        <code>opening-cutout-geometry.ts:48-73</code> 有）做不了。</li>
+    <li>洞必须<strong>贯通整个厚度</strong>。壁龛、半深的窗台板做不了。</li>
+    <li>同一个 u 区间上<strong>不能有两个洞重叠</strong>，否则段的划分会重复计算。
+        —— 这正好是 <code>hasWallChildOverlap</code> 存在的理由（<code>wall-attach-target.ts</code>）。</li>
+    <li><strong>段数 = 洞数×2 + 1 量级</strong>，每段一个 draw call。
+        一堵墙十几个洞时该合并 —— M14 的事。</li>
+  </ul>
+
+  <!-- ─── D ─── -->
+  <h3>D · 拾取墙面：不用新造射线</h3>
+
+  <p class="prose">
+    <code>handoff-m7.md</code> ② 说 <code>eventToGround</code> 只和 y=0 求交，门窗要落在墙面上
+    「这套彻底不够用了」—— <strong>前半句对，后半句的结论走偏了。</strong>
+    不需要自建射线，因为 <strong>R3F 的指针事件已经带着命中结果了</strong>。
+  </p>
+
+  <p class="prose">对照仓库的做法就一行（<code>use-node-events.ts:21</code>）：</p>
+
+<pre><code>const localPoint = e.object.worldToLocal(e.point.clone())
+</code></pre>
+
+  <p class="prose">
+    <span class="ok">实测</span>：按我们的场景图搭一遍（注册 group → <code>body</code> group 带位姿 → mesh 无位姿），
+    斜墙 (1,1)→(4,5)，取墙面上「离起点 1.5 m、高 1.2 m、左面」的世界点，
+    <code>mesh.worldToLocal()</code> 得到 <code>[−1, 1.2, 0.05]</code>，
+    和 <code>[u − L/2, 高度, +t/2]</code> 的预期<strong>逐位相等</strong>。
+    （改成路 1 之后原点搬到 <code>start</code>，这里就直接是 <code>[1.5, 1.2, 0.05]</code>。）
+  </p>
+
+  <p class="prose">再加一个字段就齐了：<code>e.face.normal</code>。</p>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      three 的 <code>face.normal</code> 是<strong>对象局部空间</strong>的
+      （<code>three.core.js:23776</code>，由 <code>Triangle.getNormal</code> 从局部顶点算出，
+      之后<em>不</em>乘 <code>matrixWorld</code>）。
+      墙 mesh 相对 <code>body</code> 没有自己的 transform，
+      所以 <code>face.normal.z &gt; 0</code> ⟺ 命中<strong>左面</strong>（D3 的 <code>leftNormal</code> 侧）。
+      <strong>一个点积都不用算就知道门朝哪边。</strong>
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">必须用 e.object，不能用 e.eventObject</span>
+    <p style="margin-bottom:0">
+      我们的 <code>useNodeEvents</code> 是展开在 <code>ParametricNodeRenderer</code> 的
+      <code>&lt;group&gt;</code> 上的。R3F 里 <code>e.eventObject</code> 是<strong>挂处理器的那个对象</strong>
+      （＝注册 group），<code>e.object</code> 才是<strong>真正被射线命中的那个</strong>（＝墙 mesh）。<br>
+      写成 <code>e.eventObject.worldToLocal(...)</code> 会得到<strong>世界坐标</strong> ——
+      在原点附近的墙上看起来「差不多对」，把墙拖到 (20, 0, 30) 之后门就飞了。
+      <strong>又一个 <code>verify</code> 全绿的静默 bug。</strong>
+    </p>
+  </div>
+
+  <p class="prose">
+    <strong>代价 / 副作用</strong>：<code>sceneRegistry.byType</code>
+    （M1 就写入、至今零读者）<strong>在 M7 仍然没有读者</strong>。
+    <code>handoff-m7.md</code> ④ 预期它会在 M7 迎来第一个消费者 —— 不会。
+    这不是遗憾：<strong>为了给一个没人用的索引找用户而自己造一套射线，是本末倒置。</strong>
+    它真正的用户是空间查询（M8+ 的空间网格）。
+  </p>
+
+  <!-- ─── E ─── -->
+  <h3>E · 沿墙定位：绝对米，不是 t ∈ [0,1]</h3>
+
+  <p class="prose">
+    <code>ROADMAP.md</code> M7 写的是「参数 <code>t</code> ∈ [0,1] + 底标高，而不是绝对坐标」。
+    <strong>本文档改成绝对米</strong>，按工作约定第 6 条显式记录，不静默替换。
+  </p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th></th><th><code>t</code> ∈ [0,1]</th><th>绝对米（从 start 起）</th></tr></thead>
+    <tbody>
+      <tr><td>拖墙端点把墙拉长 2 m</td><td class="cw">门按比例外移，<strong>离墙角的距离变了</strong></td><td class="ok">门不动，离起点仍是那么远</td></tr>
+      <tr><td>建筑直觉</td><td class="cw">没有建筑师用「门在墙的 37%」描述图纸</td><td class="ok">「离转角 1.2 m」就是施工图的写法</td></tr>
+      <tr><td>夹紧（I4）</td><td>要先乘 <code>L</code> 才能和 <code>width/2</code> 比</td><td class="ok">同一单位，直接比</td></tr>
+      <tr><td>墙变短到比门还窄</td><td>门自动缩在墙内，但会被<strong>压扁</strong>（宽度不变、位置乱跳）</td><td>门会被夹到贴边，需要显式处理（§06 有一条）</td></tr>
+      <tr><td>对照仓库</td><td>—</td><td class="ok"><code>spatial-queries.md:49</code> <code>localX: distance along wall from start</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose">
+    高度方向沿用对照仓库的约定：<strong><code>position[1]</code> 存洞口<em>中心</em>高度</strong>，
+    不是底标高（<code>door.ts:155</code>：<em>Y = height/2, always at floor</em>）。
+    底标高 = <code>position[1] − height/2</code>。
+    这样门和窗共用一个字段：门的 <code>position[1] = h/2</code>，窗的 <code>= 窗台 + h/2</code>。
+  </p>
+
+  <p class="prose">
+    <code>position[2]</code>（离墙中面的进深）<strong>M7 一律存 0</strong>。
+    它在对照仓库里只影响门扇本体的视觉进深，<strong>不影响开洞</strong>
+    （<code>wall-system.tsx:1263-1281</code> 的 <code>createOpeningCutoutBrush</code> 根本不读它，
+    洞永远贯通厚度）。留着字段是为了和对照仓库对得上，M12 做门套时才有意义。
+  </p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 03 -->
+<section>
+  <h2><span class="num">03</span>文件树增量</h2>
+  <p class="h2sub">新建 8 · 改写 10 · 其中框架文件 4（一次性）</p>
+
+<pre><code>src/
+├── core/
+│   ├── events/
+│   │   └── types.ts                        <span class="cw">改</span>  NodeEvent += localPosition, normal
+│   ├── registry/
+│   │   └── node-definition.ts              <span class="cw">改</span>  += NodeFrame / def.frame
+│   ├── schema/
+│   │   ├── base.ts                         <span class="cw">改</span>  BaseNode += children
+│   │   ├── <span class="ok">opening.ts</span>                     <span class="ok">新</span>  门窗共用的字段与夹紧规则
+│   │   ├── <span class="ok">door.ts</span>                        <span class="ok">新</span>  DoorNode（约 20 行）
+│   │   ├── <span class="ok">window.ts</span>                      <span class="ok">新</span>  WindowNode（约 20 行）
+│   │   └── types.ts                        <span class="cw">改</span>  AnyNode 联合 4 → 6
+│   ├── store/
+│   │   └── use-scene.ts                    <span class="cw">改</span>  addNode 挂父 / removeNode 级联
+│   └── systems/wall/
+│       ├── <span class="ok">wall-openings.ts</span>               <span class="ok">新</span>  纯函数：洞 → 段规格（本 M 的算法核心）
+│       └── <span class="ok">wall-openings.test.ts</span>          <span class="ok">新</span>  ~14 用例
+├── viewer/
+│   ├── components/
+│   │   └── parametric-node-renderer.tsx    <span class="cw">改</span>  绑 frame + 递归渲染 children
+│   ├── hooks/
+│   │   └── use-node-events.ts              <span class="cw">改</span>  += localPosition, normal
+│   └── nodes/
+│       ├── wall/
+│       │   ├── geometry.ts                 <span class="cw">改</span>  原点搬到 start · 摊平 body · 消费段规格
+│       │   └── definition.ts               <span class="cw">改</span>  += frame
+│       ├── column/definition.ts            <span class="cw">改</span>  += frame
+│       ├── shared/polygon-prism.ts        <span class="cw">改</span>  抽出 buildPrismGeometry（第 09 步 N 段共用材质）
+│       ├── <span class="ok">opening/geometry.ts</span>            <span class="ok">新</span>  门/窗的可见本体（一块板 + 一圈框）
+│       ├── <span class="ok">opening/definition.ts</span>          <span class="ok">新</span>  doorDefinition + windowDefinition
+│       └── register.ts                     <span class="cw">改</span>  +2 行
+└── app/
+    ├── lib/interaction/
+    │   └── <span class="ok">opening-placement.ts</span>           <span class="ok">新</span>  纯函数：墙局部命中 → 夹紧后的放置参数
+    ├── tools/
+    │   └── <span class="ok">opening-tool.tsx</span>               <span class="ok">新</span>  放置 + 沿墙拖动
+    ├── store/use-editor.ts                 <span class="cw">改</span>  Tool 联合 += 'door' | 'window'
+    └── app.tsx                             <span class="cw">改</span>  挂工具 + 快捷键 D / N
+</code></pre>
+
+  <div class="note">
+    <p><strong>为什么门和窗合用一个 <code>opening/</code> 目录，而 M6 的三种类型各有各的目录？</strong></p>
+    <p style="margin-bottom:0">
+      因为它们<strong>共享的不是样板，是语义</strong>：同一套 <code>position</code> 约定、
+      同一个夹紧规则、同一种切法、同一个放置工具。
+      M6 的 slab/ceiling/column 只是形状类似，各自的<em>含义</em>互不相干。<br>
+      <strong>判据：如果改一个必然要同步改另一个，就放一起。</strong>
+      这也是对照仓库的教训 —— 它的 <code>door/tool.tsx</code> 和 <code>window/tool.tsx</code>
+      是 770 + 842 行的<strong>孪生文件</strong>，
+      <code>wiki/architecture/tools.md</code> 明文要求「必须同 PR 移植」。
+      那是全项目最大的维护税，D5 已经因为同样的理由拒绝过一次（2D 独立场景）。
+    </p>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>层</th><th>能不能被 vitest 裸测</th><th>为什么</th></tr></thead>
+    <tbody>
+      <tr><td><code>core/systems/wall/wall-openings.ts</code></td><td class="ok"><strong>能，而且必须</strong></td><td>纯数：轮廓 + 洞 → 段规格。不碰 three，不碰 DOM。D18 要求</td></tr>
+      <tr><td><code>core/schema/opening.ts</code> 的夹紧</td><td class="ok"><strong>能，而且必须</strong></td><td>纯数。I4 挂了就是几何静默退化，编译器看不见</td></tr>
+      <tr><td><code>core/store/use-scene.ts</code> 的父子维护</td><td class="ok"><strong>能，而且必须</strong></td><td>纯 zustand。I3 挂了就是孤儿节点。D18 点名的那一类</td></tr>
+      <tr><td><code>app/lib/interaction/opening-placement.ts</code></td><td class="ok"><strong>能</strong></td><td>纯数：局部命中点 + 墙尺寸 → 放置参数。<strong>把它从 tsx 里抽出来就是为了能测</strong></td></tr>
+      <tr><td><code>viewer/nodes/*/geometry.ts</code></td><td>能，但本 M 不写</td><td>要 three，但不要 DOM。<strong>值得，只是不阻塞</strong></td></tr>
+      <tr><td><code>opening-tool.tsx</code> / 渲染器</td><td class="cw"><strong>不能</strong></td><td>无 DOM 测试环境（<code>STATE.md</code> 已记）。D11 明确接受，D16 要求交付时明写「未验证」</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 04 -->
+<section>
+  <h2><span class="num">04</span>建造顺序</h2>
+  <p class="h2sub">十四步 · 签名和提示，没有实现体（D13）</p>
+
+  <div class="note">
+    <p style="margin-bottom:0">
+      <strong>分三批，每批之间 <code>pnpm verify</code> 必须绿。</strong><br>
+      <strong>批 I（01 · <span class="cw">05</span> · 02 · 03 · 04）框架</strong>：只动坐标系机制，
+      <em>不加任何新节点类型</em>。做完屏幕上应该<strong>一模一样</strong> ——
+      这是它是不是做对了的唯一判据。<br>
+      <strong>批 II（06–09）数据与几何</strong>：门窗进 schema，墙学会被切开。<br>
+      <strong>批 III（10–14）交互</strong>：能放、能拖、能删。
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">2026-09-05 修订 · 六处。原方案行不通的地方，写清楚原因，不静默替换</span>
+    <p>
+      定了路 1 之后我把 01–04 的签名对着真实类型重推了一遍，撞出六处文档写错的地方。
+      <strong>改动都已经落在下面的步骤里</strong>，这里只记「原来写的什么、为什么不行」：
+    </p>
+    <ol style="margin-bottom:0">
+      <li><strong>第 05 步必须移进批 I，排在第 02 步之前。</strong>
+        原方案把 <code>BaseNode.children</code> 放在批 II —— 但第 02 步的渲染器要写
+        <code>node.children.map(...)</code>，那时 <code>AnyNode</code> 上还没有这个字段，
+        <strong><code>tsc</code> 当场红</strong>。一行 schema 提前，批 I 才自洽。</li>
+      <li><strong><code>frame</code> 不收 <code>ctx</code>。</strong>
+        原签名是 <code>(node, ctx: GeometryContext&lt;L&gt;)</code>。
+        但<strong>渲染器那一层根本没有 <code>ctx</code></strong>（只有 <code>GeometrySystem</code> 在造它），
+        而 wall / column / door / window 四种实现<em>一个都不需要它</em>。
+        留着等于逼调用方伪造一个参数。</li>
+      <li><strong>不要 <code>wallFrame</code> 别名。</strong>
+        <code>wallTransform</code> 的返回值结构上就是 <code>NodeFrame</code>，
+        <code>definition</code> 里直接 <code>frame: wallTransform</code>。多一个别名多一处要同步。</li>
+      <li><strong><code>children</code> 只能是 <code>string[]</code>，不能是 <code>AnyNodeId[]</code>。</strong>
+        <code>AnyNodeId</code> 由 <code>AnyNode</code> 推出，<code>AnyNode</code> 由各节点 schema 推出，
+        各节点 schema 又 extend <code>BaseNode</code> —— 写进 <code>BaseNode</code> 就是
+        <strong>zod 的循环类型引用</strong>，<code>z.infer</code> 直接报「circularly references itself」。
+        代价是渲染子节点时要过一次 <code>asNodeId</code>（见第 02 步）。</li>
+      <li><strong>门的 <code>rotationY</code> 不是恒 0</strong>（第 10 步，批 III）。
+        门在墙的右面时要转 π。<code>side</code> 是墙局部的朝向，所以这是纯局部旋转，
+        不掺墙自己的角度 —— 掺了就是「转两次」。</li>
+      <li><strong>批号顺延</strong>：原 06–09 现在是批 II 的全部，10–14 是批 III。步骤编号不变。</li>
+    </ol>
+  </div>
+
+  <div class="note" style="border-left-color:var(--accent)">
+    <p style="margin-bottom:0">
+      <strong>批 I 按 01 → 05 → 02 → 03 → 04 的顺序读，下面就是这个顺序排的。</strong>
+      步骤编号没有重排（正文里「第 05 步」始终指同一步），只是把它挪到了它该被敲的位置。
+    </p>
+  </div>
+
+  <!-- 01 -->
+  <div class="step">
+    <div class="step-n">01</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">给 NodeDefinition 加 frame</h3><span class="tag core">core</span><span class="tag debt">批 I · 第 1 步</span></div>
+      <p><code>core/registry/node-definition.ts</code>。纯加法，现有字段一个不动。</p>
+<pre><code>export type NodeFrame = {
+  position: [number, number, number]
+  rotationY: number
+}
+
+export const IDENTITY_FRAME: NodeFrame = { position: [0, 0, 0], rotationY: 0 }
+
+export type NodeDefinition&lt;N extends AnyNode = AnyNode, L = unknown&gt; = {
+    kind: N['type']
+
+<span class="ok">    /** 这个节点的 group 该站在哪。不声明 = 单位矩阵（信封路线）。 */
+    frame?: (node: N) =&gt; NodeFrame          <span class="cm">// ← 唯一新增</span></span>
+
+    geometry?: (node: N, ctx: GeometryContext&lt;L&gt;, appearance: NodeAppearance) =&gt; THREE.Object3D
+    computeLevelData?: (siblings: readonly N[]) =&gt; L
+    renderer?: ComponentType&lt;{ node: N }&gt;
+    system?: ComponentType
+}
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">frame 不收 ctx —— 这是修订，原方案收</span>
+        <p style="margin-bottom:0">
+          <strong>渲染器那一层根本没有 <code>GeometryContext</code></strong> ——
+          全项目只有 <code>GeometrySystem</code> 在造它（<code>geometry-system.tsx:66-70</code>）。
+          而 wall / column / door / window <strong>四种实现一个都不需要它</strong>：
+          wall 从自己的 <code>start</code>/<code>end</code> 算，其余三种返回自己的 <code>position</code>。
+          留着 <code>ctx</code> 等于逼调用方伪造一个参数 —— <strong>D10 明令禁止的那类抽象</strong>。
+          真需要的那天再加，那时是<em>加一个可选参数</em>，不是改这个。
+        </p>
+      </div>
+      <p><strong>hint · <code>IDENTITY_FRAME</code> 必须是模块级单例</strong>，
+      和现在 <code>parametric-node-renderer.tsx:10</code> 那个 <code>ORIGIN</code> 常量同一个理由：
+      每次渲染返回同一个数组引用，R3F 不会认为位置变了。
+      <strong>它就是来替代 <code>ORIGIN</code> 的，那个常量在第 02 步删掉。</strong></p>
+      <p><strong>hint · <code>rotationY</code> 而不是完整的 <code>rotation</code> 三元组</strong> ——
+      本项目所有类型都只绕 Y 转（D3：Y-up，平面图驱动）。
+      M10 的屋顶面宿主需要三轴时再扩，那时是<em>加一个可选字段</em>，不是改这个。</p>
+    </div>
+  </div>
+
+  <!-- 05（批 I，必须排在 02 之前） -->
+  <div class="step">
+    <div class="step-n">05</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">BaseNode 加 children</h3><span class="tag core">core</span><span class="tag debt">批 I · 第 2 步</span></div>
+      <p class="cw"><strong>顺序修订：这一步属于批 I，必须排在第 02 步之前。</strong>
+      渲染器要写 <code>node.children.map(...)</code>，字段不存在则 <code>tsc</code> 当场红。
+      原方案把它放在批 II，行不通。</p>
+<pre><code><span class="cm">// core/schema/base.ts —— BaseNode 里加一行</span>
+export const BaseNode = z.object({
+    ...
+    parentId: z.string().nullable().default(null),
+<span class="ok">    children: z.array(z.string()).default([]),</span>
+    ...
+})
+
+<span class="cm">// core/schema/types.ts —— 加一个一行的转换器</span>
+<span class="ok">export const asNodeId = (id: string): AnyNodeId =&gt; id as AnyNodeId</span>
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">children 只能是 string[]，不能是 AnyNodeId[]</span>
+        <p>
+          <code>AnyNodeId</code> 由 <code>AnyNode</code> 推出，<code>AnyNode</code> 由各节点 schema 推出，
+          各节点 schema 又 <code>extend BaseNode</code>。
+          把 <code>AnyNodeId</code> 写进 <code>BaseNode</code> 就是 <strong>zod 的循环类型引用</strong> ——
+          <code>z.infer</code> 直接报 <code>circularly references itself</code>。<strong>绕不过去。</strong>
+        </p>
+        <p style="margin-bottom:0">
+          代价是渲染子节点时要过一次 <code>asNodeId</code>
+          （<code>nodes</code> 是 <code>Record&lt;AnyNodeId, AnyNode&gt;</code>，用 <code>string</code> 索引 TS 不认）。
+          <strong>做成具名函数而不是内联 <code>as</code>，是为了它可 grep</strong> ——
+          M9 的存档导入要重建 <code>children</code> 索引时，
+          <code>asNodeId</code> 的调用点就是那份清单。
+        </p>
+      </div>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>对照仓库是按类型加的</strong>（<code>wall.ts:133</code> 只有 wall 有 <code>children</code>）。
+          我们放 <code>BaseNode</code>：它们 46 种节点、大多数不能当宿主；
+          我们只有 6 种，而 M8 马上要让 <code>site</code> / <code>building</code> / <code>level</code> 全都能当宿主。
+          放基类让第 06 步的 <code>addNode</code> / <code>removeNode</code> 写成<strong>类型无关</strong>的，
+          省掉一个会随类型数增长的 <code>switch</code>。
+          代价：slab / ceiling / column 各背一个永远是 <code>[]</code> 的字段。<strong>划算。</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="step">
+    <div class="step-n">02</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">ParametricNodeRenderer：绑 frame + 渲染 children</h3><span class="tag viewer">viewer</span><span class="tag debt">批 I · 第 3 步</span></div>
+      <p>
+        组件签名不变，变的是内部。
+        <strong>这一步删掉 <code>positionOf()</code> 和 <code>ORIGIN</code></strong> ——
+        那个 <code>'position' in source</code> 就是 M6 那条债的载体。
+      </p>
+<pre><code>export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
+  const ref = useRef&lt;THREE.Group&gt;(null)
+  useRegistry(node.id, node.type, ref)
+
+  const effective  = useEffectiveNode(node)              <span class="cm">// ← 换掉直接读 overrides</span>
+  const events     = useNodeEvents(node, node.type)      <span class="cm">// ← 注意：仍然用文档节点</span>
+  const isSelected = useContext(SelectionContext) === node.id
+
+  const def   = nodeRegistry.get(node.type)
+  const frame = def?.frame?.(effective) ?? IDENTITY_FRAME
+
+  useLayoutEffect(() =&gt; { <span class="cm">/* 原样 makeDirty */</span> }, [effective, isSelected])
+
+  return (
+    &lt;group
+      ref={ref}
+      position={frame.position}
+      rotation-y={frame.rotationY}
+      visible={node.visible !== false}
+      {...events}
+    &gt;
+      {node.children.map((childId) =&gt; (
+        &lt;NodeRenderer key={childId} nodeId={asNodeId(childId)} /&gt;
+      ))}
+    &lt;/group&gt;
+  )
+}
+</code></pre>
+      <div class="trap">
+        <span class="trap-label">四个当场会咬人的地方</span>
+        <p>
+          <strong>① <code>frame</code> 吃 <code>effective</code>，不是 <code>node</code>。</strong>
+          拖墙时 <code>useLiveOverrides</code> 里是新的 <code>start</code> / <code>end</code>，
+          读文档节点的话墙的<em>几何</em>跟着拖、<em>位姿</em>停在原地 ——
+          <strong>墙看起来在原地伸缩</strong>。
+          <code>useEffectiveNode</code>（<code>viewer/hooks/use-effective-node.ts</code>）已经存在，
+          内部就是同一个 <code>useLiveOverrides</code> 订阅，<strong>换过去不改变订阅行为</strong>；
+          无 override 时它返回 <code>node</code> 本身（引用不变），
+          所以依赖数组能直接写成 <code>[effective, isSelected]</code>。
+        </p>
+        <p>
+          <strong>② <code>useNodeEvents</code> 继续传文档 <code>node</code>。</strong>
+          批 I 的判据是「屏幕上一模一样」，这里<strong>不要</strong>顺手改成 <code>effective</code>。
+          行为上等价（<code>pointerdown</code> 只在 idle 触发，idle 时没有 override），
+          但改了就不是纯重构了 ——
+          <strong>纯重构里混一个语义改动，出问题时你分不清是哪个。</strong>
+        </p>
+        <p>
+          <strong>③ <code>rotation-y={...}</code>，不是 <code>rotation={[0, y, 0]}</code>。</strong>
+          后者每次渲染造一个新数组。用 R3F 的属性路径写法。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>④ 循环 import 是安全的，但要知道为什么。</strong>
+          <code>node-renderer.tsx</code> ↔ <code>parametric-node-renderer.tsx</code> 互相 import。
+          安全的<em>唯一</em>理由是<strong>两边都只在渲染时调用对方，模块求值期不读</strong>。
+          <code>NodeRenderer</code> 是 <code>export const</code>（有 TDZ），
+          所以哪天有人在模块顶层写 <code>const X = NodeRenderer</code> 就会炸。
+        </p>
+      </div>
+      <p><strong>hint · <code>SceneRenderer</code> 批 I 不用改。</strong>
+      批 I 结束时场景里没有任何节点有父，<code>children</code> 全是 <code>[]</code>，
+      那个 <code>map</code> 渲染零个东西。
+      <strong>「有父的节点不进 <code>rootNodeIds</code>」是第 06 步的事</strong>，
+      在那之前 <code>SceneRenderer</code> 遍历 <code>rootNodeIds</code> 的写法是对的。</p>
+      <p><strong>hint · 门为什么不会被墙的几何重建删掉。</strong>
+      <code>disposeGeometryChildren</code> 只移除
+      <code>userData.__fromGeometry === true</code> 的子节点（<code>geometry-system.tsx:86-93</code>）。
+      React 挂进来的 <code>NodeRenderer</code> 子节点没有这个标记，<strong>天然幸免</strong>。
+      这不是巧合，是 M5 当初把标记写进去的价值 —— 但也意味着
+      <strong>那个标记从今天起是父子关系的一部分，不能随手去掉。</strong></p>
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="step">
+    <div class="step-n">03</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">墙几何：原点搬到 start，摊平 body</h3><span class="tag viewer">viewer</span><span class="tag debt">批 I · 第 4 步</span></div>
+      <p><code>viewer/nodes/wall/geometry.ts</code>。两处改动，净减行数。</p>
+<pre><code><span class="cm">// ① 返回类型起个名字，原点从中点换成 start</span>
+export function wallTransform(wall: WallNode): NodeFrame
+<span class="cm">//     position:  [start.x, 0, start.y]   ← 改：原来是 midpoint(start, end)
+//     rotationY: 原样不动</span>
+
+<span class="cm">// ② buildWallGeometry 里删掉 body 那一层</span>
+<span class="cw">- const body = new THREE.Group()
+- body.position.set(position[0], position[1], position[2])
+- body.rotation.y = rotationY
+- body.add(mesh)
+- root.add(body)</span>
+<span class="ok">+ root.add(mesh)</span>
+</code></pre>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>不需要 <code>wallFrame</code> 别名</strong>（修订，原方案有）——
+          <code>wallTransform</code> 的返回值结构上就是 <code>NodeFrame</code>，
+          第 04 步直接写 <code>frame: wallTransform</code>。多一个别名多一处要同步。
+        </p>
+      </div>
+      <p><strong>三点：</strong></p>
+      <ul>
+        <li><strong><code>worldToLocalXZ</code> 的调用一个字不用改。</strong>
+          它接收 <code>position</code> 参数而不是内联算中点，原点换了自动跟着换。
+          <em>这是当初那样写的红利。</em></li>
+        <li><strong><code>shape.moveTo(local.x, −local.y)</code> 那个负号不能动。</strong>
+          它是为了在 <code>rotateX(−π/2)</code> 之后保住手性 ——
+          动了法线全部朝内，<strong>墙从外面看会消失</strong>。§02 C 有实测。</li>
+        <li>改完局部 x 的范围从 <code>[−L/2, L/2]</code> 变成 <code>[0, L]</code>。
+          <strong>这正是后面门的 <code>position[0]</code> 能直接当挂载坐标用的原因</strong>（§02 B / E）。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="step">
+    <div class="step-n">04</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">wall / column 声明 frame</h3><span class="tag viewer">viewer</span><span class="tag debt">批 I · 第 5 步</span></div>
+<pre><code><span class="cm">// viewer/nodes/wall/definition.ts</span>
+export const wallDefinition: NodeDefinition&lt;WallNode, MiterData&gt; = {
+    kind: 'wall',
+<span class="ok">    frame: wallTransform,</span>
+    geometry: buildWallGeometry,
+    computeLevelData: computeWallLevelMiters,
+}
+
+<span class="cm">// viewer/nodes/column/definition.ts</span>
+export const columnDefinition: NodeDefinition&lt;ColumnNode&gt; = {
+  kind: 'column',
+<span class="ok">  frame: (c) =&gt; ({ position: c.position, rotationY: 0 }),</span>
+  geometry: buildColumnGeometry,
+}
+</code></pre>
+      <p>
+        <strong>slab / ceiling 不加。</strong>它们没有 <code>frame</code>，
+        渲染器给 <code>IDENTITY_FRAME</code>，builder 继续烤世界坐标 ——
+        行为和今天完全一致。<strong>「不声明」现在是一个有意义的声明。</strong>
+      </p>
+    </div>
+  </div>
+
+  <div class="note" style="border-left-color:var(--accent)">
+    <p><strong class="ok">批 I 到此结束。这一批是纯重构、零新功能，所以判据只有一条：屏幕上必须一模一样。</strong></p>
+<pre style="margin-bottom:12px"><code>pnpm verify                     全绿，用例数<span class="cw">仍是 51</span>（这一批不加测试）
+画一堵斜墙                      朝向正确  <span class="cm">← 原点从中点搬到 start，斜墙最容易露馅</span>
+L 形转角                        墙角仍然严丝合缝（M2 的斜接没丢）
+柱子                            位置不变
+临时给 SlabNode 加 position     楼板<span class="cw">纹丝不动</span>  <span class="cm">← 验完删掉</span>
+</code></pre>
+    <p style="margin-bottom:0">
+      最后那条别跳。它验的不是「能跑」，是
+      <strong>「加错字段现在不可能静默平移两次了」</strong> ——
+      M6 §06 记的那条债到底还清没有，全看这一条。
+      <em>这也是整个批 I 唯一一条「测试测不出、只有肉眼能验」的收获。</em>
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">2026-09-05 修订 · 批 II 六处</span>
+    <p>
+      定完批 I 之后把 06–09 的签名对着真实类型又推了一遍。
+      <strong>改动都已落在下面的步骤里</strong>，这里只记「原来写的什么、为什么不行」：
+    </p>
+    <ol style="margin-bottom:0">
+      <li><strong>「有 <code>parentId</code> 就把父也标脏」从第 09 步移到第 06 步。</strong>
+        它是 store 的不变量，不是几何的实现细节。放在几何里意味着
+        「换一个 builder 就可能忘了它」。</li>
+      <li><strong><code>width</code> / <code>height</code> 用 <code>.default()</code>，不是
+        <code>.optional()</code> + getter。</strong>原方案照抄了 <code>ColumnNode</code> 的写法，
+        但门和窗的默认值不同、而且各自有独立 schema —— <code>.default()</code> 之后
+        parse 完必然是 <code>number</code>，<strong><code>openingSpan</code> 就成了纯函数，不用查表</strong>。</li>
+      <li><strong><code>opening.ts</code> 的纯函数吃<em>结构类型</em>，不吃节点联合。</strong>
+        原方案写 <code>openingSpan(o: OpeningNode)</code> —— 但 <code>OpeningNode = DoorNode | WindowNode</code>
+        要 import <code>door.ts</code>，而 <code>door.ts</code> 又 import <code>opening.ts</code> 拿常量：
+        <strong>循环 import</strong>。更要命的是它会让 <code>wall-openings.ts</code> 被迫认识「门」这个概念。</li>
+      <li><strong><code>DoorNode</code> / <code>WindowNode</code> 把 <code>parentId</code> 收窄成必填。</strong>
+        <code>BaseNode.parentId</code> 是 <code>.nullable().default(null)</code>。
+        门<em>不可能</em>没有宿主 —— 让 schema 说出这件事，比在五个地方写 <code>if (!door.parentId)</code> 强。</li>
+      <li><strong>§03 的文件树漏了一个改动</strong>：
+        <code>viewer/nodes/shared/polygon-prism.ts</code> 要抽出
+        <code>buildPrismGeometry</code>（第 09 步要 N 段共用一个材质，
+        现在的 <code>buildPolygonPrism</code> 每次自己造一个）。</li>
+      <li><strong><code>updateNode</code> 必须拒绝 <code>parentId</code> / <code>children</code> 补丁</strong> ——
+        而且<strong>只能靠运行时守卫，类型上表达不出来</strong>。原方案压根没提这条。见第 06 步。</li>
+    </ol>
+  </div>
+
+  <!-- 06 -->
+  <div class="step">
+    <div class="step-n">06</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">useScene：挂父、级联删、父跟着脏</h3><span class="tag core">core</span><span class="tag debt">还 M4 的债</span></div>
+      <p>三个函数改语义，一个函数新增。<strong><code>SceneState</code> 的类型签名一个字不用改。</strong></p>
+<pre><code><span class="cm">// core/store/use-scene.ts</span>
+
+addNode: (input: unknown) =&gt; AnyNodeId
+<span class="cm">//  parse 之后，在【同一个 set】里完成：
+//    有父且父存在 → 父的 children 追加 node.id；【不】进 rootNodeIds；父 makeDirty
+//    无父          → 和今天一样进 rootNodeIds
+//  有 parentId 但父不存在 → 这是脏数据，选一个行为并写测试（建议抛错）</span>
+
+updateNode: (id: AnyNodeId, patch: Partial&lt;AnyNode&gt;) =&gt; void
+<span class="cm">//  原样 makeDirty(id)，外加：node.parentId 非空 → makeDirty(parentId)
+//  【新】patch 含 parentId 或 children → 抛错（见下面的陷阱框）</span>
+
+removeNode: (id: AnyNodeId) =&gt; void
+<span class="cm">//  collectSubtree 收集整棵子树，在【同一个 set】里一次删完
+//  从父的 children 摘掉自己；父 makeDirty（洞没了，墙要重切）
+//  所有被删的 clearDirty</span>
+
+<span class="ok">// 新增，纯函数，同文件导出</span>
+export function collectSubtree(
+  nodes: Record&lt;AnyNodeId, AnyNode&gt;,
+  rootId: AnyNodeId,
+): AnyNodeId[]
+</code></pre>
+
+      <div class="trap">
+        <span class="trap-label">updateNode 拒绝 parentId / children —— 而且只能在运行时拒绝</span>
+        <p>
+          <code>updateNode(门, { parentId: 另一堵墙 })</code> 会<strong>静默改父而不动任何一边的
+          <code>children</code></strong>，两个索引当场对不上。这正是 D19 写下的那笔代价。
+          重挂宿主排在 M13，M7 期间它不该是可达的。
+        </p>
+        <p>
+          <strong>为什么不用类型挡。</strong>直觉写法是
+          <code>Partial&lt;Omit&lt;AnyNode, 'parentId' | 'children'&gt;&gt;</code>，
+          <strong>但 <code>Omit</code> 作用在联合上会塌成「所有成员的公共键」</strong>
+          （<code>Omit</code> 走的是 <code>keyof (A|B)</code> = 键的交集），
+          于是 <code>updateNode(墙, { start })</code> 立刻类型错 ——
+          <code>start</code> 不是公共键。<br>
+          <code>Partial&lt;AnyNode&gt;</code> 现在能用，靠的是 <code>Partial</code> 是同态映射类型、
+          <em>会</em>在联合上分发（<code>Partial&lt;A&gt; | Partial&lt;B&gt;</code>）。<code>Omit</code> 不会。
+          <strong>这两个内置类型在联合上的行为不一样，是本条的全部原因。</strong>
+        </p>
+        <p style="margin-bottom:0">
+          所以：<strong>运行时两行守卫 + 一条会因为它变红的测试</strong>（D18）。
+        </p>
+      </div>
+
+      <div class="trap">
+        <span class="trap-label">D18：这一步必须配测试，而且是会因为 bug 变红的那种</span>
+        <p>
+          删墙不级联 = 门变孤儿 = <code>verify</code> 全绿、画面上门<strong>还在原地飘着</strong>。
+          这是本项目第 8 个「类型系统看不见」的候选。<strong>六条断言：</strong>
+        </p>
+<pre><code>addNode 带 parentId    → 父的 children 含它，且它不在 rootNodeIds
+removeNode(墙)         → 门也没了，rootNodeIds 不含任何一个
+removeNode(门)         → 墙还在，且墙的 children 不含它
+removeNode(门)         → 墙进了 dirtyNodes           <span class="cm">// 洞没了要重切</span>
+updateNode(门, {position}) → 墙也进了 dirtyNodes      <span class="cm">// 洞挪了要重切</span>
+updateNode(门, {parentId}) → <span class="cw">抛错</span>
+撤销一次               → 墙和门<span class="cw">一起</span>回来              <span class="cm">// 一次事务，不是两次</span>
+</code></pre>
+        <p style="margin-bottom:0">
+          <strong>最后那条最容易漏。</strong><code>zundo</code> 的 <code>partialize</code>
+          已经追踪 <code>nodes</code> + <code>rootNodeIds</code>（<code>use-scene.ts:72</code>），
+          所以级联删只要发生在<strong>一次 <code>set</code> 里</strong>就自然是一步。
+          分成「先删门再删墙」两次 <code>set</code> 的话，
+          <code>runAsSingleSceneHistoryStep</code> 能兜住 —— <strong>但别依赖它</strong>，
+          <code>use-history-shortcuts.ts:36</code> 只包了键盘那一条路径。
+        </p>
+      </div>
+
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong><code>collectSubtree</code> 就放 <code>use-scene.ts</code> 里，不新开文件。</strong>
+          它现在只有一个调用方（<code>removeNode</code>），测试也是穿过 store 测的
+          —— D18 要的正是「会因为这个 bug 变红」的测试，而不是「纯函数被单独调用」的测试。
+          M8 真需要第二、第三个树工具（祖先链、同层兄弟）时再抽 <code>node-tree.ts</code>。
+          <strong>那才是 D10 说的第三次。</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 -->
+  <div class="step">
+    <div class="step-n">07</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">门窗的 schema</h3><span class="tag core">core</span></div>
+      <p>
+        四个文件。<strong>字段数量是这一步唯一的考验</strong> ——
+        对照仓库的 <code>DoorNode</code> 有 40 多个字段，我们要 7 个。
+      </p>
+
+      <h4>① <code>core/schema/opening.ts</code> —— 门窗共用，<strong>不 import 任何节点</strong></h4>
+<pre><code>export const DEFAULT_DOOR_WIDTH    = 0.9
+export const DEFAULT_DOOR_HEIGHT   = 2.1
+export const DEFAULT_WINDOW_WIDTH  = 1.2
+export const DEFAULT_WINDOW_HEIGHT = 1.2
+export const DEFAULT_WINDOW_SILL   = 0.9
+
+<span class="cm">/** [u 沿墙、离 start 的米数;  v 洞口【中心】高度;  w 离墙中面的进深（M7 恒为 0）] */</span>
+export const OpeningPlacement = z.tuple([z.number(), z.number(), z.number()])
+
+export const OpeningSide = z.enum(['left', 'right'])   <span class="cm">// 'left' = D3 的 leftNormal 侧</span>
+
+<span class="ok">/** 结构类型，不是节点联合 —— 见下面的陷阱框 */
+export type OpeningLike = {
+  position: readonly [number, number, number]
+  width: number
+  height: number
+}</span>
+
+<span class="cm">/** 洞口在墙局部坐标下的四条边。段切和验收都读它，不要各算各的。 */</span>
+export type OpeningSpan = { left: number; right: number; bottom: number; top: number }
+export function openingSpan(o: OpeningLike): OpeningSpan
+
+<span class="cm">/** I4：把洞口整个夹进 [0,L] × [0,H]。
+ *  洞比墙还大时返回 null —— 调用方据此【拒绝放置】，而不是产出退化几何。 */</span>
+export function clampOpeningToWall(
+  placement: readonly [number, number, number],
+  size: { width: number; height: number },
+  wall: { length: number; height: number },
+): [number, number, number] | null
+</code></pre>
+
+      <div class="trap">
+        <span class="trap-label">纯函数吃结构类型，不吃 OpeningNode</span>
+        <p>
+          原方案写的是 <code>openingSpan(o: OpeningNode)</code>。两个问题：
+        </p>
+        <p>
+          <strong>① 循环 import。</strong><code>OpeningNode = DoorNode | WindowNode</code>
+          要 <code>opening.ts</code> import <code>door.ts</code>；
+          而 <code>door.ts</code> 又要 import <code>opening.ts</code> 拿
+          <code>OpeningPlacement</code> / 默认值。<strong>转不出去。</strong>
+        </p>
+        <p style="margin-bottom:0">
+          <strong>② 更要命的是它会污染下游。</strong><code>OpeningSpan</code> 一旦携带节点类型，
+          第 08 步的 <code>wall-openings.ts</code> 就<strong>被迫认识「门」这个概念</strong> ——
+          而它本该只知道「一个矩形区间」。
+          结构类型让第 08 步的测试能用<strong>裸对象字面量</strong>构造输入，
+          不用 <code>DoorNode.parse</code>。<em>这就是它能被测的原因。</em>
+        </p>
+      </div>
+
+      <h4>② <code>core/schema/door.ts</code> / <code>window.ts</code></h4>
+<pre><code>export const DoorNode = BaseNode.extend({
+  id:   objectId('door'),
+  type: nodeType('door'),
+
+<span class="ok">  parentId: z.string(),          <span class="cm">// ← 收窄：门不可能没有宿主</span></span>
+
+  position: OpeningPlacement.default([0, DEFAULT_DOOR_HEIGHT / 2, 0]),
+<span class="ok">  width:  z.number().positive().default(DEFAULT_DOOR_WIDTH),
+  height: z.number().positive().default(DEFAULT_DOOR_HEIGHT),</span>
+  side:   OpeningSide.default('left'),
+})
+<span class="cm">// window.ts 同形，默认值换成窗的；position 默认
+//   [0, DEFAULT_WINDOW_SILL + DEFAULT_WINDOW_HEIGHT / 2, 0]</span>
+
+<span class="cm">// core/schema/types.ts</span>
+export const AnyNode = z.discriminatedUnion('type',
+  [WallNode, SlabNode, CeilingNode, ColumnNode, <span class="ok">DoorNode, WindowNode</span>])
+
+<span class="ok">export type OpeningNode = DoorNode | WindowNode</span>   <span class="cm">// ← 联合住这里，不住 opening.ts</span>
+</code></pre>
+
+      <div class="note">
+        <p><strong>两处和原方案不同，都是为了少写代码：</strong></p>
+        <ul style="margin-bottom:0">
+          <li><strong><code>.default()</code> 而不是 <code>.optional()</code> + getter。</strong>
+            <code>ColumnNode</code> 用的是后者，但那是因为柱子的默认值三种截面共用。
+            门窗各有独立 schema，<code>.default()</code> 之后 parse 完必然是 <code>number</code> ——
+            <strong><code>openingSpan</code> 成了真纯函数</strong>，
+            不用 <code>getDoorWidth()</code> 这类查表函数，也不用回答「<code>undefined</code> 是什么意思」。</li>
+          <li><strong><code>parentId: z.string()</code> 收窄。</strong>
+            代价：<code>AnyNode.parse({ type: 'door' })</code> 不带 <code>parentId</code> 会抛 ——
+            <strong>这正是想要的</strong>。省掉后面五处 <code>if (!door.parentId) return</code>。</li>
+        </ul>
+      </div>
+
+      <div class="note">
+        <p><strong>三个字段被<em>刻意</em>省掉了，每个都有理由：</strong></p>
+        <ul style="margin-bottom:0">
+          <li><code>wallId</code> —— <code>parentId</code> 已经是宿主。对照仓库两个都有，
+            是因为它的宿主可能是屋顶面（<code>roofSegmentId</code>）。
+            <strong>M10 出现第二种宿主时再加</strong>，那时它才有信息量。</li>
+          <li><code>rotation</code> —— 门相对墙只有「朝左 / 朝右」两种，
+            <code>side</code> 一个枚举比一个自由的欧拉角更难写错。
+            对照仓库存 <code>rotation: [0, 0|π, 0]</code>，等价，但那是给开启动画用的。</li>
+          <li><code>openingKind</code> / <code>openingShape</code> / <code>doorType</code> /
+            <code>segments</code> / …… —— D2 排除。
+            <strong>读到 <code>DoorType</code> 那个 10 项枚举就该停。</strong></li>
+        </ul>
+      </div>
+
+      <p><strong>hint</strong>：<code>AnyNode</code> 联合从 4 个成员涨到 6 个。
+      M6 记过「联合从 1 涨到 2 时炸出三处『<code>AnyNode</code> 只有一个成员』的假设」——
+      4→6 应该是零成本。<strong>如果不是，说明有人又写了个只对某一种类型成立的假设</strong>，
+      顺手记进 §06。</p>
+    </div>
+  </div>
+
+  <!-- 08 -->
+  <div class="step">
+    <div class="step-n">08</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">wall-openings.ts —— 本 M 的算法核心</h3><span class="tag core">core</span></div>
+      <p>纯函数，<strong>不 import three，也不 import 任何节点类型</strong>。
+      先把这个测绿，再去碰几何（D11）。</p>
+<pre><code><span class="cm">// core/systems/wall/wall-openings.ts</span>
+
+<span class="cm">/** 一段实心墙：平面轮廓（墙局部）+ 一段 y 区间。 */</span>
+export type WallBand = {
+  polygon: Point2D[]
+  bottomY: number
+  topY: number
+}
+
+<span class="cm">/** 用两条垂直于墙轴的半平面裁剪多边形（Sutherland–Hodgman）。
+ *  绕向保持不变；少于 3 点时返回 []。 */</span>
+export function clipPolygonByU(
+  polygon: readonly Point2D[],
+  uMin: number,
+  uMax: number,
+): Point2D[]
+
+<span class="cm">/** 墙局部轮廓 + 洞口列表 → 段列表。这就是「段切」。 */</span>
+export function splitWallByOpenings(
+  footprint: readonly Point2D[],
+  wallHeight: number,
+  openings: readonly OpeningSpan[],
+): WallBand[]
+</code></pre>
+
+      <div class="trap">
+        <span class="trap-label">polygon 里的 y 不是高度</span>
+        <p style="margin-bottom:0">
+          <code>Point2D</code> 是 <code>{ x, y }</code>，但在这里
+          <strong><code>x</code> 是沿墙的 u，<code>y</code> 是离墙中面的横向偏移</strong>
+          （<code>buildWallGeometry</code> 里的 <code>local</code> 就是这个约定）。
+          <strong>高度住在 <code>bottomY</code> / <code>topY</code>，不在 <code>polygon</code> 里。</strong>
+          这两个 <code>y</code> 撞名会让人把「墙厚方向」当成「高度」写进去，
+          而结果是一个<em>看起来能跑</em>的退化几何。
+        </p>
+      </div>
+
+      <h4><code>splitWallByOpenings</code> 的做法（形状，不是实现）</h4>
+      <ol>
+        <li>洞按 <code>left</code> 排序；<strong>重叠的洞合并成一个包围区间</strong>
+          （放置期已经挡了重叠，这里是兜底，防止段被重复计算）。</li>
+        <li>沿 u 走一遍，产出交替的区间：<em>实墙段</em> 和 <em>洞段</em>。</li>
+        <li>实墙段 → 1 个 band，<code>[0, wallHeight]</code>。</li>
+        <li>洞段 → 最多 2 个 band：<code>[0, bottom]</code>（窗台）和
+          <code>[top, wallHeight]</code>（过梁）。
+          <strong>高度 ≤ 0 的直接不发</strong> —— 门的窗台段就是这样消失的。</li>
+        <li>每个 band 的 <code>polygon</code> = <code>clipPolygonByU(footprint, uMin, uMax)</code>。</li>
+      </ol>
+
+      <div class="trap">
+        <span class="trap-label">三个数值陷阱</span>
+        <p>
+          <strong>① 洞正好贴着墙端点</strong>（<code>left = 0</code>）。
+          第一段实墙的 u 区间是 <code>[0, 0]</code>，裁出来是空多边形或一条退化的线。
+          <strong>判据写成「区间长度 &lt; EPSILON 就跳过」</strong>，
+          不是 <code>uMin === uMax</code> —— 浮点不会正好相等。
+        </p>
+        <p>
+          <strong>② 斜接把轮廓推到 <code>u &lt; 0</code> 或 <code>u &gt; L</code>。</strong>
+          <code>getWallPlanFootprint</code> 在接头处产出的点可能<em>超出</em> <code>[0, L]</code>
+          —— 斜接就是往外顶。所以第一段的 <code>uMin</code> <strong>不能写 0</strong>，
+          要写 <code>−Infinity</code>（或一个足够负的常数）；最后一段同理。
+          <strong>写成 0 的话墙角会被削平，而且只在有接头的墙上出现</strong> ——
+          你会以为是斜接坏了，其实是裁剪把它切掉了。
+        </p>
+        <p style="margin-bottom:0">
+          <strong>③ 绕向不用管。</strong>Sutherland–Hodgman 保持输入绕向，
+          而 <code>ExtrudeGeometry</code> 自己会把外轮廓强制成 CW（D20 / §02 C 有实测）。
+          <strong>这一步不需要 <code>signedArea</code>。</strong>
+        </p>
+      </div>
+
+      <h4>测试（14 条起，D18 要求）</h4>
+<pre><code><span class="cm">clipPolygonByU</span>
+  矩形裁中段              → 4 点，面积 = 原面积 × (uMax−uMin)/L
+  裁到区间外              → []
+  区间跨过整个多边形      → 点数和面积都不变
+  5 点斜接轮廓裁最左段    → <span class="cw">5 点</span>（接头顶点被保住了）
+  uMin = −Infinity        → 右边界之外的部分才被切掉
+
+<span class="cm">splitWallByOpenings</span>
+  无洞                    → 1 段，[0,H]，多边形 === 输入
+  一个门（sill = 0）      → 3 段：左满高 / 过梁 / 右满高，<span class="cw">没有窗台段</span>
+  一个窗                  → 4 段
+  一门一窗                → 6 段（就是 §02 C 那张图）
+  洞贴左端 (left = 0)     → 2 段，不产生零宽段
+  洞比墙宽                → 抛错 or 空列表（<strong>定一个，别两种都有</strong>）
+  两个洞重叠              → 合并成一个区间，不是 5 段
+  两个洞相邻但不重叠      → 5 段，中间那段实墙在
+  <span class="ok">体积守恒</span>：Σ area(band)×(topY−bottomY)
+              === area(footprint)×H − Σ 洞体积
+</code></pre>
+      <p>
+        <strong>最后那条是 I2，也是整个 M7 最值钱的一个测试。</strong>
+        它一条就能挡住段切所有的算错方式，而且不需要渲染。
+        面积直接用 <code>polygon-2d.ts</code> 已有的 <code>polygonArea</code> ——
+        <strong>那是它第二个消费者</strong>。
+      </p>
+    </div>
+  </div>
+
+  <!-- 09 -->
+  <div class="step">
+    <div class="step-n">09</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">墙几何消费段规格</h3><span class="tag viewer">viewer</span></div>
+      <p>
+        <code>buildWallGeometry</code> 从「一个 <code>ExtrudeGeometry</code>」变成「N 个」。
+        <strong>签名不变。</strong>
+      </p>
+<pre><code><span class="cm">// ① viewer/nodes/shared/polygon-prism.ts —— 抽一个只造几何的函数出来</span>
+<span class="ok">export function buildPrismGeometry(
+  polygon: readonly Point2D[],
+  bottomY: number,
+  topY: number,
+): THREE.BufferGeometry | null</span>
+<span class="cm">//   现有的 buildPolygonPrism 改成调用它 —— slab / ceiling 行为不变</span>
+
+<span class="cm">// ② viewer/nodes/wall/geometry.ts —— 签名一个字不改</span>
+export function buildWallGeometry(node, ctx, appearance): THREE.Object3D
+<span class="cm">//   1. 和今天一样：世界轮廓 → 墙局部轮廓（原点已经是 start）
+//   2. node.children → ctx.resolve → 过滤出 door / window → openingSpan[]
+//   3. splitWallByOpenings(...) → WallBand[]
+//   4. 【一个】material 实例，N 个 mesh 共用
+//   5. 每段 buildPrismGeometry(...) → new THREE.Mesh(geo, material) → root.add</span>
+</code></pre>
+
+      <div class="trap">
+        <span class="trap-label">子节点不在 ctx.siblings 里</span>
+        <p>
+          <code>GeometryContext</code> 有 <code>resolve</code> / <code>siblings</code> / <code>levelData</code>
+          （<code>node-definition.ts:8-12</code>），<strong>没有 <code>children</code></strong>。
+          而且 <code>ctx.siblings</code> 是 <strong>同类型</strong>的兄弟
+          （<code>geometry-system.tsx:60-64</code> 按 <code>n.type === node.type</code> 过滤）——
+          <strong>门和墙不是同一种类型，<code>siblings</code> 里永远没有门。</strong>
+        </p>
+        <p style="margin-bottom:0">
+          走 <code>node.children.map((id) =&gt; ctx.resolve(asNodeId(id)))</code>，
+          <strong>零框架改动</strong>。<em>不要</em>给 <code>GeometryContext</code> 加
+          <code>children</code> 字段 —— 对照仓库那么做
+          （<code>geometry-system.tsx:283-285</code>）是因为它的 <code>ctx</code>
+          还要喂 floorplan 层。<strong>我们没有那个需求。</strong>
+        </p>
+      </div>
+
+      <div class="note">
+        <p><strong>三件不用做的事，每件都省下一段代码：</strong></p>
+        <ul style="margin-bottom:0">
+          <li><strong>不用给洞底加 padding。</strong>对照仓库有
+            <code>OPENING_CUTOUT_BOTTOM_PADDING = 0.02</code>
+            （<code>opening-cutout-geometry.ts:20</code>），是为了让 CSG 躲开共面。
+            <strong>段切没有 CSG</strong> —— 门的 <code>sill = 0</code> 就是「不发下面那一段」，
+            没有面需要错开。</li>
+          <li><strong>不用管绕向。</strong>见第 08 步陷阱 ③。</li>
+          <li><strong>不用重算斜接。</strong>洞不改变外轮廓，
+            <code>computeLevelData</code> / <code>getWallPlanFootprint</code> 一个字不动。</li>
+        </ul>
+      </div>
+
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>为什么批 I 必须先做完，这里能看得最清楚。</strong>
+          第 2 步拿到的 <code>openingSpan.left/right</code> 是「离墙 start 多少米」，
+          第 1 步算出的局部轮廓也是以 start 为原点 —— <strong>两者能直接相减，
+          是因为第 03 步把原点搬过去了</strong>。
+          原点还在中点的话，这里每个洞都要先减一次 <code>L/2</code>，
+          而<em>墙一变长这个偏移就变</em>，门会在墙拉长时自己滑走。
+        </p>
+      </div>
+
+      <p><strong>hint · 材质只造一个。</strong>
+      N 段共用一个 <code>MeshStandardMaterial</code>。
+      <code>appearance.selected</code> 换色照旧有效（一个材质，改一次）。
+      <strong>每段各造一个材质的话，选中会闪、dispose 会漏。</strong></p>
+
+      <p class="ok"><strong>批 II 到此结束。</strong>此时墙上应该已经能挖出洞了 ——
+      但还<strong>没有工具能放门</strong>。验证办法：在控制台手动
+      <code>addNode({ type:'door', parentId: 某墙id, position:[1.5, 1.05, 0] })</code>，
+      墙上应该出现一个 0.9×2.1 的洞，<strong>从洞里能看到墙那边</strong>。</p>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="step">
+    <div class="step-n">10</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">门窗的可见本体</h3><span class="tag viewer">viewer</span></div>
+      <p>D2 排除造型细节。<strong>门 = 一块比洞口略小的板 + 一圈门套；窗 = 一圈框 + 一块半透玻璃。</strong></p>
+<pre><code><span class="cm">// viewer/nodes/opening/geometry.ts</span>
+export function buildDoorGeometry(node: DoorNode, ctx, appearance): THREE.Object3D
+export function buildWindowGeometry(node: WindowNode, ctx, appearance): THREE.Object3D
+
+<span class="cm">// viewer/nodes/opening/definition.ts</span>
+export const doorDefinition: NodeDefinition&lt;DoorNode&gt; = {
+  kind: 'door',
+  <span class="cm">// 【修订】不是恒 0：门在墙的右面时要转过去。
+  //   side 是【墙局部】的朝向，所以这里是纯局部旋转，不掺墙的角度。</span>
+  frame: (d) =&gt; ({ position: d.position, rotationY: d.side === 'left' ? 0 : Math.PI }),
+  geometry: buildDoorGeometry,
+}
+<span class="cm">// windowDefinition 同形</span>
+</code></pre>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>几何原点是洞口中心</strong>（因为 <code>frame</code> 就是
+          <code>position</code>，而 <code>position[1]</code> 是中心高度）。
+          所以门板的顶点范围是 <code>x ∈ [−w/2, w/2]</code>、<code>y ∈ [−h/2, h/2]</code>、
+          <code>z</code> 在墙厚里。<strong>不要在 builder 里再加任何平移</strong> ——
+          加了就是「平移两次」的第三种形态。
+        </p>
+      </div>
+      <p><strong>hint</strong>：<code>register.ts</code> 加两行。
+      <code>SelectionManager</code> <strong>一个字都不用改</strong> ——
+      它按 <code>nodeRegistry.entries()</code> 订阅（<code>selection-manager.tsx:21</code>），
+      注册了就自动可选中。<em>这是 M6 那笔一次性投资在 M7 的第一次分红。</em></p>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="step">
+    <div class="step-n">11</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">事件带上局部坐标和法线</h3><span class="tag core">core</span><span class="tag viewer">viewer</span></div>
+<pre><code><span class="cm">// core/events/types.ts</span>
+export interface NodeEvent&lt;N extends AnyNode = AnyNode&gt; {
+  node: N
+  point: [number, number, number]
+  <span class="ok">/** 命中点在【被命中对象】的局部空间。墙上就是 [u, 高度, 离中面] */
+  localPoint: [number, number, number]
+  /** 命中三角形的法线，同样是对象局部空间。墙上 z&gt;0 = 左面 */
+  normal: [number, number, number] | undefined</span>
+  object: THREE.Object3D
+  stopPropagation: () =&gt; void
+  nativeEvent: PointerEvent
+}
+</code></pre>
+      <p><code>viewer/hooks/use-node-events.ts</code> 的 <code>emit()</code> 里各加一行，
+      分别来自 <code>e.object.worldToLocal(e.point.clone())</code> 和 <code>e.face?.normal</code>。</p>
+      <div class="trap">
+        <span class="trap-label">看 §02 D 那个陷阱框</span>
+        <p style="margin-bottom:0">
+          <code>e.object</code>（命中的 mesh），<strong>不是</strong> <code>e.eventObject</code>（挂处理器的 group）。
+          写错了在原点附近看起来是对的。
+        </p>
+      </div>
+      <p><strong>hint</strong>：这是纯加法，现有六个事件消费者一个都不受影响。
+      <code>e.point.clone()</code> 的 <code>clone</code> 不能省 ——
+      <code>worldToLocal</code> 是<strong>原地修改</strong>，不 clone 会把 R3F 的事件对象改坏，
+      而且后果出现在<em>下一个</em>监听器里。</p>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div class="step">
+    <div class="step-n">12</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">放置的纯函数部分</h3><span class="tag app">app</span></div>
+      <p><strong>先写这个，再写 tsx。</strong>抽出来的唯一理由就是它能被测（§03 那张表）。</p>
+<pre><code><span class="cm">// app/lib/interaction/opening-placement.ts</span>
+
+export type WallHit = {
+  wallId: AnyNodeId
+  <span class="cm">/** 离墙 start 的米数，来自 NodeEvent.localPoint[0] */</span>
+  u: number
+  <span class="cm">/** 命中的是哪一面，来自 NodeEvent.normal[2] 的符号 */</span>
+  side: 'left' | 'right'
+}
+
+<span class="cm">/** 落点 → 可提交的 position，或 null（放不下 / 和别的洞重叠）。 */</span>
+export function resolveOpeningPlacement(args: {
+  hit: WallHit
+  wall: WallNode
+  size: { width: number; height: number }
+  sill: number
+  siblings: readonly OpeningNode[]   <span class="cm">// 同一堵墙上已有的洞</span>
+  selfId?: AnyNodeId                 <span class="cm">// 拖动自己时排除自己</span>
+}): { position: [number, number, number]; valid: boolean }
+
+<span class="cm">/** 沿墙轴的重叠判定。对照仓库叫 hasWallChildOverlap。 */</span>
+export function overlapsExistingOpening(
+  span: OpeningSpan,
+  siblings: readonly OpeningNode[],
+  selfId?: AnyNodeId,
+): boolean
+</code></pre>
+      <p><strong>hint · 返回 <code>{ position, valid }</code> 而不是 <code>position | null</code>。</strong>
+      放置期要显示一个红/绿的幽灵 —— 幽灵在「放不下」的时候<em>也得画出来</em>，
+      画在夹紧后的位置、涂成红的。返回 <code>null</code> 的话幽灵会闪没。
+      <em>这是 M6 的 <code>ColumnGhost</code> 没遇到的问题（它在地面上，永远合法）。</em></p>
+      <p><strong>hint · 吸附</strong>：<code>u</code> 先按 <code>snapToGrid</code> 的
+      0.1 m 量化再夹紧。<strong>顺序反了会得到没量化的边界值</strong>。
+      对照仓库还做了「和相邻门窗边对边对齐」
+      （<code>wall-attach-target.ts</code> 的 <code>snapLocalXToNeighbors</code>）——
+      <strong>M7 不做</strong>，记进 §06。</p>
+    </div>
+  </div>
+
+  <!-- 13 -->
+  <div class="step">
+    <div class="step-n">13</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">放置工具</h3><span class="tag app">app</span></div>
+      <p>形状照抄 <code>ColumnTool</code>（<code>column-tool.tsx</code>），换掉落点来源。</p>
+<pre><code><span class="cm">// app/tools/opening-tool.tsx</span>
+export function OpeningTool({ kind }: { kind: 'door' | 'window' }): ReactNode
+</code></pre>
+      <ul>
+        <li>active 时 <code>begin({ kind: 'placing', tool: kind })</code> ——
+            <strong><code>scope.ts</code> 的 <code>placing</code> 现在写死了
+            <code>tool: 'column'</code></strong>（<code>scope.ts:11</code>），要放宽成一个联合。</li>
+        <li>落点<strong>不走 <code>eventToGround</code></strong>，走
+            <code>emitter.on('wall:move', ...)</code> 拿 <code>localPoint</code> / <code>normal</code>。
+            <em>这就是 §02 D 说的「不用新造射线」。</em></li>
+        <li>没命中墙 → 幽灵隐藏。<strong>不要退回地面</strong> ——
+            门必须在墙上，没有「地上的门」这种中间状态。</li>
+        <li>提交走 <code>wall:click</code>，<code>addNode({ type: kind, parentId: wallId, position, side })</code>。</li>
+      </ul>
+      <div class="trap">
+        <span class="trap-label">M6 踩过的那个坑在这里会重演一次</span>
+        <p style="margin-bottom:0">
+          <code>use-grid-events.ts:31</code> 会对 <code>sceneRegistry</code> 射线，
+          命中任何节点就<strong>不发 <code>grid:click</code></strong>。
+          这对我们是好事（点墙不会取消选中）。<strong>但它每次点击都要射一次线</strong>，
+          而 <code>wall:click</code> 走的是 R3F 自己那次射线 —— <strong>同一次点击射了两次</strong>。
+          <code>STATE.md</code> 从 M3 记到现在的那条债（「<code>grid:click</code> 每次都多射一次线」）
+          <strong>M7 依然不还</strong>，只是从「多射一次」变成「多射一次，而且两次的结果必须一致」。
+          记进 §06。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14 -->
+  <div class="step">
+    <div class="step-n">14</div>
+    <div class="step-body">
+      <div class="step-head"><h3 class="step-title">沿墙滑动 + 工具接线</h3><span class="tag app">app</span></div>
+      <p>选择工具下按住门拖 —— 约束在<strong>墙面内</strong>，只改 <code>position[0]</code>。</p>
+<pre><code><span class="cm">// 复用已有的三件套，不新造：</span>
+startDragSession({ onMove, onCommit, onCancel })   <span class="cm">// drag-session.ts</span>
+useLiveOverrides.setMany([[doorId, { position }]]) <span class="cm">// 拖拽期不进主 store</span>
+runAsSingleSceneHistoryStep(useScene, ...)         <span class="cm">// 松手一条历史</span>
+</code></pre>
+      <div class="note">
+        <p style="margin-bottom:0">
+          <strong>拖门比拖墙简单一档</strong>：墙要联动邻墙（<code>linkedWallOverrides</code>），
+          门只动自己。<strong>但门的 override 会让宿主墙重切</strong> ——
+          第 09 步那条「有 <code>parentId</code> 就把父也标脏」在拖拽期<em>每帧</em>触发一次墙重建。
+          <strong>可以接受</strong>（一堵墙的段切是几十个顶点），
+          但要知道它在发生，别以为拖门是零成本的。
+        </p>
+      </div>
+      <p>最后：<code>use-editor.ts</code> 的 <code>Tool</code> 联合加两项，
+      <code>app.tsx</code> 挂 <code>&lt;OpeningTool kind="door" /&gt;</code> /
+      <code>kind="window"</code>，快捷键 <strong>D</strong> / <strong>N</strong>
+      （W/V/F/G/C 已占用），底部提示条加一行。</p>
+    </div>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 05 -->
+<section>
+  <h2><span class="num">05</span>验收清单</h2>
+  <p class="h2sub">A 组重构无痕 · B 组门窗本体 · C 组联动 · D 组回归</p>
+
+  <h4>A · 批 I 之后（还没有门窗）</h4>
+  <ul class="check">
+    <li><strong>墙和改之前逐像素一样。</strong>位置、朝向、斜接、选中颜色，全部不变</li>
+    <li>画一堵斜墙（不是轴对齐的），朝向正确 —— <em>原点从中点搬到 start 最容易在斜墙上露馅</em></li>
+    <li>L 形转角<strong>墙角仍然严丝合缝</strong>（M2 的斜接没被 frame 改动弄丢）</li>
+    <li>柱子位置不变（<code>column</code> 从「结构性绑 position」换成「声明 frame」之后）</li>
+    <li>给 <code>SlabNode</code> <em>临时</em>加一个 <code>position: [5,0,5]</code> 字段跑一次 ——
+        <strong>楼板必须纹丝不动</strong>。这是 M6 那条债真的还清了的唯一证据。<em>验完删掉</em></li>
+  </ul>
+
+  <h4>B · 门窗本体</h4>
+  <ul class="check">
+    <li>按 D，鼠标移到墙面上 → 幽灵贴在墙上跟着走；移出墙面 → 幽灵消失（不掉到地上）</li>
+    <li>点一下 → 门出现在墙上，<strong>洞是真的</strong>：从洞里能看到墙那边（ROADMAP 的原话）</li>
+    <li>站在门洞里转一圈：<strong>门框内壁（左右两侧和上方过梁）都能看见</strong>，没有看穿</li>
+    <li>按 N 放一个窗 → 窗下面有墙（窗台段），上面有墙（过梁段）</li>
+    <li>同一堵墙上放两个门 —— 6 段，中间那段实墙在</li>
+    <li>把门拖到墙的最左端 → <strong>贴边停住，不越界，不闪</strong>（I4）</li>
+    <li>试着把门放到另一个门上 → 幽灵变红，点了不生成</li>
+    <li>在<strong>斜墙</strong>上放一个门 —— 门跟着墙的朝向转，不是朝向世界轴</li>
+    <li>从墙的另一面放门 → <code>side</code> 变成 <code>'right'</code>，门朝相反方向</li>
+  </ul>
+
+  <h4>C · 联动（M7 的真正验收）</h4>
+  <ul class="check">
+    <li>拖墙<strong>整体移动</strong> → 门跟着走，<strong>和墙的相对位置一点没变</strong>（I1）</li>
+    <li>拖墙的<strong>端点</strong>把墙拉长 → 门<strong>不动</strong>（离 start 的距离不变，§02 E 的那条判据）</li>
+    <li>把墙拉短到比门还窄 → 不崩、不产生负长度的段（可以夹到贴边，也可以门消失，但要一致）</li>
+    <li>选中门按 Del → 门没了，墙上的洞<strong>补上了</strong></li>
+    <li>选中墙按 Del → <strong>门一起消失</strong>（I3）</li>
+    <li>删墙之后 Ctrl+Z <strong>一次</strong> → 墙和门<strong>一起</strong>回来</li>
+    <li>拖门沿墙滑 → 洞跟着滑，松手一次撤销回到原位</li>
+  </ul>
+
+  <h4>D · 回归（M7 有没有弄坏 M2 / M4 / M6）</h4>
+  <ul class="check">
+    <li>只移动鼠标（不点击）时 <code>buildWallGeometry</code> 的调用<strong>计数不涨</strong> ——
+        <em>在 builder 里塞一个 <code>console.count</code>，验完删掉</em></li>
+    <li>橡皮筋预览线还在（那条 <code>visible={false}</code> 的事故）</li>
+    <li>楼板 / 天花 / 柱子照常能画、能选中</li>
+    <li><code>pnpm verify</code> 全绿，且用例数从 <strong>51</strong> 涨到 <strong>≥ 70</strong>
+        （第 06 步 5 条 + 第 08 步 14 条起）</li>
+  </ul>
+
+  <div class="note">
+    <p><strong>D16 · 这份清单验不到的轴，逐条列出</strong></p>
+    <ul style="margin-bottom:0">
+      <li><strong>全部 34 条都是肉眼的</strong>，除了最后一条。项目里<strong>没有 DOM 测试环境</strong>
+          （<code>jsdom</code> / <code>@react-three/test-renderer</code> 都没装），
+          R3F 渲染、指针事件、键盘快捷键<strong>物理上跑不了自动化测试</strong>。D11 明确接受这一点。</li>
+      <li><strong>本文档没有在浏览器里运行过任何一行。</strong>
+          §02 里带「实测」标记的是<em>独立几何探针</em>（Node + three r185），
+          验的是坐标链和体积守恒，<strong>不是渲染，不是交互，不是这份文档里的代码</strong>。</li>
+      <li><strong>§04 的所有签名都没有被 <code>tsc</code> 看过。</strong>
+          它们是从当前 <code>src/</code> 的真实类型推出来的，但没有编译验证过。
+          第一次 <code>pnpm check-types</code> 报错是<strong>预期内的</strong>，
+          不代表设计错了 —— 但也<strong>不代表设计对了</strong>。</li>
+      <li><strong>性能没验。</strong>段切让一堵墙从 1 个 draw call 变成 2N+1 个。
+          十几堵墙、每堵两三个洞的场景是什么帧率，<strong>不知道</strong>。</li>
+      <li><strong>撤销/重做与 <code>children</code> 的交互只在纸上推过。</strong>
+          第 06 步那条「一次撤销全回来」的断言是<em>要你写的测试</em>，不是我跑过的结果。</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 06 -->
+<section>
+  <h2><span class="num">06</span>故意保留的缺陷</h2>
+  <p class="h2sub">每条都标到期。没有到期的不许进这张表</p>
+
+  <h3>本 M 新引入的</h3>
+
+  <div class="defect"><div><strong>洞只能是轴对齐矩形。</strong>拱形、圆角、异形开口做不了 ——
+    段切的定义就是「按 u 切、按 y 分层」。对照仓库有
+    <code>openingShape: rectangle | rounded | arch</code>（<code>door.ts:100</code>）</div><div class="defect-to">M10（CSG 到位后）</div></div>
+
+  <div class="defect"><div><strong>洞必须贯通整个墙厚。</strong>壁龛、半深窗台板、门套的进深造型都做不了。
+    <code>position[2]</code> 字段留着但恒为 0</div><div class="defect-to">M12</div></div>
+
+  <div class="defect"><div><strong>一堵墙上 N 个洞 = 2N+1 个 draw call。</strong>不合并、不 instancing。
+    十几个洞的墙会明显变慢</div><div class="defect-to">M14</div></div>
+
+  <div class="defect"><div><strong><code>children</code> 是反规范化字段。</strong>
+    和 <code>parentId</code> 表达同一件事，只靠 <code>addNode</code>/<code>removeNode</code> 两处维护。
+    <strong>M9 的存档导入如果直接写 <code>nodes</code>，必须重建这个索引</strong>，
+    否则门会渲染不出来而且不报错</div><div class="defect-to">M9（必做）</div></div>
+
+  <div class="defect"><div><strong>拖门时宿主墙每帧重切。</strong>「有 <code>parentId</code> 就把父标脏」
+    在拖拽期每帧触发一次墙几何重建。一堵墙可以接受，但这是 M4 好不容易消掉的那类开销回来了一点</div><div class="defect-to">M13</div></div>
+
+  <div class="defect"><div><strong>门窗不吸附到相邻门窗。</strong>只吸 0.1 m 网格。
+    对照仓库有边对边 / 中对中对齐（<code>snapLocalXToNeighbors</code>）</div><div class="defect-to">M12</div></div>
+
+  <div class="defect"><div><strong>门窗不能改尺寸。</strong>没有宽/高手柄，只有默认值。
+    对照仓库的 <code>doorWidthHandle</code> 有一段「拖一边、另一边锚定、
+    <code>position</code> 反算」的数学（<code>door/definition.ts:65-83</code>），值得抄，但不是现在</div><div class="defect-to">M13</div></div>
+
+  <div class="defect"><div><strong>门窗不能换宿主。</strong>放下之后不能拖到另一堵墙上 ——
+    只能沿当前墙滑。<code>parentId</code> 的重挂逻辑要动到两堵墙的 <code>children</code></div><div class="defect-to">M13</div></div>
+
+  <div class="defect"><div><strong>门没有开合。</strong><code>swingAngle</code> / 铰链方向 /
+    推拉 / 双开全部不做（D2）。门就是一块板</div><div class="defect-to">不做</div></div>
+
+  <h3>沿用 / 更正的旧账</h3>
+
+  <div class="defect"><div><strong>「有 <code>position</code> 就绑」判据无强制</strong>（M6 §06 来源三 ①）——
+    <span class="ok">本 M 关闭</span>。<code>def.frame</code> 把它从「结构性猜测」变成「显式声明」，
+    §05 A 组最后一条就是它的验收</div><div class="defect-to">✅ M7 关</div></div>
+
+  <div class="defect"><div><strong>「挖洞时洞必须和外轮廓反向 ⟹ <code>signedArea</code> 有消费者」</strong>（M6 §06 来源二）——
+    <span class="cw">撤销，不是关闭</span>。<code>ExtrudeGeometry</code> 自己归一化绕向
+    （<code>three.core.js:36317/36327</code>，实测同向反向产出一致）。
+    <strong><code>signedArea</code> 至今零消费者</strong>，它真正的用户是 M11 的楼板挖洞</div><div class="defect-to">⊘ 撤销 · 转 M11</div></div>
+
+  <div class="defect"><div><strong><code>sceneRegistry.byType</code> 有写入无读者</strong>（M1 起）——
+    <span class="cw">M7 依然不还</span>。拾取墙面走 R3F 自己的射线，
+    不需要按 kind 过滤自建射线。真正的用户是空间查询</div><div class="defect-to">M8+</div></div>
+
+  <div class="defect"><div><strong><code>grid:click</code> 每次都对 sceneRegistry 多射一次线</strong>（M3 起）——
+    <span class="cw">M7 依然不还，而且更糟</span>：现在同一次点击有两次独立的射线
+    （<code>use-grid-events</code> 一次、R3F 一次），<strong>两次的结果必须一致</strong>，
+    不一致就会出现「点了墙但没放上门，也没取消选中」</div><div class="defect-to">M12</div></div>
+
+  <div class="defect"><div><strong><code>eventToGround</code> 只和 y=0 求交</strong>（M6 记）——
+    <span class="ok">对门窗不再是问题</span>（走 <code>localPoint</code>），
+    但 <strong>柱子和多边形工具还在用它</strong>，3D 透视下画天花仍然会歪。
+    <code>STATE.md</code> 那条「画多边形要按 Tab 切正交顶视」的规避照旧</div><div class="defect-to">M12</div></div>
+
+  <div class="defect"><div><strong>live 覆盖是 <code>Partial&lt;AnyNode&gt;</code>，无 per-type 校验</strong>（M4 起）——
+    门窗加进来之后<strong>误用面变大了</strong>：给门发一个 <code>{ start, end }</code> 的
+    override 不会报错，只会被静默忽略</div><div class="defect-to">M9</div></div>
+
+  <h3>M8 会立刻踩到的两条（提前记，别到时候当新 bug 查）</h3>
+  <ul>
+    <li><strong>墙底在 y=0、楼板顶在 0.05</strong>（M6 记）。门的 <code>position[1]</code>
+        是「离墙底多高」，所以门也会跟着陷进楼板 5 cm。<strong>同一个根因，不是新 bug。</strong></li>
+    <li><strong>墙高存在 <code>wall</code> 自己身上</strong>（M1 记）。
+        门的高度夹紧读的是 <code>getWallHeight(wall)</code>；M8 把层高提到
+        <code>level</code> 之后，这个调用点要跟着改。<strong>就一处</strong>
+        （<code>clampOpeningToWall</code> 的 <code>wall.height</code> 参数），
+        因为夹紧逻辑被抽成了纯函数。<em>这是第 12 步把它抽出来的第二个理由。</em></li>
+  </ul>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 07 -->
+<section>
+  <h2><span class="num">07</span>全部代码</h2>
+  <p class="h2sub">24 个文件 · 按批次排 · 从跑绿过的那份拷贝直接导出</p>
+
+  <div class="note" style="border-left-color:var(--accent)">
+    <p><strong class="ok">本节代码验证到哪一层（D16）</strong></p>
+    <p>
+      <strong>已验</strong>：这些文件被原样放进 <code>src/</code> 的一份完整拷贝里跑过——<br>
+      <code>tsc --build --noEmit</code> ✅ ·
+      <code>eslint src</code> ✅ ·
+      <code>vitest run</code> ✅ <strong>8 文件 / 95 用例</strong>（原 51 → 95）·
+      <code>tsc --build</code> ✅<br>
+      另跑了 <strong>8 条一次性端到端几何探针</strong>（下面单列），全绿。<strong>探针不在交付范围内</strong>——
+      它们验的是本文档的声明，不是产品代码。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>未验：浏览器里的实际渲染与交互。</strong>没有一帧画面被人看过。
+      具体来说：指针事件是否真的打到墙面、幽灵跟不跟手、快捷键有没有和别的冲突、
+      段切之后的帧率、拖墙时门跟不跟——<strong>全部未验证</strong>。
+      §05 的 34 条肉眼验收就是为这一层准备的，一条都不能省。
+      这正是 2026-09-02 那次事故的教训：<em>tsc / eslint / vitest 结构上看不见渲染。</em>
+    </p>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">跑测试时撞出来的一个真 bug —— 它差点原样进文档</span>
+    <p>
+      <code>splitWallByOpenings</code> 第一版用 <code>polygon.length &lt; 3</code> 判退化段。
+      <strong>不够。</strong>洞正好贴着墙端点时（<code>left = 0</code>），
+      Sutherland–Hodgman 会把落在切线上的顶点<em>输出两次</em>，
+      于是裁出来是<strong>四个共线的点</strong>——点数 ≥ 3，面积为 0。
+      守卫放行，<code>ExtrudeGeometry</code> 收下，产出一个零面积的壳。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>它不会报错，不会崩，在画面上什么都看不见。</strong>
+      抓到它的是「洞贴左端 → 2 段」那条测试（实际给了 3 段）。
+      修法是两条：<code>clipHalfPlane</code> 里去掉重复顶点，
+      <code>pushBand</code> 里改判<strong>面积</strong>而不是点数。
+      <em>这就是为什么第 08 步的 14 条测试要先写、先跑绿，再去碰几何。</em>
+    </p>
+  </div>
+
+  <h3 class="batch">批 I · 坐标系机制</h3>
+  <p>五个文件。做完屏幕上必须<strong>一模一样</strong>——这一批零新功能。</p>
+
+  <h3><code>src/core/registry/node-definition.ts</code> <span class="tag core">core</span> <span class="filelines">50 行</span></h3>
+      <p>你已经敲过了。这里补上那条空注释的内容——它是 D19 那把锁的说明书。</p>
+<pre><code>import type * as THREE from 'three'
+import type { AnyNode, AnyNodeId, AnyNodeType } from "../schema/types"
+import type { ComponentType } from 'react'
+
+export type NodeFrame = {
+    position: [number, number, number]
+    rotationY: number
+}
+
+export const IDENTITY_FRAME: NodeFrame = { position: [0, 0, 0], rotationY: 0 }
+/**
+ * 
+ */
+export type GeometryContext&lt;L = unknown&gt; = {
+    resolve: (id: AnyNodeId) =&gt; AnyNode | undefined
+    siblings: readonly AnyNode[]
+    levelData: L | undefined
+}
+
+export type NodeAppearance = { selected: boolean }
+
+export type NodeDefinition&lt;N extends AnyNode = AnyNode, L = unknown&gt; = {
+    kind: N['type']
+
+    /**
+     * 这个节点的 group 该站在哪。
+     *
+     * 不声明 = 单位矩阵（信封路线：builder 把世界坐标烤进几何）。
+     * 渲染器【只】问这里，不按字段名去猜 —— 所以给一个没有 frame 的类型
+     * 加一个叫 position 的字段不会有任何效果，更不会被平移两次。
+     */
+    frame?: (node: N) =&gt; NodeFrame
+    geometry?: (node: N, ctx: GeometryContext&lt;L&gt;, appearance: NodeAppearance) =&gt; THREE.Object3D
+
+    computeLevelData?: (siblings: readonly N[]) =&gt; L
+
+    renderer?: ComponentType&lt;{ node: N }&gt;
+
+    system?: ComponentType
+}
+
+export type AnyNodeDefinition = NodeDefinition&lt;AnyNode, unknown&gt;
+
+export function asAnyDefinition&lt;N extends AnyNode, L&gt;(
+    def: NodeDefinition&lt;N, L&gt;,
+): AnyNodeDefinition {
+    return def as unknown as AnyNodeDefinition
+}
+
+export type { AnyNodeType }
+</code></pre>
+
+  <h3><code>src/core/schema/base.ts</code> <span class="tag core">core</span> <span class="filelines">29 行</span></h3>
+<pre><code>import { customAlphabet } from 'nanoid'
+import { z } from 'zod'
+
+
+const customId = customAlphabet('0123456789abced', 16)
+
+export const generateId = &lt;T extends string&gt;(prefix: T): `${T}_${string}` =&gt;
+  `${prefix}_${customId()}` as `${T}_${string}`
+
+export const objectId = &lt;T extends string&gt;(prefix: T) =&gt; {
+  const schema = z.templateLiteral([`${prefix}_`, z.string()])
+
+  return schema.default(() =&gt; generateId(prefix) as z.infer&lt;typeof schema&gt;)
+}
+
+export const nodeType = &lt;T extends string&gt;(type: T) =&gt; z.literal(type).default(type)
+
+export const BaseNode = z.object({
+  object: z.literal('node').default('node'),
+  id: z.string(),
+  type: nodeType('node'),
+  name: z.string().optional(),
+  parentId: z.string().nullable().default(null),
+  children: z.array(z.string()).default([]),
+  visible: z.boolean().optional().default(true),
+  metadata: z.json().optional().default({}),
+})
+
+export type BaseNode = z.infer&lt;typeof BaseNode&gt; 
+</code></pre>
+
+  <h3><code>src/core/schema/types.ts</code> <span class="tag core">core</span> <span class="filelines">30 行</span></h3>
+      <p><code>asNodeId</code> 是 <code>const</code>，不是 <code>type</code>，而且 <code>AnyNodeId</code> 那行要留着。</p>
+<pre><code>import { z } from 'zod'
+import { WallNode } from './wall'
+import { SlabNode } from './slab'
+import { CeilingNode } from './ceiling'
+import { ColumnNode } from './column'
+import { DoorNode } from './door'
+import { WindowNode } from './window'
+
+export const AnyNode = z.discriminatedUnion('type', [
+    WallNode,
+    SlabNode,
+    CeilingNode,
+    ColumnNode,
+    DoorNode,
+    WindowNode,
+])
+
+export type AnyNode = z.infer&lt;typeof AnyNode&gt;
+export type AnyNodeId = AnyNode['id']
+export type AnyNodeType = AnyNode['type']
+
+/** 宿主上挂的门窗。联合住这里，不住 opening.ts —— 那边不许 import 节点。 */
+export type OpeningNode = DoorNode | WindowNode
+
+/**
+ * children 是 string[]（写进 BaseNode 会让 AnyNodeId 循环引用自己），
+ * 而 nodes 是 Record&lt;AnyNodeId, AnyNode&gt;。这个转换是那道缝，
+ * 做成具名函数是为了它可 grep —— M9 重建 children 索引时这就是清单。
+ */
+export const asNodeId = (id: string): AnyNodeId =&gt; id as AnyNodeId
+</code></pre>
+
+  <h3><code>src/viewer/components/parametric-node-renderer.tsx</code> <span class="tag viewer">viewer</span> <span class="filelines">49 行</span></h3>
+      <p><code>positionOf()</code> 和 <code>ORIGIN</code> 整个删掉。</p>
+<pre><code>import type * as THREE from 'three'
+import { useContext, useLayoutEffect, useRef } from "react";
+import { asNodeId, type AnyNode } from "../../core/schema/types";
+import { useRegistry } from '../../core/registry/scene-registry';
+import { nodeRegistry } from '../../core/registry/node-registry';
+import { IDENTITY_FRAME } from '../../core/registry/node-definition';
+import { useNodeEvents } from '../hooks/use-node-events';
+import { useEffectiveNode } from '../hooks/use-effective-node';
+import { SelectionContext } from './scene-context';
+import { useScene } from '../../core/store/use-scene';
+import { NodeRenderer } from './node-renderer';
+
+export function ParametricNodeRenderer({ node }: { node: AnyNode }) {
+    const ref = useRef&lt;THREE.Group&gt;(null)
+    useRegistry(node.id, node.type, ref)
+
+    // 位姿必须吃【生效后】的节点：拖墙时 live override 里是新的 start/end，
+    // 读文档节点的话几何跟着拖、位姿停在原地，墙看起来在原地伸缩。
+    const effective = useEffectiveNode(node)
+
+    // 事件仍然用文档节点：idle 时两者相同，而混一个语义改动进来
+    // 会让「屏幕上一模一样」这条判据失效。
+    const events = useNodeEvents(node, node.type)
+
+    const isSelected = useContext(SelectionContext) === node.id
+
+    // 位姿从注册表要，不再按字段名猜。没声明 frame 的类型拿到单位矩阵，
+    // 就算它有一个叫 position 的字段也一样 —— 这是 D19 那把锁。
+    const def = nodeRegistry.get(node.type)
+    const frame = def?.frame?.(effective) ?? IDENTITY_FRAME
+
+    useLayoutEffect(() =&gt; {
+        useScene.getState().makeDirty(node.id)
+    }, [node.id, effective, isSelected])
+
+    return (
+        &lt;group
+            ref={ref}
+            position={frame.position}
+            rotation-y={frame.rotationY}
+            visible={node.visible !== false}
+            {...events}
+        &gt;
+            {node.children.map((childId) =&gt; (
+                &lt;NodeRenderer key={childId} nodeId={asNodeId(childId)} /&gt;
+            ))}
+        &lt;/group&gt;
+    )
+}
+</code></pre>
+
+  <h3><code>src/viewer/components/node-renderer.tsx</code> <span class="tag viewer">viewer</span> <span class="filelines">34 行</span></h3>
+      <p>只多了一段注释，代码没变——但那段注释解释了这里为什么可以循环 import。</p>
+<pre><code>import type { AnyNodeId } from "../../core/schema/types"
+import { useScene } from "../../core/store/use-scene"
+import { nodeRegistry } from "../nodes/register"
+import { ParametricNodeRenderer } from "./parametric-node-renderer"
+
+export const SceneRenderer = () =&gt; {
+    const rootNodeIds = useScene((state) =&gt; state.rootNodeIds)
+
+    return (
+        &lt;group name="scene-renderer"&gt;
+            {rootNodeIds.map((nodeId) =&gt; &lt;NodeRenderer key={nodeId} nodeId={nodeId}/&gt;)}
+        &lt;/group&gt;
+    )
+}
+
+// NodeRenderer ↔ ParametricNodeRenderer 互相 import。安全的唯一理由是
+// 两边都只在【渲染时】调用对方，模块求值期不读 —— NodeRenderer 是 const，
+// 有 TDZ，谁在模块顶层写 const X = NodeRenderer 就会炸。
+export const NodeRenderer = ({ nodeId }: { nodeId: AnyNodeId }) =&gt; {
+    const node = useScene((state) =&gt; state.nodes[nodeId])
+    if (!node) return null
+
+    const def = nodeRegistry.get(node.type)
+    if (!def) return null
+
+    if (def.renderer) {
+        const Renderer = def.renderer
+        return &lt;Renderer node={node} /&gt;
+    }
+
+    if (def.geometry) return &lt;ParametricNodeRenderer node={node} /&gt;
+
+    return null
+}
+</code></pre>
+
+  <h3><code>src/viewer/nodes/wall/geometry.ts</code> <span class="tag viewer">viewer</span> <span class="filelines">116 行</span></h3>
+      <p>原点搬到 <code>start</code>、摊平 <code>body</code>、消费段规格，三件事一起落。</p>
+<pre><code>import * as THREE from 'three'
+import { midpoint, type Point2D } from '../../../core/lib/geometry-2d'
+import type {
+    GeometryContext,
+    NodeAppearance,
+    NodeFrame,
+} from '../../../core/registry/node-definition'
+import { getWallHeight, type WallNode } from '../../../core/schema/wall'
+import { openingSpan, type OpeningSpan } from '../../../core/schema/opening'
+import { asNodeId } from '../../../core/schema/types'
+import { calculateLevelMiters, type MiterData } from '../../../core/systems/wall/wall-mitering'
+import { getWallPlanFootprint } from '../../../core/systems/wall/wall-footprint'
+import { splitWallByOpenings } from '../../../core/systems/wall/wall-openings'
+import { buildPrismGeometry } from '../shared/polygon-prism'
+
+const WALL_COLOR = '#e8e8e8'
+const WALL_SELECTED_COLOR = '#7dd3c0'
+
+const toPoint = (t: readonly [number, number]): Point2D =&gt; ({ x: t[0], y: t[1] })
+
+export function worldToLocalXZ(
+    p: Point2D,
+    position: [number, number, number],
+    rotationY: number,
+): Point2D {
+    const cos = Math.cos(rotationY)
+    const sin = Math.sin(rotationY)
+    const dx = p.x - position[0]
+    const dz = p.y - position[2]
+    return { x: dx * cos - dz * sin, y: dx * sin + dz * cos }
+}
+
+/**
+ * 墙的局部坐标系：原点在 start，+X 沿墙，+Y 向上（y=0 在墙底，D3），
+ * +Z 是 leftNormal 那一侧。
+ *
+ * 原点必须是 start，不是中点：门的 position[0] 存的是「离 start 多少米」，
+ * 原点在中点的话每次挂载都要减一个 L/2，而墙一变长这个偏移就变，
+ * 门会在拉墙时自己滑走。
+ */
+export function wallTransform(wall: WallNode): NodeFrame {
+    const start = toPoint(wall.start)
+    const end = toPoint(wall.end)
+    const rotationY = Math.atan2(-(end.y - start.y), end.x - start.x)
+    return { position: [start.x, 0, start.y], rotationY }
+}
+
+/** 墙中点的世界坐标。工具层拿它当拖拽锚点用，几何不用。 */
+export function wallCenter(wall: WallNode): Point2D {
+    return midpoint(toPoint(wall.start), toPoint(wall.end))
+}
+
+export function computeWallLevelMiters(walls: readonly WallNode[]): MiterData {
+    return calculateLevelMiters([...walls])
+}
+
+/**
+ * 这堵墙上挂着的门窗，换算成墙局部的洞口区间。
+ *
+ * 走 node.children 而不是 ctx.siblings —— siblings 是【同类型】的兄弟
+ * （GeometrySystem 按 n.type === node.type 过滤），门和墙不是同一种类型，
+ * 所以 siblings 里永远没有门。
+ */
+function collectOpeningSpans(node: WallNode, ctx: GeometryContext&lt;MiterData&gt;): OpeningSpan[] {
+    const spans: OpeningSpan[] = []
+
+    for (const childId of node.children) {
+        const child = ctx.resolve(asNodeId(childId))
+        if (!child) continue
+        if (child.type !== 'door' &amp;&amp; child.type !== 'window') continue
+        spans.push(openingSpan(child))
+    }
+
+    return spans
+}
+
+export function buildWallGeometry(
+    node: WallNode,
+    ctx: GeometryContext&lt;MiterData&gt;,
+    appearance: NodeAppearance,
+): THREE.Object3D {
+    const root = new THREE.Group()
+
+    const miter = ctx.levelData ?? calculateLevelMiters([node])
+    const worldFootprint = getWallPlanFootprint(node, miter)
+    if (worldFootprint.length &lt; 3) return root
+
+    const { position, rotationY } = wallTransform(node)
+    const local = worldFootprint.map((p) =&gt; worldToLocalXZ(p, position, rotationY))
+
+    // 段切：不挖洞，把墙切成若干实心棱柱。为什么不能用 Shape+holes 见 D20。
+    const bands = splitWallByOpenings(local, getWallHeight(node), collectOpeningSpans(node, ctx))
+    if (bands.length === 0) return root
+
+    // N 段共用一个材质：选中换色只改一次，dispose 也只有一处。
+    const material = new THREE.MeshStandardMaterial({
+        color: appearance.selected ? WALL_SELECTED_COLOR : WALL_COLOR,
+        roughness: 0.9,
+        metalness: 0,
+    })
+
+    for (const band of bands) {
+        const geometry = buildPrismGeometry(band.polygon, band.bottomY, band.topY)
+        if (!geometry) continue
+
+        const mesh = new THREE.Mesh(geometry, material)
+        mesh.name = 'wall-body'
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+        root.add(mesh)
+    }
+
+    // 位姿【不】在这里 —— 它由 def.frame 绑在渲染器的 group 上。
+    // 在这里再复合一次就是「平移两次」。
+    return root
+}
+</code></pre>
+
+  <h3><code>src/viewer/nodes/wall/definition.ts</code> <span class="tag viewer">viewer</span> <span class="filelines">13 行</span></h3>
+<pre><code>import type { NodeDefinition } from "../../../core/registry/node-definition";
+import type { WallNode } from "../../../core/schema/wall";
+import type { MiterData } from "../../../core/systems/wall/wall-mitering";
+import { buildWallGeometry, computeWallLevelMiters, wallTransform } from "./geometry";
+
+export const wallDefinition: NodeDefinition&lt;WallNode, MiterData&gt; = {
+    kind: 'wall',
+    // 位姿从 start/end 算出来，不是存在节点上的。这正是 frame 必须是
+    // 一个函数、而不是 space: 'world' | 'local' 那种枚举的原因。
+    frame: wallTransform,
+    geometry: buildWallGeometry,
+    computeLevelData: computeWallLevelMiters,
+}
+</code></pre>
+
+  <h3><code>src/viewer/nodes/column/definition.ts</code> <span class="tag viewer">viewer</span> <span class="filelines">9 行</span></h3>
+<pre><code>import type { NodeDefinition } from "../../../core/registry/node-definition";
+import type { ColumnNode } from "../../../core/schema/column";
+import { buildColumnGeometry } from "./geometry";
+
+export const columnDefinition: NodeDefinition&lt;ColumnNode&gt; = {
+  kind: 'column',
+  frame: (c) =&gt; ({ position: c.position, rotationY: 0 }),
+  geometry: buildColumnGeometry,
+}
+</code></pre>
+
+  <h3 class="batch">批 II · 数据与几何</h3>
+  <p>门窗进 schema，墙学会被切开。这一批带 30 个测试。</p>
+
+  <h3><code>src/core/store/use-scene.ts</code> <span class="tag core">core</span> <span class="filelines">158 行</span></h3>
+<pre><code>'use client'
+import { create } from 'zustand'
+import { temporal } from 'zundo'
+
+import { type AnyNodeId, AnyNode, asNodeId } from "../schema/types"
+import { areSceneSnapshotsEqual, type SceneSnapshot } from './history-control'
+
+type SceneState = {
+    nodes: Record&lt;AnyNodeId, AnyNode&gt;
+    rootNodeIds: AnyNodeId[]
+
+    dirtyNodes: Set&lt;AnyNodeId&gt;
+
+    addNode: (input: unknown) =&gt; AnyNodeId
+    updateNode: (id: AnyNodeId, patch: Partial&lt;AnyNode&gt;) =&gt; void
+    removeNode: (id: AnyNodeId) =&gt; void
+    getNode: (id: AnyNodeId) =&gt; AnyNode | undefined
+
+    makeDirty: (id: AnyNodeId) =&gt; void
+    clearDirty: (id: AnyNodeId) =&gt; void
+    markAllDirty: () =&gt; void
+}
+
+/**
+ * 从 rootId 起收集整棵子树（含自己），深度优先。
+ *
+ * seen 不是为了性能，是为了让脏数据（children 成环）不把删除变成死循环。
+ */
+export function collectSubtree(
+    nodes: Record&lt;AnyNodeId, AnyNode&gt;,
+    rootId: AnyNodeId,
+): AnyNodeId[] {
+    const out: AnyNodeId[] = []
+    const seen = new Set&lt;AnyNodeId&gt;()
+    const stack: AnyNodeId[] = [rootId]
+
+    while (stack.length &gt; 0) {
+        const id = stack.pop()!
+        if (seen.has(id)) continue
+
+        const node = nodes[id]
+        if (!node) continue
+
+        seen.add(id)
+        out.push(id)
+        for (const child of node.children) stack.push(asNodeId(child))
+    }
+
+    return out
+}
+
+export const useScene = create&lt;SceneState&gt;()(
+    temporal(
+        (set, get) =&gt; ({
+            nodes: {},
+            rootNodeIds: [],
+            dirtyNodes: new Set&lt;AnyNodeId&gt;(),
+
+            addNode: (input) =&gt; {
+                // parse 一次同时完成三件事：填 id，填默认值，挡住非法数据。
+                const node = AnyNode.parse(input)
+                const parentId = node.parentId === null ? null : asNodeId(node.parentId)
+
+                // 先校验再 set —— 在 set 里抛会让 zustand 停在半更新状态。
+                if (parentId !== null &amp;&amp; !get().nodes[parentId]) {
+                    throw new Error(`[scene] addNode: 宿主 "${parentId}" 不存在`)
+                }
+
+                set((s) =&gt; {
+                    const nodes: Record&lt;AnyNodeId, AnyNode&gt; = { ...s.nodes, [node.id]: node }
+
+                    if (parentId === null) {
+                        return { nodes, rootNodeIds: [...s.rootNodeIds, node.id] }
+                    }
+
+                    // 有父的节点【不】进 rootNodeIds —— 它由宿主的渲染器递归渲染。
+                    // 进了的话会被渲染两遍：一次在世界坐标，一次在宿主坐标。
+                    const parent = s.nodes[parentId]!
+                    nodes[parentId] = { ...parent, children: [...parent.children, node.id] }
+                    return { nodes, rootNodeIds: s.rootNodeIds }
+                })
+
+                get().makeDirty(node.id)
+                if (parentId !== null) get().makeDirty(parentId)
+                return node.id
+            },
+
+            updateNode: (id, patch) =&gt; {
+                // 重挂宿主要同时改两边的 children，M7 不支持（排 M13）。
+                // 类型上挡不住：Omit 作用在联合上会塌成公共键，
+                // Partial&lt;AnyNode&gt; 能用是因为 Partial 是同态映射类型、会分发。
+                if ('parentId' in patch || 'children' in patch) {
+                    throw new Error('[scene] updateNode: parentId / children 不可 patch')
+                }
+
+                set((s) =&gt; {
+                    const prev = s.nodes[id]
+                    if (!prev) return s
+                    return { nodes: { ...s.nodes, [id]: { ...prev, ...patch } as AnyNode } }
+                })
+
+                const next = get().nodes[id]
+                if (!next) return
+
+                get().makeDirty(id)
+
+                // 洞挪了，宿主墙要重切。M8 的层同理。
+                const parentId = next.parentId === null ? null : asNodeId(next.parentId)
+                if (parentId !== null &amp;&amp; get().nodes[parentId]) get().makeDirty(parentId)
+            },
+
+            removeNode: (id) =&gt; {
+                const target = get().nodes[id]
+                if (!target) return
+
+                const doomed = collectSubtree(get().nodes, id)
+                const removed = new Set&lt;AnyNodeId&gt;(doomed)
+                const parentId = target.parentId === null ? null : asNodeId(target.parentId)
+
+                // 整棵子树在【一次 set】里删完，撤销才是一步。
+                set((s) =&gt; {
+                    const nodes = { ...s.nodes }
+                    for (const doomedId of doomed) delete nodes[doomedId]
+
+                    if (parentId !== null) {
+                        const parent = nodes[parentId]
+                        if (parent) {
+                            nodes[parentId] = {
+                                ...parent,
+                                children: parent.children.filter((c) =&gt; c !== id),
+                            }
+                        }
+                    }
+
+                    return { nodes, rootNodeIds: s.rootNodeIds.filter((n) =&gt; !removed.has(n)) }
+                })
+
+                for (const doomedId of doomed) get().clearDirty(doomedId)
+                if (parentId !== null &amp;&amp; get().nodes[parentId]) get().makeDirty(parentId)
+            },
+
+            getNode: (id) =&gt; get().nodes[id],
+
+            makeDirty: (id) =&gt; { get().dirtyNodes.add(id) },
+            clearDirty: (id) =&gt; { get().dirtyNodes.delete(id) },
+
+            markAllDirty: () =&gt; {
+                const dirty = get().dirtyNodes
+                for (const id of Object.keys(get().nodes) as AnyNodeId[]) dirty.add(id)
+            },
+        }),
+        {
+            partialize: (s): SceneSnapshot =&gt; ({ nodes: s.nodes, rootNodeIds: s.rootNodeIds }),
+            equality: (past, current) =&gt; areSceneSnapshotsEqual(past, current),
+            limit: 50
+        },
+    )
+)
+</code></pre>
+
+  <h3><code>src/core/store/use-scene.test.ts</code> <span class="tag core">core</span> <span class="filelines">140 行</span></h3>
+      <p>11 条。D18 要的「会因为这个 bug 变红」的测试就是它们。</p>
+<pre><code>import { beforeEach, describe, expect, it } from 'vitest'
+import type { AnyNodeId } from '../schema/types'
+import { collectSubtree, useScene } from './use-scene'
+import { runAsSingleSceneHistoryStep } from './history-control'
+
+const reset = () =&gt; {
+  useScene.setState({ nodes: {}, rootNodeIds: [], dirtyNodes: new Set() })
+  useScene.temporal.getState().clear()
+}
+
+const addWall = () =&gt;
+  useScene.getState().addNode({ type: 'wall', start: [0, 0], end: [4, 0] })
+
+const addDoor = (parentId: AnyNodeId, u = 1.5) =&gt;
+  useScene.getState().addNode({ type: 'door', parentId, position: [u, 1.05, 0] })
+
+const nodeAt = (id: AnyNodeId) =&gt; useScene.getState().nodes[id]
+
+describe('父子关系', () =&gt; {
+  beforeEach(reset)
+
+  it('addNode 带 parentId → 进父的 children，不进 rootNodeIds', () =&gt; {
+    const wallId = addWall()
+    const doorId = addDoor(wallId)
+
+    expect(nodeAt(wallId)!.children).toEqual([doorId])
+    expect(useScene.getState().rootNodeIds).toEqual([wallId])
+  })
+
+  it('addNode 的宿主不存在 → 抛错，且场景没被改动', () =&gt; {
+    expect(() =&gt; addDoor('wall_nope' as AnyNodeId)).toThrow()
+    expect(Object.keys(useScene.getState().nodes)).toHaveLength(0)
+  })
+
+  it('addNode 挂上去时宿主进脏集（墙要重切）', () =&gt; {
+    const wallId = addWall()
+    useScene.getState().clearDirty(wallId)
+
+    addDoor(wallId)
+    expect(useScene.getState().dirtyNodes.has(wallId)).toBe(true)
+  })
+
+  it('collectSubtree 含自己，且不会因为成环死循环', () =&gt; {
+    const wallId = addWall()
+    const doorId = addDoor(wallId)
+
+    expect(collectSubtree(useScene.getState().nodes, wallId).sort()).toEqual(
+      [wallId, doorId].sort(),
+    )
+
+    // 人为造一个环：门反过来把墙当孩子。
+    useScene.setState((s) =&gt; ({
+      nodes: { ...s.nodes, [doorId]: { ...s.nodes[doorId]!, children: [wallId] } },
+    }))
+    expect(collectSubtree(useScene.getState().nodes, wallId)).toHaveLength(2)
+  })
+})
+
+describe('级联删除', () =&gt; {
+  beforeEach(reset)
+
+  it('删墙 → 门也没了，rootNodeIds 不含任何一个', () =&gt; {
+    const wallId = addWall()
+    const doorId = addDoor(wallId)
+
+    useScene.getState().removeNode(wallId)
+
+    expect(nodeAt(wallId)).toBeUndefined()
+    expect(nodeAt(doorId)).toBeUndefined()
+    expect(useScene.getState().rootNodeIds).toEqual([])
+  })
+
+  it('删门 → 墙还在，墙的 children 不含它，且墙进脏集', () =&gt; {
+    const wallId = addWall()
+    const doorId = addDoor(wallId)
+    useScene.getState().clearDirty(wallId)
+
+    useScene.getState().removeNode(doorId)
+
+    expect(nodeAt(wallId)!.children).toEqual([])
+    expect(nodeAt(doorId)).toBeUndefined()
+    expect(useScene.getState().dirtyNodes.has(wallId)).toBe(true)
+  })
+
+  it('被删的节点都从脏集里清掉', () =&gt; {
+    const wallId = addWall()
+    const doorId = addDoor(wallId)
+
+    useScene.getState().removeNode(wallId)
+
+    expect(useScene.getState().dirtyNodes.has(wallId)).toBe(false)
+    expect(useScene.getState().dirtyNodes.has(doorId)).toBe(false)
+  })
+
+  it('删墙 → 撤销【一次】，墙和门一起回来', () =&gt; {
+    const wallId = addWall()
+    const doorId = addDoor(wallId)
+
+    runAsSingleSceneHistoryStep(useScene, () =&gt; {
+      useScene.getState().removeNode(wallId)
+    })
+    expect(nodeAt(wallId)).toBeUndefined()
+
+    useScene.temporal.getState().undo()
+
+    expect(nodeAt(wallId)).toBeDefined()
+    expect(nodeAt(doorId)).toBeDefined()
+    expect(nodeAt(wallId)!.children).toEqual([doorId])
+  })
+})
+
+describe('updateNode', () =&gt; {
+  beforeEach(reset)
+
+  it('改门的位置 → 宿主墙也进脏集', () =&gt; {
+    const wallId = addWall()
+    const doorId = addDoor(wallId)
+    useScene.getState().clearDirty(wallId)
+
+    useScene.getState().updateNode(doorId, { position: [2.5, 1.05, 0] })
+
+    expect(useScene.getState().dirtyNodes.has(wallId)).toBe(true)
+  })
+
+  it('patch 里带 parentId 或 children → 抛错', () =&gt; {
+    const wallId = addWall()
+    const doorId = addDoor(wallId)
+
+    expect(() =&gt; useScene.getState().updateNode(doorId, { parentId: wallId })).toThrow()
+    expect(() =&gt; useScene.getState().updateNode(wallId, { children: [] })).toThrow()
+  })
+
+  it('普通 patch 照常工作（没被守卫误伤）', () =&gt; {
+    const wallId = addWall()
+    useScene.getState().updateNode(wallId, { end: [6, 0] })
+
+    const wall = nodeAt(wallId)!
+    expect(wall.type === 'wall' &amp;&amp; wall.end).toEqual([6, 0])
+  })
+})
+</code></pre>
+
+  <h3><code>src/core/schema/opening.ts</code> <span class="tag core">core</span> <span class="filelines">61 行</span></h3>
+      <p>不 import 任何节点——这是它下游能被裸对象测试的原因。</p>
+<pre><code>import { z } from 'zod'
+
+export const DEFAULT_DOOR_WIDTH = 0.9
+export const DEFAULT_DOOR_HEIGHT = 2.1
+export const DEFAULT_WINDOW_WIDTH = 1.2
+export const DEFAULT_WINDOW_HEIGHT = 1.2
+export const DEFAULT_WINDOW_SILL = 0.9
+
+/** [u 沿墙、离 start 的米数; v 洞口【中心】高度; w 离墙中面的进深（M7 恒为 0）] */
+export const OpeningPlacement = z.tuple([z.number(), z.number(), z.number()])
+
+/** 'left' = D3 的 leftNormal 侧，也就是墙局部 +Z 那一面。 */
+export const OpeningSide = z.enum(['left', 'right'])
+export type OpeningSide = z.infer&lt;typeof OpeningSide&gt;
+
+/**
+ * 结构类型，不是 DoorNode | WindowNode。
+ *
+ * 用节点联合会有两个问题：opening.ts ↔ door.ts 循环 import；
+ * 以及 wall-openings.ts 被迫认识「门」这个概念——它本该只知道一个矩形区间。
+ * 结构类型让下游的测试能用裸对象字面量构造输入。
+ */
+export type OpeningLike = {
+  position: readonly [number, number, number]
+  width: number
+  height: number
+}
+
+/** 洞口在墙局部坐标下的四条边。段切和验收都读它，不要各算各的。 */
+export type OpeningSpan = { left: number; right: number; bottom: number; top: number }
+
+export function openingSpan(o: OpeningLike): OpeningSpan {
+  const halfWidth = o.width / 2
+  const halfHeight = o.height / 2
+  return {
+    left: o.position[0] - halfWidth,
+    right: o.position[0] + halfWidth,
+    bottom: o.position[1] - halfHeight,
+    top: o.position[1] + halfHeight,
+  }
+}
+
+/**
+ * I4：把洞口整个夹进 [0, length] × [0, height]。
+ * 洞比墙还大时返回 null——调用方据此拒绝放置，而不是产出负长度的段。
+ */
+export function clampOpeningToWall(
+  placement: readonly [number, number, number],
+  size: { width: number; height: number },
+  wall: { length: number; height: number },
+): [number, number, number] | null {
+  const halfWidth = size.width / 2
+  const halfHeight = size.height / 2
+
+  if (size.width &gt; wall.length || size.height &gt; wall.height) return null
+
+  const u = Math.min(Math.max(placement[0], halfWidth), wall.length - halfWidth)
+  const v = Math.min(Math.max(placement[1], halfHeight), wall.height - halfHeight)
+
+  return [u, v, placement[2]]
+}
+</code></pre>
+
+  <h3><code>src/core/schema/door.ts</code> <span class="tag core">core</span> <span class="filelines">28 行</span></h3>
+<pre><code>import { z } from 'zod'
+import { BaseNode, nodeType, objectId } from './base'
+import {
+  DEFAULT_DOOR_HEIGHT,
+  DEFAULT_DOOR_WIDTH,
+  OpeningPlacement,
+  OpeningSide,
+} from './opening'
+
+export const DoorNode = BaseNode.extend({
+  id: objectId('door'),
+  type: nodeType('door'),
+
+  // 收窄：门不可能没有宿主。BaseNode.parentId 是 nullable，这里覆盖成必填。
+  // 代价是不带 parentId 的 parse 会抛——这正是想要的。
+  parentId: z.string(),
+
+  // 墙局部坐标。position[1] 是洞口【中心】高度，不是底标高：
+  // 门 = height / 2，窗 = 窗台 + height / 2。
+  position: OpeningPlacement.default([0, DEFAULT_DOOR_HEIGHT / 2, 0]),
+
+  width: z.number().positive().default(DEFAULT_DOOR_WIDTH),
+  height: z.number().positive().default(DEFAULT_DOOR_HEIGHT),
+
+  side: OpeningSide.default('left'),
+})
+
+export type DoorNode = z.infer&lt;typeof DoorNode&gt;
+</code></pre>
+
+  <h3><code>src/core/schema/window.ts</code> <span class="tag core">core</span> <span class="filelines">29 行</span></h3>
+<pre><code>import { z } from 'zod'
+import { BaseNode, nodeType, objectId } from './base'
+import {
+  DEFAULT_WINDOW_HEIGHT,
+  DEFAULT_WINDOW_SILL,
+  DEFAULT_WINDOW_WIDTH,
+  OpeningPlacement,
+  OpeningSide,
+} from './opening'
+
+export const WindowNode = BaseNode.extend({
+  id: objectId('window'),
+  type: nodeType('window'),
+
+  parentId: z.string(),
+
+  position: OpeningPlacement.default([
+    0,
+    DEFAULT_WINDOW_SILL + DEFAULT_WINDOW_HEIGHT / 2,
+    0,
+  ]),
+
+  width: z.number().positive().default(DEFAULT_WINDOW_WIDTH),
+  height: z.number().positive().default(DEFAULT_WINDOW_HEIGHT),
+
+  side: OpeningSide.default('left'),
+})
+
+export type WindowNode = z.infer&lt;typeof WindowNode&gt;
+</code></pre>
+
+  <h3><code>src/core/systems/wall/wall-openings.ts</code> <span class="tag core">core</span> <span class="filelines">166 行</span></h3>
+      <p>本 M 的算法核心。<code>BAND_AREA_EPSILON</code> 和去重那两段是跑测试时撞出来的，不是纸上推的——见 §07 开头。</p>
+<pre><code>import type { Point2D } from '../../lib/geometry-2d'
+import { polygonArea } from '../../lib/polygon-2d'
+import type { OpeningSpan } from '../../schema/opening'
+
+/** 段的长度/高度低于这个值就不发。浮点不会正好相等，所以判区间长度，不判端点相等。 */
+export const BAND_EPSILON = 1e-6
+
+/**
+ * 面积下限。点数 &gt;= 3 不足以说明多边形非退化：
+ * 裁到边界上会得到一串共线的点（见 clipHalfPlane 的去重注释）。
+ * 最窄的合法段是 BAND_EPSILON x 墙厚 ~ 1e-7，所以这个阈值要远小于它。
+ */
+export const BAND_AREA_EPSILON = 1e-12
+
+/**
+ * 一段实心墙。
+ *
+ * ⚠ polygon 是墙【局部平面】轮廓：x 是沿墙的 u，y 是离墙中面的横向偏移。
+ *   高度住 bottomY / topY，不在 polygon 里。两个 y 撞名，别写混。
+ */
+export type WallBand = {
+  polygon: Point2D[]
+  bottomY: number
+  topY: number
+}
+
+/**
+ * 用两条垂直于墙轴的半平面裁剪多边形（Sutherland–Hodgman）。
+ * 绕向保持不变；结果少于 3 点时返回 []。
+ *
+ * uMin / uMax 接受 ±Infinity —— 首末两段必须这么传：
+ * getWallPlanFootprint 在接头处产出的点会超出 [0, L]（斜接就是往外顶），
+ * 写成 0 / L 会把墙角削平，而且只在有接头的墙上出现。
+ */
+export function clipPolygonByU(
+  polygon: readonly Point2D[],
+  uMin: number,
+  uMax: number,
+): Point2D[] {
+  const lower = clipHalfPlane(polygon, uMin, true)
+  const clipped = clipHalfPlane(lower, uMax, false)
+  return clipped.length &lt; 3 ? [] : clipped
+}
+
+function clipHalfPlane(
+  polygon: readonly Point2D[],
+  cutX: number,
+  keepGreater: boolean,
+): Point2D[] {
+  if (polygon.length === 0) return []
+
+  const inside = (p: Point2D) =&gt; (keepGreater ? p.x &gt;= cutX : p.x &lt;= cutX)
+  const out: Point2D[] = []
+
+  // 顶点正好落在切线上时，Sutherland-Hodgman 会把它输出两次
+  // （一次作为“在内侧的原顶点”，一次作为“交点”）。重复顶点会让
+  // ExtrudeGeometry 产出零面积三角形，而且不报错，所以在这里就去掉。
+  const push = (p: Point2D) =&gt; {
+    const last = out[out.length - 1]
+    if (last &amp;&amp; samePoint(last, p)) return
+    out.push(p)
+  }
+
+  for (let i = 0; i &lt; polygon.length; i += 1) {
+    const current = polygon[i]!
+    const next = polygon[(i + 1) % polygon.length]!
+    const currentInside = inside(current)
+
+    if (currentInside) push(current)
+    if (currentInside === inside(next)) continue
+
+    const dx = next.x - current.x
+    // 一条竖直边跨不过一条竖直切线；走到这里只可能是浮点噪声，不插点。
+    if (Math.abs(dx) &lt; Number.EPSILON) continue
+
+    const t = (cutX - current.x) / dx
+    push({ x: cutX, y: current.y + (next.y - current.y) * t })
+  }
+
+  // 首尾也可能重合。
+  while (out.length &gt; 1 &amp;&amp; samePoint(out[0]!, out[out.length - 1]!)) out.pop()
+
+  return out
+}
+
+function samePoint(a: Point2D, b: Point2D): boolean {
+  return Math.abs(a.x - b.x) &lt; BAND_AREA_EPSILON &amp;&amp; Math.abs(a.y - b.y) &lt; BAND_AREA_EPSILON
+}
+
+/**
+ * 墙局部轮廓 + 洞口列表 → 段列表。这就是「段切」。
+ *
+ * 不挖洞：把墙切成若干实心棱柱——洞左边一段（满高）、洞右边一段（满高）、
+ * 洞上方过梁、洞下方窗台。门的 sill = 0 时下方那段长度为 0，直接不发。
+ */
+export function splitWallByOpenings(
+  footprint: readonly Point2D[],
+  wallHeight: number,
+  openings: readonly OpeningSpan[],
+): WallBand[] {
+  if (footprint.length &lt; 3 || wallHeight &lt;= BAND_EPSILON) return []
+
+  const spans = mergeOpeningSpans(openings)
+  const bands: WallBand[] = []
+
+  let cursor = Number.NEGATIVE_INFINITY
+  for (const span of spans) {
+    pushBand(bands, footprint, cursor, span.left, 0, wallHeight)
+    pushBand(bands, footprint, span.left, span.right, 0, span.bottom)
+    pushBand(bands, footprint, span.left, span.right, span.top, wallHeight)
+    cursor = span.right
+  }
+  pushBand(bands, footprint, cursor, Number.POSITIVE_INFINITY, 0, wallHeight)
+
+  return bands
+}
+
+function pushBand(
+  bands: WallBand[],
+  footprint: readonly Point2D[],
+  uMin: number,
+  uMax: number,
+  bottomY: number,
+  topY: number,
+): void {
+  if (topY - bottomY &lt;= BAND_EPSILON) return
+  if (uMax - uMin &lt;= BAND_EPSILON) return
+
+  const polygon = clipPolygonByU(footprint, uMin, uMax)
+  // 点数不够用：裁在边界上会得到 &gt;= 3 个共线点，面积为 0。
+  if (polygon.length &lt; 3 || polygonArea(polygon) &lt;= BAND_AREA_EPSILON) return
+
+  bands.push({ polygon, bottomY, topY })
+}
+
+/**
+ * 排序 + 合并重叠的洞。
+ *
+ * 放置期已经挡了重叠（overlapsExistingOpening），这里是兜底：
+ * 不合并的话同一段墙会被切两次，产出重叠的段。
+ * 合并取包围盒——宁可多挖，也不要留一块悬空的墙。
+ */
+function mergeOpeningSpans(openings: readonly OpeningSpan[]): OpeningSpan[] {
+  const sorted = openings
+    .filter((o) =&gt; o.right - o.left &gt; BAND_EPSILON &amp;&amp; o.top - o.bottom &gt; BAND_EPSILON)
+    .slice()
+    .sort((a, b) =&gt; a.left - b.left)
+
+  const merged: OpeningSpan[] = []
+
+  for (const span of sorted) {
+    const last = merged[merged.length - 1]
+    if (last &amp;&amp; span.left &lt;= last.right + BAND_EPSILON) {
+      merged[merged.length - 1] = {
+        left: last.left,
+        right: Math.max(last.right, span.right),
+        bottom: Math.min(last.bottom, span.bottom),
+        top: Math.max(last.top, span.top),
+      }
+      continue
+    }
+    merged.push({ ...span })
+  }
+
+  return merged
+}
+</code></pre>
+
+  <h3><code>src/core/systems/wall/wall-openings.test.ts</code> <span class="tag core">core</span> <span class="filelines">164 行</span></h3>
+      <p>19 条。最后两条是 I2 体积守恒。</p>
+<pre><code>import { describe, expect, it } from 'vitest'
+import type { Point2D } from '../../lib/geometry-2d'
+import { polygonArea } from '../../lib/polygon-2d'
+import type { OpeningSpan } from '../../schema/opening'
+import { clipPolygonByU, splitWallByOpenings } from './wall-openings'
+
+const L = 4
+const T = 0.1
+const H = 2.5
+
+/** 直墙的局部平面轮廓：x 沿墙 [0, L]，y 是横向偏移 ±T/2。原点在 start。 */
+const RECT: Point2D[] = [
+  { x: 0, y: T / 2 },
+  { x: L, y: T / 2 },
+  { x: L, y: -T / 2 },
+  { x: 0, y: -T / 2 },
+]
+
+/** 起点有接头的斜接轮廓：5 点，中心线端点被顶出来成了第 5 个顶点。 */
+const MITERED: Point2D[] = [
+  { x: 0.05, y: T / 2 },
+  { x: L, y: T / 2 },
+  { x: L, y: -T / 2 },
+  { x: -0.05, y: -T / 2 },
+  { x: 0, y: 0 },
+]
+
+const span = (left: number, right: number, bottom: number, top: number): OpeningSpan =&gt; ({
+  left,
+  right,
+  bottom,
+  top,
+})
+
+const DOOR = span(1.05, 1.95, 0, 2.1) // 宽 0.9 高 2.1，坐地
+const WINDOW = span(2.4, 3.6, 0.9, 2.1) // 宽 1.2 高 1.2，窗台 0.9
+
+const bandVolume = (bands: ReturnType&lt;typeof splitWallByOpenings&gt;) =&gt;
+  bands.reduce((sum, b) =&gt; sum + polygonArea(b.polygon) * (b.topY - b.bottomY), 0)
+
+describe('clipPolygonByU', () =&gt; {
+  it('裁中段：4 点，面积按比例', () =&gt; {
+    const clipped = clipPolygonByU(RECT, 1, 3)
+    expect(clipped).toHaveLength(4)
+    expect(polygonArea(clipped)).toBeCloseTo(polygonArea(RECT) * (2 / L), 10)
+  })
+
+  it('裁到区间外 → []', () =&gt; {
+    expect(clipPolygonByU(RECT, 10, 12)).toEqual([])
+  })
+
+  it('区间跨过整个多边形 → 点数和面积都不变', () =&gt; {
+    const clipped = clipPolygonByU(RECT, -1, L + 1)
+    expect(clipped).toHaveLength(RECT.length)
+    expect(polygonArea(clipped)).toBeCloseTo(polygonArea(RECT), 10)
+  })
+
+  it('uMin = -Infinity：只有右边界起作用', () =&gt; {
+    const clipped = clipPolygonByU(RECT, Number.NEGATIVE_INFINITY, 1)
+    expect(polygonArea(clipped)).toBeCloseTo(polygonArea(RECT) * (1 / L), 10)
+  })
+
+  it('斜接轮廓裁最左段：接头顶点被保住（5 点）', () =&gt; {
+    const clipped = clipPolygonByU(MITERED, Number.NEGATIVE_INFINITY, 1)
+    expect(clipped).toHaveLength(5)
+  })
+
+  it('绕向不变（有向面积同号）', () =&gt; {
+    const clipped = clipPolygonByU(RECT, 1, 3)
+    const sign = (pts: Point2D[]) =&gt; {
+      let sum = 0
+      for (let i = 0; i &lt; pts.length; i += 1) {
+        const p = pts[i]!
+        const q = pts[(i + 1) % pts.length]!
+        sum += p.x * q.y - q.x * p.y
+      }
+      return Math.sign(sum)
+    }
+    expect(sign(clipped)).toBe(sign(RECT))
+  })
+})
+
+describe('splitWallByOpenings', () =&gt; {
+  it('无洞 → 1 段，多边形原样', () =&gt; {
+    const bands = splitWallByOpenings(RECT, H, [])
+    expect(bands).toHaveLength(1)
+    expect(bands[0]!.bottomY).toBe(0)
+    expect(bands[0]!.topY).toBe(H)
+    expect(polygonArea(bands[0]!.polygon)).toBeCloseTo(polygonArea(RECT), 10)
+  })
+
+  it('一个门（sill = 0）→ 3 段，没有窗台段', () =&gt; {
+    const bands = splitWallByOpenings(RECT, H, [DOOR])
+    expect(bands).toHaveLength(3)
+    expect(bands.filter((b) =&gt; b.bottomY === 0 &amp;&amp; b.topY === H)).toHaveLength(2)
+    expect(bands.filter((b) =&gt; b.bottomY === DOOR.top)).toHaveLength(1)
+  })
+
+  it('一个窗 → 4 段（窗台 + 过梁都在）', () =&gt; {
+    const bands = splitWallByOpenings(RECT, H, [WINDOW])
+    expect(bands).toHaveLength(4)
+    expect(bands.some((b) =&gt; b.bottomY === 0 &amp;&amp; b.topY === WINDOW.bottom)).toBe(true)
+    expect(bands.some((b) =&gt; b.bottomY === WINDOW.top &amp;&amp; b.topY === H)).toBe(true)
+  })
+
+  it('一门一窗 → 6 段', () =&gt; {
+    expect(splitWallByOpenings(RECT, H, [DOOR, WINDOW])).toHaveLength(6)
+  })
+
+  it('洞的顺序不影响结果', () =&gt; {
+    const a = splitWallByOpenings(RECT, H, [DOOR, WINDOW])
+    const b = splitWallByOpenings(RECT, H, [WINDOW, DOOR])
+    expect(bandVolume(a)).toBeCloseTo(bandVolume(b), 10)
+    expect(a).toHaveLength(b.length)
+  })
+
+  it('洞贴左端 → 2 段，不产生零宽段', () =&gt; {
+    const bands = splitWallByOpenings(RECT, H, [span(0, 0.9, 0, 2.1)])
+    expect(bands).toHaveLength(2)
+    for (const band of bands) {
+      expect(polygonArea(band.polygon)).toBeGreaterThan(0)
+      expect(band.topY - band.bottomY).toBeGreaterThan(0)
+    }
+  })
+
+  it('洞贴右端 → 2 段', () =&gt; {
+    expect(splitWallByOpenings(RECT, H, [span(L - 0.9, L, 0, 2.1)])).toHaveLength(2)
+  })
+
+  it('洞比墙宽 → 空列表（不是抛错）', () =&gt; {
+    expect(splitWallByOpenings(RECT, H, [span(-1, L + 1, 0, H)])).toEqual([])
+  })
+
+  it('两个洞重叠 → 合并成一个区间，不是 5 段', () =&gt; {
+    const bands = splitWallByOpenings(RECT, H, [span(1, 2, 0, 2.1), span(1.5, 2.5, 0, 2.1)])
+    expect(bands).toHaveLength(3)
+  })
+
+  it('两个洞相邻但不重叠 → 中间那段实墙在', () =&gt; {
+    const bands = splitWallByOpenings(RECT, H, [span(1, 1.5, 0, 2.1), span(2, 2.5, 0, 2.1)])
+    const fullHeight = bands.filter((b) =&gt; b.bottomY === 0 &amp;&amp; b.topY === H)
+    expect(fullHeight).toHaveLength(3)
+  })
+
+  it('I2 · 体积守恒：Σ 段体积 === 墙体积 − Σ 洞体积', () =&gt; {
+    const bands = splitWallByOpenings(RECT, H, [DOOR, WINDOW])
+    const doorVolume = (DOOR.right - DOOR.left) * T * (DOOR.top - DOOR.bottom)
+    const windowVolume = (WINDOW.right - WINDOW.left) * T * (WINDOW.top - WINDOW.bottom)
+    expect(bandVolume(bands)).toBeCloseTo(polygonArea(RECT) * H - doorVolume - windowVolume, 10)
+  })
+
+  it('I2 · 斜接轮廓上同样守恒（斜接没被裁掉）', () =&gt; {
+    const bands = splitWallByOpenings(MITERED, H, [DOOR])
+    const holeArea = polygonArea(clipPolygonByU(MITERED, DOOR.left, DOOR.right))
+    expect(bandVolume(bands)).toBeCloseTo(
+      polygonArea(MITERED) * H - holeArea * (DOOR.top - DOOR.bottom),
+      10,
+    )
+  })
+
+  it('墙高为 0 → 空列表', () =&gt; {
+    expect(splitWallByOpenings(RECT, 0, [DOOR])).toEqual([])
+  })
+})
+</code></pre>
+
+  <h3><code>src/viewer/nodes/shared/polygon-prism.ts</code> <span class="tag viewer">viewer</span> <span class="filelines">66 行</span></h3>
+      <p>抽出 <code>buildPrismGeometry</code>；<code>buildPolygonPrism</code> 改成调它，slab / ceiling 行为不变。</p>
+<pre><code>import * as THREE from 'three'
+import type { Point2D } from '../../../core/lib/geometry-2d'
+
+/**
+ * 平面多边形 → 一段 y 区间上的实心棱柱几何。不造材质、不造 mesh，
+ * 所以调用方可以让 N 段共用一个材质（墙的段切就靠这个）。
+ *
+ * 退化输入（点数不足 / 高度非正）返回 null，而不是一个空 BufferGeometry ——
+ * 空几何进了场景不报错也不显示，查起来很费劲。
+ */
+export function buildPrismGeometry(
+  polygon: readonly Point2D[],
+  bottomY: number,
+  topY: number,
+): THREE.BufferGeometry | null {
+  const height = topY - bottomY
+  if (polygon.length &lt; 3 || height &lt;= 0) return null
+
+  // shape 的 y 取负：rotateX(-π/2) 会翻转手性，取负正好抵消。
+  // 动了这个负号，法线全部朝内，从外面看整个体会消失。
+  const shape = new THREE.Shape()
+  shape.moveTo(polygon[0]!.x, -polygon[0]!.y)
+  for (let i = 1; i &lt; polygon.length; i += 1) {
+    shape.lineTo(polygon[i]!.x, -polygon[i]!.y)
+  }
+  shape.closePath()
+
+  const geometry = new THREE.ExtrudeGeometry(shape, { depth: height, bevelEnabled: false })
+  geometry.rotateX(-Math.PI / 2)
+  geometry.translate(0, bottomY, 0)
+
+  return geometry
+}
+
+export function buildPolygonPrism({
+  polygon,
+  bottomY,
+  topY,
+  color,
+  name,
+}: {
+  polygon: readonly (readonly [number, number])[]
+  bottomY: number
+  topY: number
+  color: string
+  name: string
+}): THREE.Object3D {
+  const root = new THREE.Group()
+
+  const geometry = buildPrismGeometry(
+    polygon.map((p) =&gt; ({ x: p[0], y: p[1] })),
+    bottomY,
+    topY,
+  )
+  if (!geometry) return root
+
+  const material = new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0 })
+
+  const mesh = new THREE.Mesh(geometry, material)
+  mesh.name = name
+  mesh.castShadow = true
+  mesh.receiveShadow = true
+
+  root.add(mesh)
+  return root
+}
+</code></pre>
+
+  <h3 class="batch">批 III · 交互</h3>
+  <p>能放、能选、能删。</p>
+
+  <h3><code>src/viewer/nodes/opening/geometry.ts</code> <span class="tag viewer">viewer</span> <span class="filelines">124 行</span></h3>
+      <p>门 = 三条框 + 一块板；窗 = 四条框 + 一块玻璃。D2 排除造型细节。</p>
+<pre><code>import * as THREE from 'three'
+import type { NodeAppearance } from '../../../core/registry/node-definition'
+import type { DoorNode } from '../../../core/schema/door'
+import type { WindowNode } from '../../../core/schema/window'
+import { getWallThickness, type WallNode } from '../../../core/schema/wall'
+import type { GeometryContext } from '../../../core/registry/node-definition'
+import { asNodeId } from '../../../core/schema/types'
+
+const FRAME_WIDTH = 0.05
+const FRAME_DEPTH_MARGIN = 0.01
+const LEAF_DEPTH = 0.04
+
+const DOOR_COLOR = '#b9906a'
+const WINDOW_FRAME_COLOR = '#d8dcda'
+const GLASS_COLOR = '#a8c8d8'
+const SELECTED_COLOR = '#7dd3c0'
+
+/**
+ * 宿主墙的厚度。门窗的几何原点是洞口中心（因为 def.frame 就是 node.position），
+ * 所以这里只需要厚度，不需要墙的位姿。
+ */
+function hostThickness(parentId: string, ctx: GeometryContext): number {
+    const host = ctx.resolve(asNodeId(parentId))
+    if (!host || host.type !== 'wall') return getWallThickness({} as WallNode)
+    return getWallThickness(host)
+}
+
+/** 洞口四边的框条。门不发底边（门坐在地上，没有下槛）。 */
+function addFrame(
+    root: THREE.Object3D,
+    width: number,
+    height: number,
+    depth: number,
+    material: THREE.Material,
+    withBottom: boolean,
+): void {
+    const halfW = width / 2
+    const halfH = height / 2
+    const inner = FRAME_WIDTH
+
+    const bar = (w: number, h: number, x: number, y: number) =&gt; {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, depth), material)
+        mesh.position.set(x, y, 0)
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+        root.add(mesh)
+    }
+
+    bar(inner, height, -halfW + inner / 2, 0)
+    bar(inner, height, halfW - inner / 2, 0)
+    bar(width - inner * 2, inner, 0, halfH - inner / 2)
+    if (withBottom) bar(width - inner * 2, inner, 0, -halfH + inner / 2)
+}
+
+export function buildDoorGeometry(
+    node: DoorNode,
+    ctx: GeometryContext,
+    appearance: NodeAppearance,
+): THREE.Object3D {
+    const root = new THREE.Group()
+
+    const thickness = hostThickness(node.parentId, ctx)
+    const frameDepth = Math.max(thickness - FRAME_DEPTH_MARGIN, 0.01)
+
+    const frameMaterial = new THREE.MeshStandardMaterial({
+        color: appearance.selected ? SELECTED_COLOR : DOOR_COLOR,
+        roughness: 0.75,
+        metalness: 0,
+    })
+
+    addFrame(root, node.width, node.height, frameDepth, frameMaterial, false)
+
+    // 门扇：比洞口小一圈（左右各一条框、顶上一条框），坐在地上。
+    const leafWidth = node.width - FRAME_WIDTH * 2
+    const leafHeight = node.height - FRAME_WIDTH
+    const leaf = new THREE.Mesh(
+        new THREE.BoxGeometry(leafWidth, leafHeight, LEAF_DEPTH),
+        frameMaterial,
+    )
+    // 洞口中心是原点，门扇顶边比洞口顶边低一条框，所以整体下移半条框。
+    leaf.position.set(0, -FRAME_WIDTH / 2, 0)
+    leaf.castShadow = true
+    leaf.receiveShadow = true
+    root.add(leaf)
+
+    return root
+}
+
+export function buildWindowGeometry(
+    node: WindowNode,
+    ctx: GeometryContext,
+    appearance: NodeAppearance,
+): THREE.Object3D {
+    const root = new THREE.Group()
+
+    const thickness = hostThickness(node.parentId, ctx)
+    const frameDepth = Math.max(thickness - FRAME_DEPTH_MARGIN, 0.01)
+
+    const frameMaterial = new THREE.MeshStandardMaterial({
+        color: appearance.selected ? SELECTED_COLOR : WINDOW_FRAME_COLOR,
+        roughness: 0.6,
+        metalness: 0,
+    })
+
+    addFrame(root, node.width, node.height, frameDepth, frameMaterial, true)
+
+    const glass = new THREE.Mesh(
+        new THREE.BoxGeometry(
+            node.width - FRAME_WIDTH * 2,
+            node.height - FRAME_WIDTH * 2,
+            0.01,
+        ),
+        new THREE.MeshStandardMaterial({
+            color: GLASS_COLOR,
+            roughness: 0.1,
+            metalness: 0,
+            transparent: true,
+            opacity: 0.35,
+        }),
+    )
+    root.add(glass)
+
+    return root
+}
+</code></pre>
+
+  <h3><code>src/viewer/nodes/opening/definition.ts</code> <span class="tag viewer">viewer</span> <span class="filelines">26 行</span></h3>
+      <p><code>rotationY</code> 由 <code>side</code> 决定，不是恒 0。</p>
+<pre><code>import type { NodeDefinition } from "../../../core/registry/node-definition";
+import type { DoorNode } from "../../../core/schema/door";
+import type { WindowNode } from "../../../core/schema/window";
+import { buildDoorGeometry, buildWindowGeometry } from "./geometry";
+
+// frame 的 position 就是 node.position ——【墙局部坐标】，不做任何换算。
+// 门挂在墙的 group 底下，复合由 three 的场景图完成（D19）。
+//
+// rotationY 不是恒 0：门在墙的右面时要转过去。side 是墙局部的朝向，
+// 所以这里是纯局部旋转，不掺墙自己的角度 —— 掺了就是转两次。
+const openingFrame = (n: DoorNode | WindowNode) =&gt; ({
+  position: n.position,
+  rotationY: n.side === 'left' ? 0 : Math.PI,
+})
+
+export const doorDefinition: NodeDefinition&lt;DoorNode&gt; = {
+  kind: 'door',
+  frame: openingFrame,
+  geometry: buildDoorGeometry,
+}
+
+export const windowDefinition: NodeDefinition&lt;WindowNode&gt; = {
+  kind: 'window',
+  frame: openingFrame,
+  geometry: buildWindowGeometry,
+}
+</code></pre>
+
+  <h3><code>src/viewer/nodes/register.ts</code> <span class="tag viewer">viewer</span> <span class="filelines">21 行</span></h3>
+      <p>+2 行。<code>SelectionManager</code> 一个字不用改——它按注册表订阅。</p>
+<pre><code>import { nodeRegistry, registerNode } from "../../core/registry/node-registry"
+import { ceilingDefinition } from "./ceiling/definition"
+import { columnDefinition } from "./column/definition"
+import { doorDefinition, windowDefinition } from "./opening/definition"
+import { slabDefinition } from "./slab/definition"
+import { wallDefinition } from "./wall/definition"
+
+let registered = false
+
+export function registerAllNodes(): void {
+    if (registered) return
+    registered = true
+    registerNode(wallDefinition)
+    registerNode(slabDefinition)
+    registerNode(ceilingDefinition)
+    registerNode(columnDefinition)
+    registerNode(doorDefinition)
+    registerNode(windowDefinition)
+}
+
+export { nodeRegistry }
+</code></pre>
+
+  <h3><code>src/core/events/types.ts</code> <span class="tag core">core</span> <span class="filelines">32 行</span></h3>
+<pre><code>import type * as THREE from 'three'
+import type { AnyNode, AnyNodeType } from '../schema/types'
+
+export type NodeEventSuffix =
+    | 'click' | 'pointerdown' | 'pointerup' | 'enter' | 'leave' | 'move'
+
+
+export interface NodeEvent&lt;N extends AnyNode = AnyNode&gt; {
+    node: N
+    point: [number, number, number]
+    /**
+     * 命中点在【被命中对象】的局部空间。墙上就是 [u 离 start 多远, 高度, 离中面多深]。
+     * 门窗放置全靠它 —— 不需要自己再射一条线。
+     */
+    localPoint: [number, number, number]
+    /** 命中三角形的法线，同样是对象局部空间。墙上 z &gt; 0 = 左面（D3 的 leftNormal 侧）。 */
+    normal: [number, number, number] | undefined
+    object: THREE.Object3D
+    stopPropagation: () =&gt; void
+    nativeEvent: PointerEvent
+}
+
+export interface GridEvent {
+    point: [number, number, number]
+    nativeEvent: PointerEvent
+}
+
+export type NodeEventKey = `${AnyNodeType}:${NodeEventSuffix}`
+
+export type EventMap =
+    &amp; { [K in NodeEventKey]: NodeEvent }
+    &amp; { 'grid:click': GridEvent }
+</code></pre>
+
+  <h3><code>src/viewer/hooks/use-node-events.ts</code> <span class="tag viewer">viewer</span> <span class="filelines">61 行</span></h3>
+      <p><code>e.object</code>，不是 <code>e.eventObject</code>。</p>
+<pre><code>import type { ThreeEvent } from "@react-three/fiber";
+import * as THREE from 'three'
+import type { NodeEvent, NodeEventKey, NodeEventSuffix } from "../../core/events/types";
+import type { AnyNode, AnyNodeType } from "../../core/schema/types";
+import { emitter } from "../../core/events/bus";
+import { useViewer } from "../store/use-viewer";
+import { isClickGesture } from "../lib/pointer-gesture";
+
+type NodeByKind&lt;K extends AnyNodeType&gt; = Extract&lt;AnyNode, { type: K }&gt;
+
+const localScratch = new THREE.Vector3()
+
+export function useNodeEvents&lt;K extends AnyNodeType&gt;(node: NodeByKind&lt;K&gt;, type: K) {
+    const emit = (suffix: NodeEventSuffix, e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+        // e.object 是【被射线命中的那个 mesh】，e.eventObject 是挂处理器的 group。
+        // 用 eventObject 会得到世界坐标 —— 在原点附近的墙上看起来「差不多对」，
+        // 把墙拖到 (20, 0, 30) 之后门就飞了。
+        //
+        // clone 不能省：worldToLocal 是原地修改，会把 R3F 的事件对象改坏，
+        // 而且后果出现在【下一个】监听器里。
+        const local = e.object.worldToLocal(localScratch.copy(e.point))
+
+        const payload: NodeEvent&lt;NodeByKind&lt;K&gt;&gt; = {
+            node,
+            point: [e.point.x, e.point.y, e.point.z],
+            localPoint: [local.x, local.y, local.z],
+            // face.normal 是【对象局部空间】的（three 不给它乘 matrixWorld），
+            // 墙 mesh 相对 group 没有自己的 transform，所以直接可用。
+            normal: e.face ? [e.face.normal.x, e.face.normal.y, e.face.normal.z] : undefined,
+            object: e.object,
+            stopPropagation: () =&gt; e.stopPropagation(),
+            nativeEvent: e.nativeEvent,
+        }
+
+        emitter.emit(`${type}:${suffix}` as NodeEventKey, payload as NodeEvent)
+    }
+
+    const hoverSuppressed = () =&gt; useViewer.getState().cameraDragging
+
+    return {
+        onPointerDown: (e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+            if (e.button !== 0) return
+            emit('pointerdown', e)
+        },
+        onPointerUp: (e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+            if (e.button !== 0) return
+            emit('pointerup', e)
+            if (isClickGesture(e.nativeEvent)) emit('click', e)
+        },
+        onClick: (_e: ThreeEvent&lt;MouseEvent&gt;) =&gt; {},
+        onPointerEnter: (e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+            if (!hoverSuppressed()) emit('enter', e)
+        },
+        onPointerLeave: (e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+            if (!hoverSuppressed()) emit('leave', e)
+        },
+        onPointerMove: (e: ThreeEvent&lt;PointerEvent&gt;) =&gt; {
+            if (!hoverSuppressed()) emit('move', e)
+        },
+    }
+}
+</code></pre>
+
+  <h3><code>src/app/lib/interaction/opening-placement.ts</code> <span class="tag app">app</span> <span class="filelines">108 行</span></h3>
+      <p>纯函数。从 tsx 里抽出来的唯一理由就是它能被测。</p>
+<pre><code>import { len, sub } from '../../../core/lib/geometry-2d'
+import {
+    clampOpeningToWall,
+    openingSpan,
+    type OpeningSide,
+    type OpeningSpan,
+} from '../../../core/schema/opening'
+import { snapToGrid } from '../../../core/schema/snap-2d'
+import type { AnyNode, AnyNodeId } from '../../../core/schema/types'
+import { getWallHeight, wallEnd, wallStart, type WallNode } from '../../../core/schema/wall'
+
+export type WallHit = {
+    wallId: AnyNodeId
+    /** 离墙 start 的米数，来自 NodeEvent.localPoint[0]。 */
+    u: number
+    /** 命中的是哪一面，来自 NodeEvent.normal[2] 的符号。 */
+    side: OpeningSide
+}
+
+export type OpeningPlacementResult = {
+    position: [number, number, number]
+    valid: boolean
+}
+
+export const wallLength = (wall: WallNode): number =&gt;
+    len(sub(wallEnd(wall), wallStart(wall)))
+
+/** 墙面命中 → 落在哪一侧。normal 是墙局部的，+Z 就是 D3 的 leftNormal 侧。 */
+export function sideFromNormal(normal: readonly [number, number, number] | undefined): OpeningSide {
+    return (normal?.[2] ?? 1) &gt;= 0 ? 'left' : 'right'
+}
+
+/** 沿墙轴的重叠判定。对照仓库叫 hasWallChildOverlap。 */
+export function overlapsExistingOpening(
+    span: OpeningSpan,
+    siblings: readonly AnyNode[],
+    selfId?: AnyNodeId,
+): boolean {
+    for (const sibling of siblings) {
+        if (sibling.id === selfId) continue
+        if (sibling.type !== 'door' &amp;&amp; sibling.type !== 'window') continue
+
+        const other = openingSpan(sibling)
+        // 边对边刚好贴住不算重叠 —— 两扇门并排是合法的。
+        if (span.right &gt; other.left &amp;&amp; other.right &gt; span.left) return true
+    }
+    return false
+}
+
+/**
+ * 落点 → 可提交的 position。
+ *
+ * 返回 { position, valid } 而不是 position | null：
+ * 幽灵在「放不下」的时候【也得画出来】，画在夹紧后的位置、涂成红的。
+ * 返回 null 的话幽灵会闪没。
+ */
+export function resolveOpeningPlacement(args: {
+    hit: WallHit
+    wall: WallNode
+    size: { width: number; height: number }
+    sill: number
+    siblings: readonly AnyNode[]
+    selfId?: AnyNodeId
+}): OpeningPlacementResult {
+    const { hit, wall, size, sill, siblings, selfId } = args
+
+    // 先量化再夹紧。反了会得到一个没量化的边界值。
+    const snappedU = snapToGrid({ x: hit.u, y: 0 }).x
+    const centerV = sill + size.height / 2
+
+    const clamped = clampOpeningToWall([snappedU, centerV, 0], size, {
+        length: wallLength(wall),
+        height: getWallHeight(wall),
+    })
+
+    if (!clamped) {
+        // 洞比墙还大：夹不进去。给一个居中的位置让幽灵有地方画。
+        return { position: [wallLength(wall) / 2, centerV, 0], valid: false }
+    }
+
+    const span = openingSpan({ position: clamped, width: size.width, height: size.height })
+    const valid = !overlapsExistingOpening(span, siblings, selfId)
+
+    return { position: clamped, valid }
+}
+
+/** 沿墙滑动：只动 position[0]，高度和进深原样保留。 */
+export function slideOpeningAlongWall(args: {
+    u: number
+    wall: WallNode
+    opening: { position: readonly [number, number, number]; width: number; height: number }
+    siblings: readonly AnyNode[]
+    selfId: AnyNodeId
+}): OpeningPlacementResult {
+    const { u, wall, opening, siblings, selfId } = args
+
+    const snappedU = snapToGrid({ x: u, y: 0 }).x
+    const clamped = clampOpeningToWall(
+        [snappedU, opening.position[1], opening.position[2]],
+        opening,
+        { length: wallLength(wall), height: getWallHeight(wall) },
+    )
+
+    if (!clamped) return { position: [...opening.position] as [number, number, number], valid: false }
+
+    const span = openingSpan({ position: clamped, width: opening.width, height: opening.height })
+    return { position: clamped, valid: !overlapsExistingOpening(span, siblings, selfId) }
+}
+</code></pre>
+
+  <h3><code>src/app/lib/interaction/opening-placement.test.ts</code> <span class="tag app">app</span> <span class="filelines">145 行</span></h3>
+      <p>14 条。</p>
+<pre><code>import { describe, expect, it } from 'vitest'
+import { DoorNode } from '../../../core/schema/door'
+import { WallNode } from '../../../core/schema/wall'
+import type { AnyNode, AnyNodeId } from '../../../core/schema/types'
+import {
+  overlapsExistingOpening,
+  resolveOpeningPlacement,
+  sideFromNormal,
+  slideOpeningAlongWall,
+  wallLength,
+} from './opening-placement'
+
+const wall = WallNode.parse({ id: 'wall_a', start: [0, 0], end: [4, 0], height: 2.5 })
+const door = (id: string, u: number) =&gt;
+  DoorNode.parse({ id, parentId: 'wall_a', position: [u, 1.05, 0] }) as AnyNode
+
+const DOOR_SIZE = { width: 0.9, height: 2.1 }
+
+describe('sideFromNormal', () =&gt; {
+  it('+Z 是 left（D3 的 leftNormal 侧）', () =&gt; {
+    expect(sideFromNormal([0, 0, 1])).toBe('left')
+    expect(sideFromNormal([0, 0, -1])).toBe('right')
+  })
+
+  it('没有法线时退回 left，不是抛错', () =&gt; {
+    expect(sideFromNormal(undefined)).toBe('left')
+  })
+})
+
+describe('overlapsExistingOpening', () =&gt; {
+  const span = (left: number, right: number) =&gt; ({ left, right, bottom: 0, top: 2.1 })
+
+  it('重叠 → true', () =&gt; {
+    expect(overlapsExistingOpening(span(1, 2), [door('door_a', 1.5)])).toBe(true)
+  })
+
+  it('边对边贴住 → false（两扇门并排是合法的）', () =&gt; {
+    expect(overlapsExistingOpening(span(1.95, 2.85), [door('door_a', 1.5)])).toBe(false)
+  })
+
+  it('排除自己', () =&gt; {
+    const existing = door('door_a', 1.5)
+    expect(overlapsExistingOpening(span(1.05, 1.95), [existing], existing.id)).toBe(false)
+  })
+
+  it('非门窗的兄弟不参与判定', () =&gt; {
+    const column = { id: 'column_a', type: 'column' } as unknown as AnyNode
+    expect(overlapsExistingOpening(span(1, 2), [column])).toBe(false)
+  })
+})
+
+describe('resolveOpeningPlacement', () =&gt; {
+  const base = {
+    wall,
+    size: DOOR_SIZE,
+    sill: 0,
+    siblings: [] as AnyNode[],
+  }
+
+  it('墙中间 → 原样（已量化到 0.1）', () =&gt; {
+    const r = resolveOpeningPlacement({
+      ...base,
+      hit: { wallId: 'wall_a' as AnyNodeId, u: 2, side: 'left' },
+    })
+    expect(r.valid).toBe(true)
+    expect(r.position[0]).toBeCloseTo(2, 10)
+    expect(r.position[1]).toBeCloseTo(1.05, 10) // sill 0 + 高 2.1 的一半
+  })
+
+  it('I4 · 拖到墙外 → 夹到贴边，不越界', () =&gt; {
+    const r = resolveOpeningPlacement({
+      ...base,
+      hit: { wallId: 'wall_a' as AnyNodeId, u: -5, side: 'left' },
+    })
+    expect(r.position[0]).toBeCloseTo(DOOR_SIZE.width / 2, 10)
+
+    const right = resolveOpeningPlacement({
+      ...base,
+      hit: { wallId: 'wall_a' as AnyNodeId, u: 99, side: 'left' },
+    })
+    expect(right.position[0]).toBeCloseTo(wallLength(wall) - DOOR_SIZE.width / 2, 10)
+  })
+
+  it('量化在夹紧【之前】—— 结果仍然贴边，不是量化后的边界', () =&gt; {
+    const r = resolveOpeningPlacement({
+      ...base,
+      hit: { wallId: 'wall_a' as AnyNodeId, u: 3.97, side: 'left' },
+    })
+    expect(r.position[0]).toBeCloseTo(4 - 0.45, 10)
+  })
+
+  it('撞上已有的门 → valid false，但仍然给出位置', () =&gt; {
+    const r = resolveOpeningPlacement({
+      ...base,
+      siblings: [door('door_a', 1.5)],
+      hit: { wallId: 'wall_a' as AnyNodeId, u: 1.6, side: 'left' },
+    })
+    expect(r.valid).toBe(false)
+    expect(r.position[0]).toBeCloseTo(1.6, 10)
+  })
+
+  it('洞比墙宽 → valid false，位置居中（幽灵还得画出来）', () =&gt; {
+    const r = resolveOpeningPlacement({
+      ...base,
+      size: { width: 10, height: 2.1 },
+      hit: { wallId: 'wall_a' as AnyNodeId, u: 2, side: 'left' },
+    })
+    expect(r.valid).toBe(false)
+    expect(r.position[0]).toBeCloseTo(2, 10)
+  })
+
+  it('窗：sill 抬高中心', () =&gt; {
+    const r = resolveOpeningPlacement({
+      ...base,
+      size: { width: 1.2, height: 1.2 },
+      sill: 0.9,
+      hit: { wallId: 'wall_a' as AnyNodeId, u: 2, side: 'left' },
+    })
+    expect(r.position[1]).toBeCloseTo(1.5, 10)
+  })
+})
+
+describe('slideOpeningAlongWall', () =&gt; {
+  it('只动 u，高度和进深不变', () =&gt; {
+    const r = slideOpeningAlongWall({
+      u: 3,
+      wall,
+      opening: { position: [1.5, 1.05, 0], width: 0.9, height: 2.1 },
+      siblings: [],
+      selfId: 'door_a' as AnyNodeId,
+    })
+    expect(r.position).toEqual([3, 1.05, 0])
+  })
+
+  it('滑到墙外 → 夹住', () =&gt; {
+    const r = slideOpeningAlongWall({
+      u: 99,
+      wall,
+      opening: { position: [1.5, 1.05, 0], width: 0.9, height: 2.1 },
+      siblings: [],
+      selfId: 'door_a' as AnyNodeId,
+    })
+    expect(r.position[0]).toBeCloseTo(4 - 0.45, 10)
+  })
+})
+</code></pre>
+
+  <h3><code>src/app/tools/opening-tool.tsx</code> <span class="tag app">app</span> <span class="filelines">186 行</span></h3>
+      <p>形状照抄 <code>ColumnTool</code>，换掉落点来源。</p>
+<pre><code>import * as THREE from 'three'
+import { useFrame } from "@react-three/fiber"
+import { useEffect, useRef, type RefObject } from "react"
+import { emitter } from "../../core/events/bus"
+import type { NodeEvent } from "../../core/events/types"
+import { sceneRegistry } from "../../core/registry/scene-registry"
+import {
+  DEFAULT_DOOR_HEIGHT,
+  DEFAULT_DOOR_WIDTH,
+  DEFAULT_WINDOW_HEIGHT,
+  DEFAULT_WINDOW_SILL,
+  DEFAULT_WINDOW_WIDTH,
+  type OpeningSide,
+} from "../../core/schema/opening"
+import type { AnyNode, AnyNodeId } from "../../core/schema/types"
+import { asNodeId } from "../../core/schema/types"
+import type { WallNode } from "../../core/schema/wall"
+import { useScene } from "../../core/store/use-scene"
+import {
+  resolveOpeningPlacement,
+  sideFromNormal,
+  type WallHit,
+} from "../lib/interaction/opening-placement"
+import { useEditor } from "../store/use-editor"
+import { useInteractionScope } from "../store/use-interaction-scope"
+
+const NEVER_RAYCAST = () =&gt; null
+
+export type OpeningKind = 'door' | 'window'
+
+const SIZES: Record&lt;OpeningKind, { width: number; height: number; sill: number }&gt; = {
+  door: { width: DEFAULT_DOOR_WIDTH, height: DEFAULT_DOOR_HEIGHT, sill: 0 },
+  window: { width: DEFAULT_WINDOW_WIDTH, height: DEFAULT_WINDOW_HEIGHT, sill: DEFAULT_WINDOW_SILL },
+}
+
+type Preview = {
+  wallId: AnyNodeId
+  position: [number, number, number]
+  side: OpeningSide
+  valid: boolean
+}
+
+/** 这堵墙上已有的门窗。重叠判定要用。 */
+function openingsOn(wall: WallNode): AnyNode[] {
+  const { nodes } = useScene.getState()
+  const out: AnyNode[] = []
+  for (const childId of wall.children) {
+    const child = nodes[asNodeId(childId)]
+    if (child &amp;&amp; (child.type === 'door' || child.type === 'window')) out.push(child)
+  }
+  return out
+}
+
+export function OpeningTool({ kind }: { kind: OpeningKind }) {
+  const activeTool = useEditor((s) =&gt; s.activeTool)
+  const active = activeTool === kind
+
+  const previewRef = useRef&lt;Preview | null&gt;(null)
+
+  useEffect(() =&gt; {
+    if (!active) return
+    useInteractionScope.getState().begin({ kind: 'placing', tool: kind })
+    return () =&gt; {
+      useInteractionScope.getState().endIf((s) =&gt; s.kind === 'placing')
+      previewRef.current = null
+    }
+  }, [active, kind])
+
+  useEffect(() =&gt; {
+    if (!active) return
+    const size = SIZES[kind]
+
+    // 落点【不】走 eventToGround —— 那个只和 y=0 地平面求交。
+    // R3F 的事件已经带着命中结果，localPoint 就是墙局部坐标。
+    const hitFrom = (e: NodeEvent): WallHit | null =&gt; {
+      if (e.node.type !== 'wall') return null
+      return {
+        wallId: e.node.id,
+        u: e.localPoint[0],
+        side: sideFromNormal(e.normal),
+      }
+    }
+
+    const onWallMove = (e: NodeEvent) =&gt; {
+      const hit = hitFrom(e)
+      if (!hit) return
+      const wall = e.node as WallNode
+
+      const { position, valid } = resolveOpeningPlacement({
+        hit,
+        wall,
+        size,
+        sill: size.sill,
+        siblings: openingsOn(wall),
+      })
+
+      previewRef.current = { wallId: hit.wallId, position, side: hit.side, valid }
+    }
+
+    // 移出墙面就把幽灵收起来。不退回地面 —— 没有「地上的门」这种中间状态。
+    const onWallLeave = () =&gt; { previewRef.current = null }
+
+    const onWallClick = (e: NodeEvent) =&gt; {
+      const preview = previewRef.current
+      if (!preview || !preview.valid) return
+      if (e.node.type !== 'wall' || e.node.id !== preview.wallId) return
+
+      e.stopPropagation()
+      useScene.getState().addNode({
+        type: kind,
+        parentId: preview.wallId,
+        position: preview.position,
+        side: preview.side,
+      })
+    }
+
+    emitter.on('wall:move', onWallMove)
+    emitter.on('wall:leave', onWallLeave)
+    emitter.on('wall:click', onWallClick)
+
+    return () =&gt; {
+      emitter.off('wall:move', onWallMove)
+      emitter.off('wall:leave', onWallLeave)
+      emitter.off('wall:click', onWallClick)
+    }
+  }, [active, kind])
+
+  if (!active) return null
+  return &lt;OpeningGhost kind={kind} previewRef={previewRef} /&gt;
+}
+
+const scratch = new THREE.Vector3()
+
+function OpeningGhost({
+  kind,
+  previewRef,
+}: {
+  kind: OpeningKind
+  previewRef: RefObject&lt;Preview | null&gt;
+}) {
+  const groupRef = useRef&lt;THREE.Group&gt;(null)
+  const materialRef = useRef&lt;THREE.MeshStandardMaterial&gt;(null)
+  const size = SIZES[kind]
+
+  useFrame(() =&gt; {
+    const group = groupRef.current
+    if (!group) return
+
+    const preview = previewRef.current
+    if (!preview) {
+      group.visible = false
+      return
+    }
+
+    // 幽灵不是场景节点，所以得自己复合一次宿主位姿。
+    // 用宿主 Object3D 的 localToWorld 而不是重算一遍 wallTransform ——
+    // 这样它用的就是【真正生效的】那个 frame，不会和渲染漂开。
+    const host = sceneRegistry.nodes.get(preview.wallId)
+    if (!host) {
+      group.visible = false
+      return
+    }
+
+    group.visible = true
+    group.position.copy(host.localToWorld(scratch.set(...preview.position)))
+    group.rotation.y = host.rotation.y + (preview.side === 'left' ? 0 : Math.PI)
+
+    const material = materialRef.current
+    if (material) material.color.set(preview.valid ? '#0b6e5f' : '#9e4520')
+  })
+
+  return (
+    &lt;group ref={groupRef} visible={false}&gt;
+      &lt;mesh raycast={NEVER_RAYCAST}&gt;
+        &lt;boxGeometry args={[size.width, size.height, 0.14]} /&gt;
+        &lt;meshStandardMaterial
+          ref={materialRef}
+          color="#0b6e5f"
+          transparent
+          opacity={0.35}
+          depthWrite={false}
+        /&gt;
+      &lt;/mesh&gt;
+    &lt;/group&gt;
+  )
+}
+</code></pre>
+
+  <h3>三处只改一两行的文件</h3>
+  <p>整份贴出来没意义，只列改动。</p>
+
+<pre><code><span class="cm">// app/lib/interaction/scope.ts —— placing 从写死 column 放宽</span>
+export type PolygonToolKind = 'slab' | 'ceiling'
+<span class="ok">export type PlacingToolKind = 'column' | 'door' | 'window'</span>
+...
+    | { kind: 'placing'; tool: <span class="ok">PlacingToolKind</span> }
+
+<span class="cm">// app/store/use-editor.ts</span>
+export type Tool = 'select' | 'wall' | 'slab' | 'ceiling' | 'column'<span class="ok"> | 'door' | 'window'</span>
+
+<span class="cm">// app/app.tsx —— 三处</span>
+<span class="ok">import { OpeningTool } from "./tools/opening-tool";</span>
+
+    if (e.key.toLowerCase() === 'c') useEditor.getState().setActiveTool('column')
+<span class="ok">    if (e.key.toLowerCase() === 'd') useEditor.getState().setActiveTool('door')
+    if (e.key.toLowerCase() === 'n') useEditor.getState().setActiveTool('window')</span>
+
+    &lt;ColumnTool /&gt;
+<span class="ok">    &lt;OpeningTool kind="door" /&gt;
+    &lt;OpeningTool kind="window" /&gt;</span>
+</code></pre>
+
+  <h3>那 8 条探针（不要敲进 <code>src/</code>）</h3>
+  <p>
+    验的是文档的声明，不是产品代码。<strong>它们不属于 §07 的交付范围</strong>——
+    列在这里是为了让你知道「已验」那一行到底验了什么。
+  </p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>#</th><th>验的是</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td>①</td><td>空墙：1 个 mesh，体积 = L×T×H</td><td class="ok">✅ 1.0 m³</td></tr>
+      <tr><td>②</td><td>一个门：<strong>3 段</strong>，体积正好少一个门</td><td class="ok">✅ 1.0 − 0.189</td></tr>
+      <tr><td>③</td><td>一门一窗：<strong>6 段</strong>，体积少两个洞</td><td class="ok">✅ 守恒</td></tr>
+      <tr><td>④</td><td>N 段<strong>共用一个材质实例</strong></td><td class="ok">✅ size === 1</td></tr>
+      <tr><td>⑤</td><td>局部包围盒 x∈[0,L] · y∈[0,H] · z=±T/2（<strong>原点在 start</strong>）</td><td class="ok">✅</td></tr>
+      <tr><td>⑥</td><td><strong>门框内壁真的在</strong>：洞两侧各有一个朝向洞口的端面</td><td class="ok">✅ 两侧都有</td></tr>
+      <tr><td>⑦</td><td>斜墙 frame：+X 是墙向，<strong>+Z 是 leftNormal</strong>（D3）</td><td class="ok">✅</td></tr>
+      <tr><td>⑧</td><td>门贴地：<code>sill = 0</code> 时<strong>没有窗台段</strong></td><td class="ok">✅ 2 段落地 + 1 过梁</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">一个和 M7 无关、但你迟早会撞上的坑</span>
+    <p style="margin-bottom:0">
+      跑过 <code>pnpm build</code>（就是 <code>tsc --build</code>）之后再跑 <code>pnpm test</code>，
+      <strong>用例数会翻倍</strong>——<code>tsc</code> 把 <code>*.test.ts</code> 一起编译进了
+      <code>dist/</code>，vitest 的默认 glob 把 <code>dist/**/*.test.js</code> 也收了。
+      我这边一度看到「16 文件 / 190 用例」，就是这个。
+      <strong>不是 M7 引入的，也不阻塞</strong>——但下次看到用例数莫名其妙翻倍，先看 <code>dist/</code>。
+      根治办法是给 vitest 配 <code>exclude</code>，或者让 <code>tsconfig</code> 别编译测试文件。
+    </p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<section>
+  <h2><span class="num">→</span>轮到你了</h2>
+  <p class="prose">
+    <code>[机制]</code> 型，按 D13 <strong>到此为止</strong>。§07 全码要的时候再说。
+  </p>
+  <p class="prose">
+    <strong>建议的第一个动作</strong>：先做批 I（01–04），跑起来看墙有没有变。
+    那四步一行门窗代码都没有，但它们是这个里程碑的<em>全部</em>风险所在 ——
+    坐标系搬错了，后面十步全部长在歪的上面，而且症状会伪装成「门的偏移算错了」。
+  </p>
+  <div class="note">
+    <p><strong>坐标系这一条已经不再是开放问题</strong>（2026-09-05 定路 1，见 §02 A / D19）。
+    所以 §04 的十四步是一条直路，中间没有分叉要你再判断。</p>
+    <p style="margin-bottom:0">
+      仍然留给你判断的只有三处，每处我都在正文里标了：
+      第 02 步 <code>frame</code> 的 <code>ctx</code> 要不要铺到渲染器层（建议不铺）、
+      第 08 步「洞比墙宽」该抛错还是返回空列表（<strong>定一个，别两种都有</strong>）、
+      第 12 步幽灵在非法位置的画法。<strong>这三处怎么定都行，但要一致。</strong>
+    </p>
+  </div>
+</section>
+
+</div>
