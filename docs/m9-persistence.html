@@ -1,0 +1,1379 @@
+<title>M9 存档、导入导出、迁移</title>
+<style>
+:root {
+  --paper:#EDF1EF; --card:#F8FAF9; --code-bg:#E4EBE8;
+  --ink:#131B19; --ink-2:#4A5754; --ink-3:#74827E;
+  --rule:#C4CFCB; --rule-soft:#D7E0DC;
+  --accent:#0B6E5F; --accent-bg:#DBE9E5;
+  --warn:#9E4520; --warn-bg:#F1E2D9;
+  --core:#0B6E5F;  --core-bg:#DBE9E5;
+  --viewer:#2A5A79; --viewer-bg:#DBE5EC;
+  --app:#6A5843;   --app-bg:#ECE5DB;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --body: Georgia, "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+    --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+    --rule:#2A3733; --rule-soft:#1E2926;
+    --accent:#4FC3AA; --accent-bg:#12312B;
+    --warn:#E2916A; --warn-bg:#32211A;
+    --core:#4FC3AA;  --core-bg:#12312B;
+    --viewer:#79B4DA; --viewer-bg:#14262F;
+    --app:#C9AC85;   --app-bg:#2A2318;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:#0D1412; --card:#151E1B; --code-bg:#0A100F;
+  --ink:#DBE5E2; --ink-2:#96A5A1; --ink-3:#6E7C78;
+  --rule:#2A3733; --rule-soft:#1E2926;
+  --accent:#4FC3AA; --accent-bg:#12312B;
+  --warn:#E2916A; --warn-bg:#32211A;
+  --core:#4FC3AA;  --core-bg:#12312B;
+  --viewer:#79B4DA; --viewer-bg:#14262F;
+  --app:#C9AC85;   --app-bg:#2A2318;
+}
+* { box-sizing:border-box; }
+body {
+  background:var(--paper); color:var(--ink); font-family:var(--body);
+  font-size:17px; line-height:1.72; margin:0; padding:0 24px 120px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:940px; margin:0 auto; }
+.prose { max-width:68ch; }
+.masthead { padding:72px 0 0; }
+.eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 20px; display:flex; gap:14px; flex-wrap:wrap;
+}
+.eyebrow b { color:var(--accent); font-weight:600; }
+h1 {
+  font-family:var(--mono); font-size:clamp(32px,5.5vw,50px); line-height:1.08;
+  letter-spacing:-.02em; font-weight:600; margin:0 0 18px; text-wrap:balance;
+}
+.standfirst { font-size:19px; color:var(--ink-2); max-width:60ch; margin:0 0 8px; }
+.dim { position:relative; height:1px; background:var(--rule); border:0; margin:56px 0 40px; }
+.dim::before,.dim::after { content:""; position:absolute; top:-4px; width:1px; height:9px; background:var(--rule); }
+.dim::before{left:0} .dim::after{right:0}
+h2 {
+  font-family:var(--mono); font-size:13px; letter-spacing:.16em; text-transform:uppercase;
+  font-weight:600; color:var(--accent); margin:0 0 6px;
+}
+h2 .num { color:var(--ink-3); margin-right:12px; }
+.h2sub { font-family:var(--mono); font-size:22px; font-weight:600; margin:0 0 24px; letter-spacing:-.01em; }
+h3 { font-family:var(--mono); font-size:16px; font-weight:600; margin:34px 0 10px; }
+h4 { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--accent); margin:24px 0 6px; }
+p { margin:0 0 16px; }
+ul,ol { margin:0 0 16px; padding-left:22px; }
+li { margin-bottom:7px; }
+strong { font-weight:700; color:var(--ink); }
+em { font-style:italic; color:var(--ink-2); }
+code { font-family:var(--mono); font-size:.86em; background:var(--code-bg); padding:1px 5px; border-radius:2px; }
+pre {
+  background:var(--code-bg); border:1px solid var(--rule-soft); border-radius:3px;
+  padding:16px 18px; overflow-x:auto; margin:14px 0 18px; line-height:1.62;
+}
+pre code { background:none; padding:0; font-size:13px; white-space:pre; }
+.cm { color:var(--ink-3); }
+.cw { color:var(--warn); }
+.ok { color:var(--accent); }
+.step {
+  display:grid; grid-template-columns:52px 1fr; gap:0 20px;
+  padding:26px 0; border-top:1px solid var(--rule-soft);
+}
+.step:first-of-type { border-top:1px solid var(--rule); }
+.step-n { font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink-3); padding-top:4px; font-variant-numeric:tabular-nums; }
+.step-body { min-width:0; }
+.step-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.step-title { font-family:var(--mono); font-size:17px; font-weight:600; margin:0; }
+.step-body > p { max-width:64ch; }
+.tag {
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  font-weight:600; padding:3px 8px; border-radius:2px; white-space:nowrap;
+}
+.tag.core{color:var(--core);background:var(--core-bg)}
+.tag.viewer{color:var(--viewer);background:var(--viewer-bg)}
+.tag.app{color:var(--app);background:var(--app-bg)}
+.tag.debt{color:var(--warn);background:var(--warn-bg)}
+.trap {
+  background: repeating-linear-gradient(-45deg, transparent 0 6px,
+    color-mix(in srgb, var(--warn) 7%, transparent) 6px 7px), var(--warn-bg);
+  border-left:3px solid var(--warn); padding:14px 18px; margin:18px 0; border-radius:0 3px 3px 0;
+}
+.trap-label {
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  font-weight:600; color:var(--warn); display:block; margin-bottom:6px;
+}
+.trap p:last-child,.trap ul:last-child { margin-bottom:0; }
+.note { border-left:3px solid var(--rule); padding:2px 0 2px 18px; margin:18px 0; color:var(--ink-2); font-size:16px; }
+.note p:last-child { margin-bottom:0; }
+.tablewrap { overflow-x:auto; margin:18px 0 24px; }
+table { border-collapse:collapse; width:100%; font-family:var(--mono); font-size:13px; min-width:560px; }
+th {
+  text-align:left; font-weight:600; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule); padding:0 14px 8px 0;
+}
+td { padding:9px 14px 9px 0; border-bottom:1px solid var(--rule-soft); vertical-align:top; line-height:1.55; }
+td:last-child,th:last-child { padding-right:0; }
+.check { list-style:none; padding:0; margin:0; }
+.check li {
+  display:grid; grid-template-columns:26px 1fr; gap:10px; padding:11px 0;
+  border-bottom:1px solid var(--rule-soft); margin:0;
+}
+.check li::before { content:""; width:14px; height:14px; border:1.5px solid var(--accent); border-radius:2px; margin-top:6px; }
+.defect { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--rule-soft); }
+.defect-to { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--accent); white-space:nowrap; }
+.figure { margin:24px 0 28px; }
+.figure svg { display:block; width:100%; height:auto; max-width:760px; }
+.filelines { font-family:var(--mono); font-size:11px; font-weight:400; color:var(--ink-3); }
+h3.batch { font-size:20px; margin-top:52px; padding-top:18px; border-top:2px solid var(--rule); }
+.figcap { font-family:var(--mono); font-size:12px; color:var(--ink-3); margin-top:8px; max-width:64ch; line-height:1.6; }
+.road { display:grid; grid-template-columns:1fr 1fr; gap:0 26px; margin:20px 0 8px; }
+.road > div { border-top:2px solid var(--rule); padding-top:14px; min-width:0; }
+.road h4 { margin-top:0; }
+@media (max-width:760px) { .road { grid-template-columns:1fr; gap:24px 0; } }
+a { color:var(--accent); }
+a:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media (max-width:620px) {
+  body { font-size:16px; padding:0 18px 80px; }
+  .step { grid-template-columns:1fr; }
+  .step-n { padding-top:0; margin-bottom:4px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">
+    <span>r3f-arch</span><span>里程碑 <b>09</b> / 14</span><span>混合型</span>
+    <span>D13 · 前置 A–C · §00–§06</span><span>2026-09-15 → 09-16</span>
+  </p>
+  <h1>M9 存档、导入导出、迁移</h1>
+  <p class="standfirst">
+    M8 问「谁决定一个宿主坐在哪」。M9 问的是另一种问题：
+    <strong>「昨天的默认值，明天还算数吗」</strong>——
+    因为存档让「代码里的默认值」和「数据里的值」之间那条线第一次变成永久的。
+  </p>
+
+  <div class="note" style="margin-top:28px">
+    <p><strong>验证声明（D16）</strong></p>
+    <p>
+      <strong>已验：</strong><code>pnpm verify</code> 在<em>当前</em> <code>src/</code> 上跑过——
+      <code>check-types</code> ✅ · <code>eslint</code> ✅ · <code>vitest</code> ✅ <strong>15 文件 / 200 用例</strong>。<br>
+      <strong>已验：前置 C</strong>（M8 收尾：批 J 测试 · P1 · P4 · P5）应用在 <code>src/</code> 的完整拷贝上跑绿，
+      <code>vite build</code> ✅；P4 的 <code>sideFromHit</code> 做了 <strong>4 / 4 变异测试全被抓</strong>，
+      它依赖的坐标系前提用<strong>真的 three 射线</strong>打过（三种走向的墙 × 顶面 / 两侧面）。<br>
+      <strong>已验：§02 / §04 的机制不是纸上推的。</strong>core 七个文件 + <code>replaceScene</code> + <code>autosave</code> + <code>updateNode</code> 写入边界
+      在沙箱里<strong>真写出来跑过</strong>：<code>tsc</code> / <code>eslint</code> / <code>vitest</code> <strong>22 文件 / 268 用例</strong>（实现约 500 行，测试约 560 行），
+      并做了 <strong>21 个变异测试：19 个被抓，2 个存活</strong>——两个存活的各让我<strong>删掉</strong>了一处代码（§00 ⑧）。
+      <strong>这些原型代码不交付</strong>：§07 按工作约定第 1 条由你手敲。<br>
+      <strong>已验：</strong>引用的对照仓库与依赖源码都读过原文，行号在正文里
+      （<code>@react-three/fiber</code> 9.7.0 · <code>@react-three/drei</code> 10.7.8 · three r185 · zustand 5.0.15 ·
+      对照仓库 <code>packages/core</code> / <code>packages/editor</code> / <code>packages/mcp</code> / <code>wiki/</code>）。
+    </p>
+    <p style="margin-bottom:0">
+      <strong>未验：浏览器里的渲染与交互，一帧都没有。</strong>
+      <code>scene-session.ts</code> / <code>local-storage-kv.ts</code> / <code>file-io.ts</code> / 场景面板<strong>一行都没写过</strong>（§05 末尾逐条列出）；
+      真实 <code>localStorage</code> 的配额行为、<code>pagehide</code> 的真实时序、<code>&lt;input type=file&gt;</code> 的 <code>cancel</code> 事件，都只有 §05 B 的肉眼验收能证明。
+    </p>
+  </div>
+
+  <div class="trap" style="margin-top:24px">
+    <span class="trap-label">开工闸门：绿的 —— 但先做前置 C</span>
+    <p>
+      <strong>M7 §05 的 10 条、M8 批 E / G / H / I 的肉眼验收，你 2026-09-15 确认全部走过、全部通过。</strong>
+      这是 M8 文档里那个黄闸门第一次翻绿：M7 的父子关系和 M8 的三层容器<strong>现在有眼睛验过了</strong>，M9 可以踩在上面。
+    </p>
+    <p style="margin-bottom:0">
+      欠的是两样，都在前置 C：<strong>批 J 的 10 条测试没敲</strong>（批 J 的变异测试结论目前在你的 <code>src/</code> 上没有护栏），
+      以及演示暴露的 <strong>P1 / P4 / P5</strong>（P1 会静默改错数据）。<strong>P2 还没复现</strong>——需要你看一眼状态栏，见前置 C 末尾那张表。
+    </p>
+  </div>
+</header>
+
+<hr class="dim">
+
+<!-- ═══════════ 前置 A -->
+<section>
+  <h2><span class="num">前置 A</span>实际代码与计划的偏差</h2>
+  <p class="h2sub">2026-09-15 实测 · 按 <code>handoff-m9.md</code> ② 核对，不重新通读 <code>src/</code></p>
+
+  <h3>基线</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>阶段</th><th>结果</th><th>细节</th></tr></thead>
+    <tbody>
+      <tr><td><code>check-types</code></td><td class="ok"><strong>绿</strong></td><td><code>tsc --build --noEmit</code>，0 错</td></tr>
+      <tr><td><code>lint</code></td><td class="ok"><strong>绿</strong></td><td><code>eslint src</code>，0 错</td></tr>
+      <tr><td><code>test</code></td><td class="ok"><strong>绿</strong></td><td>vitest 4.1.11 · <strong>15 文件 / 200 用例</strong> · 2.0 s</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>五处差，其中一处是交接文档自己判错了</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>差</th><th>结论</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong><code>handoff-m9.md</code> ② 说「批 J 的 15 条测试没敲」，又说「多出 5 条，未查」</strong></td>
+        <td><strong>这是同一件事，判错了。</strong>批 J 的 15 条分两处：新建文件 10 条 + 追加进批 H 那个文件 5 条。
+          <strong>后者你已经敲了</strong>（<code>level-action.test.ts:169-221</code>），批 H 的 13 + 5 = 18，实测正是 18。
+          所以真正缺的是 <strong>10 条</strong>，不是 15；「多出的 5 条」也不存在。前置 C · C1 给这 10 条</td>
+      </tr>
+      <tr>
+        <td><code>core/store/migrate-to-levels.test.ts</code> 不存在（Glob 确认，没有改名）</td>
+        <td>同上。这意味着 M8 批 J 的七次变异测试结论<strong>目前在你的 <code>src/</code> 上没有护栏</strong></td>
+      </tr>
+      <tr>
+        <td>文件名是 <code>level-action.test.ts</code>，文档写的是 <code>level-actions.test.ts</code></td>
+        <td>无害，被测模块是 <code>level-actions.ts</code>。已记进 <code>STATE.md</code>「已知偏差」</td>
+      </tr>
+      <tr>
+        <td><code>ensureScaffold</code> 的报错信息缩短成 <code>'[level] ensureScaffold'</code></td>
+        <td>无害（<code>handoff-m9.md</code> 也这么判的）</td>
+      </tr>
+      <tr>
+        <td><strong><code>wall-tool.tsx:64</code> 的 <code>onPointerMove</code> 没传 <code>baseY</code></strong>，批 H 原文（<code>m8-levels.html:4438</code>）传了</td>
+        <td><strong>新发现的，交接文档没提。</strong>顶视图下没有差别；3D 透视在二层以上画墙会偏。
+          <strong>按 D17 我不把它当缺陷</strong>——请你在浏览器里看一眼，前置 C · C6</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <h3>git 状态（2026-09-15）</h3>
+  <p>
+    <code>handoff-m9.md</code> ① 担心的那批「丢了就找不回」的文件<strong>已经提交了</strong>（<code>7beb476</code>：
+    <code>m7-openings.html</code> / <code>m8-levels.html</code> / <code>m8-demo-issues.md</code> / <code>handoff-m8.md</code> / <code>handoff-m9.md</code> /
+    <code>DECISIONS.md</code> +127 行 / <code>STATE.md</code>），暂存区那三个文件也在 <code>e568b02</code>–<code>4a373d1</code> 里了。
+  </p>
+  <p>
+    还没提交的只有两样：<code>docs/README.md</code>（+2 行，你加的 m7 / handoff-m8 两行）和
+    <strong><code>pnpm-lock.yaml</code>（+267 行）</strong>——后者把 <code>mitt</code> 和 <code>vitest</code> 补进了 <code>importers</code>，
+    也就是说<strong>仓库里那份 lock 和 <code>package.json</code> 一直不同步</strong>，某次 <code>pnpm install</code> 顺手修好了它。
+    建议连同前置 C 一起提交：在一个还没有 CI 的项目里（<code>STATE.md</code>「待处理」），这种不同步只会在换机器时才炸。
+  </p>
+
+  <h3>交接文档 ⑥ 那三条「会让新会话走偏」的事实，逐条核过</h3>
+  <ul>
+    <li><strong>成立：</strong><code>src/</code> 里 <code>localStorage|persist|schemaVersion|serialize</code> <strong>grep 0 处</strong>。
+      <code>m6-prep.md</code> 那份 localStorage 设计<strong>从没敲进去过</strong>，而且它是 M8 之前的 schema（没有容器、没有 <code>children</code> 重建、版本不认识就直接丢）——
+      只能当参考，§00 ② 会逐条说它哪里不够。</li>
+    <li><strong>成立：</strong>ROADMAP 的验收「把 M1 时代格式的存档喂进去」<strong>没有语料</strong>。
+      本方案的办法：<strong>按 git 历史里当时的 zod 定义手写三代语料</strong>（M1 / M6 / M7），每一份都标出它对应哪个提交（§02 C、§04 第 02 步）。</li>
+    <li><strong>成立：</strong><code>STATE.md</code> 挂在 M9 的两笔债——导入必须重建 <code>children</code>、live 覆盖无按类型校验——
+      分别由 <code>normalizeSceneNodes</code>（§02 D）和 <code>updateNode</code> 写入边界（§02 I）还掉<strong>一整条和一半</strong>。</li>
+  </ul>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 前置 B -->
+<section>
+  <h2><span class="num">前置 B</span>五件要你拍板的事</h2>
+  <p class="h2sub">每条都给了我的推荐和理由 —— 但这些是<em>你的</em>地基决定，它们会一直活到 M14</p>
+
+  <div class="step"><div class="step-n">B1</div><div class="step-body">
+    <div class="step-head"><p class="step-title">版本号放在文档上，还是每种节点一个</p><span class="tag core">推荐：文档级整数</span></div>
+    <p>对照仓库选的是后者：每个 <code>NodeDefinition</code> 一个 <code>schemaVersion</code>（wall 是 7、door 是 2）。
+      但 <code>registry.ts:54</code> 只校验它是正整数，<strong>加载路径上没有任何人读它</strong>，
+      <code>wiki/architecture/node-schemas.md:87</code> 原文：「reserved for future use；today all load-time migration is centralised in <code>migrateNodes</code>」。</p>
+    <p><strong>推荐文档级的三个理由：</strong>① v0 → v1 要把<em>所有</em>类型收进容器，对照仓库的电梯迁移要改<em>层</em>的 <code>children</code>——
+      跨类型的迁移不属于任何一个类型；② 按类型编号会变成 N 维兼容矩阵，一个文档没有单一「版本」；
+      ③ 按类型编号真正的用户是插件（各管各的节点），而我们明确不做插件（D2）。</p>
+    <p style="margin-bottom:0"><strong>选它的代价：</strong>任何一种节点的 schema 变了，整个文档版本号 +1，其它类型的节点白走一遍迁移链（它们那一环是恒等函数）。
+      可以接受：迁移只在加载时跑一次。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">B2</div><div class="step-body">
+    <div class="step-head"><p class="step-title">导入 JSON：新建一个场景，还是覆盖当前场景</p><span class="tag core">推荐：新建</span></div>
+    <p><strong>新建</strong>：导入永远不销毁任何东西，不需要「确定要覆盖吗」，也不需要把替换做成可撤销的一步。
+      代价是导入十次得到十个场景，列表要自己清理。</p>
+    <p style="margin-bottom:0"><strong>覆盖</strong>：符合「打开文件」的直觉，但它是 M9 里唯一一个会销毁数据的操作，
+      而且要和自动保存的顺序打交道（§02 F 的第二条顺序）。<strong>我不建议在第一版就引入一条会销毁数据的路径。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="step-n">B3</div><div class="step-body">
+    <div class="step-head"><p class="step-title">要不要抄对照仓库的「疑似误删」护栏</p><span class="tag debt">推荐：不抄，靠存档点</span></div>
+    <p>对照仓库 <code>use-auto-save.ts</code> 有一条 <code>isSuspiciousNodeDrop</code>：节点数从「有内容」掉到「只剩脚手架」时<strong>拒绝写盘</strong>，
+      注释写的是「an accidental full deletion far more often than an intent」。
+      <strong>（它是随一次功能 PR 进去的，不是某次事故的修复——我查了 git log，没有证据说它救过什么。）</strong></p>
+    <p style="margin-bottom:0">不抄的理由：它会让「我真的想清空这个场景」变成一个<strong>静默失败</strong>的操作——你清空、刷新、东西又回来了，而且没人告诉你为什么。
+      我们有更直接的安全网：Ctrl+S 存档点（每场景 10 个），而且刷新之后撤销栈本来就是空的，所以「撤到底再刷新」这条路径没法把存档冲掉。
+      <strong>如果你更怕误删，那就抄它</strong>——十行纯函数、可测，代价是那个静默失败。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">B4</div><div class="step-body">
+    <div class="step-head"><p class="step-title">M4 那笔「live 覆盖无按类型校验」的债，还到哪一步</p><span class="tag core">推荐：只还写入边界</span></div>
+    <p><strong>还写入边界</strong>（<code>updateNode</code> 里校验合并结果，§02 I）：把「错字段能进 store」挡在落盘之前。
+      原型里已经写出来跑过，<strong>5 条测试、2 个变异体全被抓</strong>。</p>
+    <p style="margin-bottom:0">另外两条路：<strong>把覆盖的类型按 kind 收窄</strong>（<code>NodeOverride&lt;T&gt;</code>），改动面铺到
+      <code>move-tool</code> / <code>endpoint-handles</code> / <code>use-effective-node</code>，而拖拽预览的数据<strong>不落盘</strong>，收益小；
+      <strong>两条都做</strong>，M9 的范围就又大一圈。我建议把收窄留给 M13——那时属性面板会大量写覆盖，收益才真实。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">B5</div><div class="step-body">
+    <div class="step-head"><p class="step-title">存储接口同步还是 async</p><span class="tag core">推荐：同步</span></div>
+    <p><code>localStorage</code> 本身是同步的。写成 <code>Promise</code> 能为将来的 IndexedDB / 服务器留路，
+      代价是<strong>今天</strong>每个调用点都要 <code>await</code>，启动顺序（§02 J）从三行变成一条异步链，
+      而「读档必须在 render 之前」这条约束会难写得多。</p>
+    <p style="margin-bottom:0">推荐同步 + 一个薄接口（<code>KeyValueStore</code>）。真要换 IndexedDB 时，改的是这个接口的实现和一次启动流程，
+      而不是每个调用点——而且那时我们已经知道自己需要什么了。</p>
+  </div></div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 前置 C -->
+<section>
+  <h2><span class="num">前置 C</span>M8 收尾：先敲这几处，再开 M9</h2>
+  <p class="h2sub">C1 批 J 的 10 条测试 · C2 P1 · C3 P4 · C4 P5 · C5 演示步骤 · C6 待你看一眼</p>
+
+  <div class="trap">
+    <span class="trap-label">D16 · 前置 C 验证到哪一层</span>
+    <p><strong>已验：</strong>C1–C4 应用到 <code>src/</code> 的完整拷贝上：
+      <code>tsc</code> ✅ · <code>eslint</code> ✅ · <code>vitest</code> ✅ <strong>17 文件 / 220 用例</strong> · <code>vite build</code> ✅。
+      其中 1 个文件 / 6 条是沙箱探针（见 C3），<strong>不交付</strong>——你敲完应该是 <strong>16 文件 / 214 用例</strong>。</p>
+    <p><strong>已验：</strong>C3 的前提用真的 three 射线打过：三种走向的墙（沿 x、沿 z、斜的）× 顶面 / 两个侧面，
+      <code>face.normal</code> 与 <code>worldToLocal(point)</code> 同在 mesh 本地坐标，z = 0 是中心线，+z 是 <code>leftNormal</code> 那侧。<br>
+      <strong>已验：</strong>C3 的变异测试 4 / 4 被抓——判据取反 5 红 · 删掉法线分支 1 红 · 阈值反向 5 红 · 退回原实现 5 红。<br>
+      <strong>已验：</strong>C2 那一行漏洞来自读 <code>@react-three/fiber</code> 9.7.0 的构建产物：
+      <code>events-b1bdeb1a.cjs.dev.js:768-786</code>（<code>stopPropagation</code>）、<code>:812-829</code>（<code>cancelPointer</code>）。</p>
+    <p style="margin-bottom:0"><strong>未验：浏览器，一帧都没有。</strong>C2 是 React 事件接线，C4 是 drei 的 prop 转发——
+      <strong>两条都只有末尾那张表的肉眼验收能证明</strong>。C4 尤其要看：2026-09-02 的事故就是同一个 <code>Line</code> 组件、同一种 prop 转发。
+      C6 只在沙箱里验过编译——它是一处偏差，要你先看一眼再决定敲不敲。</p>
+  </div>
+
+  <h3>C1 · 批 J 的 10 条测试 <span class="tag core">core</span></h3>
+  <p>新建 <code>src/core/store/migrate-to-levels.test.ts</code>。原文在 <code>m8-levels.html</code> §07 批 J 第 3 / 3 步，这里原样搬过来，省得你开那个 316 KB 的文件。
+  <strong>批 J 另外 5 条（<code>ensureScaffold</code> 收养）你已经敲进 <code>level-action.test.ts:169-221</code> 了</strong>，不要再敲一遍。</p>
+<pre><code>import { describe, expect, it } from 'vitest'
+import { DoorNode } from '../schema/door'
+import { DEFAULT_LEVEL_HEIGHT, LevelNode } from '../schema/level'
+import { SiteNode } from '../schema/site'
+import type { AnyNode, AnyNodeId } from '../schema/types'
+import { WallNode } from '../schema/wall'
+import type { SceneSnapshot } from './history-control'
+import { migrateToLevels } from './migrate-to-levels'
+
+const asId = (id: string) =&gt; id as AnyNodeId
+
+const wall = (id: string, extra: Record&lt;string, unknown&gt; = {}) =&gt;
+  WallNode.parse({ id, type: 'wall', start: [0, 0], end: [4, 0], ...extra })
+
+const snapshotOf = (nodes: AnyNode[], roots: string[]): SceneSnapshot =&gt; ({
+  nodes: Object.fromEntries(nodes.map((n) =&gt; [n.id, n])) as Record&lt;AnyNodeId, AnyNode&gt;,
+  rootNodeIds: roots.map(asId),
+})
+
+const only = (s: SceneSnapshot, type: string) =&gt;
+  Object.values(s.nodes).filter((n) =&gt; n.type === type)
+
+describe('migrateToLevels', () =&gt; {
+  it('空场景 → Site → Building → Level 0，root 只剩 site', () =&gt; {
+    const out = migrateToLevels(snapshotOf([], []))
+
+    const [site] = only(out, 'site')
+    const [building] = only(out, 'building')
+    const [level] = only(out, 'level')
+
+    expect(site &amp;&amp; building &amp;&amp; level).toBeTruthy()
+    expect(building!.parentId).toBe(site!.id)
+    expect(level!.parentId).toBe(building!.id)
+    expect(level!.type === 'level' &amp;&amp; level!.level).toBe(0)
+    expect(out.rootNodeIds).toEqual([site!.id])
+  })
+
+  it('层在创建处显式写了 height', () =&gt; {
+    const [level] = only(migrateToLevels(snapshotOf([], [])), 'level')
+
+    expect('height' in level!).toBe(true)
+    expect(level!.type === 'level' &amp;&amp; level!.height).toBe(DEFAULT_LEVEL_HEIGHT)
+  })
+
+  it('散在根下的节点被收进那一层：parentId 和 children 两侧都写对', () =&gt; {
+    const a = wall('wall_a')
+    const b = wall('wall_b')
+    const out = migrateToLevels(snapshotOf([a, b], ['wall_a', 'wall_b']))
+    const [level] = only(out, 'level')
+
+    expect(out.nodes[asId('wall_a')]!.parentId).toBe(level!.id)
+    expect(out.nodes[asId('wall_b')]!.parentId).toBe(level!.id)
+    expect([...level!.children].sort()).toEqual(['wall_a', 'wall_b'])
+    expect(out.rootNodeIds).toEqual([only(out, 'site')[0]!.id])
+  })
+
+  it('parentId 与 children 互为逆 —— 这个函数绕过了 addNode，索引得自己维护对', () =&gt; {
+    const out = migrateToLevels(snapshotOf([wall('wall_a')], ['wall_a']))
+
+    for (const node of Object.values(out.nodes)) {
+      for (const childId of node.children) {
+        expect(out.nodes[asId(childId)]!.parentId).toBe(node.id)
+      }
+      if (node.parentId !== null) {
+        expect(out.nodes[asId(node.parentId)]!.children).toContain(node.id)
+      }
+    }
+  })
+
+  it('wall.height 的【缺席性】保住：没设过的仍然没有这个 key，设过的原样留着', () =&gt; {
+    const plane = wall('wall_plane')
+    const explicit = wall('wall_half', { height: 1.0 })
+    const out = migrateToLevels(snapshotOf([plane, explicit], ['wall_plane', 'wall_half']))
+
+    expect('height' in out.nodes[asId('wall_plane')]!).toBe(false)
+    const half = out.nodes[asId('wall_half')]!
+    expect(half.type === 'wall' &amp;&amp; half.height).toBe(1.0)
+  })
+
+  it('墙上的门不受影响：门仍挂在墙上，墙的 children 仍含它', () =&gt; {
+    const w = wall('wall_a')
+    const door = DoorNode.parse({ id: 'door_x', parentId: 'wall_a', position: [1, 1.05, 0] })
+    const withChild = { ...w, children: ['door_x'] } as AnyNode
+    const out = migrateToLevels(snapshotOf([withChild, door], ['wall_a']))
+
+    expect(out.nodes[asId('door_x')]!.parentId).toBe('wall_a')
+    expect(out.nodes[asId('wall_a')]!.children).toEqual(['door_x'])
+  })
+
+  it('已经有层 → 原样返回（同一个对象），不会再建一套', () =&gt; {
+    const level = LevelNode.parse({ id: 'level_0', type: 'level', level: 0, height: 2.5 })
+    const input = snapshotOf([level], ['level_0'])
+
+    expect(migrateToLevels(input)).toBe(input)
+  })
+
+  it('只有半套脚手架（有 site 没 level）也算迁过 —— 再补会变成两个 site', () =&gt; {
+    const site = SiteNode.parse({ id: 'site_a', type: 'site' })
+    const input = snapshotOf([site], ['site_a'])
+
+    expect(migrateToLevels(input)).toBe(input)
+    expect(only(migrateToLevels(input), 'site')).toHaveLength(1)
+  })
+
+  it('不改动入参：原来的 nodes / rootNodeIds / 节点对象都没被动过', () =&gt; {
+    const a = wall('wall_a')
+    const input = snapshotOf([a], ['wall_a'])
+    const nodesBefore = input.nodes
+    const rootsBefore = input.rootNodeIds
+
+    migrateToLevels(input)
+
+    expect(input.nodes).toBe(nodesBefore)
+    expect(input.rootNodeIds).toBe(rootsBefore)
+    expect(input.rootNodeIds).toEqual(['wall_a'])
+    expect(input.nodes[asId('wall_a')]!.parentId).toBeNull()
+    expect(Object.keys(input.nodes)).toEqual(['wall_a'])
+  })
+
+  it('rootNodeIds 里有已经删掉的 id → 跳过，不会往 children 里塞幽灵', () =&gt; {
+    const out = migrateToLevels(snapshotOf([wall('wall_a')], ['wall_a', 'wall_gone']))
+    const [level] = only(out, 'level')
+
+    expect(level!.children).toEqual(['wall_a'])
+  })
+})</code></pre>
+
+  <h3>C2 · P1：只认离鼠标最近的那面墙 <span class="tag app">app</span> <span class="tag debt">更正 m8-demo-issues 的方案</span></h3>
+  <div class="note"><p style="margin-bottom:0"><strong>原方案漏了一行（工作约定第 6 条）。</strong>
+  <code>m8-demo-issues.md</code> P1 给的是两处 <code>e.stopPropagation()</code>。但 R3F 的 <code>stopPropagation</code> 不只是「停止往更远处派发」：
+  被拦的物体若正处于悬停状态，它会调 <code>cancelPointer([...更近的, 自己])</code>，给<strong>射线上更远、之前悬停过</strong>的物体补发 <code>onPointerLeave</code>。
+  <code>OpeningTool</code> 的 <code>onWallLeave</code> 不看是谁离开——下层墙的 <code>wall:leave</code> 会把刚设好的预览清掉。
+  触发条件：顶视图里鼠标从「只打得中下层墙」的地方滑进上下层重叠的地方。所以要多改一处。<code>m8-demo-issues.md</code> 已加更正框。</p></div>
+
+  <h4>1 / 2 · <code>src/app/tools/move-tool.tsx</code> <span class="filelines">onWallPointerDown · +3 行</span></h4>
+<pre><code>        const onWallPointerDown = (e: NodeEvent) =&gt; {
+            if (getScope().kind !== 'idle') return
+            const wall = e.node
+            if (wall.type !== 'wall') return
+<span class="ok">            // 多层叠放时射线会穿过好几层的墙，R3F 按远近逐个派发。
+            // 不拦住的话更低层的墙会覆盖 candidate，拖走的是最底下那面（P1）。
+            e.stopPropagation()</span>
+
+            const planeY = levelBaseY(wall.parentId, useScene.getState().nodes)</code></pre>
+
+  <h4>2 / 2 · <code>src/app/tools/opening-tool.tsx</code> <span class="filelines">onWallMove +2 行 · onWallLeave 改写</span></h4>
+<pre><code>    const onWallMove = (e: NodeEvent) =&gt; {
+      const hit = hitFrom(e)
+      if (!hit) return
+<span class="ok">      // P1：只认离鼠标最近的那面墙。
+      e.stopPropagation()</span>
+      const wall = e.node as WallNode
+      <span class="cm">// ……其余不变</span>
+
+<span class="cw">-   const onWallLeave = () =&gt; { previewRef.current = null }</span>
+<span class="ok">    // stopPropagation 会给射线上更远、之前悬停过的墙补发 leave（R3F 的 cancelPointer）。
+    // 不看是谁离开，刚设好的预览会被下层墙的 leave 清掉。
+    const onWallLeave = (e: NodeEvent) =&gt; {
+      if (previewRef.current?.wallId === e.node.id) previewRef.current = null
+    }</span></code></pre>
+  <p class="note"><code>onWallClick</code> 不用改：它的 <code>stopPropagation</code> 本来就在（<code>:100</code>），而 <code>onWallMove</code> 现在只让最近的墙写预览——
+  点击派发到最近那面墙时 id 当场对得上、当场拦住。</p>
+
+  <h3>C3 · P4：顶视图里按光标在中心线哪一侧定朝向 <span class="tag app">app</span> <span class="tag core">+ 4 条测试</span></h3>
+  <h4>1 / 3 · <code>src/app/lib/interaction/opening-placement.ts</code> <span class="filelines">sideFromNormal 下面追加</span></h4>
+<pre><code>/**
+ * 侧面命中按法线；顶面命中（顶视图）时法线没有厚度分量，改看光标落在中心线哪一侧。
+ * normal 与 localPoint 都在墙 mesh 的本地坐标里：原点 wall.start，z 是厚度方向，z = 0 是中心线。
+ */
+export function sideFromHit(
+  normal: readonly [number, number, number] | undefined,
+  localPoint: readonly [number, number, number],
+): OpeningSide {
+  if (normal &amp;&amp; Math.abs(normal[2]) &gt; 0.5) return sideFromNormal(normal)
+  return localPoint[2] &gt;= 0 ? 'left' : 'right'
+}</code></pre>
+  <p>和 <code>m8-demo-issues.md</code> 草稿的两处差别：抽成了纯函数（D18 要求这一类修复配测试），
+  而且<strong>没有法线时也看 <code>localPoint</code></strong>——草稿那种写法在没有法线时会走 <code>sideFromNormal</code>，恒给 <code>left</code>。</p>
+
+  <h4>2 / 3 · <code>src/app/tools/opening-tool.tsx</code> <span class="filelines">import 一处 · hitFrom 一行</span></h4>
+<pre><code><span class="cw">- import { resolveOpeningPlacement, sideFromNormal, type WallHit } from "../lib/interaction/opening-placement";</span>
+<span class="ok">+ import { resolveOpeningPlacement, sideFromHit, type WallHit } from "../lib/interaction/opening-placement";</span>
+
+      return {
+        wallId: e.node.id,
+        u: e.localPoint[0],
+<span class="cw">-       side: sideFromNormal(e.normal),</span>
+<span class="ok">+       side: sideFromHit(e.normal, e.localPoint),</span>
+      }</code></pre>
+  <p class="note"><code>sideFromNormal</code> 要从这个文件的 import 里拿掉，否则 <code>noUnusedLocals</code> 报错。函数本身留着——<code>sideFromHit</code> 在用它。</p>
+
+  <h4>3 / 3 · <code>src/app/lib/interaction/opening-placement.test.ts</code> <span class="filelines">import 补一个名字 · 追加一个 describe</span></h4>
+<pre><code>import {
+  overlapsExistingOpening,
+  resolveOpeningPlacement,
+<span class="ok">  sideFromHit,</span>
+  sideFromNormal,
+  slideOpeningAlongWall,
+  wallLength,
+} from './opening-placement'
+
+<span class="cm">// …… sideFromNormal 那个 describe 之后</span>
+
+describe('sideFromHit（P4：顶视图里命中的是墙顶面）', () =&gt; {
+  it('侧面命中：和 sideFromNormal 一致', () =&gt; {
+    expect(sideFromHit([0, 0, 1], [1, 1, 0.05])).toBe('left')
+    expect(sideFromHit([0, 0, -1], [1, 1, -0.05])).toBe('right')
+  })
+
+  it('顶面命中：法线没有厚度分量 → 看光标在中心线哪一侧', () =&gt; {
+    expect(sideFromHit([0, 1, 0], [1, 2.5, 0.03])).toBe('left')
+    expect(sideFromHit([0, 1, 0], [1, 2.5, -0.03])).toBe('right')
+  })
+
+  it('法线有厚度分量时以法线为准，不看 localPoint', () =&gt; {
+    expect(sideFromHit([0, 0, -1], [1, 1, 0.001])).toBe('right')
+  })
+
+  it('没有法线 → 看 localPoint（sideFromNormal 在这里会恒给 left）', () =&gt; {
+    expect(sideFromHit(undefined, [1, 1, -0.02])).toBe('right')
+  })
+})</code></pre>
+
+  <h3>C4 · P5：预览虚线不被墙挡 <span class="tag app">app</span> <span class="tag debt">必须浏览器确认</span></h3>
+  <p><code>polygon-tool.tsx</code> 的 <code>PolygonDraftPreview</code> 和 <code>wall-tool.tsx</code> 的 <code>WallDraftPreview</code>，两处一模一样：</p>
+<pre><code><span class="ok">  // P5：预览线贴地，会被墙挡住。drei 的 Line 把没解构的 prop 同时铺到 line2 和 lineMaterial 上
+  // （2026-09-02 的 visible 事故就是它）：depthTest 落在材质上才生效，renderOrder 落在 line2 上才生效，
+  // 各自的另一半是无害的多余属性。未在浏览器中验证。</span>
+  return (
+    &lt;Line
+      ref={lineRef}
+      <span class="cm">// ……</span>
+      dashed
+      dashScale={20}
+<span class="ok">      depthTest={false}
+      renderOrder={999}</span>
+    /&gt;
+  )</code></pre>
+  <div class="note"><p style="margin-bottom:0"><strong>为什么两个 prop 都要：</strong>
+  drei 10.7.8 <code>core/Line.js:55-70</code> 把 <code>rest</code> 同时铺到 <code>&lt;primitive object={line2}&gt;</code> 和 <code>&lt;primitive object={lineMaterial}&gt;</code>。
+  <code>depthTest</code> 是材质属性，只关它，线仍可能先画、再被后画的墙盖掉；<code>renderOrder</code> 是 Object3D 属性，让线排到不透明队列最后画。
+  这是读源码推出来的——<strong>「虚线画在墙前面」和「画完之后虚线消失、没有残影」两件事都要亲眼看</strong>。</p></div>
+
+  <h3>C5 · P3：演示步骤更正版 <span class="tag debt">不改代码</span></h3>
+  <p>原来的演示步骤没有进仓库（<code>docs/</code> 里 grep 不到），这里给一份按 P1 / P2 / P3 / P4 / P8 修正过的「盖一栋两层小楼」：</p>
+  <ol class="check-num">
+    <li>开机：状态栏是 <code>wall · 3d · 层 0</code>。<strong>在 3D 视图里</strong>用 W 画外墙，点回起点闭合。</li>
+    <li>F 画一层楼板（点回起点或 Enter 闭合）。<strong>画完先按 V</strong> 再去点任何东西（P2 的 H1：<code>drafting</code> 状态下选中整体禁用，M3 的铁律）。</li>
+    <li>D / N 放门窗：C3 敲进去之前<strong>在 3D 里对着墙侧面放</strong>；之后顶视图也行，光标在中心线哪侧门就朝哪侧。</li>
+    <li>L 在顶上加一层（会自动切过去），W 画二层外墙——应该正好在一层墙的正上方。</li>
+    <li>F 在二层画楼板，顶面 = 二层地面。</li>
+    <li>L 再加一层当屋顶层，<strong>F 画楼板当平屋顶，不要画天花</strong>（P3：天花只跟层高、不看墙高，D24）。</li>
+    <li>女儿墙：<strong>把屋顶层的层高改成 1.0</strong>，这一层所有跟随层高的墙一起变 1 m（控制台片段见下）。</li>
+    <li>要演示「显式高度不跟着变」：单独给一面墙设 <code>height</code>，再改它所在层的层高。</li>
+    <li>确认选中看状态栏 <code>sel=</code>，不要只看颜色（P8：顶视图下变色的只有 0.1 m 宽的墙顶）。</li>
+    <li>C2 敲进去之前，<strong>不要在顶视图里拖与其它楼层重合的墙</strong>（P1）。</li>
+  </ol>
+<pre><code><span class="cm">// 浏览器控制台（Vite 开发服务器下）</span>
+const { useScene } = await import('/src/core/store/use-scene.ts')
+const levels = Object.values(useScene.getState().nodes)
+  .filter((n) =&gt; n.type === 'level')
+  .sort((a, b) =&gt; a.level - b.level)
+useScene.getState().updateNode(levels.at(-1).id, { height: 1.0 })   <span class="cm">// 屋顶层层高 1.0</span></code></pre>
+
+  <h3>C6 · 待你看一眼：<code>WallTool</code> 的橡皮筋在二层可能偏 <span class="tag app">app</span> <span class="tag debt">偏差，不是 bug 报告</span></h3>
+  <p><code>src/app/tools/wall-tool.tsx:64</code> 的 <code>onPointerMove</code> 是 <code>eventToGround(e, el, camera)</code>——和 y = 0 求交。
+  批 H 原文（<code>m8-levels.html:4438</code>）传了 <code>readCurrentLevel().baseY</code>。提交用的 <code>onPointerUp</code>（<code>:43</code>）是对的。</p>
+  <p><strong>按 D17，「和文档不一致」不是改它的依据。</strong>读代码推出来的后果：顶视图（正交相机、竖直射线）下<strong>没有任何差别</strong>；
+  3D 透视下在二层以上画墙，绿线终点会落在「光标射线穿过二层地面、继续打到 y = 0」那一点的正上方，离光标有一段距离。
+  你批 H 的验收如果是在顶视图里走的，看不出来。</p>
+  <p><strong>请在 3D 视图、二层画一堵墙，看绿线终点是不是跟着光标。</strong>跟着 → 不改，是我推错了；不跟 → 改这一行：</p>
+<pre><code>    const onPointerMove = (e: PointerEvent) =&gt; {
+<span class="cw">-     cursorRef.current = eventToGround(e, el, camera)</span>
+<span class="ok">+     cursorRef.current = eventToGround(e, el, camera, readCurrentLevel().baseY)</span>
+    }</code></pre>
+
+  <h3>敲完之后应该看到什么</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>怎么试</th><th>应该</th><th>挡的是</th></tr></thead>
+    <tbody>
+      <tr><td><code>pnpm verify</code></td><td class="ok"><strong>16 文件 / 214 用例</strong></td><td>C1 + C3</td></tr>
+      <tr><td>顶视图 · 屋顶层 · 拖一面和下层重合的墙</td><td class="ok">只动屋顶层那面</td><td>P1 · move-tool</td></tr>
+      <tr><td>顶视图 · 二层 · 放门</td><td class="ok">门在二层的墙上</td><td>P1 · opening-tool</td></tr>
+      <tr><td>顶视图 · 二层 · 鼠标沿一层的墙（二层这段没墙）滑进二层墙覆盖的那段，再点</td><td class="ok">幽灵一直在、不闪；门落在二层墙上</td><td>P1 更正的那一行</td></tr>
+      <tr><td>顶视图 · 放门时光标在墙中心线两侧来回移</td><td class="ok">幽灵翻面</td><td>P4</td></tr>
+      <tr><td>3D · 对着墙侧面放门</td><td class="ok">和以前一样按面朝向</td><td>P4 没弄坏侧面</td></tr>
+      <tr><td>画楼板 / 画墙，虚线经过墙</td><td class="ok">虚线画在墙前面</td><td>P5</td></tr>
+      <tr><td>画完（闭合 / Esc / 切工具）</td><td class="ok">虚线消失、没有残影</td><td>P5 没弄出 09-02 那类事故</td></tr>
+      <tr><td>画一块天花板，看状态栏第一个词；按 V 再点它</td><td>记下来告诉我：<code>ceiling</code> 还是 <code>select</code>、按 V 之后选没选中</td><td>P2（待复现）</td></tr>
+      <tr><td>（C6）3D 视图 · 二层画墙</td><td>绿线终点跟不跟光标</td><td>C6 那处偏差</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note"><strong>这里是一个阶段边界</strong>（<code>handoff-m9.md</code> ⑤）：前置 C 敲完、上面这张表走完，<strong>先提交</strong>，再开 M9 本体。</p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ §00 -->
+<section>
+  <h2><span class="num">§00</span>这个设计是怎么推出来的</h2>
+  <p class="h2sub">七步 + ⑧ 原型 · 样板见 <code>m3-spine.html</code> §00</p>
+
+  <h3>① 找规格书，读全文（wiki 在前，源码在后）</h3>
+  <p>对照仓库这次有<strong>正面写着这件事</strong>的规格书，不用从源码里猜：</p>
+  <ul>
+    <li><code>wiki/architecture/node-schemas.md:81-104</code>「Schema Evolution &amp; Backward Compatibility」——三条规则：
+      加字段给 <code>.default()</code>；<strong>改名 / 删除 / 换类型，<code>.default()</code> 不够</strong>，要在 <code>migrateNodes</code> 里读旧形状、写新形状，而且<strong>在 parse 之前</strong>；
+      bump <code>schemaVersion</code> 只是「记录这个 kind 变过」。</li>
+    <li><code>wiki/architecture/vertical-model.md:125-133</code>「Load migration (lives in <code>migrateVerticalSceneNodes</code>, <strong>indefinitely</strong>)」——
+      标题里那个 <em>indefinitely</em> 就是 ② 的答案。</li>
+    <li><code>wiki/architecture/plugin-authoring.md:205</code>——插件自己的数据版本化<strong>是</strong> <code>NodeDefinition.schemaVersion</code>，「the host doesn't migrate」。</li>
+    <li>源码：<code>packages/core/src/store/use-scene.ts</code> 的 <code>setScene:1209-1259</code>、<code>migrateNodes:608-945</code>、
+      <code>normalizeRootNodeIds:963-975</code>、<code>collectReachableNodeIds:977-1006</code>；
+      <code>packages/editor/src/hooks/use-auto-save.ts</code>（全文 294 行）；<code>packages/editor/src/lib/scene.ts:409-426</code>；
+      <code>packages/mcp/src/storage/types.ts:121-132</code>（<code>SceneStore</code> 接口）。</li>
+  </ul>
+  <div class="note"><p style="margin-bottom:0"><strong>更正 ROADMAP 一处数字（工作约定第 6 条）：</strong>
+    M9 的参考源码写「<code>use-scene-*-migration.test.ts</code> ← 8 个迁移测试」。实际是 <strong>7 个</strong>：
+    construction-dimension · elevator · retired-floorplan · site-child · vertical · wall-slot · window。</p></div>
+
+  <h3>② 找「之前是怎么错的」</h3>
+  <p><strong>对照仓库那边（四条，都是同一个根因：没有文档版本号）</strong></p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>后果</th><th>证据</th></tr></thead>
+    <tbody>
+      <tr><td>迁移只能<strong>看形状</strong>，每次加载全跑一遍</td><td><code>migrateNodes</code> 里每一步都是 <code>if (node.type === … &amp;&amp; 某字段存在)</code></td></tr>
+      <tr><td>迁移<strong>永远不能退役</strong></td><td><code>vertical-model.md:127</code>：「the migration must remain on the load path」</td></tr>
+      <tr><td>迁移之间的<strong>顺序靠注释维护</strong></td><td><code>use-scene.ts:926-933</code> 用七行注释解释电梯迁移为什么必须是 Pass 2：它会改父层的 <code>children</code>，而 <code>Object.entries</code> 的顺序不确定</td></tr>
+      <tr><td>迁移输出是 <strong>cast，不 parse</strong> ⟹ schema 默认值在老数据上永远不物化</td><td><code>vertical-model.md:38</code>：「<code>migrateNodes</code> output is cast, not zod-parsed」</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>对照仓库另外两条，和版本号无关，但我们会踩同一个坑</strong></p>
+  <ul>
+    <li><code>setScene</code> 原来<strong>分两步写 store</strong>，于是「半规范化的中间态」和「读档前的空场景」都变成了撤销目标。
+      现在的注释（<code>use-scene.ts:1242-1245</code>）是事后加的：「Single tracked <code>set</code>: … (as this used to) exposed a half-normalized intermediate state — and the pre-load (possibly empty) state — as undo targets」。<strong>§02 E 直接照这条走。</strong></li>
+    <li>自动保存的 hook <strong>挂载早于读档</strong>，于是防误删的基线一直停在 0，护栏形同不存在。
+      <code>use-auto-save.ts:18-23</code> 的注释：「the hook mounts before the scene has loaded, so it would sit at ~0 for the whole session」。
+      <strong>§02 F 的第一条顺序就是它。</strong>另外它用 <code>pagehide</code> 而不只是 <code>beforeunload</code>（<code>:217-221</code>），理由写得很清楚：一次快速刷新会把最后一次改动整个丢掉。</li>
+  </ul>
+  <p><strong>我们自己这边（两条）</strong></p>
+  <ul>
+    <li><code>m6-prep.md</code>（2026-09-02 写的那版 localStorage 存档，<strong>从没敲进 <code>src/</code></strong>）有两处现在必须改：
+      <code>:113-114</code> <strong>「版本不认识就当没有存档」</strong>——下一次自动保存会<strong>把它覆盖掉</strong>，用户的房子就真没了（§02 G 的降级保护）；
+      <code>:85-87</code> <strong>读写失败全部吞掉</strong>——配额满了不告诉任何人（§02 F 的状态栏）。
+      它有一条值得留：<strong><code>nodes</code> 存数组不存 <code>Record</code></strong>（<code>:71</code>），理由是「key 本来就是 id，数组少一整类 key/id 不一致的错」。</li>
+    <li><strong>本项目自己的 git 历史里已经发生过一次真实迁移，只是没人看见</strong>——见 ⑥ 第 1 条。</li>
+  </ul>
+
+  <h3>③ 量成本，决定手写还是抄</h3>
+  <p><strong>候选一：zustand 自带的 <code>persist</code> 中间件</strong>（5.0.15，<code>esm/middleware.mjs</code>）。它<em>确实</em>有版本化：
+    <code>version</code>（<code>:334</code>、<code>:362</code>）和 <code>migrate(persistedState, version)</code>（<code>:392-404</code>）。<strong>不用它，四个理由：</strong></p>
+  <ol>
+    <li><code>migrate</code> 是<strong>一个</strong>函数拿到「旧状态 + 旧版本号」，链要你自己在里面写 <code>switch</code>——而<strong>链本身正是 ROADMAP 要的东西</strong>（「每次 schema 变更追加一个迁移函数 + 一个测试」）。</li>
+    <li>它把<strong>一个 store 持久化到一个键</strong>。我们要的是「一个索引 + 每场景一个文档 + 存档点」，形状不匹配。</li>
+    <li>它的 hydrate 走 <code>setState</code>，而我们的读档必须同时做<strong>三件它不做的事</strong>：清 zundo 历史、换脏集、清掉指向旧场景的编辑器 id（§02 E）。</li>
+    <li>导入 / 导出要走<strong>同一条</strong>加载管线。用中间件的话，文件那条路得再写一遍解析 + 迁移 + 规范化。</li>
+  </ol>
+  <p><strong>候选二：照抄对照仓库的 <code>migrateNodes</code></strong>（945 行文件里迁移相关约 340 行）。它是「没有版本号」那个世界的产物——
+    抄它等于把 ② 的四条毛病一起抄过来。<strong>抄的是它的经验，不是它的代码。</strong></p>
+  <p><strong>手写量（原型实测）：</strong>core 实现约 500 行 + 语料 57 行，测试约 560 行。
+    这个量级里<strong>没有一行是「框架」</strong>，全是本项目的规则：容器怎么包、<code>children</code> 怎么重建、缺席怎么保住。</p>
+  <p class="note"><strong>一处「抄形状」：</strong><code>SceneStorage</code> 的方法名照对照仓库 <code>packages/mcp/src/storage/types.ts:121-132</code> 的
+    <code>SceneStore</code>（<code>save</code> / <code>load</code> / <code>list</code> / <code>delete</code> / <code>rename</code>）。将来真接服务器时，换的是实现，不是调用点的名字。</p>
+
+  <h3>④ 抽不变量 —— 它们就是测试用例</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>不变量</th><th>违反了会怎样</th></tr></thead>
+    <tbody>
+      <tr><td>I1</td><td>存 → 读 → 存，场景不变（<code>areSceneSnapshotsEqual</code>）</td><td>每次保存都在悄悄改数据</td></tr>
+      <tr><td>I2</td><td>当前版本的文档<strong>不跑任何迁移</strong>；跑过迁移的文档再读一次结果相同（幂等）</td><td>迁移反复施加，0.05 → 0 → 0 还好，别的就不一定</td></tr>
+      <tr><td>I3</td><td>读完之后 <code>parentId</code> 与 <code>children</code> <strong>互为逆</strong></td><td><strong>门渲染不出来，而且不报错</strong>（<code>STATE.md</code> 那笔债的原话）</td></tr>
+      <tr><td>I4</td><td>根恰好是 <code>parentId === null</code> 的那些节点；其余都能从根走到</td><td>孤儿节点永远不渲染，占着存档体积</td></tr>
+      <tr><td>I5</td><td><strong>缺席保持缺席</strong>：<code>wall.height</code> / <code>ceiling.height</code> 没设过，走完全链仍然没有这个 key</td><td>D23 作废：「改层高，显式设过的墙不变」这条验收变成假的</td></tr>
+      <tr><td>I6</td><td>文档版本<strong>比代码新</strong> → 拒绝读、<strong>拒绝写</strong></td><td>老代码用旧格式覆盖新存档（本项目会 <code>git checkout</code> 老提交，这是真实场景）</td></tr>
+      <tr><td>I7</td><td>迁移链首尾相接：<code>from</code> 依次 0…CURRENT−1</td><td>某个版本的文档永远打不开</td></tr>
+      <tr><td>I8</td><td>读档<strong>不进历史</strong>、并清空历史；之后的编辑照常可撤</td><td>Ctrl+Z 撤回到上一个场景 / 空场景</td></tr>
+      <tr><td>I9</td><td>读档后脏集<strong>恰好</strong>是新场景的全部节点</td><td>画面空白（不标脏）或旧 id 残留在脏集里</td></tr>
+      <tr><td>I10</td><td>坏数据<strong>丢掉并报告</strong>，不静默、不整份作废</td><td>一个坏节点毁掉整个存档，或者悄悄少了一堵墙</td></tr>
+      <tr><td>I11</td><td>自动保存：<strong>读档不触发写</strong>；切场景时挂着的改动写进<strong>旧</strong>场景</td><td>新场景内容写进旧场景的 id——静默覆盖（§02 F）</td></tr>
+      <tr><td>I12</td><td>迁移是纯函数，不改入参</td><td>失败时留下半迁移的内存状态</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>⑤ 切最薄的垂直片</h3>
+  <p><strong>「画几堵墙 → 刷新 → 墙还在」</strong>。它需要：文档格式 + 加载管线 + <code>replaceScene</code> + 自动保存 + 启动顺序——
+    <strong>不</strong>需要场景列表、存档点、导入导出、面板。这一片跑通，M1 那笔债就关了一半，而且从此每一站都能攒出真实场景来验。</p>
+  <p>然后按这个顺序加：<strong>迁移链</strong>（喂 M1 语料）→ <strong>导出 / 导入</strong>（能给别人看）→ <strong>场景列表 / 存档点 / 面板</strong>。
+    §07 也按这个分三轮交（<code>handoff-m9.md</code> ⑦ 定的「按层交，最多三轮」）。</p>
+
+  <h3>⑥ 去你的代码里找病灶 —— 动机必须先于机制</h3>
+  <div class="step"><div class="step-n">1</div><div class="step-body">
+    <div class="step-head"><p class="step-title">默认值改过一次，而数据里存着旧的那个</p><span class="tag core">→ §02 B / C</span></div>
+    <p>批 F（<code>965a212</code>，2026-09-11）把 <code>DEFAULT_SLAB_ELEVATION</code> 从 <strong>0.05 改成 0</strong>，为的是关掉「墙陷进楼板 5 cm」那笔债。
+      而 <code>elevation</code> 是<strong>带 <code>.default()</code></strong> 的字段——<code>addNode</code> 里那句 <code>AnyNode.parse(input)</code>（<code>use-scene.ts:65</code>）
+      会把默认值<strong>物化进数据</strong>。所以 M6 / M7 时代画的每一块楼板，身上都<strong>存着</strong> <code>elevation: 0.05</code>。</p>
+    <p style="margin-bottom:0">我核对过 M6 当时的几何（<code>a5e4ee6:src/viewer/nodes/slab/geometry.ts</code>）：<code>topY: node.elevation</code>——语义和今天一样。
+      所以那些楼板在今天的代码里会<strong>重新高出墙底 5 cm</strong>。<strong>这就是本项目第一次真实迁移，它早就发生了，只是因为没有持久化而没人看见。</strong>
+      它同时证明了为什么版本号不可省：v1 文档里的 0.05 是人设的，不能动（§02 B 那张两行表）。</p>
+  </div></div>
+  <div class="step"><div class="step-n">2</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>children</code> 只在两个地方维护</p><span class="tag core">→ §02 D</span></div>
+    <p style="margin-bottom:0"><code>addNode</code>（<code>use-scene.ts:72-82</code>）和 <code>removeNode</code>（<code>:120-134</code>）。
+      <code>migrateToLevels</code> 绕过它们直接拼 <code>nodes</code>，所以<strong>手填</strong>（D27）。导入是第三个绕过它们的地方——
+      <strong>不重建索引，门渲染不出来而且不报错</strong>（D19 记的代价，到期就是 M9）。</p>
+  </div></div>
+  <div class="step"><div class="step-n">3</div><div class="step-body">
+    <div class="step-head"><p class="step-title">两个 <code>as</code>，以前只坏一帧，从 M9 起会落盘</p><span class="tag core">→ §02 I</span></div>
+    <p style="margin-bottom:0"><code>mergeNodePath</code> 结尾的 <code>merged as AnyNode</code>（<code>use-scene.ts:53</code>）、
+      <code>getEffectiveNode</code> 的 <code>{ ...node, ...override } as T</code>（<code>use-live-overrides.ts:50</code>）。
+      <code>Partial&lt;AnyNode&gt;</code> 按联合分配，<strong><code>updateNode(wallId, { polygon: … })</code> 类型检查是通过的</strong>（原型测试里就这么写的，没有 cast）。
+      以前刷新就忘了；现在它会被自动保存写进磁盘，下次读档时整堵墙作为 invalid 被丢掉。</p>
+  </div></div>
+  <div class="step"><div class="step-n">4</div><div class="step-body">
+    <div class="step-head"><p class="step-title">编辑器里存着指向场景的 id</p><span class="tag app">→ §02 J</span></div>
+    <p style="margin-bottom:0"><code>useEditor</code> 的 <code>selectId</code> 和 <code>currentLevelId</code>（<code>app/store/use-editor.ts</code>）。
+      切场景之后它们指向一个不存在的节点。<code>currentLevelId</code> 有 <code>resolveCurrentLevelId</code> 兜底（M8 批 H），
+      <strong><code>selectId</code> 没有</strong>——P9 那条「端点球留在半空」就是同一类问题的亲戚。读档时一起清。</p>
+  </div></div>
+  <div class="step"><div class="step-n">5</div><div class="step-body">
+    <div class="step-head"><p class="step-title">「整场景写入」这个形状已经有一个了</p><span class="tag core">→ §04 第 06 步</span></div>
+    <p style="margin-bottom:0"><code>ensureScaffold</code>（<code>app/lib/level/level-actions.ts:18-31</code>）：<code>setState</code> + <code>markAllDirty</code> + 不进历史。
+      <code>replaceScene</code> 是第二个。按 D10 的 rule of three，<strong>现在不抽公共函数</strong>——第三个出现时再抽。</p>
+  </div></div>
+
+  <h3>⑦ 列故意缺陷并标到期</h3>
+  <p>见 §06：关掉三条半，新记十三条。</p>
+
+  <h3>⑧ 遇到顺序 / 时序问题，先跑一段原型，别在纸上推</h3>
+  <p>M9 全是顺序问题（读档 vs 启动自动保存、切场景 vs flush、写文档 vs 写索引、parse vs 迁移），所以这次<strong>先写了原型</strong>：
+    core 七个文件 + <code>replaceScene</code> + <code>autosave</code> + <code>updateNode</code> 写入边界，在 <code>src/</code> 的沙箱拷贝里跑到
+    <code>tsc</code> / <code>eslint</code> / <strong>22 文件 / 268 用例</strong>全绿。<strong>然后做了 21 个变异测试，19 个被抓。</strong></p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>把实现改错成……</th><th>红了几条</th></tr></thead>
+    <tbody>
+      <tr><td><code>normalize</code> 不重建 <code>children</code></td><td class="cw">5</td></tr>
+      <tr><td>自动保存不挂 <code>pagehide</code></td><td class="cw">3</td></tr>
+      <tr><td><code>updateNode</code> 不做写入边界校验</td><td class="cw">3</td></tr>
+      <tr><td>v0 → v1 不改楼板 0.05 · <strong>改成按数值嗅探（所有版本都改）</strong> · 信封把 too-new 当成能读 · 自动保存先清 dirty 再写</td><td class="cw">各 2</td></tr>
+      <tr><td><code>normalize</code> 信任存档的 <code>rootNodeIds</code> / 放过环 / 放过缺父 · <code>replaceScene</code> 不清历史 / 不换脏集 ·
+        自动保存不比引用 · 存储不做降级保护 / 先写索引后写文档 / 索引坏了不重建 / 删场景不删存档点 · 去掉「平」判据</td><td class="cw">各 1</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>两个存活的变异体，各让我删掉了一处代码：</strong></p>
+  <ol>
+    <li>v0 → v1 里给 raw 节点补 <code>children: []</code> ——<strong>死代码</strong>，最后那次 parse 会填。删。</li>
+    <li><code>replaceScene</code> 里的 <code>acquireSceneHistoryPause</code> 租约——紧跟着的 <code>clear()</code> 已经把那条记录清了，<strong>不产生可观察差别</strong>。删，少一个依赖。</li>
+  </ol>
+  <p><strong>原型还抓到两条我自己写歪的测试</strong>（都属于「写出来像对的，但结构上永远红不了」，和本项目那八个 bug 同源）：</p>
+  <ul>
+    <li>「只动脏集不算改动」我一开始用 <code>markAllDirty()</code> 触发——<strong>它是就地改 <code>Set</code>，根本不通知订阅者</strong>，所以那条测试测不到任何东西。
+      改成 <code>setState({ dirtyNodes: new Set() })</code> 之后，「不比引用」这个变异体才红。</li>
+    <li>「配额满」我一开始让 <code>setItem</code> 对所有键抛错——那样「先写文档、再写索引」这个顺序<strong>测不出来</strong>（两个写法都不改索引）。
+      改成只对 <code>scene:</code> 前缀抛错之后，「先写索引后写文档」这个变异体才红。</li>
+  </ul>
+  <div class="trap">
+    <span class="trap-label">顺带踩了 handoff ⑦ 早就写过的那个坑，值得更新一下它的说法</span>
+    <p><strong>变异测试跑到一半被打断，把两个源文件写成了全 NUL 字节</strong>——<code>handoff-m9.md</code> ⑦ 记的是「原子写（临时文件 + <code>os.replace</code>）」，
+      <strong>这不够</strong>：NTFS 上元数据先落盘、数据后落盘，进程被杀时文件长度对、内容全是零。<strong>必须 <code>f.flush()</code> + <code>os.fsync()</code> 之后再 <code>os.replace</code>。</strong></p>
+    <p style="margin-bottom:0">而且<strong>同一次打断把备份也清零了</strong>（备份是同一个进程刚写的）。所以备份不能只是「放在 <code>src/</code> 之外」，
+      还得<strong>在另一个时间点、由另一条命令做</strong>——现在是跑变异前先 <code>tar</code> 整个 <code>src/</code>。
+      最后能恢复，靠的是这两个文件的原文还在会话里，以及仓库那份 <code>use-scene.ts</code> 干净（我从来没动 <code>src/</code>）。</p>
+  </div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ §01 -->
+<section>
+  <h2><span class="num">§01</span>这一步解决什么问题</h2>
+  <p class="h2sub">刷新即丢 —— 以及它背后那个更大的问题</p>
+  <p>表面上的问题从 M1 挂到现在：<strong>刷新即丢</strong>（<code>STATE.md</code> 债表，到期 M9）。
+    你攒不出一栋房子，也没法给别人看。ROADMAP 给 M9 列了四件事：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>ROADMAP 原文</th><th>本方案怎么落</th></tr></thead>
+    <tbody>
+      <tr><td>localStorage 自动保存 + 手动存档点</td><td>防抖 500 ms 自动存当前场景；Ctrl+S 打存档点，每个场景留最近 10 个（§02 F / G）</td></tr>
+      <tr><td>JSON 导出 / 导入</td><td>导出 = 当前场景的文档；导入 = 读成一个<strong>新场景</strong>，不覆盖当前的（§02 H，前置 B2）</td></tr>
+      <tr><td>schema 版本号 + 迁移链（每次变更追加一个迁移函数 + 一个测试）</td><td>文档级整数版本号；<code>SCENE_MIGRATIONS</code> 按 <code>from</code> 首尾相接；第一环 v0 → v1 是真的（§02 B / C）</td></tr>
+      <tr><td>场景列表 / 新建 / 删除</td><td>一个索引 + 每场景一个键；<strong>索引是缓存</strong>，坏了从文档重建（§02 G）</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>底下那个更大的问题：</strong>一旦有了存档，<strong>「代码里的默认值」和「数据里的值」之间那条线就变成永久的</strong>。
+    到今天为止，改一个 <code>.default()</code>、删一个字段、换一个语义，只影响「之后新建的节点」，因为刷新就清空了。
+    M9 之后，每一次 schema 变更都是在和磁盘上已有的数据谈判。<strong>这件事在本项目已经发生过一次</strong>（§00 ⑥ 第 1 条）。</p>
+  <p><strong>验收（ROADMAP 原文，M8 §02 K 更正过措辞）：</strong>把 M1 时代格式的存档喂进去，能加载、能迁移、能再存回新格式。
+    项目从没持久化过，所以「M1 时代的存档」由我们<strong>按 git 历史里当时的 zod 定义手写成语料</strong>（§02 C、§04 第 02 步）。</p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ §02 -->
+<section>
+  <h2><span class="num">§02</span>机制说明</h2>
+  <p class="h2sub">A 信封 · B 版本号 · C 第一环 · D 加载管线 · E 进 store · F 自动保存 · G 存储 · H 导入导出 · I 写入边界 · J 启动与切换</p>
+
+  <h3>A · 文档长什么样</h3>
+<pre><code>{
+  "format": "r3f-arch/scene",
+  "version": 1,
+  "nodes": [ { "object": "node", "id": "site_…", "type": "site", "parentId": null, "children": ["building_…"], … }, … ],
+  "rootNodeIds": ["site_…"]
+}</code></pre>
+  <ul>
+    <li><strong><code>format</code></strong> 把「我们的文档」和「随便一个带 <code>nodes</code> 的 JSON」分开。没有它，任何 <code>{ nodes: {} }</code> 都会被当成 v0（§06 有一条就是这个口子）。</li>
+    <li><strong><code>nodes</code> 是数组</strong>而不是 <code>Record</code>：key 本来就是 id，数组整个消灭「key 和 id 对不上」这一类错（<code>m6-prep.md:71</code> 的理由，照用）。</li>
+    <li><strong>不存视图状态</strong>：<code>currentLevelId</code> / <code>selectId</code> / <code>viewMode</code> / 相机都不进文档。它们属于「谁在看」，不属于「房子是什么」。</li>
+    <li><strong>场景名和时间戳不进文档</strong>，进索引（G）。导出文件额外带一个 <code>name</code>，加载器不认识它也不在乎。</li>
+  </ul>
+
+  <h3>B · 版本号放在文档上，迁移链按版本号跑</h3>
+<pre><code>type SceneMigration = {
+  from: number                                                   <span class="cm">// 终点恒为 from + 1</span>
+  note: string
+  migrate: (doc: RawSceneDocument) =&gt; Omit&lt;RawSceneDocument, 'version'&gt;
+}
+SCENE_MIGRATIONS = [v0ToV1]                                      <span class="cm">// from 依次 0, 1, 2 …</span></code></pre>
+  <ol>
+    <li><strong><code>version</code> 由 runner 写，迁移函数碰不到</strong>（返回类型里 <code>Omit</code> 掉了）。「迁移做完忘了改版本号」这个 bug 在类型上就不存在。</li>
+    <li><strong>链上流的是没 parse 过的 <code>RawNode</code></strong>。parse 会剥掉老字段（D28：删字段 = 静默丢数据）、填上<em>今天</em>的默认值——两件事都必须等迁移做完。<strong>全链结束后统一 parse 一次</strong>（D）。</li>
+    <li><strong>v0 是全链唯一允许「看形状」的地方</strong>——它就是版本号出现之前的数据，没有别的信息可看。从 v1 起一律看版本号。</li>
+  </ol>
+  <p><strong>和对照仓库的差别，就是 §00 ② 那四条的镜像：</strong></p>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>对照仓库</th><th>本方案</th></tr></thead>
+    <tbody>
+      <tr><td>版本号在哪</td><td>每个 <code>NodeDefinition</code> 一个 <code>schemaVersion</code>（wall 7 · door 2），<strong>加载路径上没人读</strong></td><td>文档上一个整数</td></tr>
+      <tr><td>怎么决定跑不跑</td><td>看形状，每次加载全跑</td><td>看版本号，只跑 <code>from ≥ 文档版本</code> 的那几环</td></tr>
+      <tr><td>迁移能不能退役</td><td>不能（<code>vertical-model.md:127</code>）</td><td>能：哪天不再支持 v0，删掉链头、报 too-old</td></tr>
+      <tr><td>顺序</td><td>靠注释（<code>use-scene.ts:926-933</code>）</td><td>靠 <code>from</code> 编号，runner 强制</td></tr>
+      <tr><td>输出</td><td>cast，不 parse</td><td>全链 raw，最后 parse 一次</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>为什么非要版本号 —— 一个数、两种意义：</strong></p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>文档</th><th>楼板 <code>elevation</code></th><th>它是什么</th><th>该怎么办</th></tr></thead>
+    <tbody>
+      <tr><td>v0（M6 / M7 时代存的）</td><td><code>0.05</code></td><td>当年的 <code>DEFAULT_SLAB_ELEVATION</code>，被 <code>.default()</code> 物化进数据</td><td class="cw">改成 0</td></tr>
+      <tr><td>v1（M9 之后存的）</td><td><code>0.05</code></td><td>人在控制台 / 将来在 M13 面板里设的</td><td class="ok">不动</td></tr>
+    </tbody>
+  </table></div>
+  <p>只看数据，这两行<strong>分不出来</strong>。形状嗅探在这里只有两个选择：要么把人设的 0.05 也改掉，要么让老数据永远陷进楼板 5 cm。
+    <strong>版本号就是那一列额外的信息。</strong>（原型里「按数值嗅探」这个变异体红 2 条，就是这条的护栏。）</p>
+  <p class="note"><strong>为什么是文档级而不是按类型：</strong>v0 → v1 要把<em>所有</em>类型的节点收进容器，对照仓库的电梯迁移要改<em>层</em>的 <code>children</code>——
+    跨类型的迁移不属于任何一个类型；按类型编号会变成 N 维兼容矩阵。详见前置 B1。</p>
+
+  <h3>C · 第一环 v0 → v1：M8 之前的平场景</h3>
+  <p>两件事，都只在「平」的时候做（一个容器都没有 = M8 之前）：</p>
+  <ol>
+    <li><strong>楼板 <code>elevation === 0.05</code> → 0</strong>（§00 ⑥ 第 1 条）。</li>
+    <li><strong>收进 Site → Building → Level 0：</strong>直接调 <code>migrateToLevels</code>（D27）——它只读 <code>type</code>、按 id 查存在、展开复制，所以 raw 节点过得去。
+      这是它从 M8 起等着的那个位置。根用 <code>deriveRootIds</code> 按 <code>parentId</code> 推，<strong>不信存档里的 <code>rootNodeIds</code></strong>。</li>
+  </ol>
+  <p><strong>「有容器但没版本号」怎么办？</strong>——比如 M8 期间从控制台 <code>JSON.stringify</code> 出来的场景。它仍按 v0 读，但<strong>不再包一层、也不改楼板</strong>：
+    「平」才是 M8 之前的标志；有容器的场景里出现 0.05，只能是人设的。原型里有一条测试专门钉这个（「去掉『平』判据」这个变异体红 1 条）。</p>
+  <p class="note"><strong>不迁的两件事，写下来别装作没想过：</strong>
+    ① v0 天花的 <code>height</code> 缺席——M6 时它的意思是「2.5 常量」，今天是「层高 − 0.01」，默认层高下差 1 cm；而 M6 的本意就是「贴墙顶」，缺席在今天的语义里正好对，<strong>不迁</strong>。
+    ② v0 墙的 <code>height</code> 缺席——M1–M7 是 2.5 常量，今天跟层高，而新建的 Level 0 层高正是 2.5，<strong>等价，不迁</strong>。</p>
+
+  <h3>D · 加载管线：四步，每一步的失败去哪</h3>
+<pre><code>text ──JSON.parse──▶ unknown ──toRawDocument──▶ RawSceneDocument ──runSceneMigrations──▶ @CURRENT ──normalizeSceneNodes──▶ SceneSnapshot + LoadReport
+        │                        │                                      │                                    │
+     not-json          not-a-scene / too-new                    migration-failed              dropped[] · repairedParents[]</code></pre>
+  <p><code>normalizeSceneNodes</code> 是进 store 前的最后一道，<strong>它就是 <code>STATE.md</code> 那笔「导入必须重建 <code>children</code>」的债的还法</strong>：</p>
+  <ul>
+    <li><strong><code>parentId</code> 是真相，<code>children</code> 是索引</strong>（D19）。按 <code>parentId</code> 重建 <code>children</code>，存档里的 <code>children</code> 只用来<strong>保顺序</strong>。</li>
+    <li><strong>根按 <code>parentId === null</code> 推</strong>，存档里的 <code>rootNodeIds</code> 只用来排序。</li>
+    <li>逐个 <code>safeParse</code>；坏节点 · 重复 id · 父不存在 · <code>parentId</code> 成环 · 祖先被丢——<strong>丢掉，但每一个都进 <code>LoadReport</code></strong>，UI 要显示（「读档：丢弃 2 个节点」）。</li>
+  </ul>
+  <p class="note">对照仓库 <code>setScene</code> 做同样的事（删孤儿、删不可达，<code>use-scene.ts:1217-1240</code>），但只 <code>console.warn</code>。用户不看控制台。
+    <strong>「静默」正是本项目八个 bug 的共同点</strong>，所以这里坚持把报告交到 UI。</p>
+
+  <h3>E · 进 store：<code>replaceScene</code></h3>
+  <p>读档、切场景、导入都走同一个函数。三件事缺一不可：</p>
+  <ol>
+    <li><strong>一次 <code>setState</code> 写完</strong>，脏集换成「恰好是新场景全部节点」的新 <code>Set</code>。
+      对照仓库吃过「分两步写」的亏：半规范化的中间态和读档前的空场景都变成了撤销目标（<code>use-scene.ts:1242-1245</code>）。</li>
+    <li><strong>历史清空</strong>——读档不能被 Ctrl+Z 撤回到上一个场景。</li>
+    <li><strong>清掉指向旧场景的编辑器 id</strong>（<code>selectId</code> / <code>currentLevelId</code>，在 app 层做，见 J）。</li>
+  </ol>
+  <p><strong>viewer 一行不改</strong>，读代码确认过：<code>NodeRenderer</code> 找不到节点返回 <code>null</code>（<code>node-renderer.tsx:18</code>）；
+    <code>GeometrySystem</code> 遇到不存在的脏 id 直接 <code>clearDirty</code>（<code>geometry-system.tsx:35-37</code>），group 还没挂上就留到下一帧（<code>:47-49</code>）。</p>
+  <p class="note"><strong>不拿暂停租约。</strong>我原本照 <code>ensureScaffold</code> 的样子写了 <code>acquireSceneHistoryPause</code>，
+    但变异测试证明它<strong>不产生任何可观察差别</strong>（紧跟着的 <code>clear()</code> 已经把那条记录清了，去掉租约 268 条全绿）。删掉了——少一个依赖，少一条要靠自觉记住的规矩。</p>
+
+  <h3>F · 自动保存</h3>
+  <ul>
+    <li><strong>只认 <code>nodes</code> / <code>rootNodeIds</code> 换了引用。</strong>脏集是就地改的、live 覆盖不碰 store——<strong>拖拽期间一次都不触发</strong>。撤销 / 重做算改动，会存。</li>
+    <li><strong>防抖 500 ms</strong>（<code>m6-prep</code> 300，对照仓库 1000）；<strong><code>pagehide</code> 立刻 flush</strong>——对照仓库的注释说得清楚：刷新得快，最后一次改动就没了。</li>
+    <li><strong>写失败要看得见。</strong>状态栏显示 <code>已保存 / 未保存 / 保存失败</code>；失败时改动保持「脏」，下一次改动或 flush 重试。
+      <code>m6-prep</code> 把失败全吞了（<code>:85-87</code>）——配额满时用户永远不知道。</li>
+  </ul>
+  <div class="trap">
+    <span class="trap-label">两条顺序，错了都是静默改坏数据 —— 原型两条测试各钉一个方向</span>
+    <p><strong>① 启动：先读档，后启动自动保存。</strong>反过来，读档那一次 <code>setState</code> 自己会被当成改动写一次盘。
+      原型里有一条<strong>故意把顺序写反</strong>的测试，它确实写了一次。对照仓库在这上面也栽过（hook 挂载早于读档，防误删基线恒为 0，<code>use-auto-save.ts:18-23</code>）。</p>
+    <p style="margin-bottom:0"><strong>② 切场景：先 <code>stop()</code>（把挂着的改动写进<em>旧</em>场景），再 <code>replaceScene</code>，再为新场景 <code>start</code>。</strong>
+      反过来：<code>replaceScene</code> 让 <code>nodes</code> 换引用 → 旧的自动保存把它当成改动 → <code>stop()</code> 那次 flush
+      <strong>把新场景的内容写进旧场景的 id</strong>。不报错、不闪，下次打开旧场景才发现它变成了别的房子。
+      <strong>这是 M9 里最危险的一个 bug</strong>，原型测试把两个方向都写下来了。</p>
+  </div>
+
+  <h3>G · 存储：一个索引 + 每场景一个键</h3>
+<pre><code>r3f-arch:index                 { scenes: SceneMeta[], checkpoints: CheckpointMeta[], currentSceneId }
+r3f-arch:scene:&lt;sceneId&gt;       SceneDocument
+r3f-arch:checkpoint:&lt;cpId&gt;     SceneDocument</code></pre>
+  <ul>
+    <li><strong>索引是缓存，文档才是真相。</strong>索引丢了或坏了，扫 <code>scene:*</code> 键重建（名字退化成 id）。所以 <code>KeyValueStore</code> 需要一个 <code>keys()</code>。</li>
+    <li><strong>先写文档，再写索引。</strong>配额满时挂的是大的那个（文档），索引保持旧值、仍然自洽；反过来索引会指向一个没写成的文档。</li>
+    <li><strong>降级保护：</strong><code>SceneMeta.docVersion</code> 记着文档是哪个版本存的。比当前代码新 → <code>save</code> 抛 <code>SceneTooNewError</code>，<code>load</code> 报 <code>too-new</code>。
+      <strong>这在本项目是真实场景</strong>：你会 <code>git checkout</code> 老提交对照着看，老代码打开新存档，自动保存会用旧格式覆盖它。</li>
+    <li><strong>存档点</strong>是整份文档的拷贝，每场景留最近 10 个，旧的连文档一起删。</li>
+    <li><strong>同步接口</strong>（前置 B5）：<code>localStorage</code> 本身同步。</li>
+  </ul>
+
+  <h3>H · 导入导出</h3>
+  <ul>
+    <li><strong>导出</strong> = 当前场景的 <code>SceneDocument</code> + <code>name</code>，下载成 <code>&lt;场景名&gt;.r3f-scene.json</code>。</li>
+    <li><strong>导入</strong> = <code>parseSceneDocument</code> → 成功就<strong>新建一个场景</strong>并切过去（前置 B2），当前场景不动。
+      失败按 <code>error.kind</code> 给人话；<strong>「一个节点都没留下、却丢了若干个」→ 当成不是我们的文件，拒绝</strong>（v0 形状嗅探的兜底）。</li>
+    <li>导入后显示 <code>LoadReport</code>：从哪个版本迁过来、丢了几个、修了几个父。</li>
+  </ul>
+
+  <h3>I · 写入边界校验：M4 那笔债在 M9 到期的真正原因</h3>
+  <p><code>STATE.md</code>：「live 覆盖是 <code>Partial&lt;AnyNode&gt;</code>，无 per-type 校验 → M9」。为什么偏偏是 M9？
+    因为<strong>从 M9 起，store 里的东西会被写进磁盘</strong>。<code>Partial&lt;AnyNode&gt;</code> 按联合分配——
+    <code>updateNode(wallId, { polygon: … })</code> <strong>类型检查通过</strong>，<code>mergeNodePath</code> 的 <code>as AnyNode</code> 把它放进 store；
+    以前刷新就没了，现在它落盘，下次读档整堵墙作为 invalid 被丢掉。</p>
+  <p><strong>还法（前置 B4）：在 <code>updateNode</code> 里校验合并结果</strong>——先查 <code>type</code> / <code>id</code> 没变，再 <code>AnyNode.safeParse</code>，
+    再查「parse 剥掉了哪些键」（剥掉的就是别的类型的字段），<strong>校验通过才 <code>set</code></strong>。
+    <code>addNode</code> 早就在 parse（<code>use-scene.ts:65</code>），这一步只是让两个写入口对齐。</p>
+  <p class="note"><strong>它不还的那一半：</strong>live 覆盖本身仍是 <code>Partial&lt;AnyNode&gt;</code>，拖拽预览期间仍无校验——但它不落盘、松手就清，最坏画错一帧 → M13。
+    <strong>D23 的回归必须测：</strong><code>height: undefined</code> 删掉的键，不能被 parse 填回来（<code>height</code> 没有 <code>.default()</code>，所以不会，但要有测试钉住）。</p>
+
+  <h3>J · 启动与切换（app 层编排）</h3>
+<pre><code><span class="cm">// main.tsx</span>
+const storage = createSceneStorage(localStorageKV())
+bootScenes(storage)          <span class="cm">// ↓ 全部在 render 之前（m6-prep 的理由：放进 effect 会先闪一帧空场景）</span>
+createRoot(…).render(…)
+
+bootScenes:
+  没有任何场景             → newScene('未命名')
+  有 currentSceneId        → openScene(id)
+  打开失败（too-new / 坏） → <span class="cw">不碰它、不对它启动自动保存</span>；newScene，并在状态栏说清为什么
+
+openScene(id):
+  autosave?.stop()                       <span class="cm">// ② 先把旧场景的改动写进旧场景</span>
+  const r = storage.load(id)             <span class="cm">// 失败 → 只写 lastError，当前场景原样继续</span>
+  replaceScene(r.snapshot)               <span class="cm">// E</span>
+  useEditor: selectId = null, currentLevelId = null
+  ensureScaffold()                       <span class="cm">// 空文档补脚手架；v1 文档里已有容器，只对齐当前层</span>
+  storage.setCurrentSceneId(id)
+  autosave = startAutosave({ write: (s) =&gt; storage.save(id, s), … })   <span class="cm">// ① 最后才启动</span></code></pre>
+  <p class="note"><code>ensureScaffold</code> 排在 <code>replaceScene</code> <em>之后</em>、<code>startAutosave</code> <em>之前</em>：
+    它自己不进历史（M8 批 H），又不会被当成改动写盘；空场景的脚手架会在第一次真实编辑时一起存下去。</p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ §03 -->
+<section>
+  <h2><span class="num">§03</span>文件树增量</h2>
+  <p class="h2sub">core 新 11 个 · app 新 8 个 · 改 4 处 · viewer 不动</p>
+<pre><code>src/
+  core/
+    persistence/                               <span class="ok">新目录</span>
+      scene-document.ts                        <span class="ok">新</span>  信封类型 · CURRENT_SCENE_VERSION · toSceneDocument · deriveRootIds
+      migrations.ts                            <span class="ok">新</span>  SceneMigration · SCENE_MIGRATIONS · runSceneMigrations
+      migrations/v0-to-v1.ts                   <span class="ok">新</span>  M8 之前的平场景
+      normalize-snapshot.ts                    <span class="ok">新</span>  parse · 丢坏节点 · 重建 children · 推根 · LoadReport
+      load-scene-document.ts                   <span class="ok">新</span>  文本 / 对象 → SceneLoadResult
+      scene-storage.ts                         <span class="ok">新</span>  KeyValueStore 上的场景列表 + 存档点
+      fixtures.ts                              <span class="ok">新</span>  M1 / M6 / M7 三代语料（按 git 历史手写）
+      load-scene-document.test.ts              <span class="ok">新</span>  <span class="cm">// 23 条</span>
+      scene-storage.test.ts                    <span class="ok">新</span>  <span class="cm">// 8 条</span>
+    store/
+      replace-scene.ts                         <span class="ok">新</span>
+      replace-scene.test.ts                    <span class="ok">新</span>  <span class="cm">// 3 条</span>
+      use-scene.ts                             <span class="cw">改</span>  updateNode 写入边界校验（前置 B4）
+      use-scene.test.ts                        <span class="cw">追加</span> <span class="cm">// 5 条</span>
+  app/
+    persistence/
+      autosave.ts                              <span class="ok">新</span>  不依赖 React / DOM，可测
+      autosave.test.ts                         <span class="ok">新</span>  <span class="cm">// 9 条</span>
+      local-storage-kv.ts                      <span class="ok">新</span>  window.localStorage → KeyValueStore
+      scene-session.ts                         <span class="ok">新</span>  bootScenes · openScene · newScene · importSceneText · exportCurrentScene · checkpointNow · deleteScene · renameScene
+      scene-session.test.ts                    <span class="ok">新</span>  <span class="cm">// ≈ 6 条（未原型）</span>
+      file-io.ts                               <span class="ok">新</span>  下载 / 选文件（DOM，不测）
+    store/use-persistence.ts                   <span class="ok">新</span>  currentSceneId · saveStatus · lastReport · lastError
+    components/scene-panel.tsx                 <span class="ok">新</span>  场景列表 / 新建 / 重命名 / 删除 / 导入 / 导出 / 存档点
+    app.tsx                                    <span class="cw">改</span>  挂 ScenePanel · Ctrl+S · 状态栏加保存状态 · 输入框里不触发工具快捷键
+  main.tsx                                     <span class="cw">改</span>  ensureScaffold() → bootScenes(storage)
+  viewer/                                      不动（§02 E 说明了为什么）</code></pre>
+  <p class="note"><strong>为什么 <code>autosave.ts</code> 在 app、<code>scene-storage.ts</code> 在 core：</strong>
+    存储只依赖一个 <code>KeyValueStore</code> 接口，不知道 <code>window</code> 在哪，Node 里能测（D4）；
+    自动保存要挂 <code>pagehide</code>、要和编辑器状态一起编排切场景，属于「编辑体验」。
+    它仍然写成不依赖 React 的纯模块，<code>pagehide</code> 的目标从参数传进来——原型里就是拿 <code>new EventTarget()</code> 测的。</p>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ §04 -->
+<section>
+  <h2><span class="num">§04</span>建造顺序</h2>
+  <p class="h2sub">方法签名 + hint，不含实现体 · core 八步 → app 六步 · 每步都标「测试在防什么」</p>
+  <p>除了第 13、14 步，这一整层都落在 D11 说<strong>能测</strong>的那一半里。原型已经把 01–09 真写出来跑过（§00 ⑧），所以下面的签名不是猜的。</p>
+
+  <h3 class="batch">core 批</h3>
+
+  <div class="step"><div class="step-n">01</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>core/persistence/scene-document.ts</code></p><span class="tag core">core</span></div>
+<pre><code>export const SCENE_FORMAT = 'r3f-arch/scene'
+export const CURRENT_SCENE_VERSION = 1
+export type RawNode = Record&lt;string, unknown&gt;
+export type RawSceneDocument = { version: number; nodes: RawNode[]; rootNodeIds: string[] }
+export type SceneDocument = { format: typeof SCENE_FORMAT; version: number; nodes: AnyNode[]; rootNodeIds: AnyNodeId[] }
+export function toSceneDocument(snapshot: SceneSnapshot): SceneDocument
+export function deriveRootIds(nodes: readonly { id?: unknown; parentId?: unknown }[], saved: readonly unknown[]): string[]</code></pre>
+    <p><strong>hint：</strong><code>deriveRootIds</code> 先收「<code>parentId</code> 为 <code>null</code> 或缺席」的 id，再按 <code>saved</code> 排序，<code>saved</code> 没提到的追加在后面。
+      <strong>它决定谁是根时一眼都不看 <code>saved</code>。</strong>参数类型写成结构性的，这样 raw 节点和 <code>AnyNode</code> 都能传。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">02</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>core/persistence/fixtures.ts</code> —— 三代语料</p><span class="tag core">core</span></div>
+<pre><code>export const M1_FLAT_SCENE   <span class="cm">// 8281cd2：BaseNode 没有 children；墙 = start / end / thickness? / height?</span>
+export const M6_FLAT_SCENE   <span class="cm">// a5e4ee6：楼板 elevation 0.05 被物化；天花、柱；仍无 children</span>
+export const M7_FLAT_SCENE   <span class="cm">// 224db5e：有 children；门窗挂在墙上、不在根里</span></code></pre>
+    <p><strong>hint：</strong>用 <code>git show 8281cd2:src/core/schema/base.ts</code> 把当时的 schema 调出来对着写。
+      <strong>被 <code>.default()</code> 物化进数据的字段一个都不能漏</strong>——<code>object: 'node'</code>、<code>visible: true</code>、<code>metadata: {}</code>、<code>elevation: 0.05</code>——
+      它们才是那时 <code>addNode</code> 真正写进去的东西。形状就是 <code>useScene</code> 的 <code>{ nodes: Record, rootNodeIds }</code>：没有 <code>format</code>、没有 <code>version</code>。
+      M1 那份里放一堵「控制台设过 <code>height: 3</code>」的墙，给缺席性测试用（I5）。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">03</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>migrations.ts</code> + <code>migrations/v0-to-v1.ts</code></p><span class="tag core">core</span></div>
+<pre><code>export type SceneMigration = { from: number; note: string; migrate: (doc: RawSceneDocument) =&gt; Omit&lt;RawSceneDocument, 'version'&gt; }
+export const SCENE_MIGRATIONS: readonly SceneMigration[]
+export class SceneMigrationError extends Error { readonly from: number }
+export function runSceneMigrations(doc: RawSceneDocument, migrations?: readonly SceneMigration[], target?: number): RawSceneDocument
+export const v0ToV1: SceneMigration</code></pre>
+    <p><strong>hint（runner）：</strong>一个 <code>while (version &lt; target)</code>，每轮按 <code>from</code> <em>查找</em>（不按数组下标），找不到抛 <code>SceneMigrationError(from)</code>，
+      找到就 <code>{ ...step.migrate(doc), version: from + 1 }</code>。<code>migrations</code> 和 <code>target</code> 做成参数，测试才能喂一条假链。</p>
+    <p><strong>hint（v0 → v1）：</strong>先判「平」（没有 site / building / level），不平原样返回。
+      平的话：<code>type === 'slab' &amp;&amp; elevation === 0.05</code> → 改 0；建一个 <code>Record&lt;string, RawNode&gt;</code>（重复 id 留第一个）；
+      调 <code>migrateToLevels</code>，<code>nodes</code> 那里要 <code>as unknown as Record&lt;AnyNodeId, AnyNode&gt;</code>——<strong>在旁边写清楚这个 cast 为什么安全</strong>
+      （它只读 <code>type</code>、查存在、展开复制）。根用 <code>deriveRootIds</code> 推。<strong>不要 parse，也不用给 raw 节点补 <code>children</code></strong>——
+      第 04 步那次 parse 会填（变异测试确认过，补了是死代码）。</p>
+    <p><strong>测试在防：</strong>链断了 · 按数组顺序跑 · 迁移忘了改版本号 · 楼板没改 · 按数值嗅探（v1 的 0.05 被改）· 有容器的无版本 dump 被再包一层。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">04</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>core/persistence/normalize-snapshot.ts</code></p><span class="tag core">core</span><span class="tag debt">还 M7 的债</span></div>
+<pre><code>export type DropReason = 'invalid' | 'duplicate-id' | 'missing-parent' | 'cycle' | 'ancestor-dropped'
+export type DroppedNode = { id: string | null; reason: DropReason }
+export type LoadReport = { dropped: DroppedNode[]; repairedParents: string[] }
+export function normalizeSceneNodes(rawNodes: readonly RawNode[], savedRootIds: readonly unknown[]): { snapshot: SceneSnapshot; report: LoadReport }</code></pre>
+    <p><strong>hint，四步：</strong></p>
+    <ol>
+      <li>逐个 <code>AnyNode.safeParse</code>。失败记 <code>invalid</code>（<code>id</code> 不是字符串就记 <code>null</code>）；id 出现过记 <code>duplicate-id</code>，<strong>留第一个</strong>。</li>
+      <li>给每个节点下判决：沿 <code>parentId</code> 往上走，带「本次路径」集合 + 全局判决缓存。
+        碰到缓存 → 整条路径跟它（它不 ok 就全是 <code>ancestor-dropped</code>）；碰到路径里已有的 id → <strong>成环</strong>，环上记 <code>cycle</code>、挂在环下面的记 <code>ancestor-dropped</code>；
+        父不存在 → 最上面那个记 <code>missing-parent</code>、下面的记 <code>ancestor-dropped</code>。
+        <strong>缓存让它线性，路径集合让它不死循环</strong>（没有路径集合，环会把它挂住，不是报错而是卡死）。</li>
+      <li>重建 <code>children</code>：先按存档顺序保留「确实以我为父」的，再追加漏掉的；和原来不同就换掉并记进 <code>repairedParents</code>。</li>
+      <li>根 = <code>deriveRootIds</code>。</li>
+    </ol>
+    <p><strong>测试在防：</strong>门从墙的 <code>children</code> 里漏了（<strong>门不渲染且不报错</strong>，D19 记的那句原话）· <code>children</code> 里有幽灵 id ·
+      信了存档的 <code>rootNodeIds</code> · 环 · 缺父的节点被留下。这一步的变异体红得最多（5 条）。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">05</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>core/persistence/load-scene-document.ts</code></p><span class="tag core">core</span></div>
+<pre><code>export type SceneLoadError =
+  | { kind: 'not-json' } | { kind: 'not-a-scene' }
+  | { kind: 'too-new'; version: number } | { kind: 'migration-failed'; from: number; message: string }
+export type SceneLoadResult =
+  | { ok: true; snapshot: SceneSnapshot; report: LoadReport; fromVersion: number }
+  | { ok: false; error: SceneLoadError }
+export function toRawDocument(value: unknown): RawSceneDocument | SceneLoadError
+export function readSceneDocument(value: unknown): SceneLoadResult
+export function parseSceneDocument(text: string): SceneLoadResult</code></pre>
+    <p><strong>hint：</strong><code>format</code> 对得上 → 要求 <code>version</code> 是 ≥ 1 的整数、<code>nodes</code> 是数组，<strong>比当前新就在这里返回 <code>too-new</code>，一步迁移都不跑</strong>。
+      有 <code>format</code> 或 <code>version</code> 但对不上 → <code>not-a-scene</code>，<strong>不猜</strong>。两个都没有、<code>nodes</code> 是对象或数组 → v0。
+      <code>nodes</code> 里不是对象的条目换成 <code>{}</code>，让 parse 把它记成 <code>invalid</code>，<strong>而不是悄悄过滤掉</strong>。</p>
+    <p><strong>测试在防：</strong>too-new 被当成能读（红 2 条）· 入参被改动（把语料 <code>deepFreeze</code> 之后读）· 非法 JSON 抛出而不是返回错误。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">06</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>core/store/replace-scene.ts</code></p><span class="tag core">core</span></div>
+<pre><code>export function replaceScene(snapshot: SceneSnapshot): void</code></pre>
+    <p><strong>hint：</strong>一次 <code>useScene.setState({ nodes, rootNodeIds, dirtyNodes: new Set(新场景全部 id) })</code>，然后 <code>useScene.temporal.getState().clear()</code>。
+      <strong>不要 <code>markAllDirty()</code></strong>——它只往旧 <code>Set</code> 里加，旧 id 会留下；也<strong>不要暂停租约</strong>（§02 E 的注解）。</p>
+    <p><strong>测试在防：</strong>Ctrl+Z 撤回到上一个场景 · 旧 id 留在脏集里 · 替换之后下一次编辑不进历史。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">07</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>core/persistence/scene-storage.ts</code></p><span class="tag core">core</span></div>
+<pre><code>export type KeyValueStore = { getItem(k): string | null; setItem(k, v): void; removeItem(k): void; keys(): string[] }
+export type SceneMeta = { id; name; createdAt; updatedAt; nodeCount; docVersion }
+export type CheckpointMeta = { id; sceneId; label; createdAt }
+export class SceneTooNewError extends Error
+export function createSceneStorage(kv: KeyValueStore, options?: { now?; newId?; maxCheckpointsPerScene? }): {
+  list(): SceneMeta[]
+  create(name: string, snapshot: SceneSnapshot): SceneMeta
+  save(id: string, snapshot: SceneSnapshot): SceneMeta           <span class="cm">// docVersion &gt; CURRENT → SceneTooNewError</span>
+  load(id: string): SceneLoadResult | null                        <span class="cm">// null = 没有这个场景</span>
+  remove(id: string): void
+  rename(id: string, name: string): void
+  checkpoint(sceneId: string, label: string, snapshot: SceneSnapshot): CheckpointMeta
+  listCheckpoints(sceneId: string): CheckpointMeta[]
+  loadCheckpoint(checkpointId: string): SceneLoadResult | null
+  currentSceneId(): string | null
+  setCurrentSceneId(id: string | null): void
+}</code></pre>
+    <p><strong>hint：</strong>每个方法都「读索引 → 改 → 写回」，<strong>不要在闭包里缓存索引</strong>（另一个标签页会改它，§06）。
+      <code>readIndex</code> 解析失败就扫 <code>keys()</code> 重建。<strong><code>create</code> / <code>save</code> / <code>checkpoint</code> 一律先写文档再写索引。</strong>
+      <code>now</code> 和 <code>newId</code> 做成参数，测试里才排得出确定的顺序。</p>
+    <p><strong>测试在防：</strong>M1 语料存进去读出来不一样 · 删场景留下存档点文档 · 存档点不修剪 · 老代码覆盖新存档 ·
+      配额满后索引指向没写成的文档（<strong>只让 <code>scene:</code> 那个键抛</strong>，否则这条顺序测不出来，§00 ⑧）· 索引坏了场景全丢。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">08</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>core/store/use-scene.ts</code> · <code>updateNode</code> 写入边界</p><span class="tag core">core</span><span class="tag debt">还 M4 的债一半</span></div>
+<pre><code>function validateMerged(prev: AnyNode, merged: AnyNode): AnyNode   <span class="cm">// 模块内私有</span></code></pre>
+    <p><strong>hint：</strong><code>updateNode</code> 里先 <code>get()</code> 出 <code>prev</code>，算好 <code>validateMerged(prev, mergeNodePath(prev, patch))</code>，
+      <strong>校验通过才 <code>set</code></strong>——抛错时 store 一个字节都没动。<code>validateMerged</code> 三步：
+      ① <code>type</code> / <code>id</code> 变了就抛，<strong>这一步要在 parse 之前</strong>（否则报的是「不是合法的 slab」这种误导信息）；
+      ② <code>safeParse</code> 失败抛，带上第一条 issue；
+      ③ <code>Object.keys(merged)</code> 里有、<code>result.data</code> 里没有的键 = 被 zod 剥掉的别的类型的字段，抛出并列出名字。返回 <code>result.data</code>。</p>
+    <p><strong>测试在防：</strong>跨类型字段进 store（测试里<strong>不要 cast</strong>，让人看见类型系统放行了它）· 负厚度 · 改 <code>type</code> ·
+      <strong>D23 回归：<code>height: undefined</code> 删掉的键不被填回</strong> · 合法 patch 照常进历史。</p>
+  </div></div>
+
+  <h3 class="batch">app 批</h3>
+
+  <div class="step"><div class="step-n">09</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>app/persistence/autosave.ts</code></p><span class="tag app">app</span></div>
+<pre><code>export type AutosaveStatus = 'pending' | 'saved' | 'error'
+export function startAutosave(options: {
+  store: { getState(): SceneSnapshot; subscribe(l: (s: SceneSnapshot, prev: SceneSnapshot) =&gt; void): () =&gt; void }
+  write: (snapshot: SceneSnapshot) =&gt; void
+  debounceMs?: number                       <span class="cm">// 默认 500</span>
+  exitTarget?: { addEventListener(t: 'pagehide', l: () =&gt; void): void; removeEventListener(t: 'pagehide', l: () =&gt; void): void }
+  onStatus?: (status: AutosaveStatus, error?: unknown) =&gt; void
+}): { flush(): void; stop(): void }</code></pre>
+    <p><strong>hint：</strong>一个 <code>dirty</code> 标记 + 一个 timer。订阅回调里<strong>比引用</strong>，变了才 <code>dirty = true</code> 并重置 timer。
+      <code>flush</code>：清 timer；不脏就返回；<strong>先 <code>write</code> 成功、再 <code>dirty = false</code></strong>（反过来，写失败就把改动丢了）。
+      <code>stop</code> = flush + 摘 <code>pagehide</code> + 退订。<code>store</code> 直接传 <code>useScene</code>（方法参数双变，类型对得上）；测试里 <code>exitTarget</code> 传 <code>new EventTarget()</code>。</p>
+    <p><strong>测试在防：</strong>读档被写盘 · <strong>故意写反的启动顺序确实会多写一次</strong> · 防抖不合并 · 通知了但引用没变也写 · 撤销不写 ·
+      <code>pagehide</code> 不 flush · 写失败丢改动 · <strong>切场景顺序反了把新场景写进旧 id</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">10</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>app/persistence/local-storage-kv.ts</code></p><span class="tag app">app</span></div>
+<pre><code>export function localStorageKV(storage?: Storage): KeyValueStore</code></pre>
+    <p><strong>hint：</strong><code>keys()</code> 用 <code>storage.length</code> + <code>storage.key(i)</code>。
+      <strong>方法内部不要 try/catch</strong>——配额满的异常要一路冒到自动保存的 <code>onStatus('error')</code>，吞在这里就又回到 <code>m6-prep</code> 那样。
+      隐私模式下连<strong>访问</strong> <code>window.localStorage</code> 都会抛：只在默认参数取值那一处兜住，退化成一个内存 KV，并让状态栏显示「本次不会保存」。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">11</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>app/store/use-persistence.ts</code></p><span class="tag app">app</span></div>
+<pre><code>type PersistenceState = {
+  currentSceneId: string | null
+  saveStatus: AutosaveStatus | 'idle' | 'disabled'
+  lastReport: { fromVersion: number; report: LoadReport } | null
+  lastError: string | null
+}</code></pre>
+    <p><strong>hint：</strong>纯 zustand，只给 UI 读。<strong>不要把 <code>storage</code> 实例放进来</strong>——它不是状态。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">12</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>app/persistence/scene-session.ts</code> —— 编排</p><span class="tag app">app</span><span class="tag debt">M9 最危险的一步</span></div>
+<pre><code>export function bootScenes(storage: SceneStorage): void
+export function openScene(storage: SceneStorage, id: string): SceneLoadResult | null
+export function newScene(storage: SceneStorage, name: string): SceneMeta
+export function importSceneText(storage: SceneStorage, text: string, name: string): SceneLoadResult
+export function exportCurrentScene(storage: SceneStorage): { filename: string; text: string } | null
+export function checkpointNow(storage: SceneStorage, label?: string): CheckpointMeta | null
+export function deleteScene(storage: SceneStorage, id: string): void
+export function renameScene(storage: SceneStorage, id: string, name: string): void</code></pre>
+    <p><strong>hint：</strong>模块里持有一个 <code>autosave</code> 句柄。顺序照 §02 J 那段伪代码，<strong>两条顺序写成注释贴在对应行上</strong>。
+      <code>openScene</code> 读失败时<strong>什么都不动</strong>——不 stop 当前自动保存、不替换场景——只写 <code>lastError</code>。
+      <code>newScene</code>：清空 → <code>ensureScaffold()</code> → <code>storage.create</code> → 走 <code>openScene</code> 的后半段。
+      <code>deleteScene</code> 删的是当前场景时：<strong>先切到列表里下一个</strong>（没有就 <code>newScene</code>），<strong>再</strong> <code>storage.remove</code>——
+      切走时那次 flush 会写进马上要删掉的文档，无害，而且比「加一个不 flush 的 stop」简单。</p>
+    <p><strong>测试在防（≈ 6 条，内存 KV，<em>这一步没有原型</em>）：</strong>冷启动建出一个带脚手架的场景 · 再启动读回同一个 ·
+      打开 too-new 的场景之后<strong>改动不会写进它</strong> · 导入 M1 语料 = 新场景、原场景不变 · 切场景前的改动写进旧场景 · 删当前场景后当前指向别的场景。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">13</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>app/persistence/file-io.ts</code></p><span class="tag app">app</span><span class="tag debt">DOM · 不测</span></div>
+<pre><code>export function downloadText(filename: string, text: string): void
+export function pickTextFile(accept?: string): Promise&lt;{ name: string; text: string } | null&gt;</code></pre>
+    <p><strong>hint：</strong><code>Blob</code> + <code>URL.createObjectURL</code> + 临时 <code>&lt;a download&gt;</code>，点完 <code>revokeObjectURL</code>。
+      选文件用临时 <code>&lt;input type="file"&gt;</code> + <code>file.text()</code>；<strong>用户取消时 <code>change</code> 不触发</strong>，要监听 <code>cancel</code> 事件兜住，否则那个 Promise 永远挂着。</p>
+  </div></div>
+
+  <div class="step"><div class="step-n">14</div><div class="step-body">
+    <div class="step-head"><p class="step-title"><code>scene-panel.tsx</code> · <code>app.tsx</code> · <code>main.tsx</code></p><span class="tag app">app</span><span class="tag debt">React · 不测</span></div>
+    <p><strong>hint：</strong>面板是右上角一个固定 DOM 浮层（M12 才上 Radix，D12）。每行：名字（双击重命名）· 更新时间 · 节点数 · 打开 · 删除（<code>window.confirm</code>）。
+      底部：新建 · 导入 · 导出 · 存档点（列出最近 10 个，点一下恢复——恢复走「导入」那条路，建新场景）。</p>
+    <p><strong><code>app.tsx</code>：</strong>Ctrl+S → <code>checkpointNow</code>（<strong>记得 <code>preventDefault</code></strong>，否则浏览器弹「保存网页」）；状态栏末尾加保存状态和 <code>lastError</code>。</p>
+    <p><strong><code>main.tsx</code>：</strong><code>ensureScaffold()</code> 那一行换成 <code>bootScenes(storage)</code>，<strong>仍然在 <code>render</code> 之前</strong>。</p>
+    <p class="note"><strong>一个已经存在的坑会在这一步暴露：</strong><code>app.tsx:40</code> 那个 <code>keydown</code> 监听挂在 <code>window</code> 上，
+      按 W / F / G / C / D / N / V / L 就切工具。面板一有输入框（重命名、场景名），<strong>打字就会切工具</strong>。
+      要在监听开头跳过 <code>e.target</code> 是 <code>input</code> / <code>textarea</code> 的事件。</p>
+  </div></div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ §05 -->
+<section>
+  <h2><span class="num">§05</span>验收清单</h2>
+  <p class="h2sub">A 自动化 ≈ 54 条（214 → ≈ 268）· B 肉眼 12 条 · C 哪些轴没验</p>
+
+  <h3>A · 自动化</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>文件</th><th>条数</th><th>钉住什么</th></tr></thead>
+    <tbody>
+      <tr><td><code>persistence/load-scene-document.test.ts</code></td><td>23</td>
+        <td>三代语料 · 存回 v1 再读一致 · <strong>v0 的 0.05 改、v1 的 0.05 不改</strong> · 有容器的无版本 dump ·
+          <code>children</code> 重建 · 五种丢弃 · 信封四种错 · 链的连续性与顺序</td></tr>
+      <tr><td><code>persistence/scene-storage.test.ts</code></td><td>8</td>
+        <td>往返 · 删除连带 · 存档点修剪 · 降级保护 · 先文档后索引 · 索引重建</td></tr>
+      <tr><td><code>store/replace-scene.test.ts</code></td><td>3</td><td>不进历史 · 脏集恰好是新节点 · 之后照常可撤</td></tr>
+      <tr><td><code>store/use-scene.test.ts</code>（追加）</td><td>+5</td><td>写入边界：跨类型字段 · schema · 改 <code>type</code> · D23 回归 · 合法照常</td></tr>
+      <tr><td><code>app/persistence/autosave.test.ts</code></td><td>9</td><td><strong>两条顺序</strong> · 防抖 · 只换脏集 · 撤销 · <code>pagehide</code> · 失败重试 · <code>stop</code></td></tr>
+      <tr><td><code>app/persistence/scene-session.test.ts</code></td><td>≈ 6</td><td>冷启动 · 重启读回 · too-new 不被写 · 导入不覆盖 · 切场景 · 删当前</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">前五行的条数是<strong>原型实测</strong>的（§00 ⑧），不是估的；只有 <code>scene-session</code> 那 6 条是估的。</p>
+
+  <h3>B · 肉眼（浏览器）—— D11 说这一层不测，所以必须走</h3>
+  <ol class="check-num">
+    <li><strong>画几堵墙 → 刷新 → 墙还在</strong>，而且<strong>立刻出现</strong>，不用动鼠标。<span class="cm">← 主验收；不立刻出现就是脏集没换对</span></li>
+    <li>刷新后立刻 <strong>Ctrl+Z → 撤不掉</strong>；接着改一堵墙，Ctrl+Z 能撤这一次。</li>
+    <li><strong>画完最后一堵墙马上刷新</strong>（500 ms 内）→ 那堵墙也在。<span class="cm">← pagehide flush</span></li>
+    <li>在二层画东西 → 刷新 → 二层还在、门还在墙上、<strong>当前层回到首层</strong>（视图状态不存，§02 A）。</li>
+    <li>拖一堵墙<strong>拖着不放</strong>，看状态栏 → 一直不是「未保存」；松手之后才变。<span class="cm">← 拖拽不触发自动保存</span></li>
+    <li>导出 → 新建空场景 → 导入刚才那个文件 → <strong>和原场景一样，而且是列表里的第三个场景</strong>，前两个都没被动。</li>
+    <li><strong>导入 M1 语料</strong>（把 <code>M1_FLAT_SCENE</code> <code>JSON.stringify</code> 成一个文件）→ 三堵墙在 Level 0 里；状态栏说「从 v0 迁移」。<span class="cm">← ROADMAP 的验收原文</span></li>
+    <li><strong>导入 M6 语料 → 楼板顶面和墙底齐平</strong>，不高出 5 cm。<span class="cm">← v0 → v1 的楼板那一步，§00 ⑥ 第 1 条</span></li>
+    <li>切到另一个场景改点东西 → 马上切回来 → <strong>两个场景各是各的</strong>。<span class="cm">← 先停后换；错了是静默的</span></li>
+    <li>Ctrl+S 打个存档点 → 删几堵墙 → 从存档点恢复 → 墙回来了（在一个新场景里）。</li>
+    <li>devtools 里把当前场景文档的 <code>version</code> 改成 99 → 刷新 → <strong>状态栏说清为什么、建了新场景，那个文档原样没动</strong>。<span class="cm">← 降级保护 I6</span></li>
+    <li>devtools 里写一个 5 MB 的键把 localStorage 填满 → 画墙 → <strong>状态栏显示保存失败</strong>；删掉那个键 → 再画一笔 → 恢复「已保存」。</li>
+  </ol>
+
+  <h3>C · 哪些轴没验（D16）</h3>
+  <ul>
+    <li><strong>浏览器里的一切</strong>：上面 B 组 12 条，一条都没走过。</li>
+    <li><strong>一行都没写过的四个文件</strong>：<code>scene-session.ts</code>（§04 第 12 步，M9 最危险的编排）· <code>local-storage-kv.ts</code> ·
+      <code>file-io.ts</code> · <code>scene-panel.tsx</code>。<strong>原型只覆盖到第 09 步。</strong></li>
+    <li><strong>真实 <code>localStorage</code></strong>：配额上限、抛的是哪种异常、隐私模式下访问就抛——原型用的是内存替身。</li>
+    <li><strong><code>pagehide</code> 的真实时序</strong>、<code>&lt;input type=file&gt;</code> 的 <code>cancel</code> 事件、<code>&lt;a download&gt;</code> 在本项目的 Vite 开发服务器下的行为。</li>
+    <li><strong>性能</strong>：几百个节点的 <code>JSON.stringify</code> 在防抖窗口里的耗时没测过。</li>
+  </ul>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ §06 -->
+<section>
+  <h2><span class="num">§06</span>故意保留的缺陷</h2>
+  <p class="h2sub">十三条 · 每条带到期 —— 以及 M9 关掉的三条半</p>
+
+  <h3>M9 关掉的债</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>债</th><th>记于</th><th>怎么关的</th></tr></thead>
+    <tbody>
+      <tr><td>刷新即丢，无存档</td><td>M1</td><td class="ok">自动保存 + 场景列表（§02 F / G）。「撤销不跨刷新」那半句不关，见下</td></tr>
+      <tr><td><code>children</code> 是反规范化字段，导入必须重建</td><td>M7</td><td class="ok"><code>normalizeSceneNodes</code>（§02 D）</td></tr>
+      <tr><td><code>migrateToLevels</code> 没有版本号，不是迁移链</td><td>M8</td><td class="ok">它成了 v0 → v1 的一部分（§02 C）</td></tr>
+      <tr><td>live 覆盖无 per-type 校验</td><td>M4</td><td class="ok"><strong>还一半</strong>：会落盘的那一侧（§02 I）。覆盖本身的类型见下</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>M9 新记的债</h3>
+  <div class="defect"><div><strong>撤销不跨刷新</strong>——历史只在内存里。存 zundo 的 <code>pastStates</code> 等于每次保存写 50 份场景</div><div class="defect-to">不做</div></div>
+  <div class="defect"><div><strong>两个标签页开同一个场景，后写的赢</strong>，而且静默。<code>storage</code> 事件能检测，但要先设计「谁让步」</div><div class="defect-to">M12</div></div>
+  <div class="defect"><div><strong>localStorage 大约 5 MB 上限</strong>，没有 IndexedDB 后备。几百个节点的房子几百 KB，暂时够</div><div class="defect-to">有需要时</div></div>
+  <div class="defect"><div><strong>v0 形状嗅探会误判</strong>——任何带 <code>nodes</code> 的 JSON 都会被当成 v0。只靠「一个都没留下却丢了若干个 → 拒绝」兜底</div><div class="defect-to">不做（v0 只会越来越少）</div></div>
+  <div class="defect"><div><strong>v0 → v1 生成的容器 id 是随机的</strong>——同一个 v0 文件导入两次，得到两套不同的 site / building / level id。<strong>迁移不是确定性函数</strong></div><div class="defect-to">有需要时</div></div>
+  <div class="defect"><div><strong>父子的类型约束不校验</strong>——门挂在层上、墙挂在墙上，<code>normalize</code> 都放行；渲染出来是错的，但不报</div><div class="defect-to">M13</div></div>
+  <div class="defect"><div><strong>迁移只有升级没有降级</strong>——新存档在老代码里只能拒绝（降级保护），不能读</div><div class="defect-to">不做</div></div>
+  <div class="defect"><div><strong>自动保存没有「疑似误删」护栏</strong>（对照仓库的 <code>isSuspiciousNodeDrop</code>）——清空场景会被存下去，靠存档点兜。前置 B3 的选择</div><div class="defect-to">看 B3</div></div>
+  <div class="defect"><div><strong>live 覆盖仍是 <code>Partial&lt;AnyNode&gt;</code></strong>——拖拽预览期间无校验。不落盘，最坏画错一帧</div><div class="defect-to">M13</div></div>
+  <div class="defect"><div><strong>索引重建之后场景名退化成 id、时间戳为空</strong></div><div class="defect-to">不做</div></div>
+  <div class="defect"><div><strong>场景名不去重</strong>；导出文件名除了清非法字符之外不做处理</div><div class="defect-to">M12</div></div>
+  <div class="defect"><div><strong>场景面板是裸 DOM</strong>，没有键盘导航、没有焦点管理（D12 的 Radix 要到 M12）</div><div class="defect-to">M12</div></div>
+  <div class="defect"><div><strong>存档点只能整份恢复成新场景</strong>，没有对比、没有「回到这里」</div><div class="defect-to">M13</div></div>
+</section>
+
+<hr class="dim">
+
+<!-- ═══════════ 末 -->
+<section>
+  <h2><span class="num">末</span>下一步</h2>
+  <p class="h2sub">D13 · [混合] 型：§01–§06 先行，§07 按层三轮</p>
+
+  <p><strong>轮到你的三件事，按顺序：</strong></p>
+  <ol class="check-num">
+    <li><strong>敲前置 C</strong>（C1 → C4），<code>pnpm verify</code> 应到 <strong>16 文件 / 214 用例</strong>，然后走它末尾那张表。
+      <strong>P2 的状态栏第一个词、C6 的绿线，都需要你亲眼看一眼再告诉我。</strong>这里是阶段边界：<strong>先提交</strong>。</li>
+    <li><strong>回前置 B 的五个问题</strong>（B1 版本号粒度 · B2 导入语义 · B3 误删护栏 · B4 债还多少 · B5 同步还是 async）。
+      我给了推荐，但它们会一直活到 M14——尤其 B1，它决定 M10 / M11 / M14 每次改 schema 时要写什么。</li>
+    <li>要 §07 时告我，<strong>按层交，最多三轮</strong>（<code>handoff-m9.md</code> ⑦ 定的省钱方案）：
+      <strong>第一轮 core</strong>（§04 01–08，含语料和两个测试文件）·
+      <strong>第二轮 app 无 UI 部分</strong>（09–12 + <code>main.tsx</code>）·
+      <strong>第三轮 UI</strong>（13–14 面板与 <code>app.tsx</code>）。
+      每轮末尾我会写「敲完应该看到什么」，并在那一轮的框里按 D16 写清验证到哪一层。</li>
+  </ol>
+
+  <div class="note">
+    <p><strong>M9 验收之后要更新的四份文件</strong>（照 M8 的惯例）：
+      <code>STATE.md</code>（进度 + 债表三增十三减）· <code>DECISIONS.md</code>（前置 B 的五个结论，每条带作废条件）·
+      <code>README.md</code> 的文件表 · <code>ROADMAP.md</code>（M9 那句「8 个迁移测试」更正成 7 个，§00 ①）。</p>
+    <p style="margin-bottom:0"><strong>写交接的时机</strong>（<code>handoff-m9.md</code> ⑦ 的教训）：
+      前置 C 敲完是一个边界、§07 每一轮交完是一个边界。<strong>别等上下文快满时才写。</strong></p>
+  </div>
+</section>
+
+</div>
+
+<style>
+.check-num { padding-left:24px; }
+.check-num li { margin-bottom:11px; padding-bottom:11px; border-bottom:1px solid var(--rule-soft); }
+.check-num li:last-child { border-bottom:0; }
+blockquote.note { margin:18px 0; }
+</style>

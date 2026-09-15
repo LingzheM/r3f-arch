@@ -4,53 +4,13 @@
 
 ---
 
-## 工作约定 —— 新会话必读，优先级高于其它一切
+## 工作约定
 
-**1. 代码写进 `docs/m<N>-*.html` 的 §07，不写 `src/`。**
-用户手敲。这是学习方式，不是效率问题。写进 `src/` 等于把用户从作者降级成集成商。
+**搬到了 `../CLAUDE.md`（2026-09-16，D29）**，从 `r3f-arch` 目录启动 Claude Code 会自动加载。
+开场输入 `/kickoff`；其它 skill 见 `CLAUDE.md` 的表。
 
-**2. 需要改 `src/` 时先问。** 唯一免问的例外：修复让 `pnpm verify` 变红的**编译错误**，
-且必须在回复里逐条列出改了什么、为什么。除此之外——包括"顺手修个 bug"——都要先确认。
-
-**3. 不许覆盖用户已存在的文件，哪怕它是空的或只有几行草稿。**
-那些是用户正在写的东西，未跟踪、git 恢复不了。
-
-**4. 每个里程碑一份 HTML，结构固定：**
-⓪ 这个设计是怎么推出来的（七步推导，样板见 `m3-spine.html` §00）
-① 这一步解决什么问题 ② 机制说明 ③ 文件树增量
-④ 建造顺序（方法签名 + hint，**不含实现体**） ⑤ 验收清单 ⑥ 故意保留的缺陷 ⑦ 全部代码
-
-**§00 的七步**：①找规格书读全文（wiki 在前源码在后）②找「之前是怎么错的」
-③量成本决定手写还是抄 ④抽不变量（它们就是测试用例）⑤切最薄的垂直片
-⑥去用户代码里找病灶（动机必须先于机制）⑦列故意缺陷并标到期
-＋⑧遇到顺序/时序/手感问题先跑一段原型，别在纸上推
-
-**5. `[机制]` 型里程碑先只交 ①–⑥。** 用户要 §07 时再补。
-`[模式]` 型可以一次交完。类型见 `ROADMAP.md`。
-
-**6. 方案有缺陷就在文档里显式记录**，写成"原方案 X 行不通，因为 Y，改成 Z"，
-不要静默替换——用户是照着文档敲的，静默改会让文档和他手里的代码对不上。
-
----
-
-## 开新对话时贴这段
-
-```
-项目 C:\Users\User\workspace\meguri\r3f-arch，对照仓库 ..\editor。
-
-先读 docs/README.md 的「工作约定」，再读 docs/STATE.md、docs/DECISIONS.md、
-docs/ROADMAP.md，然后扫一遍 src/ 的真实代码并跑 pnpm verify。
-
-先报告实际代码与计划的偏差，再出 M<N> 的方案。
-代码写进 docs/m<N>-*.html，不要动 src/。
-```
-
-**接手方开场必须做的四件事**（缺一会漂移）：
-
-1. 读工作约定 + `STATE.md` / `DECISIONS.md` / `ROADMAP.md`
-2. **读 `src/` 的真实代码**——不是读上一个会话写的计划
-3. 跑 `pnpm verify`（check-types + lint + test），确认基线颜色
-4. **先报告偏差，再出计划**
+从 M9 §07 起，代码写进 Markdown（`m<N>-code.md`），按 core → viewer → app 三批放出，每批先过 `/gate`。
+M1–M9 的设计文档仍是 HTML，不转。
 
 ---
 
@@ -71,6 +31,16 @@ docs/ROADMAP.md，然后扫一遍 src/ 的真实代码并跑 pnpm verify。
 | [handoff-m6.md](handoff-m6.md) | M6 开新会话的前置闸门 + 粘贴的提示词 | 开 M6 前 |
 | [m6-slab-ceiling-column.html](m6-slab-ceiling-column.html) | M6 楼板、天花、柱（前置 A 偏差 · 前置 B M5 检验测量 · 前置 C 开工闸门 20 处 + §00–§07 全码） | ✅ |
 | [handoff-m7.md](handoff-m7.md) | M7 开新会话的前置闸门 + 粘贴的提示词 | 开 M7 前 |
+| [m7-openings.html](m7-openings.html) | M7 门窗与开洞（前置 A 偏差 · §01–§06 · **§07 全码 24 文件，已在 src/ 拷贝上跑绿**） | ✅ |
+| [handoff-m8.md](handoff-m8.md) | M8 开新会话的前置闸门 + 粘贴的提示词。**闸门只欠 M7 的 10 条肉眼验收** | 开 M8 前 |
+| [m8-levels.html](m8-levels.html) | M8 多楼层（前置 A/B · §01–§06 · §07 十批 A–J）。**316KB，不要通读，按关键词 grep** | ✅（批 J 测试见 M9 前置 C） |
+| [m8-demo-issues.md](m8-demo-issues.md) | M8 演示暴露的 9 个问题：现象 → 调查 → 方案 → 到期 | 修一条改一条 |
+| [handoff-m9.md](handoff-m9.md) | M9 开新会话的交接（刻意写短） | 开 M9 前 |
+| [m9-persistence.html](m9-persistence.html) | M9 存档、导入导出、迁移（前置 A 偏差 · 前置 B 待拍板 · 前置 C M8 收尾代码 · §00–§06） | 🔨 |
+| [_template-m.md](_template-m.md) | M10 起设计文档的 Markdown 模板 | 结构变化时 |
+| m<N>-code.md | M9 起的 §07 全码，按层追加，每层过 `/gate` 才放 | 每道闸门后 |
+| WHY.md | R0 产出：app / core / viewer 为什么能跑，用户写草稿 | R0 |
+| LEARNING.md | `/recite` 时画错的地方 | 每次 recite |
 | [roadmap.html](roadmap.html) | 路线图可读版（权威版是 ROADMAP.md） | 范围变化时 |
 | [deploy-and-ci.md](deploy-and-ci.md) | GitHub Pages 部署与 Actions CI 调查 | — |
 

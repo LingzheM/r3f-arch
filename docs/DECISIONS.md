@@ -396,3 +396,193 @@ N 个洞 = 2N+1 个 draw call。
    对照仓库 `slab-system.tsx:85` 那段注释确实存在、说的也是真事，
    但那是**他们那条管线**的问题，照搬到我们这里是错的。
    （M6 §00 第 ② 步引用过它，按工作约定第 6 条在这里显式更正，不静默替换。）
+
+---
+
+> **D21–D28 是 M8（2026-09-10 → 09-12）定下的，2026-09-15 由 M9 前置会话补记。**
+> 原文都在 `docs/m8-levels.html`，每条末尾给了 grep 关键词；这里的行号已对照 09-15 的 `src/` 核过。
+
+## D21 · Level 的位姿走 `def.renderer`，`def.frame` 签名不动
+
+**2026-09-11 定（M8 前置 B，批 E 落地）**
+
+`frame?: (node) => NodeFrame`（D19）在 Level 上拿不到它要的东西：
+层的世界 Y 取决于**同一栋楼里更低层的 `height`**（兄弟）和**它属于哪栋楼**（父）。
+
+**破的只有 `frame`，不是整个注册表**：`GeometryContext` 早就有 `resolve`，
+「墙读自己那一层的层高」一行签名都不用改。需要新上下文的只有「层自己坐在哪」这一件事。
+
+**选 (e)**：`viewer/nodes/level/renderer.tsx` 的 `LevelRenderer` 自己订阅 store、算出 frame，
+**作为 prop** 传给 `ParametricNodeRenderer`。M7 定的 `frame` 签名一个字不动。
+
+**为什么不选 (a) 给 `frame` 加 `ctx`**
+
+1. 每个节点的渲染器都得订阅整张 `nodes`（现在是按 id 订阅，`node-renderer.tsx:17`）⟹
+   任何一次提交 / 新建 / 删除让 N 个 `ParametricNodeRenderer` 重渲染。
+2. 想只让需要的 kind 订阅整表，只能拆成两个渲染器组件（hooks 不能条件调用）——那就是 (e)，绕了一圈。
+3. 把「位姿依赖别人」做成所有 kind 的通用能力，而它现在只有一个用户（D10）。
+
+**为什么不选 (b) 走 `def.system` 每帧写 `position.y`**（对照仓库 `level-system.tsx` 的做法）：
+给节点定位从此有两条路，正面违背 D19 选真父子的第一条理由（「交给场景图，不可能算错」）。
+
+**作废条件**：出现**第三个**「位姿依赖上下文」的 kind 时（候选：M10 屋顶面宿主、M11 楼梯段），
+按 D10 的 rule of three 提升成 (a)。**M10 开工时先读这一条**，不要从零再推三条路。
+
+grep：`前置 B`
+
+---
+
+## D22 · 层的世界 Y 是算出来的，不存
+
+**2026-09-11 定（M8 批 B）**
+
+`getLevelElevations(nodes)`（`core/services/storey.ts:23`）：
+按 `level` 序数排序，同一 building 内累加 `height`，每层再加自己的 `baseElevation`。
+以 **`nodes` 对象引用**为键放进 `WeakMap` 缓存——zustand 每次写入都换新引用，缓存天然失效。
+
+**为什么不存 `elevation`**：存了就有两份真相，改一层层高要连带改它上面所有层。
+对照仓库的 `LevelNode` 也没有这个字段。
+
+**代价**：所有读者都得走 `levelBaseY` / `resolveLevelHeight`；
+改层高的脏传播必须显式写（批 C：`updateNode` 脏化 children，`use-scene.ts:106-109`）。
+
+grep：`getLevelElevations`
+
+---
+
+## D23 · 缺席即数据：高度字段可选、无默认值
+
+**2026-09-11 定（M8 批 A / C / F）**
+
+`wall.height` / `level.height` / `ceiling.height` 是 `.optional()`，**不给 `.default()`**。
+缺席 = 跟着层高走；有值 = 显式。
+
+- `updateNode` 删除 patch 里值为 `undefined` 的键（`use-scene.ts:48-54` 的 `mergeNodePath`）⟹
+  `updateNode(id, { height: undefined })` 就是「恢复跟随」。
+- **创建处显式写**：新建层写 `height: DEFAULT_LEVEL_HEIGHT`（`migrate-to-levels.ts:19`、`level-actions.ts:47`），
+  缺席只留给「用户没设过」。
+
+**为什么**：zod 的 `.default()` 在 parse 时**把默认值写进数据**。
+给 `wall.height` 一个默认 2.5，每堵新墙都会带着 `height: 2.5` 入库 ⟹
+分不清「设过」和「没设过」⟹ M8 的验收「改层高，普通墙跟着变，显式设过的不变」永远做不到。
+对照仓库 `wiki/architecture/vertical-model.md:38-39` 是同一条规则。
+
+grep：`缺席`
+
+---
+
+## D24 · 墙顶跟层高，天花也只跟层高——不看墙高
+
+**2026-09-11 定（M8 批 F）**
+
+```ts
+resolveWallTop(wall, storeyHeight)       = wall.height    ?? storeyHeight
+resolveCeilingHeight(ceiling, storeyHeight) = ceiling.height ?? storeyHeight − CEILING_CLAMP_MARGIN   // 0.01
+```
+
+（`core/services/storey.ts:6`、`:83-104`）
+
+**天花板不看墙高。**墙被显式改矮（女儿墙）时，天花仍在层顶下 1 cm ⟹ 看起来悬空。
+这是设计，不是 bug——`m8-demo-issues.md` P3 已查清，错的是演示步骤（屋顶该画楼板，不该画天花）。
+
+`CEILING_CLAMP_MARGIN = 0.01` 是天花顶面与上方实体之间留的缝，防 z-fighting；对照仓库同名常量也是 0.01。
+
+grep：`CEILING_CLAMP_MARGIN`
+
+---
+
+## D25 · 几何兄弟按 `(type, parentId)` 分组
+
+**2026-09-11 定（M8 批 G）**
+
+`siblingGroupKey(node)`（`viewer/systems/sibling-groups.ts:4`）。
+斜接、`ctx.siblings`、`ctx.levelData` 都按组算。
+
+**为什么**：M2–M7 所有墙都挂在根下，天然是一组。M8 叠层之后，一层和二层的外墙端点在 XZ 上重合，
+不分组就会被当成同一个墙角互相斜接。
+
+**唯一的护栏是肉眼**：批 G 那一行（`geometry-system.tsx` 取 `levelData` 的键）写错，
+所有墙角静默丢斜接，`verify` 全绿。M8 变异测试抓到过一次。
+
+grep：`siblingGroupKey`
+
+---
+
+## D26 · 上层隐藏走 layers（31），不走 `visible`
+
+**2026-09-12 定（M8 批 I）**
+
+`HIDDEN_LEVEL_LAYER = 31`（`app/lib/level/level-display.ts:8`）。
+当前层之上的层整棵子树搬到 31 号 layer；当前层实心，下层灰显且**可编辑**。
+
+**为什么不用 `visible = false`**：three 的射线**只看 layers，不看 `visible`**
+（r185 `three.core.js:56188-56198`：`if ( object.layers.test( raycaster.layers ) ) object.raycast(...)`，
+2026-09-15 核过；R3F 9.7.0 的事件派发里也没有 `visible` 判定）。
+用 `visible` 隐藏的上层墙仍然会被点中，而且挡在下层前面。
+
+**连带**：`m8-demo-issues.md` P1 的修法（`stopPropagation`，只认射线上最近的墙）依赖这一条——
+上层打不中，所以「最近的墙」只可能是当前层或灰显的下层。
+
+grep：`HIDDEN_LEVEL_LAYER`
+
+---
+
+## D27 · `migrateToLevels`：纯函数、幂等、自己维护 `children`
+
+**2026-09-12 定（M8 批 J）**
+
+`core/store/migrate-to-levels.ts`：把「平的」场景（节点直接躺在 `rootNodeIds` 里）收进 Site → Building → Level 0。
+
+- **不碰 store、不改入参**，进出都是 `SceneSnapshot`。
+- **幂等判据看三种容器任一存在**，不只看 level——半套脚手架（有 site 没 level）再补一套会变成两个 site。
+- 它绕过 `addNode` 直接拼 `nodes`，所以 **`children` 这个反规范化索引要自己维护对**——D19 记的那笔代价第一次落到实处。
+- 唯一生产调用方是 `ensureScaffold`（`app/lib/level/level-actions.ts:10`）：`setState` 之后 `markAllDirty`，不进历史。
+
+**它不是数据迁移**：M8 时项目没有任何持久化，没有语料可迁
+（`m8-levels.html` §02 K 已按工作约定第 6 条更正 ROADMAP「第一次真实 schema 迁移」那句）。
+它的定位是 **M9 迁移链的第一个节点**——趁还没有存档格式，先把「纯函数、进出都是 snapshot、自己维护索引」这个形状定下来。
+
+grep：`migrateToLevels`
+
+---
+
+## D28 · 批 F 更正：`WallNode.height` 保留，意义从「高度」变成「显式高度」
+
+**2026-09-11 定（M8 批 F 的更正框）**
+
+批 F 起初打算删掉 `WallNode.height`（「墙高归层管」）。**不删。**
+
+**为什么**：`z.object` 默认**剥掉未知键**。字段一删，所有带 `height` 的数据在 parse 时被静默剥掉 ⟹
+显式设过高度的墙全部变回跟随层高，没有任何报错。
+M9 的存档加载要走 parse，这条正好是它面对的第一类风险：**删字段 = 静默丢数据**，要删必须配迁移。
+
+grep：`height 字段保留`
+
+---
+
+## D29 · 方法 v2：闸门、Markdown、按层放码
+
+**2026-09-16 定**（起因：用户自述 M1–M8「基本是照抄，没什么思考」。证据：`m4-exercises.md` 早已诊断「能抄的全抄完了，要求理解的正好是缺的」，三组测试至今不存在；`m5-registry.html` 的「轮到你了」从未完成，直接用了答案文件；M7 / M8 是 [机制] 型却都拿到了 §07 全码。）
+
+用户 2026-09-16 拍板的六条：
+
+1. **产品和原理都要，产品先。** 产品：多层住宅，外观尽量接近现实，自己能用，部署后别人不细问也能用。原理：说清 app / core / viewer 为什么能。
+2. **每周 2–3 天，1–1.5 个 M。** 范围以 ROADMAP 为准，不加注册、分享之类路线图外的功能。
+3. **保留手敲**（D14 不变），助手不写 `src/`。
+4. **里程碑文档改 Markdown**（关闭 STATE 待决 #3）。
+5. **editor 的 AI 面之后单独聊**，顺序：为什么它做得好 → 它有什么工具和 skill → MCP 最后。
+6. **只用 Claude Code**，规则放 `CLAUDE.md`。
+
+由此定的机制：
+
+- **§07 按层放码，每层过闸门**（`/gate`）：用户先用自己的话讲回该层机制（3 问），再先写红测试，然后才拿到该层代码。这是 D14「作者不是集成商」第一次有强制手段。
+- **文档拆两份**：`m<N>-<slug>.md` 设计（模板 `_template-m.md`），`m<N>-code.md` 全码。M1–M9 的 HTML 设计文档保留不转。
+- **每个 M 收尾 `/recite`**：合上文档讲机制、画调用链，产出 `LEARNING.md`。
+- **R0**：M9 之前先对 M1–M8 做一次 recite，产出 `WHY.md`。用户写草稿，助手只标「不准确」和「漏了」。这直接回答「抄了这么多，为什么能」。
+- **工作约定搬进 `CLAUDE.md`**，开场协议变成 `/kickoff`，阶段边界 `/handoff`。
+
+**为什么不完全反转角色**（用户写设计，助手只 review）：用户明确要保留手敲和每周 1–1.5 M 的节奏，完全反转会把周期拉到两倍以上。闸门把「理解」压缩成每层 3 问加一个测试文件，是这个节奏能承受的最小强制量。
+
+**为什么闸门在放码之前而不是之后**：M4 练习清单和 M5「轮到你了」都把理解放在拿到代码之后或旁边，两次都被跳过。理解必须是拿到代码的前置条件，否则永远会被跳过。
+
+**取代**：README 的「工作约定」和「开新对话时贴这段」、ROADMAP 的「新对话开场协议」。原工作约定第 4 条（一份 HTML、§00–§07）和第 5 条（[机制] 型先只交 ①–⑥）由按层放码取代。

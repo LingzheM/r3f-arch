@@ -1,13 +1,18 @@
 # STATE —— 当前进度
 
-> 每个 M 验收通过后更新本文件。新对话开场第二个读的（第一个是 README 的「工作约定」）。
+> 每个 M 验收通过后更新本文件。新对话由 `/kickoff` 读它（工作约定在 `../CLAUDE.md`）。
 
-**最后更新**：2026-09-10
-**当前对话**：#4（M7）
-**当前里程碑**：**M7 门窗与开洞 —— 🔨 代码完成，等肉眼验收**。
-代码全部进 `src/`，`pnpm verify` **全绿（8 文件 / 95 用例）**。
-**只差 §05 的 10 条肉眼验收——一条都没走。走完即可验收。**
-**下一站：M8 多楼层**，`[机制]` 型。**开工前读 `handoff-m8.md`——它的闸门现在是红的。**
+**最后更新**：2026-09-16
+**当前对话**：方法复盘（从 `meguri` 根目录启动；下次从 `r3f-arch` 启动，`CLAUDE.md` 才会加载）
+**当前里程碑**：**M8 多楼层 —— ✅**；**M9 存档 —— 🔨 方案已出（`m9-persistence.html` §00–§06），前置 C 待敲**。
+`pnpm verify` **全绿（15 文件 / 200 用例）**，2026-09-16 实测。
+**方法 v2 已落地（D29）**：`../CLAUDE.md` + `../.claude/skills/{kickoff,gate,review,recite,handoff}` + `_template-m.md`。
+
+**下一站（按顺序）**：
+1. 提交 docs（`m9-persistence.html` 仍未跟踪；DECISIONS / STATE / README / m8-demo-issues 有未提交改动）。
+2. **R0**：`/recite` 复盘 M1–M8，产出 `WHY.md`。用户先写草稿，助手只标错和漏。
+3. **M8 前置 C** 按新流程：`/gate app`（批 J 的 10 条测试 + P4 `sideFromHit` 的 4 条先红）→ 敲 → `/review` → 浏览器看 P1 / P5。敲完应为 16 文件 / 214 用例。
+4. **M9 本体**：§07 写进 `m9-code.md`，core → viewer → app 三道闸门。
 
 ---
 
@@ -21,14 +26,51 @@
 | M4 | 拖动、撤销、脏传播 | ✅ 收尾清单已全部应用（`d20ff7f`），`verify` 转绿 |
 | M5 | 节点注册表 | ✅ 代码在 `src/`（`abda947`→`7a822e4`）；**M6 是它的验收，已通过**，见下 |
 | M6 | 楼板、天花、柱 | ✅ 验收通过（`0b4b879`→`a5e4ee6`）；`verify` 全绿 + §05 肉眼验收走完 |
-| M7 | 门窗与开洞 | 🔨 **代码完成，等验收** —— `verify` 全绿 8 文件 / 95 用例；**§05 的 10 条肉眼验收未走**。见下 |
-| M8 | 多楼层 | ⬜ 下一站，见 `handoff-m8.md`（**闸门红**） |
-| M9 | 存档、导入导出、迁移 | ⬜ |
+| M7 | 门窗与开洞 | ✅ 验收通过 —— §05 的 10 条肉眼验收，2026-09-15 用户确认走完 |
+| M8 | 多楼层 | ✅ 肉眼验收走完（批 E/G/H/I）；⚠ 批 J 的 10 条测试未敲、演示问题 P1/P2/P4/P5 未修 → M9 前置 C。见下 |
+| M9 | 存档、导入导出、迁移 | 🔨 方案已出（`m9-persistence.html` §00–§06），前置 C 待敲 |
 | M10 | 屋顶 | ⬜ |
 | M11 | 楼梯 | ⬜ |
 | M12 | UI 外壳 | ⬜ |
 | M13 | 属性面板与大纲 | ⬜ |
 | M14 | 材质与上色 | ⬜ |
+
+---
+
+## M8 实测状态（2026-09-15）
+
+`pnpm verify` **全绿**：`check-types` ✅ · `eslint` ✅ · `vitest` ✅ **15 文件 / 200 用例**（M7 基线 95 → 200）。
+
+### 与 `m8-levels.html` §07 的差（M9 前置会话实测）
+
+| 差 | 结论 |
+|---|---|
+| **没有 `core/store/migrate-to-levels.test.ts`** | 批 J 新建文件的那 **10 条**没敲。补在 `m9-persistence.html` 前置 C · C1 |
+| 批 J 追加进 `level-action.test.ts` 的 **5 条已经在**（`:169-221`） | `handoff-m9.md` ② 说「15 条全没敲、另外多出 5 条」**是误判**：多出来的 5 条就是批 J 的这 5 条（批 H 13 + 5 = 18，实测 18） |
+| 文件名是 `level-action.test.ts`，文档写的是 `level-actions.test.ts` | 只是命名，无害。被测模块是 `level-actions.ts` |
+| `ensureScaffold` 的报错信息缩短成 `'[level] ensureScaffold'` | 无害 |
+| **`wall-tool.tsx:64` 的 `onPointerMove` 没传 `baseY`**（批 H 原文 `m8-levels.html:4438` 传了 `readCurrentLevel().baseY`） | **读代码推出来的，没观察过**：顶视图（正交、竖直射线）下没有差别；3D 透视下在二层以上画墙，绿线终点会偏离光标（提交用的 `onPointerUp` 是对的）。**请在 3D 视图的二层画墙看一眼再定**，前置 C · C6 |
+
+各文件用例数（`vitest --reporter=verbose` 实测）：`storey` 24 · `level-display` 22 · `wall-openings` 19 · `level-action` 18 ·
+`use-scene` 17 · `geometry-2d` 16 · `wall-mitering` 15 · `opening-placement` 14 · `current-level` 12 · `sibling-groups` 11 ·
+`polygon-draft` 9 · `node-registry` 8 · `polygon-2d` 6 · `register` 5 · `storey-geometry` 4。
+
+### M8 定下的决定已进 `DECISIONS.md`
+
+D21（Level 位姿走 `def.renderer`，**带作废条件，M10 开工先读**）· D22（层的 Y 算出来不存）·
+D23（缺席即数据）· D24（墙顶 / 天花只跟层高）· D25（兄弟按 `(type, parentId)` 分组）·
+D26（上层隐藏走 layers 31）· D27（`migrateToLevels`）· D28（`WallNode.height` 保留）。
+
+### 演示问题（`m8-demo-issues.md`）
+
+| # | 状态 |
+|---|---|
+| P1 拖墙 / 放门窗作用到下层墙 | 修法在前置 C · C2。**原方案漏了一行**：`stopPropagation` 会让 R3F 给更远的墙补发 `leave`，`onWallLeave` 必须只清自己那面墙的预览 |
+| P2 天花板选不中 | **待复现**。先看状态栏第一个词（2026-09-15 用户还没看） |
+| P3 屋顶层天花悬空 | 设计如此（D24）。演示步骤更正版在前置 C · C5 |
+| P4 顶视图门窗朝向 | 前置 C · C3：`sideFromHit` + 4 条测试 |
+| P5 楼板预览线被墙挡 | 前置 C · C4。**必须在浏览器里看过才算完** |
+| P6–P9 | 到期 M12，见下方债表 |
 
 ---
 
@@ -83,7 +125,7 @@ M6 的前置 C 才让它跑起来，而这两条肉眼验收才证明它跑对�
 
 ---
 
-## M7 实测状态（2026-09-10）—— **未验收**
+## M7 实测状态（2026-09-10）—— ✅ 2026-09-15 验收通过
 
 `pnpm verify` **全绿**：`check-types` ✅ · `eslint` ✅ · `vitest` ✅
 **8 文件 / 95 用例**（M6 基线 51 → 95，+44）。与 `m7-openings.html` §07 那份跑绿拷贝完全对齐。
@@ -95,7 +137,7 @@ M6 的前置 C 才让它跑起来，而这两条肉眼验收才证明它跑对�
 > 「patch 里带 parentId / children → 抛错」在实现补上之前就红着——
 > **测试先到位、实现缺三行**。D18 那条规则在这里当场生效了。
 
-**⬜ 只差 §05 的 10 条肉眼验收，一条都没走。** 走完即可验收 M7。
+**✅ §05 的 10 条肉眼验收：2026-09-15 用户确认全部走过、全部通过。**
 
 ### 本次会话的教训，值得记住
 
@@ -135,7 +177,7 @@ M3 §05 第 6 条「选择工具下点墙 → 选中并高亮」当时不可能�
 | `grid:click` 每次都对 sceneRegistry 多射一次线 | M3 | **M7 不还**；现在同一次点击有两次独立射线，两次结果必须一致 → M12 |
 | 删墙没有级联 | M4 | ✅ **M7 已关**（`collectSubtree` + `removeNode` 级联，7 条测试）|
 | 只吸端点和网格，无中点 / 交点 / 垂足吸附 | M4 | M12 |
-| 墙高存在 `wall` 自己身上，无楼层概念 | M1 | M8 |
+| 墙高存在 `wall` 自己身上，无楼层概念 | M1 | ✅ **M8 已关**（D23 / D24） |
 | 刷新即丢，无存档；撤销不跨刷新 | M1 | M9 |
 | 选中高亮是换材质色不是描边；无悬停高亮（`enter`/`leave` 已发出但无人监听） | M3 | M12 |
 | 拖拽中没有尺寸标注 | M4 | M13 |
@@ -153,12 +195,23 @@ M3 §05 第 6 条「选择工具下点墙 → 选中并高亮」当时不可能�
 | 门窗不能改尺寸（无宽/高手柄）、不能换宿主（只能沿当前墙滑） | M7 | M13 |
 | 门没有开合（铰链/推拉/双开全不做，D2） | M7 | 不做 |
 | 自相交多边形不检测（只有面积守卫挡退化） | M6 | M11 |
-| 天花高度是硬编码常量，不"吸附到层顶"（ROADMAP 原文做不到，因为「层」要 M8 才存在） | M6 | M8 |
-| 墙底在 y=0、楼板顶在 0.05 ⟹ 墙看起来陷进楼板 5cm | M6 | M8 |
+| 天花高度是硬编码常量，不"吸附到层顶"（ROADMAP 原文做不到，因为「层」要 M8 才存在） | M6 | ✅ **M8 已关**（D24） |
+| 墙底在 y=0、楼板顶在 0.05 ⟹ 墙看起来陷进楼板 5cm | M6 | ✅ **M8 批 F 已关**（`DEFAULT_SLAB_ELEVATION` → 0）。⚠ M6 / M7 时代的楼板**存着** 0.05（zod `.default()` 在 `addNode` 时物化），M9 的 v0→v1 迁移要改写 |
 | 「有 `position` 就绑，没有就信封」的判据**无机制强制**，加错字段会静默平移两次 | M6 | ✅ **M7 已关**（`def.frame`，见 D19）|
 | ~~绕向不做归一化 ⟹ 挖洞时洞要反向~~ | M6 | ⊘ **撤销**：`ExtrudeGeometry` 自己归一化绕向（D20 实测）。`signedArea` 仍零消费者 → M11 |
 | 绘制只吸网格 0.1m，不吸墙端点 ⟹ 楼板边缘和墙中心线差半个墙厚 | M6 | M12 |
 | 预览线定长缓冲 64 点，超过 62 个顶点预览截断（数据不截） | M6 | M13 |
+| 支撑选举不做：墙不会站到脚下那块楼板上（抬高露台 / 下沉客厅做不了） | M8 | M11 |
+| 上层楼板不压低下层墙、天花不避让上层楼板（`min(层高, 上层楼板底)` 只做了层高那一半） | M8 | 有需要时 |
+| Building 没有 `position` / `rotation`；`OpeingGhost` 用局部 `host.rotation.y`，因「Level 只做 Y 平移」而恰好正确 | M8 | M13（两条同批改） |
+| 没有 exploded / solo 模式，切层硬切、无动画 | M8 | M12 |
+| 灰显直接改材质，会和 M14 的材质系统、选中高亮互相覆盖 | M8 | M14 |
+| 楼层切换 / 加删层 / 改层高没有 UI，只有快捷键和控制台 | M8 | M12 / M13 |
+| 层不能重排（改 `ordinal` 算法是对的，但没有 UI） | M8 | M12 |
+| 删一整层没有确认（`collectSubtree` 连内容一起删） | M8 | M13 |
+| `eventToGround` 仍只和一个水平面求交（现在是当前层地面，不再是 y=0） | M8 | M12 |
+| **`migrateToLevels` 没有版本号，不是迁移链**；绕过 `addNode`，`children` 是手填的 | M8 | **M9（必做）** |
+| 演示 P6 顶视图墙与地面同色 · P7 画内隔墙看不到落点 · P8 顶视图选中不明显 · P9 切层后端点球留在半空 | M8 | M12（见 `m8-demo-issues.md`） |
 
 ---
 
@@ -171,7 +224,7 @@ M3 §05 第 6 条「选择工具下点墙 → 选中并高亮」当时不可能�
    类型住 `core/registry/`、实例住 `viewer/nodes/`；`AnyNode` 继续手写 `discriminatedUnion`；
    斜接走 `def.computeLevelData`。
 
-3. **里程碑文档要不要从 HTML 改成 Markdown。** 2026-09-04 提出，未决。
+3. ~~**里程碑文档要不要从 HTML 改成 Markdown。**~~ **2026-09-16 已定：改 Markdown，见 D29。** 2026-09-04 提出。
    HTML 的代价这次事故暴露过：错误的一行埋在 131KB 标签里，交叉核对费劲，
    而且新会话读它要先剥标签。M7 是 `[机制]` 型只交 §01–§06，
    正好是 HTML 优势最小的形态，可以拿它试一次。
@@ -207,7 +260,9 @@ M3 §05 第 6 条「选择工具下点墙 → 选中并高亮」当时不可能�
 | 纯几何（`geometry-2d` 16 / `wall-mitering` 15） | ✅ 31 用例 |
 | M6 的纯函数（`polygon-2d` 6 / `polygon-draft` 9 / `node-registry` 5） | ✅ 20 用例 |
 | M7 的纯函数（`wall-openings` 19 / `use-scene` 11 / `opening-placement` 14） | ✅ 44 用例 |
-| **合计** | ✅ **8 文件 / 95 用例，全绿** |
+| M8（`storey` 24 / `level-display` 22 / `level-action` 18 / `current-level` 12 / `sibling-groups` 11 / `register` 5 / `storey-geometry` 4 / `node-registry` +3 / `use-scene` +6） | ✅ 105 用例 |
+| **合计** | ✅ **15 文件 / 200 用例，全绿**（2026-09-15） |
+| 批 J `migrate-to-levels.test.ts` 10 条 + P4 `sideFromHit` 4 条 | ⬜ 在 `m9-persistence.html` 前置 C，敲完应为 16 文件 / 214 |
 | M4 的纯函数（`wall.test` / `history-control.test` / `wall-adjacency.test` / `snap-2d.test`） | ⬜ `m4-drag.html` §07 给了全码（64 用例），**一个都没敲**。不阻塞 M7 |
 | 真实功能操作（建墙→拖→撤销→删的端到端） | ⬜ `m4-drag.html` §09 给了 7 个文件 / 85 用例，待敲 |
 | R3F 渲染 / 指针 / 键盘 | ❌ 无环境，靠跑起来看（D11 明确接受）。**D16 要求交付时明写"未验证"** |

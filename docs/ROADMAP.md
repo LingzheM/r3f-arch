@@ -17,13 +17,14 @@
 
 | 对话 | 里程碑 | 主题 | 状态 |
 |---|---|---|---|
-| 1 | M1–M2 | 几何基础 | M1 ✅ / M2 进行中 |
-| 2 | M3–M5 | 交互与框架 | 未开始 |
-| 3 | M6–M8 | 结构扩展 | 未开始 |
-| 4 | M9–M11 | 持久化与复杂几何 | 未开始 |
+| 1 | M1–M2 | 几何基础 | ✅ |
+| 2 | M3–M5 | 交互与框架 | ✅ |
+| 3 | M6–M8 | 结构扩展 | ✅ |
+| — | **R0** | 讲回来 M1–M8，产出 `WHY.md`（D29） | ⬜ 下一站 |
+| 4 | M9–M11 | 持久化与复杂几何 | M9 方案已出 |
 | 5 | M12–M14 | UI 与材质 | 未开始 |
 
-**切换信号**：当前对话开始出现上下文摘要，或一组 M 全部验收通过。
+**2026-09-16 起（D29）**：一个 M 不再对应一次对话，而是 设计 → `/gate core` → `/gate viewer` → `/gate app` → `/review` → `/recite`。会话在任一边界可断，断前 `/handoff`。
 
 ---
 
@@ -294,21 +295,7 @@ packages/viewer/src/systems/wall/wall-system.tsx  ← applyWorldPlanarWallUVs
 
 ## 新对话开场协议
 
-把下面这段原样贴给我：
-
-```
-项目 C:\Users\User\workspace\meguri\r3f-arch，对照仓库 ..\editor。
-先读 docs/STATE.md、docs/DECISIONS.md、docs/ROADMAP.md，
-再扫一遍 src/ 的真实代码和测试结果，
-报告实际代码与计划的偏差，然后出 M<N> 的方案。
-```
-
-**我在开场必须做的四件事**（缺一会导致漂移）：
-
-1. 读 `STATE.md` / `DECISIONS.md` / `ROADMAP.md`
-2. **读 `src/` 的真实代码**，不是读我上次写的计划
-3. 跑 `pnpm verify` 和测试，确认基线是绿的
-4. **先报告偏差，再出计划**——如果实际代码和路线图假设不符，先对齐
+搬到了 `../CLAUDE.md`，开场输入 `/kickoff`（D29）。
 
 ---
 
