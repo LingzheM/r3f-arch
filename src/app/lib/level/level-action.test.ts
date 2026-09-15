@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import type { AnyNodeId } from '../../../core/schema/types'
+import type { AnyNode, AnyNodeId } from '../../../core/schema/types'
 import { resetSceneHistoryPause } from '../../../core/store/history-control'
 import { useScene } from '../../../core/store/use-scene'
 import { useEditor } from '../../store/use-editor'
 import { levelWalls } from '../interaction/wall-linking'
 import { addLevelOnTop, ensureScaffold, readCurrentLevel, switchLevel } from './level-actions'
+import { WallNode } from '../../../core/schema/wall'
 
 // 这些是碰 store 的测试，但 zustand 在 Node 里跑得动 —— 仍然在 D11 说「能测」的那一半。
 
@@ -162,5 +163,59 @@ describe('levelWalls', () => {
     const root = addNode({ type: 'wall', start: [0, 5], end: [4, 5] })
 
     expect(levelWalls(null).map((w) => w.id)).toEqual([root])
+  })
+})
+
+describe('ensureScaffold 收养散在根下的节点（M8 批 J）', () => {
+  beforeEach(reset)
+
+  /** 直接写 store，装出一个「M8 之前」的平场景：墙就躺在 rootNodeIds 里。 */
+  const legacyScene = () => {
+    const wall = WallNode.parse({ id: 'wall_old', type: 'wall', start: [0, 0], end: [4, 0] })
+    useScene.setState({
+      nodes: { [wall.id]: wall } as Record<AnyNodeId, AnyNode>,
+      rootNodeIds: [wall.id],
+      dirtyNodes: new Set(),
+    })
+    useScene.temporal.getState().clear()
+  }
+
+  it('开机时把老场景里的墙收进新建的那一层', () => {
+    legacyScene()
+
+    const levelId = ensureScaffold()
+
+    expect(nodes()['wall_old' as AnyNodeId]!.parentId).toBe(levelId)
+    expect(nodes()[levelId]!.children).toEqual(['wall_old'])
+  })
+
+  it('收养之后 root 只剩 site', () => {
+    legacyScene()
+    ensureScaffold()
+
+    const roots = useScene.getState().rootNodeIds
+    expect(roots).toHaveLength(1)
+    expect(nodes()[roots[0]!]!.type).toBe('site')
+  })
+
+  it('收养也【不进历史】', () => {
+    legacyScene()
+    ensureScaffold()
+
+    expect(past()).toBe(0)
+  })
+
+  it('收养的节点进脏集 —— 换了宿主，几何要重建', () => {
+    legacyScene()
+    ensureScaffold()
+
+    expect(useScene.getState().dirtyNodes.has('wall_old' as AnyNodeId)).toBe(true)
+  })
+
+  it('墙原来的 height 缺席性没被收养弄丢', () => {
+    legacyScene()
+    ensureScaffold()
+
+    expect('height' in nodes()['wall_old' as AnyNodeId]!).toBe(false)
   })
 })

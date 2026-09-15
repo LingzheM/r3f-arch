@@ -16,6 +16,7 @@ import { useScene } from "../core/store/use-scene";
 import { resolveCurrentLevelId } from "./lib/level/current-level";
 import { addLevelOnTop, switchLevel } from "./lib/level/level-actions";
 import { LevelFrame } from "./components/level-frame";
+import { LevelVisibility } from "./components/level-visibility";
 
 const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
 
@@ -71,6 +72,7 @@ export function App() {
                     onEnd={() => useViewer.getState().setCameraDragging(false)}
                 />
                 <SelectionManager />
+                <LevelVisibility />
                 <LevelFrame>
                     <WallTool />
                     <PolygonTool tool="slab" />
