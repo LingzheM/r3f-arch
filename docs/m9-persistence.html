@@ -733,7 +733,7 @@ useScene.getState().updateNode(levels.at(-1).id, { height: 1.0 })   <span class=
   <p><strong>「画几堵墙 → 刷新 → 墙还在」</strong>。它需要：文档格式 + 加载管线 + <code>replaceScene</code> + 自动保存 + 启动顺序——
     <strong>不</strong>需要场景列表、存档点、导入导出、面板。这一片跑通，M1 那笔债就关了一半，而且从此每一站都能攒出真实场景来验。</p>
   <p>然后按这个顺序加：<strong>迁移链</strong>（喂 M1 语料）→ <strong>导出 / 导入</strong>（能给别人看）→ <strong>场景列表 / 存档点 / 面板</strong>。
-    §07 也按这个分三轮交（<code>handoff-m9.md</code> ⑦ 定的「按层交，最多三轮」）。</p>
+    §07 也按这个分三轮交（<code>handoff-m9.md</code> ⑦ 定的「按层交，最多三轮」）。<strong>（分法已按 D29 更正为 core → viewer → app，见文末更正框。）</strong></p>
 
   <h3>⑥ 去你的代码里找病灶 —— 动机必须先于机制</h3>
   <div class="step"><div class="step-n">1</div><div class="step-body">
@@ -1359,6 +1359,12 @@ export function pickTextFile(accept?: string): Promise&lt;{ name: string; text: 
       <strong>第三轮 UI</strong>（13–14 面板与 <code>app.tsx</code>）。
       每轮末尾我会写「敲完应该看到什么」，并在那一轮的框里按 D16 写清验证到哪一层。</li>
   </ol>
+
+  <div class="trap">
+    <span class="trap-label">更正（2026-09-16，工作约定第 6 条）：三轮的分法改了</span>
+    <p>上面第 3 条原本按「core → app 无 UI → UI」分三轮。<strong>D29 / <code>CLAUDE.md</code> 定的是 core → viewer → app，每批先过 <code>/gate</code></strong>，代码写进 <code>docs/m9-code.md</code>，不写进本 HTML。</p>
+    <p style="margin-bottom:0">M9 的 viewer 层<strong>没有改动</strong>（§02 E），所以 <code>/gate viewer</code> 只需确认「本层无改动、无自动护栏」；app 批一次放出 §04 的 09–14。</p>
+  </div>
 
   <div class="note">
     <p><strong>M9 验收之后要更新的四份文件</strong>（照 M8 的惯例）：

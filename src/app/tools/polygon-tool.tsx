@@ -164,6 +164,8 @@ function PolygonDraftPreview({
       lineWidth={2}
       dashed
       dashScale={20}
+      depthTest={false}
+      renderOrder={999}
     />
   )
 }
