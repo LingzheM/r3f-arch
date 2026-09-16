@@ -6,7 +6,7 @@ import { useScene } from "../../core/store/use-scene";
 import { useEditor } from "../store/use-editor";
 import { useInteractionScope } from "../store/use-interaction-scope";
 import type { NodeEvent } from "../../core/events/types";
-import { resolveOpeningPlacement, sideFromNormal, type WallHit } from "../lib/interaction/opening-placement";
+import { resolveOpeningPlacement, sideFromHit, type WallHit } from "../lib/interaction/opening-placement";
 import { emitter } from "../../core/events/bus";
 import * as THREE from 'three'
 import { useFrame } from "@react-three/fiber";
@@ -68,13 +68,15 @@ export function OpeningTool({ kind }: { kind: OpeningKind }) {
       return {
         wallId: e.node.id,
         u: e.localPoint[0],
-        side: sideFromNormal(e.normal),
+        side: sideFromHit(e.normal, e.localPoint),
       }
     }
 
     const onWallMove = (e: NodeEvent) => {
       const hit = hitFrom(e)
       if (!hit) return
+      // p1: 只认离鼠标最近的那面墙
+      e.stopPropagation()
       const wall = e.node as WallNode
 
       const { position, valid } = resolveOpeningPlacement({
@@ -89,7 +91,9 @@ export function OpeningTool({ kind }: { kind: OpeningKind }) {
       previewRef.current = { wallId: hit.wallId, position, side: hit.side, valid }
     }
 
-    const onWallLeave = () => { previewRef.current = null }
+    const onWallLeave = (e: NodeEvent) => {
+      if (previewRef.current?.wallId === e.node.id) previewRef.current = null
+    }
 
 
     const onWallClick = (e: NodeEvent) => {

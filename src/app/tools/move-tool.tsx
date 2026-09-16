@@ -133,6 +133,7 @@ export function MoveTool(): null {
             if (getScope().kind !== 'idle') return
             const wall = e.node
             if (wall.type !== 'wall') return
+            e.stopPropagation()
 
             const planeY = levelBaseY(wall.parentId, useScene.getState().nodes)
             const anchor = eventToGround(e.nativeEvent, el, camera, planeY)

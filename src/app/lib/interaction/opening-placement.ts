@@ -22,6 +22,14 @@ export function sideFromNormal(normal: readonly [number, number, number] | undef
   return (normal?.[2] ?? 1) >= 0 ? 'left' : 'right'
 }
 
+export function sideFromHit(
+  normal: readonly [number, number, number] | undefined,
+  localPoint: readonly [number, number, number],
+): OpeningSide {
+  if (normal && Math.abs(normal[2]) > 0.5) return sideFromNormal(normal)
+  return localPoint[2] >= 0 ? 'left' : 'right'
+}
+
 export function overlapsExistingOpening(
   span: OpeningSpan,
   siblings: readonly AnyNode[],
