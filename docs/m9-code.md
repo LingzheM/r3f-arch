@@ -1,57 +1,125 @@
 # M9 §07 全码
 
-**验证**：`tsc` ✅ · `eslint` ✅ · `vitest` ✅ **20 文件 / 252 用例** · 变异测试 **19 / 19 被抓**——在 2026-09-17 你的 `src/` 的完整拷贝上跑的，含你的 `gate-core.test.ts`。本文件的代码块由脚本从那份拷贝里原样导出，不是手抄。
+**验证**：`tsc` ✅ · `eslint` ✅ · `vitest` ✅ **20 passed (20) · 265 passed (265)** · `vite build` ✅ · 变异测试 **32 / 32 被抓**。
+在 2026-09-17 你的 `src/` 的全新拷贝上，**按下面的顺序一步一步做了你要做的每个动作，每一步都跑了 `check-types` / `lint` / `vitest`**，表里的数字全是实测。代码块由脚本从跑过的文件原样导出，不是手抄。
 
-**未验证**：浏览器里的渲染与交互。本批是纯 core，但第 08 步改了 `updateNode`，拖墙 / 拖端点球会走到它（见末尾「肉眼」）；真实 `localStorage`（存储层只用内存 KV 测过）。
+**未验证**：浏览器里的渲染与交互（本批是纯 core；但第 08 步改了 `updateNode`，拖墙 / 拖端点球会走到它，见末尾「肉眼」）；真实 `localStorage`（存储层只用内存 KV 测过）。
 
-> 设计在 `m9-persistence.html`（§02 机制 · §04 建造顺序）。本文件按 **core → viewer → app** 三批放出，每批先过 `/gate`（D29）。
-> 每批敲完：`pnpm verify` → `/review`。
+> 设计在 `m9-persistence.html`（§02 机制 · §04 建造顺序）。按 **core → viewer → app** 三批放出，每批先过 `/gate`（D29）。每批敲完：`pnpm verify` → `/review`。
 
 ---
 
-## core 批 · 2026-09-17（`/gate core` 通过）
+## core 批（2026-09-17 修订版）
 
-### 和设计文档不一样的地方（约定 6）
+> **这一版整体替换上一版**（上一版在 git 的 `2efb179` 里）。上一版你还没敲，所以不用对照着改，照这一版从头敲。
 
-| 设计写的 | 这里改成 | 为什么 |
+### 和上一版的差
+
+| 上一版 | 这一版 | 为什么 |
 |---|---|---|
-| 目录 `src/core/persistence/` | **`src/core/store/persistence/`** | 你在闸门第 2 步选的位置，命名跟你走 |
+| 目录 `src/core/store/persistence/` | **`src/core/persistence/`** | 你决定改回设计目录 |
+| `fixtures.ts` 和实现文件放在一起 | **`__fixtures__/legacy-scenes.ts`**，文件头写明「冻结、只给测试用」 | 它是测试输入，不是实现；实现文件一个都不 import 它 |
+| v0 → v1 调 `migrateToLevels` 造容器 | 容器的 **v1 形状冻结在迁移里** | 迁移是历史记录，不能依赖会随 schema 变的代码（今天的 `SiteNode.parse` / `DEFAULT_LEVEL_HEIGHT`）。否则 v2 出现时，v0 文档会被直接造成 v2 的样子，再被 v1 → v2 改一遍 |
+| v0 → v1 遇到没 id / 重复 id 的节点直接跳过 | 原样放行，由 normalize **丢掉并报告** | 上一版会悄悄吞节点（复查发现，新增测试钉住） |
+| normalize 直接 `parse` | 先要求 id 是字符串 | `objectId` 带 default，缺 id 的节点会被 parse **发明一个新 id**，变成谁都不认识的新根 |
+| `updateNode` 用 `in` 查多余字段 | **`Object.hasOwn`** | `constructor` 之类在原型链上，`in` 会漏判 |
+| 存储：索引就是真相 | **索引是缓存，以存储里实际的键为准** | 上一版：写完文档没写成索引的场景永远不出现；文档没了记录还在；一条缺字段的记录让 `list()` 崩；存档点在索引重建后永远泄漏 |
+| 降级保护只看索引 | **索引和文档本身都看** | 新版本写完文档、没写成索引时，只有文档知道自己是新版本 |
+| 存档点键 `checkpoint:<id>`；`loadCheckpoint(id)` | **`checkpoint:<场景id>:<id>`**；`loadCheckpoint(场景id, id)` | 索引丢了也知道存档点属于谁，删场景时按前缀删干净 |
+| `newId: () => string` | `newId: (kind) => string` | 场景和存档点的 id 前缀分开 |
+
+### 和设计文档的差（约定 6）
+
+| 设计写的 | 实际 | 为什么 |
+|---|---|---|
 | `readSceneDocument` | **`loadSceneDocument`** | 你的命名 |
-| 你的桩：返回 `{ snapshot, report }`，失败时抛 | **联合类型** `{ ok: true, … } \| { ok: false, error }`；`report` 带每个节点被丢的**原因** | 闸门第 2 步 A 版本实测：抛异常时 `not-a-scene` 在调用方只剩一句说不清的错；Q1 那棵树你标的正是原因 |
-| 你的桩 `gate-core.ts` | **删掉**，由 `load-scene-document.ts` 等取代 | —— |
+| —— | 你的闸门测试 **`src/core/persistence/gate-core.test.ts`** | 你写的，第 00 步挪过来，第 05 步改两处 |
+| 你的桩：返回 `{ snapshot, report }`，失败抛 | **联合类型** `{ ok: true, … } \| { ok: false, error }`，`report` 带原因 | 闸门第 2 步实测：抛异常时 `not-a-scene` 在调用方说不清原因；你在 Q1 那棵树上标的正是原因 |
+| §02 C「v0 → v1 直接调 `migrateToLevels`」（D27 把它定位成迁移链第一个节点） | **不调**，形状冻结在迁移里 | 见上表第三行。`migrateToLevels` 仍然是 `ensureScaffold` 的实现，不受影响 |
 | `replaceScene` 拿暂停租约 | **不拿** | 变异测试：去掉租约全绿，紧跟着的 `clear()` 已经清掉那条历史 |
-| v0 → v1 给 raw 节点补 `children` | **不补** | 变异测试：死代码，最后那次 `parse` 会填 |
 | §02 I 的例子「跨类型字段读档会丢墙」 | 跨类型字段被 zod **静默剥掉**；丢数据的是**非法值**（层高 0） | 沙箱探针；HTML 里已加更正框 |
-| `use-scene.test.ts` 追加 5 条 / 加载测试 23 条 | **6 条 / 24 条** | 各多一条「层高 0」——你在闸门 Q1 答的那个场景 |
 
 ### 前置 B 用的是推荐值
 
 本批按推荐实现了 **B1**（文档级整数版本号）、**B4**（只还写入边界）、**B5**（同步存储）。B2（导入语义）、B3（误删护栏）到 app 批才生效。**要改任何一条，在 `/gate app` 之前告诉我。**
 
-### 敲的顺序，以及每一步之后 `pnpm test` 应该是多少
+### 敲的顺序，以及每一步之后应该看到什么（全部实测）
 
-| 步 | 做什么 | 敲完之后 |
-|---|---|---|
-| 01 | 新建 `persistence/scene-document.ts` | 不变：17 文件，你的 gate 测试仍红 |
-| 02 | 新建 `persistence/fixtures.ts` | 不变 |
-| 03 | 新建 `persistence/migrations.ts` + `persistence/migrations/v0-to-v1.ts` | 不变 |
-| 04 | 新建 `persistence/normalize-snapshot.ts` | 不变 |
-| 05 | 新建 `persistence/load-scene-document.ts`；**删 `gate-core.ts`**；改 `gate-core.test.ts`；新建 `load-scene-document.test.ts` | **18 文件 / 235，全绿**（你的 gate 测试转绿） |
-| 06 | 新建 `replace-scene.ts` + `replace-scene.test.ts` | 19 / 238 |
-| 07 | 新建 `persistence/scene-storage.ts` + `scene-storage.test.ts` | 20 / 246 |
-| 08 | 改 `use-scene.ts` 两处；`use-scene.test.ts` 末尾追加 | **20 / 252** |
+| 步 | 做什么 | `check-types` | `lint` | `vitest` |
+|---|---|---|---|---|
+| 基线（你当前的 src/） | 什么都不做 | ❌（TS6133: 'raw' is declared but its value is never read.） | ✅ | 1 failed | 16 passed (17) · 1 failed | 210 passed (211)；红：src/core/store/persistence/gate-core.test.ts > loadSceneDocument > v0 文档： 楼板 elevation 0.05 迁移成 0 |
+| 00 | 把你的两个文件挪到 `src/core/persistence/`，删掉 `src/core/store/persistence/` | ✅ | ✅ | 1 failed | 16 passed (17) · 1 failed | 210 passed (211)；红：src/core/persistence/gate-core.test.ts > loadSceneDocument > v0 文档： 楼板 elevation 0.05 迁移成 0 |
+| 01 | `scene-document.ts` | ✅ | ✅ | 1 failed | 16 passed (17) · 1 failed | 210 passed (211)；红：src/core/persistence/gate-core.test.ts > loadSceneDocument > v0 文档： 楼板 elevation 0.05 迁移成 0 |
+| 02 | `__fixtures__/legacy-scenes.ts` | ✅ | ✅ | 1 failed | 16 passed (17) · 1 failed | 210 passed (211)；红：src/core/persistence/gate-core.test.ts > loadSceneDocument > v0 文档： 楼板 elevation 0.05 迁移成 0 |
+| 03 | `migrations.ts` + `migrations/v0-to-v1.ts` | ✅ | ✅ | 1 failed | 16 passed (17) · 1 failed | 210 passed (211)；红：src/core/persistence/gate-core.test.ts > loadSceneDocument > v0 文档： 楼板 elevation 0.05 迁移成 0 |
+| 04 | `normalize-snapshot.ts` | ✅ | ✅ | 1 failed | 16 passed (17) · 1 failed | 210 passed (211)；红：src/core/persistence/gate-core.test.ts > loadSceneDocument > v0 文档： 楼板 elevation 0.05 迁移成 0 |
+| 05 | `load-scene-document.ts` + 删 `gate-core.ts` + 改 `gate-core.test.ts` + `load-scene-document.test.ts` | ✅ | ✅ | 18 passed (18) · 239 passed (239) |
+| 06 | `store/replace-scene.ts` + 测试 | ✅ | ✅ | 19 passed (19) · 242 passed (242) |
+| 07 | `scene-storage.ts` + 测试 | ✅ | ✅ | 20 passed (20) · 258 passed (258) |
+| 08 | `store/use-scene.ts` 两处 + `use-scene.test.ts` 追加 | ✅ | ✅ | 20 passed (20) · 265 passed (265) |
 
-> 中间几步的数字是按各文件实测条数推出来的（加载 24 · `replaceScene` 3 · 存储 8 · `use-scene` +6）；只有最终的 20 / 252 是整体跑出来的。
+> 基线那一行的 `check-types` 是红的：你的桩 `gate-core.ts` 的参数 `raw` 没被用到（`noUnusedParameters`），所以 `pnpm verify` 现在停在第一步，根本没跑到测试。第 00 步把它改成 `_raw` 就绿了。00–04 之间你的闸门测试一直红在 `not implemented`，这是对的；05 之后转绿。
 
 ---
 
-### 01 · `src/core/store/persistence/scene-document.ts` · 新建 · 51 行
+### 00 · 把你的两个文件挪到设计目录
+
+1. **新建** `src/core/persistence/gate-core.ts`（你的桩，只改了 import 路径，参数名改成 `_raw`）：
+
+```ts
+import type { AnyNodeId } from "../schema/types";
+import type { SceneSnapshot } from "../store/history-control";
+
+export type LoadReport = {
+  droppedNodeIds: AnyNodeId[]
+}
+
+export function loadSceneDocument(_raw: unknown): { snapshot: SceneSnapshot; report: LoadReport } {
+  throw new Error('not implemented')
+}
+```
+
+2. **新建** `src/core/persistence/gate-core.test.ts`（你的测试，只改了两行 import 路径）：
+
+```ts
+import { describe, expect, it } from "vitest";
+import { asNodeId } from "../schema/types";
+import type { SlabNode } from "../schema/slab";
+import { loadSceneDocument } from "./gate-core";
+
+describe('loadSceneDocument', () => {
+  it('v0 文档： 楼板 elevation 0.05 迁移成 0', () => {
+    const v0FlatDoc = {
+      nodes: [
+        {
+          object: 'node', id: 'wall_1', type: 'wall', parentId: null, children: [],
+          visible: true, metadata: {}, start: [0, 0], end: [4, 0],
+        },
+        {
+          object: 'node', id: 'slab_1', type: 'slab', parentId: null, children: [],
+          visible: true, metadata: {}, polygon: [[0, 0], [4, 0], [4, 4], [0, 4]],
+          elevation: 0.05,
+        },
+      ],
+      rootNodeIds: ['wall_1', 'slab_1'],
+    }
+
+    const { snapshot } = loadSceneDocument(v0FlatDoc)
+    const slab = snapshot.nodes[asNodeId('slab_1')] as SlabNode
+    expect(slab.elevation).toBe(0)
+  })
+})
+```
+
+3. **删除整个 `src/core/store/persistence/` 目录**（里面就是这两个文件的旧位置）。
+
+### 01 · `src/core/persistence/scene-document.ts` · 新建 · 51 行
 
 信封的样子、当前版本号，以及「根由 `parentId` 决定，存档里的顺序只用来排序」（§02 A）。
 
 ```ts
-import type { AnyNode, AnyNodeId } from '../../schema/types'
-import type { SceneSnapshot } from '../history-control'
+import type { AnyNode, AnyNodeId } from '../schema/types'
+import type { SceneSnapshot } from '../store/history-control'
 
 export const SCENE_FORMAT = 'r3f-arch/scene'
 export const CURRENT_SCENE_VERSION = 1
@@ -81,7 +149,7 @@ export function toSceneDocument(snapshot: SceneSnapshot): SceneDocument {
   }
 }
 
-/** 根 = parentId 为空的节点。保存的顺序只用来排序，不用来决定谁是根。 */
+/** 根 = parentId 为空的节点。存档里的 rootNodeIds 只用来排序，不用来决定谁是根。 */
 export function deriveRootIds(
   nodes: readonly { id?: unknown; parentId?: unknown }[],
   saved: readonly unknown[],
@@ -103,16 +171,21 @@ export function deriveRootIds(
 }
 ```
 
-### 02 · `src/core/store/persistence/fixtures.ts` · 新建 · 61 行
+### 02 · `src/core/persistence/__fixtures__/legacy-scenes.ts` · 新建 · 66 行
 
-三代语料，按 git 历史里当时的 zod 定义手写。**被 `.default()` 物化进数据的字段一个都不能漏**——那才是当年 `addNode` 真正写进去的东西。它只被测试 import，不会进打包。
+**测试输入，不是实现。**项目从没存过档，「M1 时代的存档」只能按 git 历史里当时的 zod 定义写出来。被 `.default()` 物化进数据的字段一个都不能漏——那才是当年 `addNode` 真正写进去的东西。**以后 schema 变了，这个文件一个字都不改。**
 
 ```ts
 /**
- * 存档语料。M9 之前项目从没持久化过，所以这些不是捡来的老存档，
- * 而是**按 git 历史里当时的 zod 定义手写的「那时如果有存档，它会长这样」**。
- * 被 .default() 物化进数据的字段（object / visible / metadata / slab.elevation）一个不少。
- * 形状就是 useScene 的 { nodes: Record<id, node>, rootNodeIds }——没有 format、没有 version。
+ * 冻结的存档语料 —— 不要随 schema 更新。
+ *
+ * M9 之前项目从没持久化过，所以这些不是捡来的老存档，而是按 git 历史里当时的 zod 定义
+ * 手写的「那时如果有存档，它会长这样」。被 .default() 物化进数据的字段
+ * （object / visible / metadata / slab.elevation）一个不少。
+ * 形状就是 useScene 的 { nodes: Record<id, node>, rootNodeIds }：没有 format，没有 version。
+ *
+ * 以后 schema 变了，这里一个字都不改：改了，迁移测试就变成「新格式读新格式」，永远绿、什么都不证明。
+ * 新版本的语料另起一个导出，旧的留着。只给测试用，产品代码不许 import。
  */
 
 const base = { object: 'node', parentId: null, visible: true, metadata: {} }
@@ -171,9 +244,9 @@ export const M7_FLAT_SCENE = {
 }
 ```
 
-### 03a · `src/core/store/persistence/migrations.ts` · 新建 · 35 行
+### 03 · 迁移链
 
-链按 `from` 查找，不按数组下标；`version` 由 runner 写，迁移函数碰不到（§02 B）。
+**03a · `src/core/persistence/migrations.ts` · 新建 · 36 行** —— 链按 `from` 查找，`version` 由 runner 写（§02 B）。
 
 ```ts
 import { v0ToV1 } from './migrations/v0-to-v1'
@@ -205,6 +278,7 @@ export function runSceneMigrations(
   let current = doc
   while (current.version < target) {
     const from = current.version
+    // 按 from 查找，不按数组下标：链的顺序由编号决定，不由谁先写进数组决定。
     const step = migrations.find((m) => m.from === from)
     if (!step) throw new SceneMigrationError(from, `没有从 v${from} 出发的迁移`)
     current = { ...step.migrate(current), version: from + 1 }
@@ -213,59 +287,88 @@ export function runSceneMigrations(
 }
 ```
 
-### 03b · `src/core/store/persistence/migrations/v0-to-v1.ts` · 新建 · 39 行
-
-全链唯一「看形状」的地方。**只在「平」（一个容器都没有）时**才改 0.05、才收进容器（§02 C，Q2）。
+**03b · `src/core/persistence/migrations/v0-to-v1.ts` · 新建 · 70 行** —— 全链唯一「看形状」的地方；只在「平」时改 0.05、收进容器（§02 C，Q2）。`0.05` 和 `2.5` 写成字面量是故意的：它们记录的是**当时**的值，import 今天的常量就错了。
 
 ```ts
-import type { AnyNode, AnyNodeId } from '../../../schema/types'
-import { migrateToLevels } from '../../migrate-to-levels'
+import { generateId } from '../../schema/base'
 import type { SceneMigration } from '../migrations'
 import { deriveRootIds, type RawNode } from '../scene-document'
 
+/*
+ * v0 → v1：M8 之前的平场景。
+ *
+ * 迁移是历史记录，必须冻结：这里不 import 任何会随 schema 变化的东西——默认值常量、
+ * SiteNode.parse / LevelNode.parse、migrateToLevels 都不行。它产出的永远是「v1 那一刻」的形状。
+ * 要是这里调了今天的 schema，等 v2 出现，v0 的文档会被直接造成 v2 的样子，
+ * 再被 v1 → v2 改一遍，verify 全绿、数据静默出错。
+ */
+
 const CONTAINER_TYPES = new Set(['site', 'building', 'level'])
 
-/** M6–M8 批 F 之前的 DEFAULT_SLAB_ELEVATION。zod 的 .default() 在 addNode 时把它写进了每一块楼板。 */
-const LEGACY_SLAB_ELEVATION = 0.05
+/** v0 时的 DEFAULT_SLAB_ELEVATION（M6 到 M8 批 F 之前）。zod 的 .default() 在 addNode 时把它写进了每一块楼板。 */
+const V0_SLAB_ELEVATION = 0.05
+
+/** v1 新建层的层高（M8 的 DEFAULT_LEVEL_HEIGHT）。显式写进数据：缺席要留给「用户没设过」（D23）。 */
+const V1_LEVEL_HEIGHT = 2.5
+
+const v1Container = (
+  type: 'site' | 'building' | 'level',
+  id: string,
+  parentId: string | null,
+  children: string[],
+  extra: RawNode = {},
+): RawNode => ({ object: 'node', id, type, parentId, children, visible: true, metadata: {}, ...extra })
 
 export const v0ToV1: SceneMigration = {
   from: 0,
   note: 'M8 之前的平场景：楼板 0.05 → 0；收进 Site → Building → Level 0',
   migrate: (doc) => {
-    // v0 没有版本号，这里是全链唯一允许「看形状」的地方。
+    // v0 没有版本号，这里是全链唯一允许「看形状」的地方：一个容器都没有 = M8 之前。
     const flat = !doc.nodes.some((n) => CONTAINER_TYPES.has(String(n.type)))
     if (!flat) return { nodes: doc.nodes, rootNodeIds: doc.rootNodeIds }
 
-    const record: Record<string, RawNode> = {}
+    // 用 Map 不用普通对象：id 恰好叫 constructor 之类时，`id in {}` 会被原型链骗到。
+    const keyed = new Map<string, RawNode>()
+    // 没法按 id 收养的（id 不是字符串、id 重复）原样放行，交给 normalize 去丢、去报告——迁移不许悄悄吞节点。
+    const passThrough: RawNode[] = []
     for (const raw of doc.nodes) {
-      if (typeof raw.id !== 'string' || raw.id in record) continue
-      const slabFixed =
-        raw.type === 'slab' && raw.elevation === LEGACY_SLAB_ELEVATION ? { ...raw, elevation: 0 } : raw
-      // 不用在这里补 children：normalize 最后那次 parse 会填成 []（变异测试验证过，去掉它全绿）。
-      record[raw.id] = slabFixed
+      if (typeof raw.id !== 'string' || keyed.has(raw.id)) {
+        passThrough.push(raw)
+        continue
+      }
+      keyed.set(raw.id, raw.type === 'slab' && raw.elevation === V0_SLAB_ELEVATION ? { ...raw, elevation: 0 } : raw)
     }
 
-    const wrapped = migrateToLevels({
-      // migrateToLevels 只读 type、按 id 查存在、展开复制——不读别的字段，raw 节点过得去。
-      nodes: record as unknown as Record<AnyNodeId, AnyNode>,
-      rootNodeIds: deriveRootIds(Object.values(record), doc.rootNodeIds) as AnyNodeId[],
-    })
+    const siteId = generateId('site')
+    const buildingId = generateId('building')
+    const levelId = generateId('level')
+
+    // 根下的节点收进 Level 0。不经过 addNode，所以 parentId 和 children 两侧都在这里写对。
+    // 不用补 children 字段：normalize 最后那次 parse 会填成 []。
+    const adopted = deriveRootIds([...keyed.values()], doc.rootNodeIds)
+    for (const id of adopted) keyed.set(id, { ...keyed.get(id), parentId: levelId })
 
     return {
-      nodes: Object.values(wrapped.nodes) as unknown as RawNode[],
-      rootNodeIds: wrapped.rootNodeIds,
+      nodes: [
+        v1Container('site', siteId, null, [buildingId]),
+        v1Container('building', buildingId, siteId, [levelId]),
+        v1Container('level', levelId, buildingId, adopted, { level: 0, baseElevation: 0, height: V1_LEVEL_HEIGHT }),
+        ...keyed.values(),
+        ...passThrough,
+      ],
+      rootNodeIds: [siteId],
     }
   },
 }
 ```
 
-### 04 · `src/core/store/persistence/normalize-snapshot.ts` · 新建 · 111 行
+### 04 · `src/core/persistence/normalize-snapshot.ts` · 新建 · 119 行
 
-进 store 前的最后一道：逐个 `parse` → 沿 `parentId` 下判决（缺父 / 成环 / 祖先被丢）→ **按 `parentId` 重建 `children`** → 推根（§02 D，Q3）。判决缓存让它是线性的；「本次路径」集合让环不会把它挂住。
+进 store 前的最后一道：要求字符串 id → 逐个 `parse` → 沿 `parentId` 下判决（缺父 / 成环 / 祖先被丢）→ **按 `parentId` 重建 `children`** → 推根（§02 D，Q3）。
 
 ```ts
-import { AnyNode, type AnyNodeId } from '../../schema/types'
-import type { SceneSnapshot } from '../history-control'
+import { AnyNode, type AnyNodeId } from '../schema/types'
+import type { SceneSnapshot } from '../store/history-control'
 import { deriveRootIds, type RawNode } from './scene-document'
 
 export type DropReason = 'invalid' | 'duplicate-id' | 'missing-parent' | 'cycle' | 'ancestor-dropped'
@@ -275,6 +378,7 @@ export type LoadReport = { dropped: DroppedNode[]; repairedParents: string[] }
 /**
  * 迁移之后、进 store 之前的最后一道：逐个 parse、丢坏的、按 parentId 重建 children、推出根。
  * parentId 是真相，children 是索引（D19）——存档里的 children 只用来保顺序。
+ * 丢掉的每一个节点都进报告：静默是本项目 bug 的共同点。
  */
 export function normalizeSceneNodes(
   rawNodes: readonly RawNode[],
@@ -284,9 +388,15 @@ export function normalizeSceneNodes(
   const parsed = new Map<string, AnyNode>()
 
   for (const raw of rawNodes) {
+    // 先要求有字符串 id：objectId 带 default，缺 id 的节点 parse 时会被发明一个新 id，
+    // 变成一个谁都不认识的新根。读档时不许这样「修」数据。
+    if (typeof raw.id !== 'string') {
+      dropped.push({ id: null, reason: 'invalid' })
+      continue
+    }
     const result = AnyNode.safeParse(raw)
     if (!result.success) {
-      dropped.push({ id: typeof raw.id === 'string' ? raw.id : null, reason: 'invalid' })
+      dropped.push({ id: raw.id, reason: 'invalid' })
       continue
     }
     if (parsed.has(result.data.id)) {
@@ -296,6 +406,7 @@ export function normalizeSceneNodes(
     parsed.set(result.data.id, result.data)
   }
 
+  // 沿 parentId 往上走，给每个节点下判决。判决缓存让它是线性的；「本次路径」集合让环不会把它挂住。
   const verdict = new Map<string, DropReason | 'ok'>()
   const settle = (id: string): DropReason | 'ok' => {
     const path: string[] = []
@@ -377,14 +488,12 @@ export function normalizeSceneNodes(
 }
 ```
 
-### 05 · 加载入口，以及你的 gate 测试
+### 05 · 加载入口，以及你的闸门测试转绿
 
-**05a · `src/core/store/persistence/load-scene-document.ts` · 新建 · 73 行**
-
-C → E → D → B 四步都在这里串起来，**一步都不碰 store**（Q3 小问 9：读取失败 = 什么都没发生）。比当前版本新的文件在信封这一步就拒绝，一环迁移都不跑。
+**05a · `src/core/persistence/load-scene-document.ts` · 新建 · 81 行** —— 信封 → 迁移 → 规范化，**一步都不碰 store**（Q3：读取失败 = 什么都没发生）。
 
 ```ts
-import type { SceneSnapshot } from '../history-control'
+import type { SceneSnapshot } from '../store/history-control'
 import { runSceneMigrations, SceneMigrationError } from './migrations'
 import { normalizeSceneNodes, type LoadReport } from './normalize-snapshot'
 import { CURRENT_SCENE_VERSION, SCENE_FORMAT, type RawNode, type RawSceneDocument } from './scene-document'
@@ -402,9 +511,11 @@ export type SceneLoadResult =
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v)
 
+// 不是对象的条目换成 {}：让 normalize 把它记成 invalid，而不是在这里悄悄过滤掉。
 const asRawNodes = (list: readonly unknown[]): RawNode[] => list.map((n) => (isObject(n) ? n : {}))
 const asIds = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [])
 
+/** 信封：认出版本。比当前新的在这里就拒绝，一环迁移都不跑。 */
 export function toRawDocument(value: unknown): RawSceneDocument | SceneLoadError {
   if (!isObject(value)) return { kind: 'not-a-scene' }
 
@@ -417,15 +528,20 @@ export function toRawDocument(value: unknown): RawSceneDocument | SceneLoadError
     return { version, nodes: asRawNodes(nodes), rootNodeIds: asIds(value.rootNodeIds) }
   }
 
+  // 有 format 或 version、但对不上：不猜。
   if ('format' in value || 'version' in value) return { kind: 'not-a-scene' }
 
-  // v0：版本号出现之前的样子，就是 useScene 的 { nodes: Record<id, node>, rootNodeIds }
+  // v0：版本号出现之前的样子，就是 useScene 的 { nodes: Record<id, node>, rootNodeIds }——没有 format，也没有 version。
   const { nodes } = value
   const list = Array.isArray(nodes) ? nodes : isObject(nodes) ? Object.values(nodes) : null
   if (list === null) return { kind: 'not-a-scene' }
   return { version: 0, nodes: asRawNodes(list), rootNodeIds: asIds(value.rootNodeIds) }
 }
 
+/**
+ * 读档：信封 → 迁移 → 规范化。纯函数，一步都不碰 store——读取失败 = 什么都没发生。
+ * 不改入参。
+ */
 export function loadSceneDocument(value: unknown): SceneLoadResult {
   const raw = toRawDocument(value)
   if ('kind' in raw) return { ok: false, error: raw }
@@ -448,6 +564,7 @@ export function loadSceneDocument(value: unknown): SceneLoadResult {
   return { ok: true, snapshot, report, fromVersion: raw.version }
 }
 
+/** 从文本读档（文件导入、localStorage）。不是 JSON 就返回错误，不抛。 */
 export function parseSceneDocument(text: string): SceneLoadResult {
   let value: unknown
   try {
@@ -459,14 +576,14 @@ export function parseSceneDocument(text: string): SceneLoadResult {
 }
 ```
 
-**05b · 删掉 `src/core/store/persistence/gate-core.ts`**（你的桩）。
+**05b · 删除 `src/core/persistence/gate-core.ts`**（桩完成使命）。
 
-**05c · `src/core/store/persistence/gate-core.test.ts` · 改两处**：import 指向新文件；读完先检查 `ok`。改完是这样：
+**05c · 改 `src/core/persistence/gate-core.test.ts`**：import 指向 `./load-scene-document`；读完先检查 `ok`。改完是这样：
 
 ```ts
 import { describe, expect, it } from "vitest";
-import { asNodeId } from "../../schema/types";
-import type { SlabNode } from "../../schema/slab";
+import { asNodeId } from "../schema/types";
+import type { SlabNode } from "../schema/slab";
 import { loadSceneDocument } from "./load-scene-document";
 
 describe('loadSceneDocument', () => {
@@ -494,49 +611,16 @@ describe('loadSceneDocument', () => {
 })
 ```
 
-<details><summary>你改之前的版本（对照用）</summary>
-
-```ts
-import { describe, expect, it } from "vitest";
-import { asNodeId } from "../../schema/types";
-import type { SlabNode } from "../../schema/slab";
-import { loadSceneDocument } from "./gate-core";
-
-describe('loadSceneDocument', () => {
-  it('v0 文档： 楼板 elevation 0.05 迁移成 0', () => {
-    const v0FlatDoc = {
-      nodes: [
-        {
-          object: 'node', id: 'wall_1', type: 'wall', parentId: null, children: [],
-          visible: true, metadata: {}, start: [0, 0], end: [4, 0],
-        },
-        {
-          object: 'node', id: 'slab_1', type: 'slab', parentId: null, children: [],
-          visible: true, metadata: {}, polygon: [[0, 0], [4, 0], [4, 4], [0, 4]],
-          elevation: 0.05,
-        },
-      ],
-      rootNodeIds: ['wall_1', 'slab_1'],
-    }
-
-    const { snapshot } = loadSceneDocument(v0FlatDoc)
-    const slab = snapshot.nodes[asNodeId('slab_1')] as SlabNode
-    expect(slab.elevation).toBe(0)
-  })
-})
-```
-
-</details>
-
-**05d · `src/core/store/persistence/load-scene-document.test.ts` · 新建 · 24 条**
+**05d · `src/core/persistence/load-scene-document.test.ts` · 新建**
 
 ```ts
 import { describe, expect, it } from 'vitest'
-import type { AnyNodeId } from '../../schema/types'
-import { areSceneSnapshotsEqual, type SceneSnapshot } from '../history-control'
-import { M1_FLAT_SCENE, M6_FLAT_SCENE, M7_FLAT_SCENE } from './fixtures'
-import { parseSceneDocument, loadSceneDocument } from './load-scene-document'
+import type { AnyNodeId } from '../schema/types'
+import { areSceneSnapshotsEqual, type SceneSnapshot } from '../store/history-control'
+import { M1_FLAT_SCENE, M6_FLAT_SCENE, M7_FLAT_SCENE } from './__fixtures__/legacy-scenes'
+import { loadSceneDocument, parseSceneDocument } from './load-scene-document'
 import { runSceneMigrations, SCENE_MIGRATIONS, type SceneMigration } from './migrations'
+import { v0ToV1 } from './migrations/v0-to-v1'
 import { CURRENT_SCENE_VERSION, SCENE_FORMAT, toSceneDocument } from './scene-document'
 
 const load = (value: unknown) => {
@@ -553,6 +637,9 @@ const docOf = (s: SceneSnapshot) => JSON.parse(JSON.stringify(toSceneDocument(s)
   rootNodeIds: string[]
 }
 const roundTrip = (s: SceneSnapshot) => load(docOf(s))
+const v1 = () => docOf(load(M7_FLAT_SCENE).snapshot)
+const m1Nodes = () => Object.values(structuredClone(M1_FLAT_SCENE).nodes) as Record<string, unknown>[]
+const base = { object: 'node', parentId: null, visible: true, metadata: {} }
 
 function expectIndexConsistent(s: SceneSnapshot) {
   for (const node of Object.values(s.nodes)) {
@@ -579,6 +666,7 @@ describe('M1 时代的存档（ROADMAP 验收）', () => {
 
     expect(r.fromVersion).toBe(0)
     expect(r.snapshot.rootNodeIds).toEqual([site!.id])
+    expect(level).toMatchObject({ level: 0, baseElevation: 0, height: 2.5 })
     for (const wall of ofType(r.snapshot, 'wall')) expect(wall.parentId).toBe(level!.id)
     expect(r.report.dropped).toEqual([])
     expectIndexConsistent(r.snapshot)
@@ -669,8 +757,7 @@ describe('children 是索引，parentId 是真相', () => {
   })
 
   it('rootNodeIds 不可信：列了非根、漏了根，都以 parentId 为准', () => {
-    const first = load(M1_FLAT_SCENE).snapshot
-    const doc = docOf(first)
+    const doc = docOf(load(M1_FLAT_SCENE).snapshot)
     doc.rootNodeIds = ['wall_0a1b2c3d4e5a6b7c']
     const s = load(doc).snapshot
     expect(s.rootNodeIds).toEqual([ofType(s, 'site')[0]!.id])
@@ -678,15 +765,47 @@ describe('children 是索引，parentId 是真相', () => {
 })
 
 describe('坏数据：丢掉，但必须报出来', () => {
-  const v1 = () => docOf(load(M7_FLAT_SCENE).snapshot)
-
   it('单个节点坏了只丢它，记 invalid；其余照常', () => {
     const raw = structuredClone(M1_FLAT_SCENE) as { nodes: Record<string, unknown>; rootNodeIds: string[] }
-    raw.nodes.wall_bad = { object: 'node', id: 'wall_bad', type: 'wall', parentId: null, start: [0, 0] }
+    raw.nodes.wall_bad = { ...base, id: 'wall_bad', type: 'wall', start: [0, 0] }
     raw.rootNodeIds.push('wall_bad')
     const r = load(raw)
 
     expect(r.report.dropped).toEqual([{ id: 'wall_bad', reason: 'invalid' }])
+    expect(ofType(r.snapshot, 'wall')).toHaveLength(3)
+    expectIndexConsistent(r.snapshot)
+  })
+
+  it('v1 里缺 id 的节点 → invalid，id 记 null（不许 parse 替它发明一个 id）', () => {
+    const doc = v1()
+    doc.nodes.push({ ...base, type: 'wall', children: [], start: [0, 0], end: [1, 0] })
+    const r = load(doc)
+
+    expect(r.report.dropped).toEqual([{ id: null, reason: 'invalid' }])
+    expect(ofType(r.snapshot, 'wall')).toHaveLength(1)
+    expect(r.snapshot.rootNodeIds).toHaveLength(1)
+  })
+
+  it('v0 里缺 id、重复 id 的节点也要报告：迁移不许悄悄吞掉', () => {
+    const nodes = m1Nodes()
+    const first = nodes[0]!
+    nodes.push({ ...first, id: undefined }, { ...first, start: [9, 9] })
+    const r = load({ nodes, rootNodeIds: [] })
+
+    expect(r.report.dropped).toEqual([
+      { id: null, reason: 'invalid' },
+      { id: 'wall_0a1b2c3d4e5a6b7c', reason: 'duplicate-id' },
+    ])
+    expect(ofType(r.snapshot, 'wall')).toHaveLength(3)
+    expect(r.snapshot.nodes[id('wall_0a1b2c3d4e5a6b7c')]).toMatchObject({ start: [0, 0] })
+  })
+
+  it('id 恰好叫 constructor 的坏节点照样被报告（不被原型链骗过去）', () => {
+    const nodes = m1Nodes()
+    nodes.push({ ...base, id: 'constructor', type: 'wall', start: [0, 0], end: [1, 0] })
+    const r = load({ nodes, rootNodeIds: [] })
+
+    expect(r.report.dropped).toEqual([{ id: 'constructor', reason: 'invalid' }])
     expect(ofType(r.snapshot, 'wall')).toHaveLength(3)
     expectIndexConsistent(r.snapshot)
   })
@@ -769,6 +888,7 @@ describe('信封', () => {
   })
 
   it('有 format 但 version 不合法、或者有 version 没 format → not-a-scene（不猜）', () => {
+    expect(loadSceneDocument({ format: SCENE_FORMAT, nodes: [] })).toEqual({ ok: false, error: { kind: 'not-a-scene' } })
     expect(loadSceneDocument({ format: SCENE_FORMAT, version: 0, nodes: [] })).toMatchObject({ ok: false })
     expect(loadSceneDocument({ format: SCENE_FORMAT, version: '1', nodes: [] })).toMatchObject({ ok: false })
     expect(loadSceneDocument({ version: 1, nodes: {} })).toEqual({ ok: false, error: { kind: 'not-a-scene' } })
@@ -804,12 +924,24 @@ describe('迁移链', () => {
     const steps: SceneMigration[] = [{ from: 0, note: 'a', migrate: (d) => d }]
     expect(() => runSceneMigrations({ version: 0, nodes: [], rootNodeIds: [] }, steps, 2)).toThrow(/v1/)
   })
+
+  it('v0 → v1 造出来的容器是冻结的 v1 形状：键一个不多、一个不少，层高显式写着 2.5', () => {
+    const out = v0ToV1.migrate({ version: 0, nodes: [], rootNodeIds: [] })
+    const byType = (t: string) => out.nodes.find((n) => n.type === t)
+    const baseKeys = ['children', 'id', 'metadata', 'object', 'parentId', 'type', 'visible']
+
+    expect(Object.keys(byType('site')!).sort()).toEqual(baseKeys)
+    expect(Object.keys(byType('building')!).sort()).toEqual(baseKeys)
+    expect(Object.keys(byType('level')!).sort()).toEqual([...baseKeys, 'baseElevation', 'height', 'level'].sort())
+    expect(byType('level')).toMatchObject({ level: 0, baseElevation: 0, height: 2.5 })
+    expect(out.rootNodeIds).toEqual([byType('site')!.id])
+  })
 })
 ```
 
 ### 06 · `src/core/store/replace-scene.ts` · 新建 · 19 行
 
-读档、切场景、导入共用。一次 `setState`、脏集换成新的 `Set`（不是 `markAllDirty()`——那只往旧集合里加，旧 id 会留下）、清历史（§02 E）。
+读档、切场景、导入共用：一次 `setState`、脏集换成新的 `Set`、清历史（§02 E）。
 
 ```ts
 import type { AnyNodeId } from '../schema/types'
@@ -820,8 +952,8 @@ import { useScene } from './use-scene'
  * 整场景替换：读档、切场景、导入都走这里。
  * 三件事缺一不可——一次 setState 写完、历史清空、脏集恰好是新节点（旧 id 不留在脏集里）。
  *
- * 不拿 acquireSceneHistoryPause：紧跟着的 clear() 已经把那条记录清掉了，
- * 变异测试验证过（去掉租约 268 条全绿）。少一个依赖，少一条要靠自觉记住的规矩。
+ * 不用 markAllDirty()：它只往旧集合里加，旧场景的 id 会留下。
+ * 不拿 acquireSceneHistoryPause：紧跟着的 clear() 已经把这次写入留下的历史清掉了（变异测试验证过）。
  */
 export function replaceScene(snapshot: SceneSnapshot): void {
   useScene.setState({
@@ -833,12 +965,12 @@ export function replaceScene(snapshot: SceneSnapshot): void {
 }
 ```
 
-**`src/core/store/replace-scene.test.ts` · 新建 · 3 条**
+**`src/core/store/replace-scene.test.ts` · 新建**
 
 ```ts
 import { beforeEach, describe, expect, it } from 'vitest'
-import { M1_FLAT_SCENE } from './persistence/fixtures'
-import { loadSceneDocument } from './persistence/load-scene-document'
+import { M1_FLAT_SCENE } from '../persistence/__fixtures__/legacy-scenes'
+import { loadSceneDocument } from '../persistence/load-scene-document'
 import type { AnyNodeId } from '../schema/types'
 import { resetSceneHistoryPause } from './history-control'
 import { replaceScene } from './replace-scene'
@@ -881,7 +1013,7 @@ describe('replaceScene', () => {
     expect(dirty.has(stale)).toBe(false)
   })
 
-  it('替换之后的下一次编辑照常进历史、能撤（暂停租约被释放了）', () => {
+  it('替换之后的下一次编辑照常进历史、能撤', () => {
     replaceScene(snapshot())
     const wallId = 'wall_0a1b2c3d4e5a6b7c' as AnyNodeId
 
@@ -894,20 +1026,21 @@ describe('replaceScene', () => {
 })
 ```
 
-### 07 · `src/core/store/persistence/scene-storage.ts` · 新建 · 179 行
+### 07 · `src/core/persistence/scene-storage.ts` · 新建 · 242 行
 
-索引是缓存、文档是真相；**先写文档再写索引**；`docVersion` 比当前新就拒绝写（§02 G）。
+索引是缓存、存储里实际的键才是真相；**先写文档再写索引**；文档或索引任一处说「更新的版本存的」就拒绝覆盖（§02 G）。
 
 ```ts
-import { generateId } from '../../schema/base'
-import type { SceneSnapshot } from '../history-control'
-import { loadSceneDocument, type SceneLoadResult } from './load-scene-document'
+import { generateId } from '../schema/base'
+import type { SceneSnapshot } from '../store/history-control'
+import { parseSceneDocument, type SceneLoadResult } from './load-scene-document'
 import { CURRENT_SCENE_VERSION, toSceneDocument } from './scene-document'
 
 export type KeyValueStore = {
   getItem(key: string): string | null
   setItem(key: string, value: string): void
   removeItem(key: string): void
+  /** 返回一个快照数组：调用方会一边遍历一边删。 */
   keys(): string[]
 }
 
@@ -917,6 +1050,7 @@ export type SceneMeta = {
   createdAt: string
   updatedAt: string
   nodeCount: number
+  /** 这份文档是哪个版本存的。比当前代码新就拒绝覆盖（降级保护）。 */
   docVersion: number
 }
 
@@ -927,70 +1061,130 @@ type SceneIndex = { scenes: SceneMeta[]; checkpoints: CheckpointMeta[]; currentS
 const PREFIX = 'r3f-arch:'
 const INDEX_KEY = `${PREFIX}index`
 const SCENE_PREFIX = `${PREFIX}scene:`
-const sceneKey = (id: string) => `${SCENE_PREFIX}${id}`
-const checkpointKey = (id: string) => `${PREFIX}checkpoint:${id}`
+const CHECKPOINT_PREFIX = `${PREFIX}checkpoint:`
+const sceneKey = (sceneId: string) => `${SCENE_PREFIX}${sceneId}`
+// 存档点的键带着场景 id：索引丢了也知道它属于谁，删场景时按前缀就能删干净。
+const checkpointKey = (sceneId: string, checkpointId: string) => `${CHECKPOINT_PREFIX}${sceneId}:${checkpointId}`
 
 export class SceneTooNewError extends Error {
-  constructor(id: string, version: number) {
-    super(`场景 ${id} 是 v${version} 存的，比当前 v${CURRENT_SCENE_VERSION} 新，拒绝覆盖`)
+  constructor(sceneId: string, version: number) {
+    super(`场景 ${sceneId} 是 v${version} 存的，比当前 v${CURRENT_SCENE_VERSION} 新，拒绝覆盖`)
     this.name = 'SceneTooNewError'
+  }
+}
+
+const isString = (v: unknown): v is string => typeof v === 'string'
+const isNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null
+
+const isSceneMeta = (v: unknown): v is SceneMeta =>
+  isRecord(v) && isString(v.id) && isString(v.name) && isString(v.createdAt) &&
+  isString(v.updatedAt) && isNumber(v.nodeCount) && isNumber(v.docVersion)
+
+const isCheckpointMeta = (v: unknown): v is CheckpointMeta =>
+  isRecord(v) && isString(v.id) && isString(v.sceneId) && isString(v.label) && isString(v.createdAt)
+
+/** 只看文档的版本号和节点数，不做完整加载。读不出来就当 v0、0 个节点——真正打开时再报错。 */
+function peekDocument(text: string | null): { docVersion: number; nodeCount: number } {
+  let value: unknown
+  try {
+    value = JSON.parse(text ?? '')
+  } catch {
+    return { docVersion: 0, nodeCount: 0 }
+  }
+  if (!isRecord(value)) return { docVersion: 0, nodeCount: 0 }
+  const { version, nodes } = value
+  return {
+    docVersion: isNumber(version) ? version : 0,
+    nodeCount: Array.isArray(nodes) ? nodes.length : isRecord(nodes) ? Object.keys(nodes).length : 0,
   }
 }
 
 export function createSceneStorage(
   kv: KeyValueStore,
-  options: { now?: () => string; newId?: () => string; maxCheckpointsPerScene?: number } = {},
+  options: {
+    now?: () => string
+    newId?: (kind: 'scene' | 'checkpoint') => string
+    maxCheckpointsPerScene?: number
+  } = {},
 ) {
   const now = options.now ?? (() => new Date().toISOString())
-  const newId = options.newId ?? (() => generateId('scene'))
+  const newId = options.newId ?? ((kind: 'scene' | 'checkpoint') => generateId(kind))
   const maxCheckpoints = options.maxCheckpointsPerScene ?? 10
 
-  /** 索引是缓存，文档才是真相：索引丢了或坏了，从 scene:* 键重建。 */
-  const readIndex = (): SceneIndex => {
+  /** 存下来的索引。坏了、丢了、某条记录缺字段，都只是「少几条记录」，不会让调用方崩。 */
+  const readStoredIndex = (): Partial<SceneIndex> => {
     const raw = kv.getItem(INDEX_KEY)
-    if (raw !== null) {
-      try {
-        const v = JSON.parse(raw) as Partial<SceneIndex>
-        if (Array.isArray(v.scenes) && Array.isArray(v.checkpoints)) {
-          return { scenes: v.scenes, checkpoints: v.checkpoints, currentSceneId: v.currentSceneId ?? null }
-        }
-      } catch {
-        // 落到下面重建
-      }
+    if (raw === null) return {}
+    let value: unknown
+    try {
+      value = JSON.parse(raw)
+    } catch {
+      return {}
     }
+    if (!isRecord(value)) return {}
+    return {
+      scenes: Array.isArray(value.scenes) ? value.scenes.filter(isSceneMeta) : [],
+      checkpoints: Array.isArray(value.checkpoints) ? value.checkpoints.filter(isCheckpointMeta) : [],
+      currentSceneId: isString(value.currentSceneId) ? value.currentSceneId : null,
+    }
+  }
+
+  /**
+   * 索引是缓存，存储里实际存在的键才是真相：
+   * 索引记录了的沿用记录；没记录的（上次写完文档没写成索引、索引坏了）从文档本身重建；
+   * 记录了但文档已经不在的丢掉。
+   */
+  const readIndex = (): SceneIndex => {
+    const stored = readStoredIndex()
+    const keys = kv.keys()
+
+    const knownScenes = new Map((stored.scenes ?? []).map((s) => [s.id, s]))
     const scenes: SceneMeta[] = []
-    for (const key of kv.keys()) {
+    for (const key of keys) {
       if (!key.startsWith(SCENE_PREFIX)) continue
       const id = key.slice(SCENE_PREFIX.length)
-      const text = kv.getItem(key) ?? ''
-      let docVersion = 0
-      let nodeCount = 0
-      try {
-        const v = JSON.parse(text) as { version?: unknown; nodes?: unknown }
-        if (typeof v.version === 'number') docVersion = v.version
-        if (Array.isArray(v.nodes)) nodeCount = v.nodes.length
-        else if (v.nodes && typeof v.nodes === 'object') nodeCount = Object.keys(v.nodes).length
-      } catch {
-        // 坏文档也列出来，读的时候再报错
-      }
-      scenes.push({ id, name: id, createdAt: '', updatedAt: '', nodeCount, docVersion })
+      scenes.push(knownScenes.get(id) ?? { id, name: id, createdAt: '', updatedAt: '', ...peekDocument(kv.getItem(key)) })
     }
-    return { scenes, checkpoints: [], currentSceneId: null }
+    const sceneIds = new Set(scenes.map((s) => s.id))
+
+    const present = new Set(keys.filter((k) => k.startsWith(CHECKPOINT_PREFIX)))
+    const listed = new Set<string>()
+    const recorded: CheckpointMeta[] = []
+    for (const c of stored.checkpoints ?? []) {
+      const key = checkpointKey(c.sceneId, c.id)
+      if (!present.has(key) || listed.has(key)) continue
+      listed.add(key)
+      recorded.push(c)
+    }
+    const orphans: CheckpointMeta[] = []
+    for (const key of present) {
+      if (listed.has(key)) continue
+      const rest = key.slice(CHECKPOINT_PREFIX.length)
+      const cut = rest.indexOf(':')
+      if (cut <= 0) continue
+      orphans.push({ sceneId: rest.slice(0, cut), id: rest.slice(cut + 1), label: '', createdAt: '' })
+    }
+    // 旧的在前，修剪时从前面删；来历不明的孤儿当作最旧。场景已经不在的存档点不列出来。
+    const checkpoints = [...orphans, ...recorded].filter((c) => sceneIds.has(c.sceneId))
+
+    const current = stored.currentSceneId ?? null
+    return { scenes, checkpoints, currentSceneId: current !== null && sceneIds.has(current) ? current : null }
   }
 
   const writeIndex = (index: SceneIndex) => kv.setItem(INDEX_KEY, JSON.stringify(index))
 
-  const writeDoc = (key: string, snapshot: SceneSnapshot) =>
-    kv.setItem(key, JSON.stringify(toSceneDocument(snapshot)))
+  const writeDoc = (key: string, snapshot: SceneSnapshot) => kv.setItem(key, JSON.stringify(toSceneDocument(snapshot)))
 
   const loadKey = (key: string): SceneLoadResult | null => {
     const text = kv.getItem(key)
-    if (text === null) return null
-    try {
-      return loadSceneDocument(JSON.parse(text))
-    } catch {
-      return { ok: false, error: { kind: 'not-json' } }
-    }
+    return text === null ? null : parseSceneDocument(text)
+  }
+
+  const requireScene = (index: SceneIndex, sceneId: string): SceneMeta => {
+    const meta = index.scenes.find((s) => s.id === sceneId)
+    if (!meta) throw new Error(`场景 ${sceneId} 不存在`)
+    return meta
   }
 
   return {
@@ -1000,79 +1194,80 @@ export function createSceneStorage(
       const index = readIndex()
       const t = now()
       const meta: SceneMeta = {
-        id: newId(),
+        id: newId('scene'),
         name,
         createdAt: t,
         updatedAt: t,
         nodeCount: Object.keys(snapshot.nodes).length,
         docVersion: CURRENT_SCENE_VERSION,
       }
-      writeDoc(sceneKey(meta.id), snapshot) // 先写文档，再写索引：索引写挂了还能重建
+      // 先写文档，再写索引：配额满时挂的是大的那个，索引保持旧值、仍然自洽。
+      writeDoc(sceneKey(meta.id), snapshot)
       writeIndex({ ...index, scenes: [...index.scenes, meta] })
       return meta
     },
 
-    save(id: string, snapshot: SceneSnapshot): SceneMeta {
+    save(sceneId: string, snapshot: SceneSnapshot): SceneMeta {
       const index = readIndex()
-      const prev = index.scenes.find((s) => s.id === id)
-      if (!prev) throw new Error(`场景 ${id} 不存在`)
-      if (prev.docVersion > CURRENT_SCENE_VERSION) throw new SceneTooNewError(id, prev.docVersion)
+      const prev = requireScene(index, sceneId)
+      // 降级保护看两处：索引的记录，和文档本身（新版本写完文档、没写成索引时，只有文档知道）。
+      const stored = Math.max(prev.docVersion, peekDocument(kv.getItem(sceneKey(sceneId))).docVersion)
+      if (stored > CURRENT_SCENE_VERSION) throw new SceneTooNewError(sceneId, stored)
 
-      writeDoc(sceneKey(id), snapshot)
+      writeDoc(sceneKey(sceneId), snapshot)
       const meta: SceneMeta = {
         ...prev,
         updatedAt: now(),
         nodeCount: Object.keys(snapshot.nodes).length,
         docVersion: CURRENT_SCENE_VERSION,
       }
-      writeIndex({ ...index, scenes: index.scenes.map((s) => (s.id === id ? meta : s)) })
+      writeIndex({ ...index, scenes: index.scenes.map((s) => (s.id === sceneId ? meta : s)) })
       return meta
     },
 
-    load: (id: string): SceneLoadResult | null => loadKey(sceneKey(id)),
+    /** null = 没有这个场景。 */
+    load: (sceneId: string): SceneLoadResult | null => loadKey(sceneKey(sceneId)),
 
-    remove(id: string): void {
-      const index = readIndex()
-      kv.removeItem(sceneKey(id))
-      for (const cp of index.checkpoints) if (cp.sceneId === id) kv.removeItem(checkpointKey(cp.id))
-      writeIndex({
-        scenes: index.scenes.filter((s) => s.id !== id),
-        checkpoints: index.checkpoints.filter((c) => c.sceneId !== id),
-        currentSceneId: index.currentSceneId === id ? null : index.currentSceneId,
-      })
+    remove(sceneId: string): void {
+      kv.removeItem(sceneKey(sceneId))
+      const prefix = `${CHECKPOINT_PREFIX}${sceneId}:`
+      for (const key of kv.keys()) if (key.startsWith(prefix)) kv.removeItem(key)
+      // 这时文档已经不在：它的记录、它的存档点、指向它的 currentSceneId 都会在读的时候被滤掉。
+      writeIndex(readIndex())
     },
 
-    rename(id: string, name: string): void {
+    rename(sceneId: string, name: string): void {
       const index = readIndex()
-      writeIndex({ ...index, scenes: index.scenes.map((s) => (s.id === id ? { ...s, name } : s)) })
+      requireScene(index, sceneId)
+      writeIndex({ ...index, scenes: index.scenes.map((s) => (s.id === sceneId ? { ...s, name } : s)) })
     },
 
     checkpoint(sceneId: string, label: string, snapshot: SceneSnapshot): CheckpointMeta {
       const index = readIndex()
-      const meta: CheckpointMeta = { id: newId(), sceneId, label, createdAt: now() }
-      writeDoc(checkpointKey(meta.id), snapshot)
+      requireScene(index, sceneId)
+      const meta: CheckpointMeta = { id: newId('checkpoint'), sceneId, label, createdAt: now() }
+      writeDoc(checkpointKey(sceneId, meta.id), snapshot)
 
       const mine = [...index.checkpoints.filter((c) => c.sceneId === sceneId), meta]
-      const doomed = mine.slice(0, Math.max(0, mine.length - maxCheckpoints))
-      for (const cp of doomed) kv.removeItem(checkpointKey(cp.id))
-      const doomedIds = new Set(doomed.map((c) => c.id))
-
-      writeIndex({
-        ...index,
-        checkpoints: [...index.checkpoints, meta].filter((c) => !doomedIds.has(c.id)),
-      })
+      const doomed = new Set(mine.slice(0, Math.max(0, mine.length - maxCheckpoints)))
+      for (const c of doomed) kv.removeItem(checkpointKey(c.sceneId, c.id))
+      writeIndex({ ...index, checkpoints: [...index.checkpoints, meta].filter((c) => !doomed.has(c)) })
       return meta
     },
 
     listCheckpoints: (sceneId: string): CheckpointMeta[] =>
       readIndex().checkpoints.filter((c) => c.sceneId === sceneId),
 
-    loadCheckpoint: (checkpointId: string): SceneLoadResult | null => loadKey(checkpointKey(checkpointId)),
+    /** null = 没有这个存档点。 */
+    loadCheckpoint: (sceneId: string, checkpointId: string): SceneLoadResult | null =>
+      loadKey(checkpointKey(sceneId, checkpointId)),
 
     currentSceneId: (): string | null => readIndex().currentSceneId,
 
-    setCurrentSceneId(id: string | null): void {
-      writeIndex({ ...readIndex(), currentSceneId: id })
+    setCurrentSceneId(sceneId: string | null): void {
+      const index = readIndex()
+      if (sceneId !== null) requireScene(index, sceneId)
+      writeIndex({ ...index, currentSceneId: sceneId })
     },
   }
 }
@@ -1080,14 +1275,14 @@ export function createSceneStorage(
 export type SceneStorage = ReturnType<typeof createSceneStorage>
 ```
 
-**`src/core/store/persistence/scene-storage.test.ts` · 新建 · 8 条**
+**`src/core/persistence/scene-storage.test.ts` · 新建**
 
 ```ts
 import { describe, expect, it } from 'vitest'
-import { areSceneSnapshotsEqual } from '../history-control'
-import { M1_FLAT_SCENE } from './fixtures'
+import { areSceneSnapshotsEqual } from '../store/history-control'
+import { M1_FLAT_SCENE } from './__fixtures__/legacy-scenes'
 import { loadSceneDocument } from './load-scene-document'
-import { SCENE_FORMAT } from './scene-document'
+import { CURRENT_SCENE_VERSION, SCENE_FORMAT } from './scene-document'
 import { createSceneStorage, SceneTooNewError, type KeyValueStore } from './scene-storage'
 
 function memoryKV(): KeyValueStore & { map: Map<string, string> } {
@@ -1110,7 +1305,7 @@ const make = (kv = memoryKV(), maxCheckpointsPerScene = 10) => {
   let n = 0
   const storage = createSceneStorage(kv, {
     now: () => new Date(Date.UTC(2026, 8, 15) + tick++ * 1000).toISOString(),
-    newId: () => `scene_${n++}`,
+    newId: (kind) => `${kind}_${n++}`,
     maxCheckpointsPerScene,
   })
   return { kv, storage }
@@ -1122,7 +1317,12 @@ const m1 = () => {
   return r.snapshot
 }
 
-describe('sceneStorage', () => {
+const INDEX = 'r3f-arch:index'
+const sceneKey = (id: string) => `r3f-arch:scene:${id}`
+const cpKey = (sceneId: string, id: string) => `r3f-arch:checkpoint:${sceneId}:${id}`
+const checkpointKeys = (kv: KeyValueStore) => kv.keys().filter((k) => k.startsWith('r3f-arch:checkpoint:'))
+
+describe('往返', () => {
   it('M1 老存档 → 读进来 → 存成新场景 → 再读：一模一样，且已是当前版本', () => {
     const { storage } = make()
     const snap = m1()
@@ -1131,18 +1331,39 @@ describe('sceneStorage', () => {
     const back = storage.load(meta.id)
     expect(back?.ok).toBe(true)
     if (!back?.ok) return
-    expect(back.fromVersion).toBe(1)
+    expect(back.fromVersion).toBe(CURRENT_SCENE_VERSION)
     expect(areSceneSnapshotsEqual(back.snapshot, snap)).toBe(true)
-    expect(storage.list()[0]).toMatchObject({ name: '老房子', nodeCount: Object.keys(snap.nodes).length, docVersion: 1 })
+    expect(storage.list()).toEqual([meta])
+    expect(meta).toMatchObject({ name: '老房子', nodeCount: Object.keys(snap.nodes).length, docVersion: CURRENT_SCENE_VERSION })
   })
 
-  it('直接躺在存储里的 v0 文档（没有 format / version）也走迁移', () => {
+  it('直接躺在存储里的 v0 文档（没有 format / version）也走迁移，并且出现在列表里', () => {
     const { kv, storage } = make()
-    kv.setItem('r3f-arch:scene:legacy', JSON.stringify(M1_FLAT_SCENE))
+    kv.setItem(sceneKey('legacy'), JSON.stringify(M1_FLAT_SCENE))
+
     expect(storage.load('legacy')).toMatchObject({ ok: true, fromVersion: 0 })
+    expect(storage.list()).toEqual([{ id: 'legacy', name: 'legacy', createdAt: '', updatedAt: '', nodeCount: 3, docVersion: 0 }])
   })
 
-  it('删除：文档、它的存档点、索引条目一起清掉；当前场景是它 → 置空', () => {
+  it('没有这个场景 → load 返回 null', () => {
+    const { storage } = make()
+    expect(storage.load('nope')).toBeNull()
+  })
+
+  it('存档点：打一个再读回来，和打的时候一样', () => {
+    const { storage } = make()
+    const snap = m1()
+    const a = storage.create('a', snap)
+    const cp = storage.checkpoint(a.id, '第一版', snap)
+
+    const back = storage.loadCheckpoint(a.id, cp.id)
+    expect(back?.ok && areSceneSnapshotsEqual(back.snapshot, snap)).toBe(true)
+    expect(storage.listCheckpoints(a.id)).toEqual([cp])
+  })
+})
+
+describe('删除与修剪', () => {
+  it('删除：文档、它的存档点、索引条目一起清掉；当前场景是它 → 置空；别的场景不受影响', () => {
     const { kv, storage } = make()
     const snap = m1()
     const a = storage.create('a', snap)
@@ -1153,11 +1374,21 @@ describe('sceneStorage', () => {
 
     storage.remove(a.id)
 
-    expect(kv.getItem(`r3f-arch:scene:${a.id}`)).toBeNull()
-    expect(kv.getItem(`r3f-arch:checkpoint:${cpA.id}`)).toBeNull()
-    expect(kv.getItem(`r3f-arch:checkpoint:${cpB.id}`)).not.toBeNull()
+    expect(kv.getItem(sceneKey(a.id))).toBeNull()
+    expect(kv.getItem(cpKey(a.id, cpA.id))).toBeNull()
+    expect(kv.getItem(cpKey(b.id, cpB.id))).not.toBeNull()
     expect(storage.list().map((s) => s.id)).toEqual([b.id])
+    expect(storage.listCheckpoints(b.id)).toEqual([cpB])
     expect(storage.currentSceneId()).toBeNull()
+  })
+
+  it('删除时连索引里没登记的存档点文档（孤儿）也清掉', () => {
+    const { kv, storage } = make()
+    const a = storage.create('a', m1())
+    kv.setItem(cpKey(a.id, 'checkpoint_stray'), '{}')
+
+    storage.remove(a.id)
+    expect(checkpointKeys(kv)).toEqual([])
   })
 
   it('存档点只留最近 N 个，旧的连文档一起删', () => {
@@ -1167,24 +1398,36 @@ describe('sceneStorage', () => {
     for (const label of ['1', '2', '3', '4', '5']) storage.checkpoint(a.id, label, snap)
 
     expect(storage.listCheckpoints(a.id).map((c) => c.label)).toEqual(['3', '4', '5'])
-    expect(kv.keys().filter((k) => k.startsWith('r3f-arch:checkpoint:'))).toHaveLength(3)
+    expect(checkpointKeys(kv)).toHaveLength(3)
   })
+})
 
-  it('降级保护：索引记着文档是更新的版本存的 → save 抛 SceneTooNewError，文档原样不动', () => {
+describe('降级保护与写入顺序', () => {
+  it('索引记着文档是更新的版本存的 → save 抛 SceneTooNewError，文档原样不动', () => {
     const { kv, storage } = make()
     const a = storage.create('a', m1())
-    const index = JSON.parse(kv.getItem('r3f-arch:index')!)
-    index.scenes[0].docVersion = 99
-    kv.setItem('r3f-arch:index', JSON.stringify(index))
-    kv.setItem(`r3f-arch:scene:${a.id}`, 'NEWER')
+    const index = JSON.parse(kv.getItem(INDEX)!)
+    index.scenes[0].docVersion = CURRENT_SCENE_VERSION + 1
+    kv.setItem(INDEX, JSON.stringify(index))
+    kv.setItem(sceneKey(a.id), 'NEWER')
 
     expect(() => storage.save(a.id, m1())).toThrow(SceneTooNewError)
-    expect(kv.getItem(`r3f-arch:scene:${a.id}`)).toBe('NEWER')
+    expect(kv.getItem(sceneKey(a.id))).toBe('NEWER')
+  })
+
+  it('索引没来得及更新、但文档本身是更新的版本存的 → 同样拒绝', () => {
+    const { kv, storage } = make()
+    const a = storage.create('a', m1())
+    const newer = JSON.stringify({ format: SCENE_FORMAT, version: CURRENT_SCENE_VERSION + 1, nodes: [], rootNodeIds: [] })
+    kv.setItem(sceneKey(a.id), newer)
+
+    expect(() => storage.save(a.id, m1())).toThrow(SceneTooNewError)
+    expect(kv.getItem(sceneKey(a.id))).toBe(newer)
   })
 
   it('读到比当前新的文档 → too-new（调用方据此不许对它启动自动保存）', () => {
     const { kv, storage } = make()
-    kv.setItem('r3f-arch:scene:x', JSON.stringify({ format: SCENE_FORMAT, version: 99, nodes: [], rootNodeIds: [] }))
+    kv.setItem(sceneKey('x'), JSON.stringify({ format: SCENE_FORMAT, version: 99, nodes: [], rootNodeIds: [] }))
     expect(storage.load('x')).toEqual({ ok: false, error: { kind: 'too-new', version: 99 } })
   })
 
@@ -1192,7 +1435,7 @@ describe('sceneStorage', () => {
     const kv = memoryKV()
     const { storage } = make(kv)
     const a = storage.create('a', m1())
-    const indexBefore = kv.getItem('r3f-arch:index')
+    const indexBefore = kv.getItem(INDEX)
 
     const setItem = kv.setItem
     kv.setItem = (k, v) => {
@@ -1200,28 +1443,68 @@ describe('sceneStorage', () => {
       setItem(k, v)
     }
     expect(() => storage.save(a.id, m1())).toThrow(/Quota/)
-    expect(kv.map.get('r3f-arch:index')).toBe(indexBefore)
+    expect(kv.map.get(INDEX)).toBe(indexBefore)
   })
 
+  it('对不存在的场景 save / rename / checkpoint / setCurrentSceneId → 抛错；setCurrentSceneId(null) 可以', () => {
+    const { storage } = make()
+    expect(() => storage.save('nope', m1())).toThrow(/nope/)
+    expect(() => storage.rename('nope', 'x')).toThrow(/nope/)
+    expect(() => storage.checkpoint('nope', 'x', m1())).toThrow(/nope/)
+    expect(() => storage.setCurrentSceneId('nope')).toThrow(/nope/)
+    expect(() => storage.setCurrentSceneId(null)).not.toThrow()
+  })
+})
+
+describe('索引是缓存，文档才是真相', () => {
   it('索引坏了 / 丢了 → 从 scene:* 键重建，一个场景都不丢', () => {
     const { kv, storage } = make()
     const a = storage.create('a', m1())
     const b = storage.create('b', m1())
 
-    kv.setItem('r3f-arch:index', '{坏了')
+    kv.setItem(INDEX, '{坏了')
     expect(storage.list().map((s) => s.id).sort()).toEqual([a.id, b.id].sort())
 
-    kv.removeItem('r3f-arch:index')
+    kv.removeItem(INDEX)
     const rebuilt = storage.list()
     expect(rebuilt).toHaveLength(2)
     expect(rebuilt[0]!.nodeCount).toBe(Object.keys(m1().nodes).length)
+  })
+
+  it('索引完好，但有一份它没登记的文档（上次写完文档、没写成索引）→ 也列出来', () => {
+    const { kv, storage } = make()
+    const a = storage.create('a', m1())
+    kv.setItem(sceneKey('orphan'), JSON.stringify(M1_FLAT_SCENE))
+
+    expect(storage.list().map((s) => s.id).sort()).toEqual([a.id, 'orphan'].sort())
+  })
+
+  it('索引登记了、但文档已经不在 → 不列出来，指向它的当前场景也清掉', () => {
+    const { kv, storage } = make()
+    const a = storage.create('a', m1())
+    storage.setCurrentSceneId(a.id)
+    kv.removeItem(sceneKey(a.id))
+
+    expect(storage.list()).toEqual([])
+    expect(storage.currentSceneId()).toBeNull()
+  })
+
+  it('索引里有一条缺字段的记录 → list 不崩，那个场景从文档重建', () => {
+    const { kv, storage } = make()
+    const a = storage.create('a', m1())
+    const index = JSON.parse(kv.getItem(INDEX)!)
+    delete index.scenes[0].updatedAt
+    kv.setItem(INDEX, JSON.stringify(index))
+
+    expect(() => storage.list()).not.toThrow()
+    expect(storage.list()).toMatchObject([{ id: a.id, name: a.id }])
   })
 })
 ```
 
 ### 08 · `src/core/store/use-scene.ts` · 改两处 —— 写入边界（B4，Q1）
 
-**08a · 在 `mergeNodePath` 下面新增 `validateMerged`**。`mergeNodePath` 本身不动，它现在长这样：
+**08a · 在 `mergeNodePath` 下面新增 `validateMerged`。** `mergeNodePath` 本身不动，它现在长这样：
 
 ```ts
 function mergeNodePath(prev: AnyNode, patch: Partial<AnyNode>): AnyNode {
@@ -1247,7 +1530,8 @@ function validateMerged(prev: AnyNode, merged: AnyNode): AnyNode {
         throw new Error(`[scene] updateNode: ${prev.id} 改完不是合法的 ${prev.type}：${result.error.issues[0]?.message ?? ''}`)
     }
     // 别的类型的字段：zod 会静默剥掉，不丢数据，但会把调用方的错藏起来。
-    const stripped = Object.keys(merged).filter((k) => !(k in result.data))
+    // 用 hasOwn 不用 in：constructor 之类的名字在原型链上，in 会漏判。
+    const stripped = Object.keys(merged).filter((k) => !Object.hasOwn(result.data, k))
     if (stripped.length > 0) {
         throw new Error(`[scene] updateNode: ${prev.type} 没有字段 ${stripped.join(', ')}`)
     }
@@ -1255,13 +1539,9 @@ function validateMerged(prev: AnyNode, merged: AnyNode): AnyNode {
 }
 ```
 
-**08b · `updateNode` 开头**：先校验、再写。改前：
+**08b · `updateNode` 开头：先校验、再写。** 把这一段：
 
 ```ts
-            updateNode: (id, patch) => {
-                if ('parentId' in patch || 'children' in patch) {
-                    throw new Error('[scene] updateNode: parentId / children 不可 patch')
-                }
                 set((s) => {
                     const prev = s.nodes[id]
                     if (!prev) return s
@@ -1269,13 +1549,9 @@ function validateMerged(prev: AnyNode, merged: AnyNode): AnyNode {
                 })
 ```
 
-改后：
+换成：
 
 ```ts
-            updateNode: (id, patch) => {
-                if ('parentId' in patch || 'children' in patch) {
-                    throw new Error('[scene] updateNode: parentId / children 不可 patch')
-                }
                 const prev = get().nodes[id]
                 if (!prev) return
                 // 校验通过才写：抛错时 store 一个字节都没动。
@@ -1285,7 +1561,7 @@ function validateMerged(prev: AnyNode, merged: AnyNode): AnyNode {
 
 `updateNode` 里 `const next = get().nodes[id]` 往下的脏传播不变。
 
-**08c · `src/core/store/use-scene.test.ts` · 末尾追加 6 条**（复用文件里已有的 `reset` / `addWall` / `nodeAt`；`addLevel` 原来只定义在另一个 `describe` 里，所以这里自带一个）：
+**08c · `src/core/store/use-scene.test.ts` 末尾追加**（复用文件里已有的 `reset` / `addWall` / `nodeAt`；`addLevel` 原来只定义在另一个 `describe` 里，所以这里自带一个）：
 
 ```ts
 describe('updateNode 写入边界（M9 · B4）', () => {
@@ -1299,6 +1575,11 @@ describe('updateNode 写入边界（M9 · B4）', () => {
     const before = useScene.getState().nodes
     expect(() => useScene.getState().updateNode(id, { polygon: [[0, 0], [1, 0], [1, 1]] })).toThrow(/polygon/)
     expect(useScene.getState().nodes).toBe(before)
+  })
+
+  it('原型链上的名字（constructor）也算多余字段', () => {
+    const id = addWall()
+    expect(() => useScene.getState().updateNode(id, { constructor: 1 } as never)).toThrow(/constructor/)
   })
 
   it('值不合法（负厚度）→ 抛错', () => {
@@ -1340,10 +1621,10 @@ describe('updateNode 写入边界（M9 · B4）', () => {
 
 | 怎么试 | 应该 |
 |---|---|
-| `pnpm verify` | **20 文件 / 252 用例，全绿** |
+| `pnpm verify` | **全绿：20 passed (20) · 265 passed (265)** |
 | 打开页面，画几堵墙 | **和敲之前完全一样**。刷新仍然清空——`main.tsx` 还没接存档，那是 app 批的事 |
-| 拖一堵墙、拖一个端点球，松手 | 行为不变，**控制台没有 `[scene] updateNode` 报错**。这两处（`move-tool.tsx:45`、`endpoint-handles.tsx:117`）只写 `start` / `end`，按代码推是合法的——**未在浏览器验证** |
-| 控制台里把某一层的层高改成 0（片段见下） | **抛错**：`[scene] updateNode: level_… 改完不是合法的 level：…`；画面不变 |
+| 拖一堵墙、拖一个端点球，松手 | 行为不变，**控制台没有 `[scene] updateNode` 报错**。`updateNode` 只有这两个调用点（`move-tool.tsx:45`、`endpoint-handles.tsx:117`），都只写 `start` / `end`，按代码推是合法的——**未在浏览器验证** |
+| 控制台把一层的层高改成 0（片段见下） | **抛错** `[scene] updateNode: level_… 改完不是合法的 level：…`，画面不变 |
 
 ```js
 // 浏览器控制台（Vite 开发服务器下）
@@ -1352,8 +1633,47 @@ const level = Object.values(useScene.getState().nodes).find((n) => n.type === 'l
 useScene.getState().updateNode(level.id, { height: 0 })   // 应该抛错
 ```
 
+### 变异测试（把实现故意改错，确认测试会红）
+
+| 改错成 | 结果 |
+|---|---|
+| v0→v1 不改楼板 0.05 | 3 failed | 262 passed (265) |
+| v0→v1 去掉「平」判据 | 1 failed | 264 passed (265) |
+| v0→v1 悄悄吞掉没 id / 重复 id 的节点 | 1 failed | 264 passed (265) |
+| v0→v1 层高不显式写 | 2 failed | 263 passed (265) |
+| v0→v1 不收养根下节点 | 7 failed | 258 passed (265) |
+| 按数值嗅探：所有版本都改 0.05 | 2 failed | 263 passed (265) |
+| normalize 让 parse 替缺 id 的节点发明 id | 3 failed | 262 passed (265) |
+| normalize 不重建 children | 7 failed | 258 passed (265) |
+| normalize 信任存档的 rootNodeIds | 1 failed | 264 passed (265) |
+| normalize 放过环 | 1 failed | 264 passed (265) |
+| normalize 放过缺父 | 2 failed | 263 passed (265) |
+| normalize 父被丢时子不跟着丢 | 3 failed | 262 passed (265) |
+| 信封：too-new 当成能读 | 2 failed | 263 passed (265) |
+| 信封：不认 v0 | 39 failed | 226 passed (265) |
+| 迁移链按数组下标找 | 1 failed | 264 passed (265) |
+| replaceScene 不清历史 | 2 failed | 263 passed (265) |
+| replaceScene 不换脏集 | 1 failed | 264 passed (265) |
+| 存储 不做降级保护 | 2 failed | 263 passed (265) |
+| 存储 降级保护只看索引 | 1 failed | 264 passed (265) |
+| 存储 save 先写索引后写文档 | 1 failed | 264 passed (265) |
+| 存储 孤儿文档不列出 | 4 failed | 261 passed (265) |
+| 存储 失效记录照列 | 2 failed | 263 passed (265) |
+| 存储 currentSceneId 不校验 | 2 failed | 263 passed (265) |
+| 存储 缺字段的记录不过滤 | 1 failed | 264 passed (265) |
+| 存储 删场景不按前缀删存档点 | 2 failed | 263 passed (265) |
+| 存储 修剪不删文档 | 1 failed | 264 passed (265) |
+| 存储 不检查场景存在 | 1 failed | 264 passed (265) |
+| B4 不查多余字段 | 2 failed | 263 passed (265) |
+| B4 用 in 不用 hasOwn | 1 failed | 264 passed (265) |
+| B4 值不合法也放行 | 2 failed | 263 passed (265) |
+| B4 不查 type / id | 1 failed | 264 passed (265) |
+| B4 完全不校验 | 5 failed | 260 passed (265) |
+
+**32 / 32 被抓**，跑完文件逐字节恢复（`restored: True`）。
+
 ### 下一步
 
 1. 敲完跑 `pnpm verify`，再 **`/review`**。
-2. **`/gate viewer`**：M9 的 viewer 层没有改动（§02 E：`NodeRenderer` 找不到节点返回 `null`，`GeometrySystem` 对不存在的脏 id 直接 `clearDirty`），这一关只确认「本层无改动、无自动护栏」。
-3. **`/gate app`** 之前，先定前置 B 的 **B2**（导入是新建场景还是覆盖）和 **B3**（要不要误删护栏）。app 批是：`autosave` · `local-storage-kv` · `use-persistence` · `scene-session` · `file-io` · 面板 · `app.tsx` / `main.tsx`。
+2. **`/gate viewer`**：M9 的 viewer 层没有改动（`NodeRenderer` 找不到节点返回 `null`，`GeometrySystem` 对不存在的脏 id 直接 `clearDirty`），这一关只确认「本层无改动」。
+3. **`/gate app`** 之前，先定前置 B 的 **B2**（导入是新建场景还是覆盖）和 **B3**（要不要误删护栏）。

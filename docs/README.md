@@ -37,7 +37,7 @@ M1–M9 的设计文档仍是 HTML，不转。
 | [m8-demo-issues.md](m8-demo-issues.md) | M8 演示暴露的 9 个问题：现象 → 调查 → 方案 → 到期 | 修一条改一条 |
 | [handoff-m9.md](handoff-m9.md) | M9 开新会话的交接（刻意写短） | 开 M9 前 |
 | [m9-persistence.html](m9-persistence.html) | M9 存档、导入导出、迁移（前置 A 偏差 · 前置 B 待拍板 · 前置 C M8 收尾代码 · §00–§06） | 🔨 |
-| [m9-code.md](m9-code.md) | M9 §07 全码，按 core → viewer → app 分批放出（core 批 2026-09-17，代码块由脚本从跑绿的拷贝导出） | 每过一道闸门追加 |
+| [m9-code.md](m9-code.md) | M9 §07 全码，按 core → viewer → app 分批放出（core 批修订版 2026-09-17：按敲的顺序逐步实测，代码块由脚本从跑过的拷贝导出） | 每过一道闸门追加 |
 | [_template-m.md](_template-m.md) | M10 起设计文档的 Markdown 模板 | 结构变化时 |
 | m<N>-code.md | M9 起的 §07 全码，按层追加，每层过 `/gate` 才放 | 每道闸门后 |
 | WHY.md | R0 产出：app / core / viewer 为什么能跑，用户写草稿 | R0 |
