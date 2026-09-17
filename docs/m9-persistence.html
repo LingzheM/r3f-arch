@@ -898,6 +898,12 @@ SCENE_MIGRATIONS = [v0ToV1]                                      <span class="cm
     <li><strong>收进 Site → Building → Level 0：</strong>直接调 <code>migrateToLevels</code>（D27）——它只读 <code>type</code>、按 id 查存在、展开复制，所以 raw 节点过得去。
       这是它从 M8 起等着的那个位置。根用 <code>deriveRootIds</code> 按 <code>parentId</code> 推，<strong>不信存档里的 <code>rootNodeIds</code></strong>。</li>
   </ol>
+  <div class="trap">
+    <span class="trap-label">更正（2026-09-17，工作约定第 6 条）：v0 → v1 不再调 migrateToLevels</span>
+    <p>上面第 2 条原本「直接调 <code>migrateToLevels</code>」，§04 第 03 步的 hint 也是这么写的。<strong>不对</strong>：<code>migrateToLevels</code> 内部用的是<strong>今天的</strong> <code>SiteNode.parse</code> / <code>LevelNode.parse</code> / <code>DEFAULT_LEVEL_HEIGHT</code>。等 v2 出现，v0 文档会被直接造成 v2 的样子，再被 v1 → v2 改一遍。</p>
+    <p style="margin-bottom:0">改成：<strong>容器的 v1 形状冻结在迁移里</strong>（字面量，层高 2.5 显式写着），一条测试钉住键集合。原则写进 <strong>D30</strong>「迁移是历史记录，必须冻结」；同一原则也管语料（<code>__fixtures__/</code>）。另外，没 id / 重复 id 的节点不在迁移里跳过，原样交给 normalize 丢掉并报告。</p>
+  </div>
+
   <p><strong>「有容器但没版本号」怎么办？</strong>——比如 M8 期间从控制台 <code>JSON.stringify</code> 出来的场景。它仍按 v0 读，但<strong>不再包一层、也不改楼板</strong>：
     「平」才是 M8 之前的标志；有容器的场景里出现 0.05，只能是人设的。原型里有一条测试专门钉这个（「去掉『平』判据」这个变异体红 1 条）。</p>
   <p class="note"><strong>不迁的两件事，写下来别装作没想过：</strong>
