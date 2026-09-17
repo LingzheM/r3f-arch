@@ -756,7 +756,7 @@ useScene.getState().updateNode(levels.at(-1).id, { height: 1.0 })   <span class=
     <p style="margin-bottom:0"><code>mergeNodePath</code> 结尾的 <code>merged as AnyNode</code>（<code>use-scene.ts:53</code>）、
       <code>getEffectiveNode</code> 的 <code>{ ...node, ...override } as T</code>（<code>use-live-overrides.ts:50</code>）。
       <code>Partial&lt;AnyNode&gt;</code> 按联合分配，<strong><code>updateNode(wallId, { polygon: … })</code> 类型检查是通过的</strong>（原型测试里就这么写的，没有 cast）。
-      以前刷新就忘了；现在它会被自动保存写进磁盘，下次读档时整堵墙作为 invalid 被丢掉。</p>
+      以前刷新就忘了；现在它会被自动保存写进磁盘。<strong>（更正：跨类型字段读档时会被 zod 静默剥掉，不会丢墙；真正会丢数据的是值不合法的 patch，比如层高 0——读档时整层连同墙和门窗一起消失。见 §02 I 的更正框。）</strong></p>
   </div></div>
   <div class="step"><div class="step-n">4</div><div class="step-body">
     <div class="step-head"><p class="step-title">编辑器里存着指向场景的 id</p><span class="tag app">→ §02 J</span></div>
@@ -973,6 +973,12 @@ r3f-arch:checkpoint:&lt;cpId&gt;     SceneDocument</code></pre>
     因为<strong>从 M9 起，store 里的东西会被写进磁盘</strong>。<code>Partial&lt;AnyNode&gt;</code> 按联合分配——
     <code>updateNode(wallId, { polygon: … })</code> <strong>类型检查通过</strong>，<code>mergeNodePath</code> 的 <code>as AnyNode</code> 把它放进 store；
     以前刷新就没了，现在它落盘，下次读档整堵墙作为 invalid 被丢掉。</p>
+  <div class="trap">
+    <span class="trap-label">更正（2026-09-16，工作约定第 6 条，沙箱探针实测）：上面这个例子写错了</span>
+    <p>原文说「<code>updateNode(墙, { polygon })</code> 落盘后，下次读档整堵墙作为 invalid 被丢掉」。<strong>不对。</strong><code>z.object</code> 默认<strong>剥掉不认识的键</strong>，<code>parse</code> 成功，<code>polygon</code> 被静默去掉，墙完好无损（探针：<code>parseSuccess = true</code>，<code>polygonKept = false</code>）。</p>
+    <p>真正会在读档时丢数据的是<strong>值不合法</strong>的 patch。最现实的例子就在前置 C · C5 的演示步骤里：控制台 <code>updateNode(屋顶层id, { height: 0 })</code>（本想写 1.0）。<code>LevelNode.height</code> 是 <code>.positive()</code>，今天的 <code>updateNode</code> 照样把它放进 store，画面上那一层只是变扁；自动保存把它写盘；下次读档，<strong>层 <code>invalid</code> → 这一层的墙和楼板 <code>missing-parent</code> → 墙上的门窗 <code>ancestor-dropped</code> → 整层消失</strong>，只剩 site 和 building（探针对 M7 语料实测）。</p>
+    <p style="margin-bottom:0">所以写入边界的两个检查，理由要分开写：<code>safeParse</code> 挡的是<strong>「会让读档丢掉整层」的非法值</strong>（§04 第 08 步的「负厚度」测试就是这一类）；「parse 剥掉了哪些键」挡的是<strong>「调用方以为自己在改别的类型」</strong>——它不丢数据，但静默剥掉会把一个调用方的 bug 藏起来。两个检查都保留，决定不变，改的是理由。</p>
+  </div>
   <p><strong>还法（前置 B4）：在 <code>updateNode</code> 里校验合并结果</strong>——先查 <code>type</code> / <code>id</code> 没变，再 <code>AnyNode.safeParse</code>，
     再查「parse 剥掉了哪些键」（剥掉的就是别的类型的字段），<strong>校验通过才 <code>set</code></strong>。
     <code>addNode</code> 早就在 parse（<code>use-scene.ts:65</code>），这一步只是让两个写入口对齐。</p>

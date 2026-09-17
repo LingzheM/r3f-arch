@@ -2,17 +2,17 @@
 
 > 每个 M 验收通过后更新本文件。新对话由 `/kickoff` 读它（工作约定在 `../CLAUDE.md`）。
 
-**最后更新**：2026-09-16
-**当前对话**：方法复盘（从 `meguri` 根目录启动；下次从 `r3f-arch` 启动，`CLAUDE.md` 才会加载）
-**当前里程碑**：**M8 多楼层 —— ✅**；**M9 存档 —— 🔨 方案已出（`m9-persistence.html` §00–§06），前置 C 待敲**。
-`pnpm verify` **全绿（15 文件 / 200 用例）**，2026-09-16 实测。
+**最后更新**：2026-09-17
+**当前对话**：M9 `/gate core`（从 `r3f-arch` 启动）
+**当前里程碑**：**M9 存档 —— `/gate core` ✅ 通过（2026-09-16），core 批 §07 已放出（`m9-code.md`），待敲**。
+`pnpm verify`：**17 文件 / 211 用例，1 条红**（2026-09-17 实测）——红的是 `gate-core.test.ts`，闸门第 2 步故意写的红测试，敲完 core 批转绿。core 批敲完应为 **20 文件 / 252 用例**。
 **方法 v2 已落地（D29）**：`../CLAUDE.md` + `../.claude/skills/{kickoff,gate,review,recite,handoff}` + `_template-m.md`。
 
 **下一站（按顺序）**：
-1. 提交 docs（`m9-persistence.html` 仍未跟踪；DECISIONS / STATE / README / m8-demo-issues 有未提交改动）。
-2. **R0**：`/recite` 复盘 M1–M8，产出 `WHY.md`。用户先写草稿，助手只标错和漏。
-3. **M8 前置 C** 按新流程：`/gate app`（批 J 的 10 条测试 + P4 `sideFromHit` 的 4 条先红）→ 敲 → `/review` → 浏览器看 P1 / P5。敲完应为 16 文件 / 214 用例。
-4. **M9 本体**：§07 写进 `m9-code.md`，core → viewer → app 三道闸门。
+1. 敲 `m9-code.md` 的 **core 批** → `pnpm verify`（20 / 252）→ `/review`。
+2. `/gate viewer`（M9 的 viewer 层无改动，只确认）→ 先定前置 **B2 / B3** → `/gate app`。
+3. **M8 前置 C 的尾巴**：P4 `sideFromHit` 的 4 条测试没敲（D18）；`wall-tool.tsx` 的 P5 没敲；P1 / P5 / C6 待浏览器看；P2 待复现。
+4. **R0**（`/recite` M1–M8 → `WHY.md`）尚未开始。原计划排在 M9 之前，2026-09-16 用户选择先做 M9 core。
 
 ---
 
@@ -27,13 +27,30 @@
 | M5 | 节点注册表 | ✅ 代码在 `src/`（`abda947`→`7a822e4`）；**M6 是它的验收，已通过**，见下 |
 | M6 | 楼板、天花、柱 | ✅ 验收通过（`0b4b879`→`a5e4ee6`）；`verify` 全绿 + §05 肉眼验收走完 |
 | M7 | 门窗与开洞 | ✅ 验收通过 —— §05 的 10 条肉眼验收，2026-09-15 用户确认走完 |
-| M8 | 多楼层 | ✅ 肉眼验收走完（批 E/G/H/I）；⚠ 批 J 的 10 条测试未敲、演示问题 P1/P2/P4/P5 未修 → M9 前置 C。见下 |
-| M9 | 存档、导入导出、迁移 | 🔨 方案已出（`m9-persistence.html` §00–§06），前置 C 待敲 |
+| M8 | 多楼层 | ✅ 肉眼验收走完（批 E/G/H/I）；批 J 10 条测试 ✅（C1）；P1 / P4 已修（`e4b1de3`），⚠ P4 测试未敲、P5 只敲了一半、P2 待复现 |
+| M9 | 存档、导入导出、迁移 | 🔨 `/gate core` ✅ → core 批已放出（`m9-code.md`）待敲；viewer / app 两道闸门未开始 |
 | M10 | 屋顶 | ⬜ |
 | M11 | 楼梯 | ⬜ |
 | M12 | UI 外壳 | ⬜ |
 | M13 | 属性面板与大纲 | ⬜ |
 | M14 | 材质与上色 | ⬜ |
+
+---
+
+## M9 进行中（2026-09-17）
+
+### `/gate core` 记下的命名 —— 后续文档跟这个走
+
+| 设计文档（`m9-persistence.html`） | 实际 | 出处 |
+|---|---|---|
+| 目录 `src/core/persistence/` | **`src/core/store/persistence/`** | 用户在闸门第 2 步建的目录 |
+| `readSceneDocument` | **`loadSceneDocument`** | 用户的桩 `gate-core.ts` |
+| —— | 闸门红测试 **`src/core/store/persistence/gate-core.test.ts`**（1 条：v0 楼板 0.05 → 0） | 用户写的；敲 core 批第 05 步时改两处，桩 `gate-core.ts` 删掉 |
+| 用户桩的返回 `{ snapshot, report }`、失败抛 | 设计的联合类型 `{ ok, … }`，`report` 带原因 | 沙箱实测：抛异常时 `not-a-scene` 说不清原因，见 `m9-code.md` 开头 |
+
+**前置 B**：core 批按推荐实现了 B1 / B4 / B5，**用户尚未正式拍板**，未进 `DECISIONS.md`。B2 / B3 在 `/gate app` 之前要定。
+
+**设计文档两处更正**（已在 HTML 里加更正框）：§07 分批改为 core → viewer → app（D29）；§02 I 的例子写错了——跨类型字段读档时被 zod 静默剥掉，真正丢数据的是非法值（层高 0 → 整层连同墙和门窗消失，沙箱探针实测）。
 
 ---
 
@@ -45,9 +62,9 @@
 
 | 差 | 结论 |
 |---|---|
-| **没有 `core/store/migrate-to-levels.test.ts`** | 批 J 新建文件的那 **10 条**没敲。补在 `m9-persistence.html` 前置 C · C1 |
+| ~~没有 `core/store/migrate-to-levels.test.ts`~~ | ✅ **2026-09-17 已敲**（前置 C · C1，10 条全过） |
 | 批 J 追加进 `level-action.test.ts` 的 **5 条已经在**（`:169-221`） | `handoff-m9.md` ② 说「15 条全没敲、另外多出 5 条」**是误判**：多出来的 5 条就是批 J 的这 5 条（批 H 13 + 5 = 18，实测 18） |
-| 文件名是 `level-action.test.ts`，文档写的是 `level-actions.test.ts` | 只是命名，无害。被测模块是 `level-actions.ts` |
+| ~~文件名是 `level-action.test.ts`~~ | ✅ 用户在 `e4b1de3` 改名成 `level-actions.test.ts`，和文档一致了 |
 | `ensureScaffold` 的报错信息缩短成 `'[level] ensureScaffold'` | 无害 |
 | **`wall-tool.tsx:64` 的 `onPointerMove` 没传 `baseY`**（批 H 原文 `m8-levels.html:4438` 传了 `readCurrentLevel().baseY`） | **读代码推出来的，没观察过**：顶视图（正交、竖直射线）下没有差别；3D 透视下在二层以上画墙，绿线终点会偏离光标（提交用的 `onPointerUp` 是对的）。**请在 3D 视图的二层画墙看一眼再定**，前置 C · C6 |
 
@@ -261,8 +278,11 @@ M3 §05 第 6 条「选择工具下点墙 → 选中并高亮」当时不可能�
 | M6 的纯函数（`polygon-2d` 6 / `polygon-draft` 9 / `node-registry` 5） | ✅ 20 用例 |
 | M7 的纯函数（`wall-openings` 19 / `use-scene` 11 / `opening-placement` 14） | ✅ 44 用例 |
 | M8（`storey` 24 / `level-display` 22 / `level-action` 18 / `current-level` 12 / `sibling-groups` 11 / `register` 5 / `storey-geometry` 4 / `node-registry` +3 / `use-scene` +6） | ✅ 105 用例 |
-| **合计** | ✅ **15 文件 / 200 用例，全绿**（2026-09-15） |
-| 批 J `migrate-to-levels.test.ts` 10 条 + P4 `sideFromHit` 4 条 | ⬜ 在 `m9-persistence.html` 前置 C，敲完应为 16 文件 / 214 |
+| 批 J `migrate-to-levels.test.ts` | ✅ 10 用例（2026-09-17） |
+| M9 闸门红测试 `gate-core.test.ts` | 🔴 1 用例，故意红，敲完 core 批转绿 |
+| **合计** | **17 文件 / 211 用例，1 条红**（2026-09-17） |
+| P4 `sideFromHit` 4 条 | ⬜ 前置 C · C3 给了，未敲（D18） |
+| M9 core 批（`m9-code.md`） | ⬜ 已放出：+3 文件 / +41 用例（加载 24 · 存储 8 · `replaceScene` 3 · `use-scene` +6），敲完 **20 / 252** |
 | M4 的纯函数（`wall.test` / `history-control.test` / `wall-adjacency.test` / `snap-2d.test`） | ⬜ `m4-drag.html` §07 给了全码（64 用例），**一个都没敲**。不阻塞 M7 |
 | 真实功能操作（建墙→拖→撤销→删的端到端） | ⬜ `m4-drag.html` §09 给了 7 个文件 / 85 用例，待敲 |
 | R3F 渲染 / 指针 / 键盘 | ❌ 无环境，靠跑起来看（D11 明确接受）。**D16 要求交付时明写"未验证"** |

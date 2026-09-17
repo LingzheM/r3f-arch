@@ -37,10 +37,11 @@ M1–M9 的设计文档仍是 HTML，不转。
 | [m8-demo-issues.md](m8-demo-issues.md) | M8 演示暴露的 9 个问题：现象 → 调查 → 方案 → 到期 | 修一条改一条 |
 | [handoff-m9.md](handoff-m9.md) | M9 开新会话的交接（刻意写短） | 开 M9 前 |
 | [m9-persistence.html](m9-persistence.html) | M9 存档、导入导出、迁移（前置 A 偏差 · 前置 B 待拍板 · 前置 C M8 收尾代码 · §00–§06） | 🔨 |
+| [m9-code.md](m9-code.md) | M9 §07 全码，按 core → viewer → app 分批放出（core 批 2026-09-17，代码块由脚本从跑绿的拷贝导出） | 每过一道闸门追加 |
 | [_template-m.md](_template-m.md) | M10 起设计文档的 Markdown 模板 | 结构变化时 |
 | m<N>-code.md | M9 起的 §07 全码，按层追加，每层过 `/gate` 才放 | 每道闸门后 |
 | WHY.md | R0 产出：app / core / viewer 为什么能跑，用户写草稿 | R0 |
-| LEARNING.md | `/recite` 时画错的地方 | 每次 recite |
+| [LEARNING.md](LEARNING.md) | `/gate` 讲回来、`/recite` 时画错的地方，每条带正确版本 | 每次 gate / recite |
 | [roadmap.html](roadmap.html) | 路线图可读版（权威版是 ROADMAP.md） | 范围变化时 |
 | [deploy-and-ci.md](deploy-and-ci.md) | GitHub Pages 部署与 Actions CI 调查 | — |
 
