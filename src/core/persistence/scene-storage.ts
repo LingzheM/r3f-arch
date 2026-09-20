@@ -68,12 +68,12 @@ export function createSceneStorage(
   options: {
     now?: () => string
     newId?: (kind: 'scene' | 'checkpoint') => string
-    maxCheckPointsPerScene?: number
+    maxCheckpointsPerScene?: number
   } = {},
 ) {
   const now = options.now ?? (() => new Date().toISOString())
   const newId = options.newId ?? ((kind: 'scene' | 'checkpoint') => generateId(kind))
-  const maxCheckpoints = options.maxCheckPointsPerScene ?? 10
+  const maxCheckpoints = options.maxCheckpointsPerScene ?? 10
 
   const readStoredIndex = (): Partial<SceneIndex> => {
     const raw = kv.getItem(INDEX_KEY)

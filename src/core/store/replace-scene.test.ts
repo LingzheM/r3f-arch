@@ -1,6 +1,9 @@
+import { beforeEach, describe, expect, it } from "vitest"
 import { M1_FLAT_SCENE } from "../persistence/__fixtures__/legacy-scenes"
 import { loadSceneDocument } from "../persistence/load-scene-document"
+import type { AnyNodeId } from "../schema/types"
 import { resetSceneHistoryPause } from "./history-control"
+import { replaceScene } from "./replace-scene"
 import { useScene } from "./use-scene"
 
 const reset = () => {

@@ -1,4 +1,4 @@
-import { v0Tov1 } from "./migrations/v0-to-v1"
+import { v0ToV1 } from "./migrations/v0-to-v1"
 import { CURRENT_SCENE_VERSION, type RawSceneDocument } from "./scene-document"
 
 export type SceneMigration = {
@@ -7,7 +7,7 @@ export type SceneMigration = {
   migrate: (doc: RawSceneDocument) => Omit<RawSceneDocument, 'version'>
 }
 
-export const SCENE_MIGRATIONS: readonly SceneMigration[] = [v0Tov1]
+export const SCENE_MIGRATIONS: readonly SceneMigration[] = [v0ToV1]
 
 
 export class SceneMigrationError extends Error {

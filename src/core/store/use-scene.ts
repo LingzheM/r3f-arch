@@ -106,12 +106,10 @@ export const useScene = create<SceneState>()(
                 if ('parentId' in patch || 'children' in patch) {
                     throw new Error('[scene] updateNode: parentId / children 不可 patch')
                 }
-                set((s) => {
-                    const prev = get().nodes[id]
-                    if (!prev) return
-                    const validated = validateMerged(prev, mergeNodePath(prev, patch))
-                    set((s) => ({ nodes: { ...s.nodes, [id]: validated } }))
-                })
+                const prev = get().nodes[id]
+                if (!prev) return
+                const validated = validateMerged(prev, mergeNodePath(prev, patch))
+                set((s) => ({ nodes: { ...s.nodes, [id]: validated } }))
 
                 const next = get().nodes[id]
                 if (!next) return
