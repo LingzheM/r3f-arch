@@ -53,6 +53,22 @@ function mergeNodePath(prev: AnyNode, patch: Partial<AnyNode>): AnyNode {
     return merged as AnyNode
 }
 
+function validateMerged(prev: AnyNode, merged: AnyNode): AnyNode {
+    if (merged.type !== prev.type || merged.id !== prev.id) {
+        throw new Error(`[scene updateNode: ${prev.id} 不能改 type / id]`)
+    }
+    const result = AnyNode.safeParse(merged)
+    if (!result.success) {
+        throw new Error(`[scene] updateNode: ${prev.id} 改完不是合法的 ${prev.type}: ${result.error.issues[0]?.message ?? ''}`)
+    }
+
+    const stripped = Object.keys(merged).filter((k) => !Object.hasOwn(result.data, k))
+    if (stripped.length > 0) {
+        throw new Error(`[scene] ${prev.type} 没有字段 ${stripped.join(', ')}`)
+    }
+    return result.data
+}
+
 export const useScene = create<SceneState>()(
     temporal(
         (set, get) => ({
@@ -91,9 +107,10 @@ export const useScene = create<SceneState>()(
                     throw new Error('[scene] updateNode: parentId / children 不可 patch')
                 }
                 set((s) => {
-                    const prev = s.nodes[id]
-                    if (!prev) return s
-                    return { nodes: { ...s.nodes, [id]: mergeNodePath(prev, patch) } }
+                    const prev = get().nodes[id]
+                    if (!prev) return
+                    const validated = validateMerged(prev, mergeNodePath(prev, patch))
+                    set((s) => ({ nodes: { ...s.nodes, [id]: validated } }))
                 })
 
                 const next = get().nodes[id]

@@ -1,5 +1,7 @@
 import { generateId } from "../schema/base"
-import { CURRENT_SCENE_VERSION } from "./scene-document"
+import type { SceneSnapshot } from "../store/history-control"
+import { parseSceneDocument, type SceneLoadResult } from "./load-scene-document"
+import { CURRENT_SCENE_VERSION, toSceneDocument } from "./scene-document"
 
 export type KeyValueStore = {
   getItem(key: string): string | null
@@ -125,4 +127,99 @@ export function createSceneStorage(
     const current = stored.currentSceneId ?? null
     return { scenes, checkpoints, currentSceneId: current !== null && sceneIds.has(current) ? current : null }
   }
+
+  const writeIndex = (index: SceneIndex) => kv.setItem(INDEX_KEY, JSON.stringify(index))
+
+  const writeDoc = (key: string, snapshot: SceneSnapshot) => kv.setItem(key, JSON.stringify(toSceneDocument(snapshot)))
+
+  const loadKey = (key: string): SceneLoadResult | null => {
+    const text = kv.getItem(key)
+    return text === null ? null : parseSceneDocument(text)
+  }
+
+  const requireScene = (index: SceneIndex, sceneId: string): SceneMeta => {
+    const meta = index.scenes.find((s) => s.id === sceneId)
+    if (!meta) throw new Error(`场景 ${sceneId} 不存在`)
+    return meta
+  }
+
+  return {
+    list: (): SceneMeta[] => [...readIndex().scenes].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+
+    create(name: string, snapshot: SceneSnapshot): SceneMeta {
+      const index = readIndex()
+      const t = now()
+      const meta: SceneMeta = {
+        id: newId('scene'),
+        name,
+        createdAt: t,
+        updatedAt: t,
+        nodeCount: Object.keys(snapshot.nodes).length,
+        docVersion: CURRENT_SCENE_VERSION,
+      }
+      writeDoc(sceneKey(meta.id), snapshot)
+      writeIndex({ ...index, scenes: [...index.scenes, meta] })
+      return meta
+    },
+
+    save(sceneId: string, snapshot: SceneSnapshot): SceneMeta {
+      const index = readIndex()
+      const prev = requireScene(index, sceneId)
+      const stored = Math.max(prev.docVersion, peekDocument(kv.getItem(sceneKey(sceneId))).docVersion)
+      if (stored > CURRENT_SCENE_VERSION) throw new SceneTooNewError(sceneId, stored)
+
+      writeDoc(sceneKey(sceneId), snapshot)
+      const meta: SceneMeta = {
+        ...prev,
+        updatedAt: now(),
+        nodeCount: Object.keys(snapshot.nodes).length,
+        docVersion: CURRENT_SCENE_VERSION,
+      }
+      writeIndex({ ...index, scenes: index.scenes.map((s) => (s.id === sceneId ? meta : s)) })
+      return meta
+    },
+
+    load: (sceneId: string): SceneLoadResult | null => loadKey(sceneKey(sceneId)),
+
+    remove(sceneId: string): void {
+      kv.removeItem(sceneKey(sceneId))
+      const prefix = `${CHECKPOINT_PREFIX}${sceneId}:`
+      for (const key of kv.keys()) if (key.startsWith(prefix)) kv.removeItem(key)
+      writeIndex(readIndex())
+    },
+
+    rename(sceneId: string, name: string): void {
+      const index = readIndex()
+      requireScene(index, sceneId)
+      writeIndex({ ...index, scenes: index.scenes.map((s) => (s.id === sceneId ? { ...s, name } : s)) })
+    },
+
+    checkpoint(sceneId: string, label: string, snapshot: SceneSnapshot): CheckpointMeta {
+      const index = readIndex()
+      requireScene(index, sceneId)
+      const meta: CheckpointMeta = { id: newId('checkpoint'), sceneId, label, createdAt: now() }
+      writeDoc(checkpointKey(sceneId, meta.id), snapshot)
+
+      const mine = [...index.checkpoints.filter((c) => c.sceneId === sceneId), meta]
+      const doomed = new Set(mine.slice(0, Math.max(0, mine.length - maxCheckpoints)))
+      for (const c of doomed) kv.removeItem(checkpointKey(c.sceneId, c.id))
+      writeIndex({ ...index, checkpoints: [...index.checkpoints, meta].filter((c) => !doomed.has(c)) })
+      return meta
+    },
+
+    listCheckpoints: (sceneId: string): CheckpointMeta[] =>
+      readIndex().checkpoints.filter((c) => c.sceneId === sceneId),
+
+    loadCheckpoint: (sceneId: string, checkpointId: string): SceneLoadResult | null => loadKey(checkpointKey(sceneId, checkpointId)),
+
+    currentSceneId: (): string | null => readIndex().currentSceneId,
+
+    setCurrentSceneId(sceneId: string | null): void {
+      const index = readIndex()
+      if (sceneId !== null) requireScene(index, sceneId)
+      writeIndex({ ...index, currentSceneId: sceneId })
+    },
+  }
 }
+
+export type SceneStorage = ReturnType<typeof createSceneStorage>

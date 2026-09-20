@@ -233,3 +233,53 @@ describe('脏传播到孩子（M8 批 C）', () => {
     expect(useScene.getState().dirtyNodes.has(doorId)).toBe(false)
   })
 })
+
+describe('updateNode 写入边界（M9 · B4）', () => {
+  beforeEach(reset)
+
+  const addLevel = (height = 2.5) =>
+    useScene.getState().addNode({ type: 'level', level: 0, height })
+
+  it('别的类型的字段 → 抛错，场景不变（Partial<AnyNode> 在类型上放行了它）', () => {
+    const id = addWall()
+    const before = useScene.getState().nodes
+    expect(() => useScene.getState().updateNode(id, { polygon: [[0, 0], [1, 0], [1, 1]] })).toThrow(/polygon/)
+    expect(useScene.getState().nodes).toBe(before)
+  })
+
+  it('原型链上的名字（constructor）也算多余字段', () => {
+    const id = addWall()
+    expect(() => useScene.getState().updateNode(id, { constructor: 1 } as never)).toThrow(/constructor/)
+  })
+
+  it('值不合法（负厚度）→ 抛错', () => {
+    const id = addWall()
+    expect(() => useScene.getState().updateNode(id, { thickness: -1 })).toThrow()
+  })
+
+  it('层高 0 → 抛错，层原样不动（不挡的话，落盘后下次读档整层丢失）', () => {
+    const levelId = addLevel()
+    const before = nodeAt(levelId)
+    expect(() => useScene.getState().updateNode(levelId, { height: 0 })).toThrow()
+    expect(nodeAt(levelId)).toBe(before)
+  })
+
+  it('改 type → 抛错', () => {
+    const id = addWall()
+    expect(() => useScene.getState().updateNode(id, { type: 'slab' })).toThrow(/type/)
+  })
+
+  it('D23 回归：height: undefined 仍然删掉这个键，不被 parse 填回来', () => {
+    const id = addWall()
+    useScene.getState().updateNode(id, { height: 3 })
+    useScene.getState().updateNode(id, { height: undefined })
+    expect('height' in nodeAt(id)!).toBe(false)
+  })
+
+  it('合法 patch 照常：写进去、进历史', () => {
+    const id = addWall()
+    useScene.getState().updateNode(id, { end: [9, 0] })
+    expect(nodeAt(id)).toMatchObject({ end: [9, 0] })
+    expect(useScene.temporal.getState().pastStates).toHaveLength(2)
+  })
+})
