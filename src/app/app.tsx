@@ -17,10 +17,22 @@ import { resolveCurrentLevelId } from "./lib/level/current-level";
 import { addLevelOnTop, switchLevel } from "./lib/level/level-actions";
 import { LevelFrame } from "./components/level-frame";
 import { LevelVisibility } from "./components/level-visibility";
+import { ScenePanel } from "./components/scene-panel";
+import type { SceneStorage } from "../core/persistence/scene-storage";
+import { usePersistence } from "./store/use-persistence";
+import { checkpointNow } from "./persistence/scene-session";
 
 const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
 
-export function App() {
+const SAVE_LABEL: Record<string, string> = {
+    idle: '未保存',
+    pending: '未保存',
+    saved: '已保存',
+    error: '保存失败',
+    disabled: '本次不会保存',
+}
+
+export function App({ storage }: { storage: SceneStorage }) {
     const viewMode = useEditor((s) => s.viewMode)
     const activeTool = useEditor((s) => s.activeTool)
     const selectId = useEditor((s) => s.selectId)
@@ -34,10 +46,20 @@ export function App() {
 
     const inputDragging = useViewer((s) => s.inputDragging)
 
+    const saveStatus = usePersistence((s) => s.saveStatus)
+    const lastError = usePersistence((s) => s.lastError)
+
     useHistoryShortcuts()
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement | null
+            if (target !== null && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault()
+                checkpointNow(storage)
+                return
+            }
             if (e.key === 'Tab') {
                 e.preventDefault()
                 useEditor.getState().toggleViewMode()
@@ -55,7 +77,7 @@ export function App() {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [])
+    }, [storage])
 
 
     const isPlan = viewMode === 'plan'
@@ -94,8 +116,8 @@ export function App() {
                 &nbsp;|&nbsp; W 墙 · F 楼板 · G 天花 · C 柱（Shift=方） · V 选 · Tab 视图
                 &nbsp;|&nbsp; 多边形：点回起点 或 Enter 闭合 · Esc 取消
                 &nbsp;|&nbsp; 拖墙移动 · 拖端点球 · Del 删 · Ctrl+Z 撤销
-                &nbsp;|&nbsp; [ ] 切层 · L 顶上加一层
-            </div>
+                &nbsp;|&nbsp; [ ] 切层 · L 顶上加一层 · Ctrl+S 存档点
+                &nbsp;|&nbsp; {SAVE_LABEL[saveStatus]}{lastError === null ? '' : ` · ${lastError}`}            </div>
         </div>
     )
 }
