@@ -2,17 +2,22 @@
 
 > 每个 M 验收通过后更新本文件。新对话由 `/kickoff` 读它（工作约定在 `../CLAUDE.md`）。
 
-**最后更新**：2026-09-17
-**当前对话**：M9 `/gate core`（从 `r3f-arch` 启动）
-**当前里程碑**：**M9 存档 —— `/gate core` ✅ 通过（2026-09-16），core 批 §07 已放出（`m9-code.md` 修订版，2026-09-17），待敲**。
-`pnpm verify`：**红在 `check-types`**（2026-09-17 实测）——桩 `gate-core.ts` 的参数 `raw` 没被用到（`noUnusedParameters`），所以测试根本没跑到；`vitest` 单独跑是 17 文件 / 211，1 条红（闸门红测试，故意的）。core 批第 00 步修掉它；敲完应为 **20 文件 / 265 用例**。
+**最后更新**：2026-09-21
+**当前对话**：M9 `/gate app`（从 `r3f-arch` 启动）
+**当前里程碑**：**M9 存档 —— 三道闸门全过**。core 批已敲完；`/gate viewer` ✅（本层无改动，只确认）；`/gate app` ✅（2026-09-21，三问过）；**app 批 §07 已放出（`m9-code.md` 末尾），待敲**。
+`pnpm verify`：**2026-09-21 实测全绿，19 文件 / 264 用例**（入场时红在 `check-types` 的 4 处编译错，助手按约定 1 修掉，见下「偏差」）。
+文件/用例数比 core 批文档预告的 20 / 265 各少一个：闸门红测试 `gate-core.test.ts` 被并进了 `load-scene-document.test.ts:80`，桩文件删了。
+敲完 app 批应为 **21 文件 / 287 用例**。
+**注意**：用户 2026-09-21 已建 `src/app/persistence/autosave.ts`，里面只有签名没有实现 → `check-types` 现在红在 `TS2391`。敲到 app 批第 10 步就绿。
 **方法 v2 已落地（D29）**：`../CLAUDE.md` + `../.claude/skills/{kickoff,gate,review,recite,handoff}` + `_template-m.md`。
 
 **下一站（按顺序）**：
-1. 敲 `m9-code.md` 的 **core 批**（修订版，从第 00 步开始）→ `pnpm verify`（20 / 265）→ `/review`。
-2. `/gate viewer`（M9 的 viewer 层无改动，只确认）→ 先定前置 **B2 / B3** → `/gate app`。
-3. **M8 前置 C 的尾巴**：P4 `sideFromHit` 的 4 条测试没敲（D18）；`wall-tool.tsx` 的 P5 没敲；P1 / P5 / C6 待浏览器看；P2 待复现。
-4. **R0**（`/recite` M1–M8 → `WHY.md`）尚未开始。原计划排在 M9 之前，2026-09-16 用户选择先做 M9 core。
+1. 敲 `m9-code.md` 的 **app 批**（第 09 → 18 步，测试排在实现前面）→ `pnpm verify`（21 / 287）→ `/review`。
+2. **§05 B 的肉眼验收**（清单在 app 批末尾）。这一批 8 个文件里 4 个没有任何自动护栏（`file-io` / `scene-panel` / `app.tsx` / `main.tsx`），**M9 的验收压在这一步**。ROADMAP 给 M9 定的验收原文（M1 时代存档喂进去能加载、能迁移、能再存回）也在这张表里。
+3. `/recite` 收尾 M9。
+4. **M8 前置 C 的尾巴**：P4 `sideFromHit` 的 4 条测试没敲（D18）；`wall-tool.tsx` 的 P5 没敲；P1 / P5 / C6 待浏览器看；P2 待复现。
+5. **R0**（`/recite` M1–M8 → `WHY.md`）尚未开始。原计划排在 M9 之前，2026-09-16 用户选择先做 M9 core。
+6. **M10 已被顺延**（D31，2026-09-18）：新 M10 是「操作台、定位与外立面」（`m10-workbench.md`），原 M10 屋顶 → M11。**`ROADMAP.md` 还没按这个改**。
 
 ---
 
@@ -28,16 +33,40 @@
 | M6 | 楼板、天花、柱 | ✅ 验收通过（`0b4b879`→`a5e4ee6`）；`verify` 全绿 + §05 肉眼验收走完 |
 | M7 | 门窗与开洞 | ✅ 验收通过 —— §05 的 10 条肉眼验收，2026-09-15 用户确认走完 |
 | M8 | 多楼层 | ✅ 肉眼验收走完（批 E/G/H/I）；批 J 10 条测试 ✅（C1）；P1 / P4 已修（`e4b1de3`），⚠ P4 测试未敲、P5 只敲了一半、P2 待复现 |
-| M9 | 存档、导入导出、迁移 | 🔨 `/gate core` ✅ → core 批已放出（`m9-code.md`）待敲；viewer / app 两道闸门未开始 |
-| M10 | 屋顶 | ⬜ |
-| M11 | 楼梯 | ⬜ |
-| M12 | UI 外壳 | ⬜ |
-| M13 | 属性面板与大纲 | ⬜ |
-| M14 | 材质与上色 | ⬜ |
+| M9 | 存档、导入导出、迁移 | 🔨 三道闸门全过；core 批已敲完且绿；**app 批已放出待敲**；肉眼验收未走 |
+| M10 | **操作台、定位与外立面**（D31 新插入） | ⬜ 设计已写（`m10-workbench.md`），开工条件：M9 闸门全过 + `/recite` 做完 |
+| M11 | 屋顶（原 M10） | ⬜ |
+| M12 | 楼梯（原 M11） | ⬜ |
+| M13 | UI 外壳（原 M12） | ⬜ |
+| M14 | 属性面板与大纲（原 M13） | ⬜ |
+| M15 | 材质与上色（原 M14） | ⬜ |
+
+> ⚠ 顺延只改了本表。**债表和历史记录里的「M12 / M13 / M14」仍是旧编号**（= 现在的 M13 / M14 / M15），`ROADMAP.md` 同样没改。统一改名要专门走一趟，别顺手改一半。
 
 ---
 
-## M9 进行中（2026-09-17）
+## M9 进行中（2026-09-21）
+
+### 2026-09-21 这次会话做了什么
+
+**入场偏差（4 处编译错，助手按约定 1 修掉，逐条报告过）**：
+
+| 文件:行 | 改动 | 后果 |
+|---|---|---|
+| `core/persistence/migrations.ts:1,10` | `v0Tov1` → `v0ToV1` | 迁移链数组那一项是 `undefined`，`runSceneMigrations` 读 `m.from` 直接炸 → 20 条 `migration-failed` |
+| `core/persistence/scene-storage.ts:71,76` | `maxCheckPointsPerScene` → `maxCheckpointsPerScene` | 大写 P 只在实现里，测试和文档都是小写 |
+| `core/store/replace-scene.test.ts:1` | 补 3 行 import（`vitest` 四个名字 / `AnyNodeId` / `replaceScene`） | 整个 import 块少了一半 |
+| `core/store/use-scene.ts:109-114` | 删掉外层 `set((s) => { … })` 包裹 | 08b 的新代码被套进旧的 `set` 回调里，回调返回 `void` → **B4 那 7 条写入边界测试全红，浏览器里表现为 `updateNode` 静默不写** |
+
+**其它偏差**：`src/core/persistence/fixtures.ts` 是 0 字节空壳、已被 git 跟踪（第 00 步遗留，D30 定的语料在 `__fixtures__/legacy-scenes.ts`），**删不删待用户决定，助手没碰**。
+
+**`/gate viewer` ✅ 本层无改动**，三条依据：① `grep -rn "persistence|replaceScene|SceneDocument" src/viewer` 为空；② `geometry-system.tsx:35-38` 脏 id 找不到节点就 `clearDirty` 跳过，`replaceScene` 换掉整个 `nodes` 不会崩；③ **本层无自动护栏，验收靠肉眼**。
+
+**`/gate app` ✅ 三问过**（Q1 补了「宿主环境」和「磁盘指针 vs 活着的订阅」；Q2 补了「下次打开旧场景才发现」；**Q3 不完整 → Q3' 过**）。
+
+> **Q3 暴露的缺口值得记**：调用链画得出来，但 `autosave.stop()` / `startAutosave()` 那两端整个没出现 —— 而 Q2 刚刚把这两条顺序答得完全正确。**规矩记住了，它在调用链上的位置还没长进去。**app 批的红测试就是照这个缺口选的，写进 D33。
+
+**方案变更（约定 6）**：原计划「用户先自己写红测试，助手再放码」没走通 —— 用户缺的是这类测试的搭法（假 store / 假时钟 / `EventTarget`），不是断言。**改成测试和实现一起给、测试排在前面**，第 09 / 13 步敲完必须是红的，红的样子写在文档里。
 
 ### `/gate core` 记下的命名 —— 后续文档跟这个走
 
@@ -46,14 +75,22 @@
 | 目录 `src/core/persistence/` | **同设计**（2026-09-17 用户改回；闸门时建在 `src/core/store/persistence/`） | 用户决定 |
 | `persistence/fixtures.ts` | **`persistence/__fixtures__/legacy-scenes.ts`**，冻结、只给测试用 | 用户授权按推荐定；D30 |
 | `readSceneDocument` | **`loadSceneDocument`** | 用户的桩 `gate-core.ts` |
-| —— | 闸门红测试 **`src/core/persistence/gate-core.test.ts`**（1 条：v0 楼板 0.05 → 0） | 用户写的；core 批第 00 步从 `store/persistence/` 挪过来，第 05 步改两处、删桩 |
+| —— | 闸门红测试 `gate-core.test.ts` → **并进 `load-scene-document.test.ts:80`**，桩文件删了 | 用户敲 core 批时合的；2026-09-21 实测 |
 | 用户桩的返回 `{ snapshot, report }`、失败抛 | 设计的联合类型 `{ ok, … }`，`report` 带原因 | 沙箱实测：抛异常时 `not-a-scene` 说不清原因，见 `m9-code.md` 开头 |
+| （app 批）`app/persistence/autosave.ts` | **同设计**，用户 2026-09-21 先建了空壳 | 用户建的文件 |
+| §04 的 `localStorageKV(storage?)` 自带隐私模式兜底 | 拆成 `localStorageKV(storage)` · `memoryKV()` · `detectLocalStorage()`，退化决定权在 `main.tsx` | app 批差异表第 1 条 |
 
-**前置 B**：core 批按推荐实现了 B1 / B4 / B5，**用户尚未正式拍板**，未进 `DECISIONS.md`。B2 / B3 在 `/gate app` 之前要定。
+**前置 B 五条全定了**（D32）：B2 = 导入新建场景、B3 = 不抄误删护栏（2026-09-21 用户拍板）；B1 / B4 / B5 在 core 批里已按推荐实现并跑绿，补记。
 
 **core 批修订版（2026-09-17）**：复查修了四类测试没覆盖的问题——v0 → v1 悄悄吞掉没 id / 重复 id 的节点；缺 id 的节点被 parse 发明新 id；`in` 被原型链骗（`constructor`）；存储层把索引当真相（孤儿文档不可见、失效记录、缺字段崩溃、存档点泄漏、降级保护只看索引）。每处配测试。v0 → v1 不再调 `migrateToLevels`（**D30** 迁移冻结）。按敲的顺序逐步实测，变异测试 32 / 32 被抓。
 
 **设计文档三处更正**（已在 HTML 里加更正框，第三处是 §02 C 的 `migrateToLevels`）：§07 分批改为 core → viewer → app（D29）；§02 I 的例子写错了——跨类型字段读档时被 zod 静默剥掉，真正丢数据的是非法值（层高 0 → 整层连同墙和门窗消失，沙箱探针实测）。
+
+**app 批的设计偏差 8 条**列在 `m9-code.md` 的 app 批开头（约定 6）。其中两条值得在这里点名：
+- **§02 J 的伪代码自相矛盾**：第一句 `autosave?.stop()`，同一段又写「读失败什么都不动」。实现里 `storage.load()` 排在 `stop()` 前面 —— load 是纯读，两条都满足。变异测试「照伪代码写」会红。
+- **§02 H 的兜底判据写错了**：「一个节点都没留下」不能写成 `nodes` 为空 —— v0 → v1 自己会造 site / building / level，永远不空。判据改成「**文件里的东西一个都没留下**」。沙箱第一版就是照原文写的，测试当场红。
+
+**M9 新决定**：**D31**（M10 顺延，补录）· **D32**（前置 B 五条）· **D33**（两条顺序是 app 层的，不是 core 的）。
 
 ---
 
@@ -198,7 +235,8 @@ M3 §05 第 6 条「选择工具下点墙 → 选中并高亮」当时不可能�
 | 删墙没有级联 | M4 | ✅ **M7 已关**（`collectSubtree` + `removeNode` 级联，7 条测试）|
 | 只吸端点和网格，无中点 / 交点 / 垂足吸附 | M4 | M12 |
 | 墙高存在 `wall` 自己身上，无楼层概念 | M1 | ✅ **M8 已关**（D23 / D24） |
-| 刷新即丢，无存档；撤销不跨刷新 | M1 | M9 |
+| 刷新即丢，无存档 | M1 | 🔨 **M9 app 批第 18 步（`main.tsx` 接 `bootScenes`）敲完才关**。core 批敲完时仍然刷新即丢 |
+| 撤销不跨刷新（`replaceScene` 明确清历史，见 D33 / core 批第 06 步） | M1 | 不做 —— 跨刷新的撤销栈要连同历史一起存盘，M9 不碰 |
 | 选中高亮是换材质色不是描边；无悬停高亮（`enter`/`leave` 已发出但无人监听） | M3 | M12 |
 | 拖拽中没有尺寸标注 | M4 | M13 |
 | 不能多选（Ctrl/Shift + 点击）、不能框选 | M3 | M13 |
@@ -209,7 +247,7 @@ M3 §05 第 6 条「选择工具下点墙 → 选中并高亮」当时不可能�
 | 洞只能是轴对齐矩形（拱形/圆角做不了）—— 段切的定义 | M7 | M10（CSG 到位后）|
 | 洞必须贯通整个墙厚（壁龛、半深窗台板做不了）；`position[2]` 恒为 0 | M7 | M12 |
 | 一堵墙 N 个洞 = 2N+1 个 draw call，不合并 | M7 | M14 |
-| **`children` 是反规范化字段**，只在 `addNode`/`removeNode` 维护。**M9 存档导入若直接写 `nodes`，必须重建这个索引**，否则门渲染不出来且不报错 | M7 | **M9（必做）** |
+| **`children` 是反规范化字段**，只在 `addNode`/`removeNode` 维护。**M9 存档导入若直接写 `nodes`，必须重建这个索引**，否则门渲染不出来且不报错 | M7 | ✅ **M9 core 批已关**：`normalizeSceneNodes` 一律按 `parentId` 重建 `children`，存档里的 `children` 不信（变异「不重建 children」→ 7 条红） |
 | 拖门时宿主墙每帧重切（「有 `parentId` 就把父标脏」在拖拽期每帧触发） | M7 | M13 |
 | 门窗不吸附到相邻门窗（只吸 0.1m 网格） | M7 | M12 |
 | 门窗不能改尺寸（无宽/高手柄）、不能换宿主（只能沿当前墙滑） | M7 | M13 |
@@ -230,7 +268,7 @@ M3 §05 第 6 条「选择工具下点墙 → 选中并高亮」当时不可能�
 | 层不能重排（改 `ordinal` 算法是对的，但没有 UI） | M8 | M12 |
 | 删一整层没有确认（`collectSubtree` 连内容一起删） | M8 | M13 |
 | `eventToGround` 仍只和一个水平面求交（现在是当前层地面，不再是 y=0） | M8 | M12 |
-| **`migrateToLevels` 没有版本号，不是迁移链**；绕过 `addNode`，`children` 是手填的 | M8 | **M9（必做）** |
+| **`migrateToLevels` 没有版本号，不是迁移链**；绕过 `addNode`，`children` 是手填的 | M8 | ✅ **M9 已关，但不是"接进迁移链"**：D30 把它排除在迁移之外（迁移要冻结），v0 → v1 自己用字面量造容器。`migrateToLevels` 留作 `ensureScaffold` 的脚手架工具，D27 作废 |
 | 演示 P6 顶视图墙与地面同色 · P7 画内隔墙看不到落点 · P8 顶视图选中不明显 · P9 切层后端点球留在半空 | M8 | M12（见 `m8-demo-issues.md`） |
 
 ---
@@ -282,10 +320,10 @@ M3 §05 第 6 条「选择工具下点墙 → 选中并高亮」当时不可能�
 | M7 的纯函数（`wall-openings` 19 / `use-scene` 11 / `opening-placement` 14） | ✅ 44 用例 |
 | M8（`storey` 24 / `level-display` 22 / `level-action` 18 / `current-level` 12 / `sibling-groups` 11 / `register` 5 / `storey-geometry` 4 / `node-registry` +3 / `use-scene` +6） | ✅ 105 用例 |
 | 批 J `migrate-to-levels.test.ts` | ✅ 10 用例（2026-09-17） |
-| M9 闸门红测试 `gate-core.test.ts` | 🔴 1 用例，故意红，敲完 core 批转绿 |
-| **合计** | **17 文件 / 211 用例，1 条红；`check-types` 红**（2026-09-17） |
+| **M9 core 批**（`load-scene-document` 29 含并进来的闸门那条 · `scene-storage` 16 · `replace-scene` 3 · `use-scene` +7） | ✅ **已敲完**（2026-09-21 实测绿）。`gate-core.test.ts` 并进 `load-scene-document.test.ts:80`，桩删了 |
+| **合计** | **19 文件 / 264 用例，全绿**（2026-09-21 实测。⚠ 用户随后建的 `app/persistence/autosave.ts` 空壳让 `check-types` 红在 TS2391，敲 app 批第 10 步就绿） |
 | P4 `sideFromHit` 4 条 | ⬜ 前置 C · C3 给了，未敲（D18） |
-| M9 core 批（`m9-code.md` 修订版） | ⬜ 已放出：+3 文件 / +54 用例（加载 28 · 存储 16 · `replaceScene` 3 · `use-scene` +7），敲完 **20 / 265** |
+| **M9 app 批**（`autosave` 9 · `scene-session` 14） | ⬜ 已放出：+2 文件 / +23 用例，敲完 **21 / 287**。沙箱实测绿，变异 16/16 被抓 |
 | M4 的纯函数（`wall.test` / `history-control.test` / `wall-adjacency.test` / `snap-2d.test`） | ⬜ `m4-drag.html` §07 给了全码（64 用例），**一个都没敲**。不阻塞 M7 |
 | 真实功能操作（建墙→拖→撤销→删的端到端） | ⬜ `m4-drag.html` §09 给了 7 个文件 / 85 用例，待敲 |
 | R3F 渲染 / 指针 / 键盘 | ❌ 无环境，靠跑起来看（D11 明确接受）。**D16 要求交付时明写"未验证"** |

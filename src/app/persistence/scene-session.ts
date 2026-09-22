@@ -1,0 +1,1 @@
+let autosave: { flush(): void; stop(): void } | null = null
