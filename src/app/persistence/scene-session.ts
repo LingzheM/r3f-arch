@@ -110,6 +110,22 @@ export function adoptScene(storage: SceneStorage, sceneId: string, snapshot: Sce
   persistence.bumpRevision()
 }
 
+export function bootScenes(storage: SceneStorage): void {
+  const remembered = storage.currentSceneId() ?? storage.list()[0]?.id ?? null
+
+  if (remembered !== null) {
+    const result = openScene(storage, remembered)
+    if (result !== null && result.ok) return
+
+    const reason = usePersistence.getState().lastError
+    newScene(storage, '未命名')
+    usePersistence.getState().setError(reason)
+    return
+  }
+
+  newScene(storage, '未命名')
+}
+
 export function importSceneText(storage: SceneStorage, text: string, name: string): SceneLoadResult {
   const result = parseSceneDocument(text)
   if (!result.ok) {
