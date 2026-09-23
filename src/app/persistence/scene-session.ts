@@ -194,3 +194,21 @@ export function renameScene(storage: SceneStorage, id: string, name: string): vo
   }
   usePersistence.getState().bumpRevision()
 }
+
+export function deleteScene(storage: SceneStorage, id: string): void {
+  if (storage.currentSceneId() === id) {
+    const next = storage.list().find((s) => s.id !== id)
+    if (next === undefined) {
+      newScene(storage, '')
+    } else {
+      openScene(storage, next.id)
+    }
+  }
+
+  storage.remove(id)
+  usePersistence.getState().bumpRevision()
+}
+
+export function stopSession(): void {
+  stopSessionAutosave()
+}

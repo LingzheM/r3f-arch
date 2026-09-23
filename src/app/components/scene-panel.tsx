@@ -2,7 +2,7 @@ import { useState } from "react"
 import type { SceneStorage } from "../../core/persistence/scene-storage"
 import { usePersistence } from "../store/use-persistence"
 import { downloadText, pickTextFile } from "../persistence/file-io"
-import { checkpointNow, exportCurrentScene, importSceneText, newScene, openScene, renameScene, restoreCheckpoint } from "../persistence/scene-session"
+import { checkpointNow, deleteScene, exportCurrentScene, importSceneText, newScene, openScene, renameScene, restoreCheckpoint } from "../persistence/scene-session"
 
 const panel: React.CSSProperties = {
   position: 'absolute', right: 12, top: 12, width: 280, maxHeight: 'calc(100vh - 24px)',
@@ -37,6 +37,12 @@ export function ScenePanel({ storage }: { storage: SceneStorage }) {
     if (out !== null) downloadText(out.filename, out.text)
   }
 
+  const onDelete = (id: string, name: string) => {
+    if (window.confirm(`[删除场景 ${name}] ？这会连同它的存档点一起删掉，撤不回来。`)) {
+      deleteScene(storage, id)
+    }
+  }
+
   return (
     <div style={panel}>
       <div style={{ ...row, fontWeight: 'bold' }}>场景
@@ -62,6 +68,7 @@ export function ScenePanel({ storage }: { storage: SceneStorage }) {
               </span>
             )}
           <button disabled={meta.id === currentSceneId} onClick={() => openScene(storage, meta.id)}>打开</button>
+          <button onClick={() => onDelete(meta.id, meta.name)}>删</button>
         </div>
       ))}
       <div style={{ ...row, marginTop: 6 }}>

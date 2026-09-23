@@ -5,6 +5,7 @@ import { App } from './app/app'
 import { createSceneStorage } from './core/persistence/scene-storage'
 import { detectLocalStorage, localStorageKV, memoryKV } from './app/persistence/local-storage-kv'
 import { usePersistence } from './app/store/use-persistence'
+import { bootScenes } from './app/persistence/scene-session'
 
 const browserStorage = detectLocalStorage()
 const storage = createSceneStorage(browserStorage === null ? memoryKV() : localStorageKV(browserStorage))

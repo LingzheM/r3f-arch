@@ -17,10 +17,10 @@ import { resolveCurrentLevelId } from "./lib/level/current-level";
 import { addLevelOnTop, switchLevel } from "./lib/level/level-actions";
 import { LevelFrame } from "./components/level-frame";
 import { LevelVisibility } from "./components/level-visibility";
-import { ScenePanel } from "./components/scene-panel";
 import type { SceneStorage } from "../core/persistence/scene-storage";
 import { usePersistence } from "./store/use-persistence";
 import { checkpointNow } from "./persistence/scene-session";
+import { ScenePanel } from "./components/scene-panel";
 
 const PLAN_MOUSE_BUTTONS = { LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }
 
@@ -106,6 +106,7 @@ export function App({ storage }: { storage: SceneStorage }) {
                 <MoveTool />
                 <EndpointHandles />
             </Viewer>
+            <ScenePanel storage={storage} />
 
             <div style={{
                 position: 'absolute', left: 12, bottom: 12, padding: '6px 10px',
