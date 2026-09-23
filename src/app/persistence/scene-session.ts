@@ -108,6 +108,8 @@ export function adoptScene(storage: SceneStorage, sceneId: string, snapshot: Sce
   persistence.setSaveStatus('saved')
   persistence.setError(null)
   persistence.bumpRevision()
+
+  startSessionAutosave(storage, sceneId)
 }
 
 export function bootScenes(storage: SceneStorage): void {
