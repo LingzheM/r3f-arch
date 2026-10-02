@@ -5,6 +5,7 @@ import type { AnyNode, AnyNodeId } from '../../../core/schema/types'
 import {
   overlapsExistingOpening,
   resolveOpeningPlacement,
+  sideFromHit,
   sideFromNormal,
   slideOpeningAlongWall,
   wallLength,
@@ -144,5 +145,29 @@ describe('slideOpeningAlongWall', () => {
       selfId: 'door_a' as AnyNodeId,
     })
     expect(r.position[0]).toBeCloseTo(4 - 0.45, 10)
+  })
+})
+
+describe('sideFromHit (P4)', () => {
+  const noNormal = undefined
+
+  it('法线明确方向 +Z/-Z时听法线的', () => {
+    expect(sideFromHit([0, 0, 1], [0, 0, -0.05])).toBe('left')
+    expect(sideFromHit([0, 0, -1], [0, 0, 0.05])).toBe('right')
+  })
+
+  it('顶视图在墙顶面（法线 Y）时改听局部点的 z', () => {
+    expect(sideFromHit([0, 1, 0], [1.2, 2.5, 0.04])).toBe('left')
+    expect(sideFromHit([0, 1, 0], [1.2, 2.5, -0.04])).toBe('right')
+  })
+
+  it('没有法线时（face为undefined）也只看局部点', () => {
+    expect(sideFromHit(noNormal, [1.2, 1, 0.04])).toBe('left')
+    expect(sideFromHit(noNormal, [1.2, 1, -0.04])).toBe('right')
+  })
+
+  it('斜法线（|z| <= 0.5）不算数——门窗只能贴在两个大面上', () => {
+    expect(sideFromHit([0.87, 0, 0.5], [0, 0, -0.03])).toBe('right')
+    expect(sideFromHit([0.87, 0, -0.5], [0, 0, 0.03])).toBe('left')
   })
 })

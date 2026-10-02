@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { nodeClickKeys } from "./node-click-keys";
+import type { NodeEventKey } from "../../../core/events/types";
 
 describe('nodeClickKeys (I1 D36)', () => {
   it('每个kind配一个完整的事件键', () => {
@@ -21,4 +22,15 @@ describe('nodeClickKeys (I1 D36)', () => {
       'door:click', 'window:click', 'wall:click',
     ])
   })
+
+  it('类型层：传 string[] 编译不过', () => {
+    const loose: string[] = ['wall']
+    nodeClickKeys(loose)
+    expect(loose).toEqual(['wall'])
+  })
+
+  it('类型层：把元素当 [kind, def] 解构编译不过'), () => {
+    const broken: NodeEventKey[] = (['wall', 'slab'] as const).map(([kind]) => `${kind}:click`)
+    expect(broken).toEqual(['w:click', 's:click'])
+  }
 })

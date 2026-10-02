@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { BuildingNode } from '../../../core/schema/building'
-import { LevelNode } from '../../../core/schema/level'
-import type { AnyNode, AnyNodeId } from '../../../core/schema/types'
-import { WallNode } from '../../../core/schema/wall'
-import { adjacentLevelId, nextLevelOrdinal, resolveCurrentLevelId } from './current-level'
+import { BuildingNode } from '../schema/building'
+import { LevelNode } from '../schema/level'
+import type { AnyNode, AnyNodeId } from '../schema/types'
+import { WallNode } from '../schema/wall'
+import { adjacentLevelId, nextLevelOrdinal, resolveCurrentLevelId } from './level-stack'
 
 const level = (id: string, ordinal: number, parentId: string | null = 'building_a') =>
   LevelNode.parse({ id, type: 'level', level: ordinal, height: 2.5, parentId })

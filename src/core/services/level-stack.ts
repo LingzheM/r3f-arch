@@ -1,5 +1,5 @@
-import { LevelNode } from "../../../core/schema/level";
-import { asNodeId, type AnyNode, type AnyNodeId } from "../../../core/schema/types";
+import type { LevelNode } from "../schema/level";
+import { asNodeId, type AnyNode, type AnyNodeId } from "../schema/types";
 
 const levelsOf = (nodes: Record<AnyNodeId, AnyNode>): LevelNode[] =>
   Object.values(nodes).filter((n): n is LevelNode => n.type === 'level')
