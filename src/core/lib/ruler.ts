@@ -11,10 +11,20 @@ export const RULER_STEPS = [0.1, 0.5, 1, 5, 10] as const
 export const MAX_RULER_TICKS = 200
 
 export type RulerTicks = {
+  /** 选中的步长（米） */
   step: number
+  /** 升序的刻度世界坐标 */
   ticks: number[]
 }
 
+/**
+ * 
+ * @param min 可见区间左/上端
+ * @param max 可见区间右/下端
+ * @param pxPerMetre  一米占多少像素
+ * @param minPx 相邻刻度至少隔多少像素
+ * @returns 
+ */
 export function rulerTicks(
   min: number,
   max: number,

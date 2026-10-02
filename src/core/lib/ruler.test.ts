@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatMetres, rulerTicks } from "./ruler";
+import { formatMetres, RULER_STEPS, rulerTicks } from "./ruler";
 
 describe('rulerTicks (I7)', () => {
   it('步长只能是候选表里的值', () => {
@@ -29,6 +29,13 @@ describe('rulerTicks (I7)', () => {
     expect(ticks[0]).toBeGreaterThanOrEqual(-3.3)
     expect(ticks[ticks.length - 1]).toBeLessThanOrEqual(7.7)
   })
+
+  it('刻度升序，等距，没有浮点脏值', () => {
+    const { step, ticks } = rulerTicks(0, 1, 600)
+    expect(step).toBe(0.1)
+    expect(ticks).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+    expect(ticks).not.toContain(0.30000000000000004)
+  })
 })
 
 describe('formatMetres (I8)', () => {
@@ -36,4 +43,15 @@ describe('formatMetres (I8)', () => {
     expect(formatMetres(3.14159)).toBe('3.14m')
     expect(formatMetres(3)).toBe('3.00 m')
   })
+
+  it('不出 -0.00', () => {
+    expect(formatMetres(-0.001)).toBe('0.00 m')
+    expect(formatMetres(-0)).toBe('0.00 m')
+  })
+
+  it('真的负号照常带负号', () => {
+    expect(formatMetres(-1.4)).toBe('-1.40m')
+  })
+
+  it('NaN / Infinity 不往标签里漏')
 })
