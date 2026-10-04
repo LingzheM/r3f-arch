@@ -201,7 +201,7 @@ export function deleteScene(storage: SceneStorage, id: string): void {
   if (storage.currentSceneId() === id) {
     const next = storage.list().find((s) => s.id !== id)
     if (next === undefined) {
-      newScene(storage, '')
+      newScene(storage, '未命名')
     } else {
       openScene(storage, next.id)
     }

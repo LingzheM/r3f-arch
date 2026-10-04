@@ -5,6 +5,13 @@ import type { AnyNodeId } from "./types"
 export const DEFAULT_GRID_STEP = 0.1
 export const ENDPOINT_SNAP_RADIUS = 0.35
 
+export type SnapKind = 'endpoint' | 'grid'
+
+export type SnapResult = {
+    point: Point2D
+    kind: SnapKind
+}
+
 export type SnapOptions = {
     ignoreIds?: ReadonlySet<AnyNodeId>
     radius?: number
@@ -50,5 +57,16 @@ export function snapPoint(
     walls: readonly WallNode[],
     options?: SnapOptions,
 ): Point2D {
-    return nearestEndpoint(p, walls, options) ?? snapToGrid(p, options?.step)
+    return snapPointDetailed(p, walls, options).point
 }
+
+export function snapPointDetailed(
+    p: Point2D,
+    walls: readonly WallNode[],
+    options?: SnapOptions,
+): SnapResult {
+    const endpoint = nearestEndpoint(p, walls, options)
+    if (endpoint !== null) return { point: endpoint, kind: 'endpoint' }
+    return { point: snapToGrid(p, options?.step), kind: 'grid' }
+}
+
