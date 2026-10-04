@@ -107,5 +107,11 @@ export function computeSceneBounds(
 
 const toPlan = (polygon: readonly (readonly [number, number])[]): Point2D[] => polygon.map(([x, y]) => ({ x, y }))
 
+export const boundsCenter = (b: SceneBounds): Vec3 => [
+  (b.min[0] + b.max[0]) / 2,
+  (b.min[1] + b.max[1]) / 2,
+  (b.min[2] + b.max[2]) / 2,
+]
+
 export const boundsDiagonal = (b: SceneBounds): number =>
   Math.hypot(b.max[0] - b.min[0], b.max[1] - b.min[1], b.max[2] - b.min[2])
