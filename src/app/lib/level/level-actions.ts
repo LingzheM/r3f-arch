@@ -5,7 +5,7 @@ import { acquireSceneHistoryPause } from "../../../core/store/history-control";
 import { migrateToLevels } from "../../../core/store/migrate-to-levels";
 import { useScene } from "../../../core/store/use-scene";
 import { useEditor } from "../../store/use-editor";
-import { adjacentLevelId, nextLevelOrdinal, resolveCurrentLevelId } from "./current-level";
+import { adjacentLevelId, nextLevelOrdinal, resolveCurrentLevelId } from "../../../core/services/level-stack";
 
 export function ensureScaffold(): AnyNodeId {
   const { nodes } = useScene.getState()

@@ -13,7 +13,7 @@ import { PolygonTool } from "./tools/polygon-tool";
 import { ColumnTool } from "./tools/column-tool";
 import { OpeningTool } from "./tools/opening-tool";
 import { useScene } from "../core/store/use-scene";
-import { resolveCurrentLevelId } from "./lib/level/current-level";
+import { resolveCurrentLevelId } from "../core/services/level-stack";
 import { addLevelOnTop, switchLevel } from "./lib/level/level-actions";
 import { LevelFrame } from "./components/level-frame";
 import { LevelVisibility } from "./components/level-visibility";

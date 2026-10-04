@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { useEditor } from "../store/use-editor"
 import { useScene } from "../../core/store/use-scene"
 import { levelBaseY } from "../../core/services/storey"
-import { resolveCurrentLevelId } from "../lib/level/current-level"
+import { resolveCurrentLevelId } from "../../core/services/level-stack"
 
 export function LevelFrame({
   levelId,

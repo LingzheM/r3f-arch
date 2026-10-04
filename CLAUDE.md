@@ -1,6 +1,6 @@
 # r3f-arch
 
-复刻 `../editor`（pascalorg/editor）的住宅编辑器，14 个里程碑，范围以 `docs/ROADMAP.md` 为准。
+复刻 `../editor`（pascalorg/editor）的住宅编辑器，16 个里程碑（原 14 + D31 / D34 插入的 M10、M11），范围以 `docs/ROADMAP.md` 为准。
 三层：`src/core`（无 three，纯逻辑）→ `src/viewer`（渲染，不知道工具和选中）→ `src/app`（编辑体验）。边界由 `eslint.config.js` 强制。
 
 ## 会话开场

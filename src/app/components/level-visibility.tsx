@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { sceneRegistry } from "../../core/registry/scene-registry";
 import { useScene } from "../../core/store/use-scene";
-import { resolveCurrentLevelId } from "../lib/level/current-level";
+import { resolveCurrentLevelId } from "../../core/services/level-stack";
 import { useEditor } from "../store/use-editor";
 import { applyLevelDisplay, levelDisplayMode } from "../lib/level/level-display";
 
