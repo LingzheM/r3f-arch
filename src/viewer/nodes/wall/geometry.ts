@@ -13,9 +13,9 @@ import { asNodeId } from '../../../core/schema/types'
 import { splitWallByOpenings } from '../../../core/systems/wall/wall-openings'
 import { buildPrismGeometry } from '../shared/polygon-prism'
 import { hostStoreyHeight, resolveWallTop } from '../../../core/services/storey'
+import { SelectionGlow } from '../../lib/selection-glow'
 
 const WALL_COLOR = '#e8e8e8'
-const WALL_SELECTED_COLOR = '#7dd3c0'
 
 const toPoint = (t: readonly [number, number]): Point2D => ({ x: t[0], y: t[1] })
 
@@ -81,9 +81,10 @@ export function buildWallGeometry(
     if (bands.length === 0) return root
 
     const material = new THREE.MeshStandardMaterial({
-        color: appearance.selected ? WALL_SELECTED_COLOR : WALL_COLOR,
+        color: WALL_COLOR,
         roughness: 0.9,
         metalness: 0,
+        ...SelectionGlow(appearance.selected),
     })
 
     for (const band of bands) {

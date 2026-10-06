@@ -1,9 +1,9 @@
 import * as THREE from 'three'
 import type { GeometryContext, NodeAppearance } from "../../../core/registry/node-definition"
 import { getColumnDepth, getColumnHeight, getColumnRadius, getColumnWidth, type ColumnNode } from "../../../core/schema/column"
+import { SelectionGlow } from '../../lib/selection-glow'
 
 const COLUMN_COLOR = '#d9d3c8'
-const COLUMN_SELECTED_COLOR = '#7dd3c0'
 const RADIAL_SEGMENTS = 24
 
 
@@ -25,9 +25,10 @@ export function buildColumnGeometry(
   geometry.translate(0, height / 2, 0)
 
   const material = new THREE.MeshStandardMaterial({
-    color: appearance.selected ? COLUMN_SELECTED_COLOR : COLUMN_COLOR,
+    color: COLUMN_COLOR,
     roughness: 0.85,
     metalness: 0,
+    ...SelectionGlow(appearance.selected),
   })
 
   const mesh = new THREE.Mesh(geometry, material)

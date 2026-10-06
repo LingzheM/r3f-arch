@@ -5,7 +5,6 @@ import { buildPolygonPrism } from '../shared/polygon-prism'
 
 
 const SLAB_COLOR = '#cfd6d2'
-const SLAB_SELECTED_COLOR = '#7dd3c0'
 
 
 export function buildSlabGeometry(
@@ -19,7 +18,8 @@ export function buildSlabGeometry(
     polygon: node.polygon,
     bottomY: node.elevation - thickness,
     topY: node.elevation,
-    color: appearance.selected ? SLAB_SELECTED_COLOR : SLAB_COLOR,
+    color: SLAB_COLOR,
     name: 'slab-body',
+    selected: appearance.selected,
   })
 }

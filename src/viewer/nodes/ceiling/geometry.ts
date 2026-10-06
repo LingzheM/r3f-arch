@@ -18,7 +18,8 @@ export function buildCeilingGeometry(
     polygon: node.polygon,
     bottomY,
     topY: bottomY + getCeilingThickness(node),
-    color: appearance.selected ? CEILING_SELECTED_COLOR : CEILING_COLOR,
+    color: CEILING_COLOR,
     name: 'ceiling-body',
+    selected: appearance.selected
   })
 }

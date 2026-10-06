@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import type { Point2D } from '../../../core/lib/geometry-2d'
+import { SelectionGlow } from '../../lib/selection-glow'
 
 export function buildPrismGeometry(
   polygon: readonly Point2D[],
@@ -29,12 +30,14 @@ export function buildPolygonPrism({
   topY,
   color,
   name,
+  selected = false,
 }: {
   polygon: readonly (readonly [number, number])[]
   bottomY: number
   topY: number
   color: string
   name: string
+  selected?: boolean
 }): THREE.Object3D {
   const root = new THREE.Group()
 
@@ -46,7 +49,12 @@ export function buildPolygonPrism({
 
   if (!geometry) return root
 
-  const material = new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0 })
+  const material = new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.9,
+    metalness: 0,
+    ...SelectionGlow(selected),
+  })
 
   const mesh = new THREE.Mesh(geometry, material)
   mesh.name = name
