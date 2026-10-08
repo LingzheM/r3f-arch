@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
+import { forgetPose, recallPose, rememberPose } from "./camera-memory"
 
 const pose = (x: number) => ({ position: [x, x, x] as const, target: [0, 0, 0] as const })
 
@@ -18,7 +19,7 @@ describe('camera-memory', () => {
 
   it('V7 只有 3D 有记忆：顶视和四个立面记不进去，也取不出来', () => {
     for (const mode of ['plan', 'front', 'back', 'left', 'right'] as const) {
-      remeberPose(mode, pose(3))
+      rememberPose(mode, pose(3))
     }
   })
 })

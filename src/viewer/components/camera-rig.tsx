@@ -1,7 +1,7 @@
 import { OrthographicCamera, PerspectiveCamera } from "@react-three/drei";
 import { useLayoutEffect, useRef } from "react";
 import * as THREE from 'three'
-import type { ViewPose } from "../../core/services/view-pose";
+import type { ViewMode, ViewPose } from "../../core/services/view-pose";
 import type { Vec3 } from "../../core/services/scene-bounds";
 import { useThree } from "@react-three/fiber";
 import { forgetPose, recallPose, rememberPose } from "../lib/camera-memory";
@@ -15,7 +15,7 @@ export function CameraRig({
     pose,
     fitToken,
 }: {
-    mode: '3d' | 'plan',
+    mode: ViewMode,
     pose: ViewPose,
     fitToken: number
 }) {

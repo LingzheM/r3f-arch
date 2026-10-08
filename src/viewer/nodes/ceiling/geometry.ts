@@ -5,7 +5,6 @@ import { buildPolygonPrism } from '../shared/polygon-prism'
 import { hostStoreyHeight, resolveCeilingHeight } from '../../../core/services/storey'
 
 const CEILING_COLOR = '#e6e9e7'
-const CEILING_SELECTED_COLOR = '#7dd3c0'
 
 export function buildCeilingGeometry(
   node: CeilingNode,
