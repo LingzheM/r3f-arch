@@ -16,15 +16,13 @@ export function useHistoryShortcuts(): void {
 
             if (mod && key === 'z' && !e.shiftKey) {
                 e.preventDefault()
-                useScene.temporal.getState().undo()
-                afterHistoryJump()
+                undoScene()
                 return
             }
 
             if (mod && ((key === 'z' && e.shiftKey) || key === 'y')) {
                 e.preventDefault()
-                useScene.temporal.getState().redo()
-                afterHistoryJump()
+                redoScene()
                 return
             }
 
@@ -43,6 +41,16 @@ export function useHistoryShortcuts(): void {
         window.addEventListener('keydown', onKeyDown)
         return () => window.removeEventListener('keydown', onKeyDown)
     }, [])
+}
+
+export function undoScene(): void {
+    useScene.temporal.getState().undo()
+    afterHistoryJump()
+}
+
+export function redoScene(): void {
+    useScene.temporal.getState().redo()
+    afterHistoryJump()
 }
 
 function afterHistoryJump(): void {

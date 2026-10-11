@@ -6,6 +6,7 @@ import { useEditor } from '../../store/use-editor'
 import { levelWalls } from '../interaction/wall-linking'
 import { addLevelOnTop, ensureScaffold, readCurrentLevel, switchLevel } from './level-actions'
 import { WallNode } from '../../../core/schema/wall'
+import { start } from 'repl'
 
 // 这些是碰 store 的测试，但 zustand 在 Node 里跑得动 —— 仍然在 D11 说「能测」的那一半。
 
@@ -13,7 +14,7 @@ const reset = () => {
   resetSceneHistoryPause(useScene)
   useScene.setState({ nodes: {}, rootNodeIds: [], dirtyNodes: new Set() })
   useScene.temporal.getState().clear()
-  useEditor.setState({ currentLevelId: null })
+  useEditor.setState({ currentLevelId: null, selectId: null })
 }
 
 const nodes = () => useScene.getState().nodes
@@ -217,5 +218,35 @@ describe('ensureScaffold 收养散在根下的节点（M8 批 J）', () => {
     ensureScaffold()
 
     expect('height' in nodes()['wall_old' as AnyNodeId]!).toBe(false)
+  })
+})
+
+describe('切层清选中（I10 P9）', () => {
+  beforeEach(reset)
+
+  it('setCurrentLevel之后 selectId 是 null —— 端点球不允许留在上一层', () => {
+    const ground = ensureScaffold()
+    const wallId = useScene.getState().addNode({
+      type: 'wall', parentId: ground, start: [0, 0], end: [4, 0],
+    })
+    useEditor.getState().select(wallId)
+    expect(useEditor.getState().selectId).toBe(wallId)
+
+    const upper = addLevelOnTop()
+    expect(upper).not.toBeNull()
+    expect(useEditor.getState().currentLevelId).toBe(upper)
+    expect(useEditor.getState().selectId).toBeNull()
+  })
+
+  it('每一个切层入口都清 —— switchLevel 也不例外', () => {
+    const ground = ensureScaffold()
+    addLevelOnTop()
+    const wallId = useScene.getState().addNode({
+      type: 'wall', parentId: ground, start: [0, 0], end: [4, 0],
+    })
+
+    useEditor.getState().select(wallId)
+    expect(switchLevel(-1)).toBe(true)
+    expect(useEditor.getState().selectId).toBeNull()
   })
 })
