@@ -1,0 +1,33 @@
+.workbench {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 44px 1fr 28px;
+  grid-template-columns: 1fr 220px;
+  grid-template-areas:
+    "toolbar toolbar"
+    "canvas rail"
+    "status status";
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #1c2321;
+  background: #e9ecea;
+}
+
+.workbench__toolbar {
+  grid-area: toolbar;
+}
+
+.workbench__canvas {
+  grid-area: canvas;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+
+.workbench__rail {
+  grid-area: rail;
+}
+
+.workbench__status {
+  grid-area: status;
+}
