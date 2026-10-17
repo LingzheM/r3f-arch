@@ -31,3 +31,185 @@
 .workbench__status {
   grid-area: status;
 }
+
+/* ── 工具条 ───────────────────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  background: #f7f9f8;
+  border-bottom: 1px solid #ccd3d0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar__label {
+  opacity: .55;
+  padding-right: 2px;
+}
+
+.toolbar__sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 8px 6px;
+  background: #ccd3d0;
+}
+
+.btn {
+  font: inherit;
+  padding: 4px 8px;
+  border: 1px solid #ccd3d0;
+  border-radius: 3px;
+  background: #fff;
+  color: inherit;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  background: #eef2f0;
+}
+
+.btn:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+.btn--on {
+  background: #1f8f7a;
+  border-color: #1f8f7a;
+  color: #fff;
+}
+
+.btn__key {
+  opacity: .55;
+  margin-left: 4px;
+}
+
+.btn--on .btn__key {
+  opacity: .8;
+}
+
+/* ── 右栏：上「楼层」下「场景」 ───────────────────────────────────── */
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #f7f9f8;
+  border-left: 1px solid #ccd3d0;
+}
+
+.rail__section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-bottom: 1px solid #ccd3d0;
+}
+
+/* 楼层那节吃掉剩余高度；场景那节自适应，但最多占一半（D40） */
+.rail__section--levels {
+  flex: 1 1 auto;
+}
+
+.rail__section--scenes {
+  flex: 0 1 auto;
+  max-height: 50%;
+}
+
+.rail__title {
+  padding: 6px 10px;
+  font-weight: bold;
+  opacity: .8;
+}
+
+.rail__body {
+  overflow: auto;
+  padding: 0 8px 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 2px;
+}
+
+.row--on {
+  background: rgba(31, 143, 122, .14);
+  border-radius: 3px;
+}
+
+.row__grow {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row__dim {
+  opacity: .5;
+}
+
+.row__input {
+  font: inherit;
+  width: 56px;
+  padding: 2px 4px;
+  border: 1px solid #ccd3d0;
+  border-radius: 3px;
+  background: #fff;
+}
+
+.rail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 2px 0;
+}
+
+.rail__note {
+  padding: 4px 2px;
+  opacity: .7;
+}
+
+details>summary {
+  cursor: pointer;
+  padding: 4px 2px;
+  opacity: .8;
+}
+
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  background: #f7f9f8;
+  border-top: 1px solid #ccd3d0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.statusbar__cell {
+  opacity: .8;
+}
+
+.statusbar__cell--grow {
+  flew: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusbar__sep {
+  opacity: .3;
+}
+
+.statusbar__error {
+  color: #b3261e;
+}
